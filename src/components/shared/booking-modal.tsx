@@ -97,7 +97,7 @@ export function BookingModal({
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <div className={className}>{children}</div>
+                <div className={className} suppressHydrationWarning>{children}</div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] bg-stone-50 p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col">
                 <DialogHeader className="p-6 pb-4 border-b border-stone-200 flex-shrink-0">
