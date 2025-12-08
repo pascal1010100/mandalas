@@ -1,0 +1,154 @@
+"use client"
+
+import { Hero } from "@/components/shared/hero"
+import { FadeIn } from "@/components/animations/fade-in"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Wifi, Beer, Coffee, Music, Users, Sun } from "lucide-react"
+import { EventsCalendar } from "@/components/shared/events-calendar"
+import { BookingModal } from "@/components/shared/booking-modal"
+
+export default function PuebloPage() {
+    return (
+        <div className="bg-stone-50 min-h-screen">
+            <Hero
+                title="Mandalas"
+                subtitle="Tu hogar social en el corazón de San Pedro. Conecta, celebra y vive la magia del lago."
+                backgroundGradient="linear-gradient(to bottom right, #f97316, #ec4899)"
+                align="center"
+            >
+                <BookingModal>
+                    <Button size="lg" className="rounded-full bg-white text-orange-600 hover:bg-stone-100 font-bold text-lg px-8">
+                        Reservar Estadía
+                    </Button>
+                </BookingModal>
+            </Hero>
+
+            {/* Intro Section */}
+            <section className="py-24 container mx-auto px-4">
+                <FadeIn>
+                    <div className="max-w-4xl mx-auto text-center space-y-8">
+                        <h2 className="text-3xl md:text-5xl font-bold font-heading text-stone-800 tracking-tighter">La Esencia del Pueblo</h2>
+                        <p className="text-lg md:text-xl text-stone-600 leading-relaxed font-light">
+                            Ubicado a pasos de los mejores cafés y bares, Mandalas es el punto de encuentro para viajeros de todo el mundo.
+                            Disfruta de nuestra terraza con vista a los volcanes, únete a nuestras cenas familiares o simplemente relájate con un buen libro.
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8">
+                            {[
+                                { icon: Wifi, label: "WiFi Alta Velocidad" },
+                                { icon: Beer, label: "Bar & Happy Hour" },
+                                { icon: Coffee, label: "Desayuno Inlcuido" },
+                                { icon: Users, label: "Eventos Diarios" },
+                                { icon: Music, label: "Música en Vivo" },
+                                { icon: Sun, label: "Terraza Panorámica" },
+                            ].map((feature, idx) => (
+                                <div key={idx} className="flex flex-col items-center gap-3 text-stone-700">
+                                    <feature.icon className="w-8 h-8 text-orange-500" />
+                                    <span className="font-medium">{feature.label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </FadeIn>
+            </section>
+
+            {/* Events Section */}
+            <section className="py-24 bg-stone-100">
+                <div className="container mx-auto px-4">
+                    <FadeIn>
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl md:text-5xl font-bold font-heading text-stone-800 tracking-tighter mb-4">Agenda Semanal</h2>
+                            <p className="text-stone-600 max-w-2xl mx-auto">Siempre hay algo sucediendo en Mandalas. Únete a nuestras actividades y conoce a otros viajeros.</p>
+                        </div>
+                        <EventsCalendar />
+                    </FadeIn>
+                </div>
+            </section>
+
+            {/* Rooms Section */}
+            <section className="py-24 bg-white">
+                <div className="container mx-auto px-4">
+                    <FadeIn>
+                        <h2 className="text-3xl md:text-5xl font-bold text-stone-800 tracking-tighter mb-12 text-center">Nuestras Habitaciones</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {/* Room 1 */}
+                            <Card className="border-none shadow-lg overflow-hidden group">
+                                <div className="h-64 bg-stone-200 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-orange-400 to-pink-400 group-hover:scale-105 transition-transform duration-500" />
+                                    {/* Placeholder for image */}
+                                </div>
+                                <CardHeader>
+                                    <CardTitle>Dormitorio Compartido</CardTitle>
+                                    <CardDescription>Ideal para conocer gente nueva</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <ul className="text-sm text-stone-600 space-y-2">
+                                        <li>• Camas con cortinas de privacidad</li>
+                                        <li>• Lockers individuales</li>
+                                        <li>• Enchufe y luz de lectura</li>
+                                    </ul>
+                                </CardContent>
+                                <CardFooter>
+                                    <Button className="w-full rounded-full" variant="outline">Ver Disponibilidad</Button>
+                                </CardFooter>
+                            </Card>
+
+                            {/* Room 2 */}
+                            <Card className="border-none shadow-lg overflow-hidden group">
+                                <div className="h-64 bg-stone-200 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-orange-500 to-red-500 group-hover:scale-105 transition-transform duration-500" />
+                                </div>
+                                <CardHeader>
+                                    <CardTitle>Privada Estándar</CardTitle>
+                                    <CardDescription>Tu propio espacio de confort</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <ul className="text-sm text-stone-600 space-y-2">
+                                        <li>• Cama Matrimonial</li>
+                                        <li>• Baño Privado</li>
+                                        <li>• Ventilador de techo</li>
+                                    </ul>
+                                </CardContent>
+                                <CardFooter>
+                                    <Button className="w-full rounded-full" variant="outline">Ver Disponibilidad</Button>
+                                </CardFooter>
+                            </Card>
+
+                            {/* Room 3 */}
+                            <Card className="border-none shadow-lg overflow-hidden group">
+                                <div className="h-64 bg-stone-200 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-pink-500 to-purple-500 group-hover:scale-105 transition-transform duration-500" />
+                                </div>
+                                <CardHeader>
+                                    <CardTitle>Suite con Vista</CardTitle>
+                                    <CardDescription>Lujo relajado frente al lago</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <ul className="text-sm text-stone-600 space-y-2">
+                                        <li>• Vista panorámica al lago</li>
+                                        <li>• Balcón privado</li>
+                                        <li>• Cama King Size</li>
+                                    </ul>
+                                </CardContent>
+                                <CardFooter>
+                                    <Button className="w-full rounded-full" variant="outline">Ver Disponibilidad</Button>
+                                </CardFooter>
+                            </Card>
+                        </div>
+                    </FadeIn>
+                </div>
+            </section>
+
+            {/* CTA */}
+            <section className="py-24 bg-stone-900 text-white text-center">
+                <FadeIn>
+                    <h2 className="text-3xl md:text-5xl font-bold mb-6">¿Listo para la aventura?</h2>
+                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Reserva directamente con nosotros para obtener los mejores precios y beneficios exclusivos.</p>
+                    <Button size="lg" className="rounded-full bg-white text-black hover:bg-stone-200 text-lg px-10 py-6">
+                        Reservar Ahora
+                    </Button>
+                </FadeIn>
+            </section>
+        </div>
+    )
+}
