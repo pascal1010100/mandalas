@@ -21,10 +21,12 @@ export function MandalaIcon({ className }: { className?: string }) {
             {/* Petals - 8 directions */}
             {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
                 const rad = (angle * Math.PI) / 180
-                const x1 = 50 + Math.cos(rad) * 22
-                const y1 = 50 + Math.sin(rad) * 22
-                const x2 = 50 + Math.cos(rad) * 35
-                const y2 = 50 + Math.sin(rad) * 35
+                const x1 = Number((50 + Math.cos(rad) * 22).toFixed(2))
+                const y1 = Number((50 + Math.sin(rad) * 22).toFixed(2))
+                const x2 = Number((50 + Math.cos(rad) * 35).toFixed(2))
+                const y2 = Number((50 + Math.sin(rad) * 35).toFixed(2))
+                const cx = Number((50 + Math.cos(rad) * 41).toFixed(2))
+                const cy = Number((50 + Math.sin(rad) * 41).toFixed(2))
 
                 return (
                     <g key={i}>
@@ -40,11 +42,11 @@ export function MandalaIcon({ className }: { className?: string }) {
 
                         {/* Petal shapes */}
                         <ellipse
-                            cx={50 + Math.cos(rad) * 41}
-                            cy={50 + Math.sin(rad) * 41}
+                            cx={cx}
+                            cy={cy}
                             rx="6"
                             ry="3"
-                            transform={`rotate(${angle} ${50 + Math.cos(rad) * 41} ${50 + Math.sin(rad) * 41})`}
+                            transform={`rotate(${angle} ${cx} ${cy})`}
                             fill="currentColor"
                             opacity="0.6"
                         />
