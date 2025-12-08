@@ -25,8 +25,8 @@ export default function LandingPage() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
           style={{
-            // Fallback gradient until images are ready
-            backgroundImage: "linear-gradient(to bottom right, #f97316, #ec4899)",
+            // Warm amber gradient for social vibe
+            backgroundImage: "linear-gradient(to bottom right, #d97706, #ea580c)",
             // backgroundImage: "url('/images/pueblo_vibes.webp')" 
           }}
         />
@@ -38,13 +38,13 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Users className="w-16 h-16 mb-4 mx-auto text-orange-200" />
+            <Users className="w-16 h-16 mb-4 mx-auto text-amber-100" />
             <h2 className="text-4xl md:text-6xl font-bold mb-4 tracking-tighter">Mandalas</h2>
             <p className="text-lg md:text-xl font-light mb-8 max-w-md mx-auto">
               Vibra social, atardeceres en el lago y noches inolvidables en el corazón de San Pedro.
             </p>
             <Link href="/pueblo">
-              <Button size="lg" className="rounded-full bg-white/20 backdrop-blur-sm border border-white/40 hover:bg-white hover:text-orange-600 transition-all text-lg px-8 py-6">
+              <Button size="lg" className="rounded-full bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white hover:text-amber-700 transition-all duration-300 text-lg px-8 py-6 font-semibold shadow-lg hover:shadow-xl hover:scale-105">
                 Explorar Pueblo <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -65,8 +65,8 @@ export default function LandingPage() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
           style={{
-            // Fallback gradient until images are ready
-            backgroundImage: "linear-gradient(to bottom left, #10b981, #06b6d4)",
+            // Cool teal-emerald gradient for nature vibe
+            backgroundImage: "linear-gradient(to bottom left, #0d9488, #059669)",
             // backgroundImage: "url('/images/hideout_nature.webp')" 
           }}
         />
@@ -78,13 +78,13 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Leaf className="w-16 h-16 mb-4 mx-auto text-emerald-200" />
+            <Leaf className="w-16 h-16 mb-4 mx-auto text-teal-100" />
             <h2 className="text-4xl md:text-6xl font-bold mb-4 tracking-tighter">Mandalas Hideout</h2>
             <p className="text-lg md:text-xl font-light mb-8 max-w-md mx-auto">
               Retiro natural, paz absoluta y conexión con la tierra en nuestro santuario escondido.
             </p>
             <Link href="/hideout">
-              <Button size="lg" className="rounded-full bg-white/20 backdrop-blur-sm border border-white/40 hover:bg-white hover:text-emerald-600 transition-all text-lg px-8 py-6">
+              <Button size="lg" className="rounded-full bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white hover:text-teal-700 transition-all duration-300 text-lg px-8 py-6 font-semibold shadow-lg hover:shadow-xl hover:scale-105">
                 Descubrir Hideout <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
