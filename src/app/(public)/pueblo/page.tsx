@@ -14,7 +14,7 @@ export default function PuebloPage() {
             <Hero
                 title="Mandalas"
                 subtitle="Tu hogar social en el corazón de San Pedro. Conecta, celebra y vive la magia del lago."
-                backgroundGradient="linear-gradient(135deg, #e8b87e 0%, #d4a574 50%, #c08f5f 100%)"
+                backgroundGradient="linear-gradient(135deg, #f4d03f 0%, #e8b84e 40%, #d4a05d 100%)"
                 align="center"
             >
                 <BookingModal>

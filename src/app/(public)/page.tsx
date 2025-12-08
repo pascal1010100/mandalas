@@ -25,8 +25,8 @@ export default function LandingPage() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
           style={{
-            // Warm elegant gradient - sunset vibes
-            backgroundImage: "linear-gradient(135deg, #e8b87e 0%, #d4a574 50%, #c08f5f 100%)",
+            // Golden sand gradient - warm and luminous
+            backgroundImage: "linear-gradient(135deg, #f4d03f 0%, #e8b84e 40%, #d4a05d 100%)",
             // backgroundImage: "url('/images/pueblo_vibes.webp')" 
           }}
         />
@@ -65,8 +65,8 @@ export default function LandingPage() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
           style={{
-            // Light natural gradient - misty forest morning
-            backgroundImage: "linear-gradient(135deg, #c8d8d3 0%, #a7c4bc 50%, #8ab4a8 100%)",
+            // Fresh lime gradient - vibrant and natural
+            backgroundImage: "linear-gradient(135deg, #d4e157 0%, #aed581 40%, #81c784 100%)",
             // backgroundImage: "url('/images/hideout_nature.webp')" 
           }}
         />
@@ -78,7 +78,7 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Leaf className="w-16 h-16 mb-4 mx-auto text-emerald-50/90" />
+            <Leaf className="w-16 h-16 mb-4 mx-auto text-lime-50/90" />
             <h2 className="text-4xl md:text-6xl font-bold mb-4 tracking-tighter drop-shadow-lg">Mandalas Hideout</h2>
             <p className="text-lg md:text-xl font-light mb-8 max-w-md mx-auto drop-shadow-md">
               Retiro natural, paz absoluta y conexión con la tierra en nuestro santuario escondido.
