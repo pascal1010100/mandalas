@@ -18,8 +18,24 @@ import { Button } from "@/components/ui/button"
 export default function AdminDashboard() {
     const { bookings, events } = useAppStore()
 
+    // Calculate real metrics
     const totalRevenue = bookings.reduce((sum, b) => sum + b.totalPrice, 0)
-    const activeBookings = bookings.length
+    const activeBookings = bookings.filter(b => b.status !== 'cancelled').length
+    const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length
+    const pendingBookings = bookings.filter(b => b.status === 'pending').length
+
+    // Calculate upcoming check-ins (next 7 days)
+    const now = new Date()
+    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    const upcomingCheckIns = bookings.filter(b => {
+        if (!b.checkIn) return false
+        const checkInDate = new Date(b.checkIn)
+        return checkInDate >= now && checkInDate <= nextWeek && b.status !== 'cancelled'
+    }).length
+
+    // Calculate occupancy rate (simplified)
+    const totalRooms = 20 // Pueblo (12) + Hideout (8)
+    const occupancyRate = Math.min(100, Math.round((activeBookings / totalRooms) * 100))
 
     const getStatusBadge = (status: string) => {
         switch (status) {
@@ -77,33 +93,49 @@ export default function AdminDashboard() {
                     </CardContent>
                 </Card>
 
-                <Card className="border-stone-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                <Card className="relative overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-500">Reservas Activas</CardTitle>
-                        <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-                            <Users className="h-4 w-4" />
-                        </div>
+                        <CardTitle className="text-sm font-medium text-stone-600">Reservas Activas</CardTitle>
+                        <CalendarDays className="h-5 w-5 text-purple-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold font-heading text-stone-900 mt-2">{activeBookings}</div>
-                        <p className="text-sm text-stone-400 mt-1">
-                            Huéspedes en casa
+                        <div className="text-3xl font-bold font-heading text-stone-900">{activeBookings}</div>
+                        <p className="text-xs text-stone-500 mt-2 flex items-center gap-1">
+                            <span className="text-blue-600 font-medium">{confirmedBookings} confirmadas</span>
+                            <span className="text-stone-400">•</span>
+                            <span className="text-yellow-600 font-medium">{pendingBookings} pendientes</span>
                         </p>
                     </CardContent>
                 </Card>
 
-                <Card className="border-stone-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                {/* Card 3: Upcoming Check-ins */}
+                <Card className="relative overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-500">Eventos</CardTitle>
-                        <div className="p-2 bg-pink-50 rounded-lg text-pink-600">
-                            <CalendarDays className="h-4 w-4" />
-                        </div>
+                        <CardTitle className="text-sm font-medium text-stone-600">Próximas Llegadas</CardTitle>
+                        <Users className="h-5 w-5 text-orange-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold font-heading text-stone-900 mt-2">{events.length}</div>
-                        <p className="text-sm text-stone-400 mt-1">
-                            Actividades esta semana
+                        <div className="text-3xl font-bold font-heading text-stone-900">{upcomingCheckIns}</div>
+                        <p className="text-xs text-stone-500 mt-2 flex items-center gap-1">
+                            <span className="text-stone-600">Próximos 7 días</span>
                         </p>
+                    </CardContent>
+                </Card>
+
+                {/* Card 4: Occupancy Rate */}
+                <Card className="relative overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-stone-600">Ocupación</CardTitle>
+                        <Activity className="h-5 w-5 text-teal-500" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-3xl font-bold font-heading text-stone-900">{occupancyRate}%</div>
+                        <div className="mt-2 w-full bg-stone-200 rounded-full h-2">
+                            <div
+                                className="bg-gradient-to-r from-teal-500 to-emerald-500 h-2 rounded-full transition-all duration-500"
+                                style={{ width: `${occupancyRate}%` }}
+                            />
+                        </div>
                     </CardContent>
                 </Card>
 
