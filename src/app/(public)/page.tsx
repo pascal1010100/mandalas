@@ -25,12 +25,12 @@ export default function LandingPage() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
           style={{
-            // Golden sand gradient - warm and luminous
-            backgroundImage: "linear-gradient(135deg, #f4d03f 0%, #e8b84e 40%, #d4a05d 100%)",
+            // Warm golden gradient - sunset, social, welcoming
+            backgroundImage: "linear-gradient(135deg, #e8c468 0%, #d4a855 40%, #c08d42 100%)",
             // backgroundImage: "url('/images/pueblo_vibes.webp')" 
           }}
         />
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+        <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors" />
 
         <div className="relative z-10 h-full flex flex-col justify-center items-center text-center text-white p-8">
           <motion.div
@@ -65,12 +65,12 @@ export default function LandingPage() {
         <div
           className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
           style={{
-            // Fresh lime gradient - vibrant and natural
-            backgroundImage: "linear-gradient(135deg, #d4e157 0%, #aed581 40%, #81c784 100%)",
+            // Zen holistic green - healing, nature, peace
+            backgroundImage: "linear-gradient(135deg, #a8c5a0 0%, #8fb088 40%, #769b70 100%)",
             // backgroundImage: "url('/images/hideout_nature.webp')" 
           }}
         />
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+        <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors" />
 
         <div className="relative z-10 h-full flex flex-col justify-center items-center text-center text-white p-8">
           <motion.div
@@ -78,7 +78,7 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <Leaf className="w-16 h-16 mb-4 mx-auto text-lime-50/90" />
+            <Leaf className="w-16 h-16 mb-4 mx-auto text-emerald-50/90" />
             <h2 className="text-4xl md:text-6xl font-bold mb-4 tracking-tighter drop-shadow-lg">Mandalas Hideout</h2>
             <p className="text-lg md:text-xl font-light mb-8 max-w-md mx-auto drop-shadow-md">
               Retiro natural, paz absoluta y conexión con la tierra en nuestro santuario escondido.
