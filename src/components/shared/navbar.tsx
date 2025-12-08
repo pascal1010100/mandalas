@@ -55,48 +55,63 @@ export function Navbar() {
                 </Link>
 
                 {/* Desktop Menu */}
-                <div className="hidden md:flex gap-8 items-center font-medium">
+                <div className="hidden md:flex gap-2 items-center font-medium">
                     <Link
                         href="/pueblo"
                         className={cn(
-                            "relative hover:text-primary transition-colors py-2",
-                            pathname === "/pueblo" && "text-primary"
+                            "relative px-4 py-2 rounded-lg transition-all duration-300",
+                            "hover:bg-stone-100/80 hover:text-purple-600",
+                            pathname === "/pueblo"
+                                ? "text-purple-600 bg-purple-50/50"
+                                : scrolled || !isHome ? "text-stone-700" : "text-white/90"
                         )}
                     >
                         Pueblo
                         {pathname === "/pueblo" && (
-                            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full" />
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-600" />
                         )}
                     </Link>
                     <Link
                         href="/hideout"
                         className={cn(
-                            "relative hover:text-primary transition-colors py-2",
-                            pathname === "/hideout" && "text-primary"
+                            "relative px-4 py-2 rounded-lg transition-all duration-300",
+                            "hover:bg-stone-100/80 hover:text-purple-600",
+                            pathname === "/hideout"
+                                ? "text-purple-600 bg-purple-50/50"
+                                : scrolled || !isHome ? "text-stone-700" : "text-white/90"
                         )}
                     >
                         Hideout
                         {pathname === "/hideout" && (
-                            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full" />
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-600" />
                         )}
                     </Link>
                     <Link
                         href="/contact"
                         className={cn(
-                            "relative hover:text-primary transition-colors py-2",
-                            pathname === "/contact" && "text-primary"
+                            "relative px-4 py-2 rounded-lg transition-all duration-300",
+                            "hover:bg-stone-100/80 hover:text-purple-600",
+                            pathname === "/contact"
+                                ? "text-purple-600 bg-purple-50/50"
+                                : scrolled || !isHome ? "text-stone-700" : "text-white/90"
                         )}
                     >
                         Contacto
                         {pathname === "/contact" && (
-                            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full" />
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-600" />
                         )}
                     </Link>
+
+                    {/* Divider */}
+                    <div className="w-px h-6 bg-stone-300/50 mx-2" />
+
                     <BookingModal>
                         <Button
                             className={cn(
-                                "rounded-full font-bold px-6 shadow-lg transition-all hover:scale-105",
-                                !scrolled && isHome ? "bg-white text-black hover:bg-white/90" : ""
+                                "rounded-full font-bold px-6 h-10 shadow-lg transition-all duration-300",
+                                "bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500",
+                                "hover:shadow-xl hover:scale-105 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600",
+                                "text-white border-0"
                             )}
                         >
                             Reservar
