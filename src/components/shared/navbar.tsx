@@ -2,13 +2,13 @@
 
 import * as React from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { BookingModal } from "@/components/shared/booking-modal"
+import { MandalaIcon } from "@/components/icons/mandala-icon"
 
 export function Navbar() {
     const [scrolled, setScrolled] = React.useState(false)
@@ -36,15 +36,17 @@ export function Navbar() {
         >
             <div className="container mx-auto px-4 h-20 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-3 group">
-                    {/* Original Mandalas Logo */}
-                    <div className="relative w-12 h-12 transition-transform duration-300 group-hover:scale-105">
-                        <Image
-                            src="/logo.png"
-                            alt="Mandalas Hostal"
-                            fill
-                            className="object-contain"
-                            priority
-                        />
+                    {/* Mandala Icon with Gradient Background */}
+                    <div className={cn(
+                        "w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md",
+                        scrolled || !isHome
+                            ? "bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 shadow-purple-500/30"
+                            : "bg-white/10 backdrop-blur-sm border border-white/30 shadow-white/20"
+                    )}>
+                        <MandalaIcon className={cn(
+                            "w-7 h-7 transition-all duration-300",
+                            scrolled || !isHome ? "text-white" : "text-white"
+                        )} />
                     </div>
                     {/* Brand Text */}
                     <span className={cn(
@@ -116,13 +118,8 @@ export function Navbar() {
                         <SheetHeader>
                             <SheetTitle className="text-left">
                                 <div className="flex items-center gap-3">
-                                    <div className="relative w-12 h-12">
-                                        <Image
-                                            src="/logo.png"
-                                            alt="Mandalas Hostal"
-                                            fill
-                                            className="object-contain"
-                                        />
+                                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                                        <MandalaIcon className="w-7 h-7 text-white" />
                                     </div>
                                     <span className="text-2xl font-bold tracking-tighter">MANDALAS</span>
                                 </div>
