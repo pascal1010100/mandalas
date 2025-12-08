@@ -14,11 +14,11 @@ export default function PuebloPage() {
             <Hero
                 title="Mandalas"
                 subtitle="Tu hogar social en el corazón de San Pedro. Conecta, celebra y vive la magia del lago."
-                backgroundGradient="linear-gradient(to bottom right, #f97316, #ec4899)"
+                backgroundGradient="linear-gradient(135deg, #e8b87e 0%, #d4a574 50%, #c08f5f 100%)"
                 align="center"
             >
                 <BookingModal>
-                    <Button size="lg" className="rounded-full bg-white text-orange-600 hover:bg-stone-100 font-bold text-lg px-8">
+                    <Button size="lg" className="rounded-full bg-gradient-to-r from-emerald-500/60 to-teal-600/60 backdrop-blur-md border border-emerald-200/40 hover:from-emerald-600/70 hover:to-teal-700/70 text-white font-semibold shadow-lg shadow-emerald-900/10 hover:shadow-2xl hover:shadow-emerald-900/20 transition-all duration-500 ease-out hover:scale-[1.02] text-lg px-8">
                         Reservar Estadía
                     </Button>
                 </BookingModal>
@@ -95,7 +95,7 @@ export default function PuebloPage() {
                                         roomName="Dormitorio Compartido"
                                         pricePerNight={18}
                                     >
-                                        <Button className="w-full rounded-full" variant="outline">Reservar Ahora</Button>
+                                        <Button className="w-full rounded-full bg-gradient-to-r from-emerald-500/60 to-teal-600/60 backdrop-blur-md hover:from-emerald-600/70 hover:to-teal-700/70 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -123,7 +123,7 @@ export default function PuebloPage() {
                                         roomName="Habitación Privada Estándar"
                                         pricePerNight={35}
                                     >
-                                        <Button className="w-full rounded-full" variant="outline">Reservar Ahora</Button>
+                                        <Button className="w-full rounded-full bg-gradient-to-r from-emerald-500/60 to-teal-600/60 backdrop-blur-md hover:from-emerald-600/70 hover:to-teal-700/70 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -148,12 +148,10 @@ export default function PuebloPage() {
                                     <BookingModal
                                         defaultLocation="pueblo"
                                         defaultRoomType="suite"
-                                        roomName="Suite con Vista al Lago"
-                                        pricePerNight={45}
+                                        roomName="Suite con Vista"
+                                        pricePerNight={55}
                                     >
-                                        <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white">
-                                            Reservar Ahora
-                                        </Button>
+                                        <Button className="w-full rounded-full bg-gradient-to-r from-emerald-500/60 to-teal-600/60 backdrop-blur-md hover:from-emerald-600/70 hover:to-teal-700/70 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
