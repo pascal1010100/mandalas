@@ -139,12 +139,15 @@ export function Navbar() {
                                 </div>
                             </SheetTitle>
                         </SheetHeader>
-                        <div className="flex flex-col gap-6 mt-10">
+                        <div className="flex flex-col gap-4 mt-10">
                             <Link
                                 href="/pueblo"
                                 className={cn(
-                                    "text-xl font-medium hover:text-primary transition-colors",
-                                    pathname === "/pueblo" && "text-primary font-bold"
+                                    "text-lg font-medium px-4 py-3 rounded-lg transition-all duration-300",
+                                    "hover:bg-purple-50 hover:text-purple-600",
+                                    pathname === "/pueblo"
+                                        ? "text-purple-600 bg-purple-50 font-bold"
+                                        : "text-stone-700"
                                 )}
                             >
                                 Pueblo
@@ -152,8 +155,11 @@ export function Navbar() {
                             <Link
                                 href="/hideout"
                                 className={cn(
-                                    "text-xl font-medium hover:text-primary transition-colors",
-                                    pathname === "/hideout" && "text-primary font-bold"
+                                    "text-lg font-medium px-4 py-3 rounded-lg transition-all duration-300",
+                                    "hover:bg-purple-50 hover:text-purple-600",
+                                    pathname === "/hideout"
+                                        ? "text-purple-600 bg-purple-50 font-bold"
+                                        : "text-stone-700"
                                 )}
                             >
                                 Hideout
@@ -161,14 +167,20 @@ export function Navbar() {
                             <Link
                                 href="/contact"
                                 className={cn(
-                                    "text-xl font-medium hover:text-primary transition-colors",
-                                    pathname === "/contact" && "text-primary font-bold"
+                                    "text-lg font-medium px-4 py-3 rounded-lg transition-all duration-300",
+                                    "hover:bg-purple-50 hover:text-purple-600",
+                                    pathname === "/contact"
+                                        ? "text-purple-600 bg-purple-50 font-bold"
+                                        : "text-stone-700"
                                 )}
                             >
                                 Contacto
                             </Link>
+
+                            <div className="h-px bg-stone-200 my-2" />
+
                             <BookingModal>
-                                <Button className="w-full rounded-full text-lg py-6 shadow-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                                <Button className="w-full rounded-full text-lg py-6 shadow-lg bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 transition-all duration-300">
                                     Reservar Ahora
                                 </Button>
                             </BookingModal>
