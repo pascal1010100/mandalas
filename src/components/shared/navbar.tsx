@@ -38,8 +38,10 @@ export function Navbar() {
                     {/* Main Brand */}
                     <span className={cn(
                         "text-3xl font-black tracking-tighter transition-all duration-300",
-                        "bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent",
-                        "group-hover:scale-105 inline-block"
+                        scrolled || !isHome
+                            ? "text-stone-800"
+                            : "text-white",
+                        "group-hover:text-teal-700"
                     )}>
                         MANDALAS
                     </span>
@@ -60,45 +62,45 @@ export function Navbar() {
                         href="/pueblo"
                         className={cn(
                             "relative px-4 py-2 rounded-lg transition-all duration-300",
-                            "hover:bg-stone-100/80 hover:text-purple-600",
+                            "hover:bg-teal-50/80 hover:text-teal-700",
                             pathname === "/pueblo"
-                                ? "text-purple-600 bg-purple-50/50"
+                                ? "text-teal-700 bg-teal-50/50"
                                 : scrolled || !isHome ? "text-stone-700" : "text-white/90"
                         )}
                     >
                         Pueblo
                         {pathname === "/pueblo" && (
-                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-600" />
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-teal-600" />
                         )}
                     </Link>
                     <Link
                         href="/hideout"
                         className={cn(
                             "relative px-4 py-2 rounded-lg transition-all duration-300",
-                            "hover:bg-stone-100/80 hover:text-purple-600",
+                            "hover:bg-teal-50/80 hover:text-teal-700",
                             pathname === "/hideout"
-                                ? "text-purple-600 bg-purple-50/50"
+                                ? "text-teal-700 bg-teal-50/50"
                                 : scrolled || !isHome ? "text-stone-700" : "text-white/90"
                         )}
                     >
                         Hideout
                         {pathname === "/hideout" && (
-                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-600" />
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-teal-600" />
                         )}
                     </Link>
                     <Link
                         href="/contact"
                         className={cn(
                             "relative px-4 py-2 rounded-lg transition-all duration-300",
-                            "hover:bg-stone-100/80 hover:text-purple-600",
+                            "hover:bg-teal-50/80 hover:text-teal-700",
                             pathname === "/contact"
-                                ? "text-purple-600 bg-purple-50/50"
+                                ? "text-teal-700 bg-teal-50/50"
                                 : scrolled || !isHome ? "text-stone-700" : "text-white/90"
                         )}
                     >
                         Contacto
                         {pathname === "/contact" && (
-                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-purple-600" />
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-teal-600" />
                         )}
                     </Link>
 
@@ -109,8 +111,8 @@ export function Navbar() {
                         <Button
                             className={cn(
                                 "rounded-full font-bold px-6 h-10 shadow-lg transition-all duration-300",
-                                "bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500",
-                                "hover:shadow-xl hover:scale-105 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600",
+                                "bg-teal-600 hover:bg-teal-700",
+                                "hover:shadow-xl hover:scale-105",
                                 "text-white border-0"
                             )}
                         >
@@ -130,7 +132,7 @@ export function Navbar() {
                         <SheetHeader>
                             <SheetTitle className="text-left">
                                 <div className="flex flex-col leading-none">
-                                    <span className="text-3xl font-black tracking-tighter bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text text-transparent">
+                                    <span className="text-3xl font-black tracking-tighter text-stone-800">
                                         MANDALAS
                                     </span>
                                     <span className="text-[10px] font-medium tracking-wide uppercase text-stone-500 mt-0.5">
@@ -144,9 +146,9 @@ export function Navbar() {
                                 href="/pueblo"
                                 className={cn(
                                     "text-lg font-medium px-4 py-3 rounded-lg transition-all duration-300",
-                                    "hover:bg-purple-50 hover:text-purple-600",
+                                    "hover:bg-teal-50 hover:text-teal-700",
                                     pathname === "/pueblo"
-                                        ? "text-purple-600 bg-purple-50 font-bold"
+                                        ? "text-teal-700 bg-teal-50 font-bold"
                                         : "text-stone-700"
                                 )}
                             >
@@ -156,9 +158,9 @@ export function Navbar() {
                                 href="/hideout"
                                 className={cn(
                                     "text-lg font-medium px-4 py-3 rounded-lg transition-all duration-300",
-                                    "hover:bg-purple-50 hover:text-purple-600",
+                                    "hover:bg-teal-50 hover:text-teal-700",
                                     pathname === "/hideout"
-                                        ? "text-purple-600 bg-purple-50 font-bold"
+                                        ? "text-teal-700 bg-teal-50 font-bold"
                                         : "text-stone-700"
                                 )}
                             >
@@ -168,9 +170,9 @@ export function Navbar() {
                                 href="/contact"
                                 className={cn(
                                     "text-lg font-medium px-4 py-3 rounded-lg transition-all duration-300",
-                                    "hover:bg-purple-50 hover:text-purple-600",
+                                    "hover:bg-teal-50 hover:text-teal-700",
                                     pathname === "/contact"
-                                        ? "text-purple-600 bg-purple-50 font-bold"
+                                        ? "text-teal-700 bg-teal-50 font-bold"
                                         : "text-stone-700"
                                 )}
                             >
@@ -180,7 +182,7 @@ export function Navbar() {
                             <div className="h-px bg-stone-200 my-2" />
 
                             <BookingModal>
-                                <Button className="w-full rounded-full text-lg py-6 shadow-lg bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 transition-all duration-300">
+                                <Button className="w-full rounded-full text-lg py-6 shadow-lg bg-teal-600 hover:bg-teal-700 transition-all duration-300 text-white">
                                     Reservar Ahora
                                 </Button>
                             </BookingModal>
