@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -34,25 +35,68 @@ export function Navbar() {
             )}
         >
             <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-                <Link href="/" className="text-2xl font-bold tracking-tighter hover:opacity-80 transition-opacity">
-                    MANDALAS
+                <Link href="/" className="flex items-center gap-3 group">
+                    {/* Original Mandalas Logo */}
+                    <div className="relative w-12 h-12 transition-transform duration-300 group-hover:scale-105">
+                        <Image
+                            src="/logo.png"
+                            alt="Mandalas Hostal"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
+                    </div>
+                    {/* Brand Text */}
+                    <span className={cn(
+                        "text-2xl font-bold tracking-tighter transition-all duration-300",
+                        "group-hover:opacity-80"
+                    )}>
+                        MANDALAS
+                    </span>
                 </Link>
 
                 {/* Desktop Menu */}
                 <div className="hidden md:flex gap-8 items-center font-medium">
-                    <Link href="/pueblo" className="hover:text-primary transition-colors">
+                    <Link
+                        href="/pueblo"
+                        className={cn(
+                            "relative hover:text-primary transition-colors py-2",
+                            pathname === "/pueblo" && "text-primary"
+                        )}
+                    >
                         Pueblo
+                        {pathname === "/pueblo" && (
+                            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full" />
+                        )}
                     </Link>
-                    <Link href="/hideout" className="hover:text-primary transition-colors">
+                    <Link
+                        href="/hideout"
+                        className={cn(
+                            "relative hover:text-primary transition-colors py-2",
+                            pathname === "/hideout" && "text-primary"
+                        )}
+                    >
                         Hideout
+                        {pathname === "/hideout" && (
+                            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full" />
+                        )}
                     </Link>
-                    <Link href="/contact" className="hover:text-primary transition-colors">
+                    <Link
+                        href="/contact"
+                        className={cn(
+                            "relative hover:text-primary transition-colors py-2",
+                            pathname === "/contact" && "text-primary"
+                        )}
+                    >
                         Contacto
+                        {pathname === "/contact" && (
+                            <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full" />
+                        )}
                     </Link>
                     <BookingModal>
                         <Button
                             className={cn(
-                                "rounded-full font-bold px-6",
+                                "rounded-full font-bold px-6 shadow-lg transition-all hover:scale-105",
                                 !scrolled && isHome ? "bg-white text-black hover:bg-white/90" : ""
                             )}
                         >
@@ -70,19 +114,53 @@ export function Navbar() {
                     </SheetTrigger>
                     <SheetContent side="right" className="w-[300px] sm:w-[400px]">
                         <SheetHeader>
-                            <SheetTitle className="text-left text-2xl font-bold">Menú</SheetTitle>
+                            <SheetTitle className="text-left">
+                                <div className="flex items-center gap-3">
+                                    <div className="relative w-12 h-12">
+                                        <Image
+                                            src="/logo.png"
+                                            alt="Mandalas Hostal"
+                                            fill
+                                            className="object-contain"
+                                        />
+                                    </div>
+                                    <span className="text-2xl font-bold tracking-tighter">MANDALAS</span>
+                                </div>
+                            </SheetTitle>
                         </SheetHeader>
                         <div className="flex flex-col gap-6 mt-10">
-                            <Link href="/pueblo" className="text-xl font-medium hover:text-primary">
-                                Mandalas
+                            <Link
+                                href="/pueblo"
+                                className={cn(
+                                    "text-xl font-medium hover:text-primary transition-colors",
+                                    pathname === "/pueblo" && "text-primary font-bold"
+                                )}
+                            >
+                                Pueblo
                             </Link>
-                            <Link href="/hideout" className="text-xl font-medium hover:text-primary">
-                                Mandalas Hideout
+                            <Link
+                                href="/hideout"
+                                className={cn(
+                                    "text-xl font-medium hover:text-primary transition-colors",
+                                    pathname === "/hideout" && "text-primary font-bold"
+                                )}
+                            >
+                                Hideout
                             </Link>
-                            <Link href="/contact" className="text-xl font-medium hover:text-primary">
+                            <Link
+                                href="/contact"
+                                className={cn(
+                                    "text-xl font-medium hover:text-primary transition-colors",
+                                    pathname === "/contact" && "text-primary font-bold"
+                                )}
+                            >
                                 Contacto
                             </Link>
-                            <Button className="w-full rounded-full text-lg py-6">Reservar Ahora</Button>
+                            <BookingModal>
+                                <Button className="w-full rounded-full text-lg py-6 shadow-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                                    Reservar Ahora
+                                </Button>
+                            </BookingModal>
                         </div>
                     </SheetContent>
                 </Sheet>
