@@ -73,7 +73,14 @@ export default function HideoutPage() {
                                     </ul>
                                 </CardContent>
                                 <CardFooter>
-                                    <Button className="w-full rounded-full" variant="outline">Ver Disponibilidad</Button>
+                                    <BookingModal
+                                        defaultLocation="hideout"
+                                        defaultRoomType="dorm"
+                                        roomName="Dormitorio Compartido Hideout"
+                                        pricePerNight={16}
+                                    >
+                                        <Button className="w-full rounded-full" variant="outline">Reservar Ahora</Button>
+                                    </BookingModal>
                                 </CardFooter>
                             </Card>
 
@@ -94,7 +101,14 @@ export default function HideoutPage() {
                                     </ul>
                                 </CardContent>
                                 <CardFooter>
-                                    <Button className="w-full rounded-full" variant="outline">Ver Disponibilidad</Button>
+                                    <BookingModal
+                                        defaultLocation="hideout"
+                                        defaultRoomType="private"
+                                        roomName="Cabaña Privada"
+                                        pricePerNight={40}
+                                    >
+                                        <Button className="w-full rounded-full" variant="outline">Reservar Ahora</Button>
+                                    </BookingModal>
                                 </CardFooter>
                             </Card>
 
@@ -115,7 +129,14 @@ export default function HideoutPage() {
                                     </ul>
                                 </CardContent>
                                 <CardFooter>
-                                    <Button className="w-full rounded-full" variant="outline">Ver Disponibilidad</Button>
+                                    <BookingModal
+                                        defaultLocation="hideout"
+                                        defaultRoomType="suite"
+                                        roomName="Suite Lakefront Premium"
+                                        pricePerNight={55}
+                                    >
+                                        <Button className="w-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white">Reservar Ahora</Button>
+                                    </BookingModal>
                                 </CardFooter>
                             </Card>
                         </div>

@@ -89,7 +89,14 @@ export default function PuebloPage() {
                                     </ul>
                                 </CardContent>
                                 <CardFooter>
-                                    <Button className="w-full rounded-full" variant="outline">Ver Disponibilidad</Button>
+                                    <BookingModal
+                                        defaultLocation="pueblo"
+                                        defaultRoomType="dorm"
+                                        roomName="Dormitorio Compartido"
+                                        pricePerNight={18}
+                                    >
+                                        <Button className="w-full rounded-full" variant="outline">Reservar Ahora</Button>
+                                    </BookingModal>
                                 </CardFooter>
                             </Card>
 
@@ -110,7 +117,14 @@ export default function PuebloPage() {
                                     </ul>
                                 </CardContent>
                                 <CardFooter>
-                                    <Button className="w-full rounded-full" variant="outline">Ver Disponibilidad</Button>
+                                    <BookingModal
+                                        defaultLocation="pueblo"
+                                        defaultRoomType="private"
+                                        roomName="Habitación Privada Estándar"
+                                        pricePerNight={35}
+                                    >
+                                        <Button className="w-full rounded-full" variant="outline">Reservar Ahora</Button>
+                                    </BookingModal>
                                 </CardFooter>
                             </Card>
 
@@ -131,7 +145,16 @@ export default function PuebloPage() {
                                     </ul>
                                 </CardContent>
                                 <CardFooter>
-                                    <Button className="w-full rounded-full" variant="outline">Ver Disponibilidad</Button>
+                                    <BookingModal
+                                        defaultLocation="pueblo"
+                                        defaultRoomType="suite"
+                                        roomName="Suite con Vista al Lago"
+                                        pricePerNight={45}
+                                    >
+                                        <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white">
+                                            Reservar Ahora
+                                        </Button>
+                                    </BookingModal>
                                 </CardFooter>
                             </Card>
                         </div>

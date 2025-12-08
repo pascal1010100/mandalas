@@ -18,9 +18,8 @@ export function LocationMap() {
             ; (async () => {
                 const L = (await import("leaflet")).default
                 // Fix leaflet icon issue in Next.js
-                // @ts-ignore
+                // @ts-expect-error - Leaflet types issue
                 delete L.Icon.Default.prototype._getIconUrl;
-                // @ts-ignore
                 L.Icon.Default.mergeOptions({
                     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
                     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',

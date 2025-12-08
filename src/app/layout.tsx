@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/shared/navbar"
-import { Footer } from "@/components/shared/footer"
-import { MobileCTA } from "@/components/shared/mobile-cta"
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -27,9 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${outfit.variable} ${inter.variable} font-sans antialiased bg-stone-50`}
-      >
+      <body>
         {children}
       </body>
     </html>

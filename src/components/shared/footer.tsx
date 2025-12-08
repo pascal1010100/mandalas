@@ -62,8 +62,12 @@ export function Footer() {
                     </div>
                 </div>
 
-                <div className="border-t border-stone-800 pt-8 text-center text-sm text-stone-500">
+                <div className="border-t border-stone-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-stone-500">
                     <p>&copy; {new Date().getFullYear()} Mandalas Hostal. Todos los derechos reservados.</p>
+                    <Link href="/admin" className="text-orange-500 font-bold hover:text-orange-400 transition-colors flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                        Admin Portal
+                    </Link>
                 </div>
             </div>
         </footer>
