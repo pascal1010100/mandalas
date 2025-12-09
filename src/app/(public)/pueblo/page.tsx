@@ -2,6 +2,7 @@
 
 import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
+import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Wifi, Beer, Coffee, Music, Users, Sun } from "lucide-react"
@@ -28,12 +29,13 @@ export default function PuebloPage() {
             <section className="py-24 container mx-auto px-4">
                 <FadeIn>
                     <div className="max-w-4xl mx-auto text-center space-y-8">
-                        <h2 className="text-3xl md:text-5xl font-bold font-heading text-foreground tracking-tighter">La Esencia del Pueblo</h2>
-                        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed font-light">
+                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">La Esencia del Pueblo</h2>
+                        <div className="w-24 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent mx-auto opacity-50" />
+                        <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
                             Ubicado a pasos de los mejores cafés y bares, Mandalas es el punto de encuentro para viajeros de todo el mundo.
                             Disfruta de nuestra terraza con vista a los volcanes, únete a nuestras cenas familiares o simplemente relájate con un buen libro.
                         </p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8">
+                        <StaggerReveal className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8" delay={0.2}>
                             {[
                                 { icon: Wifi, label: "WiFi Alta Velocidad" },
                                 { icon: Beer, label: "Bar & Happy Hour" },
@@ -42,12 +44,12 @@ export default function PuebloPage() {
                                 { icon: Music, label: "Música en Vivo" },
                                 { icon: Sun, label: "Terraza Panorámica" },
                             ].map((feature, idx) => (
-                                <div key={idx} className="flex flex-col items-center gap-3 text-muted-foreground">
-                                    <feature.icon className="w-8 h-8 text-orange-500" />
-                                    <span className="font-medium">{feature.label}</span>
-                                </div>
+                                <StaggerItem key={idx} className="flex flex-col items-center gap-4 text-muted-foreground/80 group">
+                                    <feature.icon className="w-6 h-6 text-orange-500/80 stroke-[1.5px] group-hover:text-orange-500 transition-colors" />
+                                    <span className="text-sm uppercase tracking-widest font-light">{feature.label}</span>
+                                </StaggerItem>
                             ))}
-                        </div>
+                        </StaggerReveal>
                     </div>
                 </FadeIn>
             </section>
@@ -61,10 +63,10 @@ export default function PuebloPage() {
             <section className="py-24 bg-card">
                 <div className="container mx-auto px-4">
                     <FadeIn>
-                        <h2 className="text-3xl md:text-5xl font-bold text-foreground tracking-tighter mb-12 text-center">Nuestras Habitaciones</h2>
+                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em] mb-12 text-center">Nuestras Habitaciones</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* Room 1 */}
-                            <Card className="border-none shadow-lg overflow-hidden group">
+                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-tr from-amber-400 to-orange-500 group-hover:scale-105 transition-transform duration-500" />
                                     {/* Placeholder for image */}
@@ -93,7 +95,7 @@ export default function PuebloPage() {
                             </Card>
 
                             {/* Room 2 */}
-                            <Card className="border-none shadow-lg overflow-hidden group">
+                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-tr from-orange-500 to-red-500 group-hover:scale-105 transition-transform duration-500" />
                                 </div>
@@ -121,7 +123,7 @@ export default function PuebloPage() {
                             </Card>
 
                             {/* Room 3 */}
-                            <Card className="border-none shadow-lg overflow-hidden group">
+                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-tr from-yellow-500 to-amber-600 group-hover:scale-105 transition-transform duration-500" />
                                 </div>

@@ -4,6 +4,7 @@ import { BookingModal } from "@/components/shared/booking-modal"
 
 import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
+import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Leaf, Waves, Mountain, Flame, Cloud, Stars } from "lucide-react"
@@ -27,11 +28,12 @@ export default function HideoutPage() {
             <section className="py-24 container mx-auto px-4">
                 <FadeIn>
                     <div className="max-w-4xl mx-auto text-center space-y-8">
-                        <h2 className="text-3xl md:text-5xl font-bold text-foreground tracking-tighter">Paz en la Naturaleza</h2>
-                        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">Paz en la Naturaleza</h2>
+                        <div className="w-24 h-px bg-gradient-to-r from-transparent via-lime-400 to-transparent mx-auto opacity-50" />
+                        <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
                             Escondido entre jardines exuberantes y con acceso directo al lago, Hideout es el lugar perfecto para yoga temprano, tardes de hamaca y noches bajo las estrellas.
                         </p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8">
+                        <StaggerReveal className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8" delay={0.2}>
                             {[
                                 { icon: Leaf, label: "Jardines Tropicales" },
                                 { icon: Waves, label: "Acceso al Lago" },
@@ -40,12 +42,12 @@ export default function HideoutPage() {
                                 { icon: Cloud, label: "Deck de Yoga" },
                                 { icon: Stars, label: "Cielos Estrellados" },
                             ].map((feature, idx) => (
-                                <div key={idx} className="flex flex-col items-center gap-3 text-muted-foreground">
-                                    <feature.icon className="w-8 h-8 text-lime-600" />
-                                    <span className="font-medium">{feature.label}</span>
-                                </div>
+                                <StaggerItem key={idx} className="flex flex-col items-center gap-4 text-muted-foreground/80 group">
+                                    <feature.icon className="w-6 h-6 text-lime-600/80 stroke-[1.5px] group-hover:text-lime-500 transition-colors" />
+                                    <span className="text-sm uppercase tracking-widest font-light">{feature.label}</span>
+                                </StaggerItem>
                             ))}
-                        </div>
+                        </StaggerReveal>
                     </div>
                 </FadeIn>
             </section>
@@ -54,10 +56,10 @@ export default function HideoutPage() {
             <section className="py-24 bg-card">
                 <div className="container mx-auto px-4">
                     <FadeIn>
-                        <h2 className="text-3xl md:text-5xl font-bold text-foreground tracking-tighter mb-12 text-center">Alojamientos</h2>
+                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em] mb-12 text-center">Alojamientos</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* Room 1 */}
-                            <Card className="border-none shadow-lg overflow-hidden group">
+                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-tr from-lime-400 to-green-500 group-hover:scale-105 transition-transform duration-500" />
                                 </div>
@@ -86,7 +88,7 @@ export default function HideoutPage() {
                             </Card>
 
                             {/* Room 2 */}
-                            <Card className="border-none shadow-lg overflow-hidden group">
+                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-tr from-green-500 to-emerald-600 group-hover:scale-105 transition-transform duration-500" />
                                 </div>
@@ -114,7 +116,7 @@ export default function HideoutPage() {
                             </Card>
 
                             {/* Room 3 */}
-                            <Card className="border-none shadow-lg overflow-hidden group">
+                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500 to-lime-600 group-hover:scale-105 transition-transform duration-500" />
                                 </div>

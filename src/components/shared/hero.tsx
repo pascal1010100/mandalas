@@ -44,15 +44,15 @@ export function Hero({
                 align === "center" ? "text-center" : "text-left"
             )}>
                 <FadeIn>
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 tracking-tighter drop-shadow-lg">
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-light font-heading text-white mb-6 tracking-[0.2em] uppercase drop-shadow-lg">
                         {title}
                     </h1>
                     {subtitle && (
-                        <p className="text-xl md:text-2xl text-white/90 max-w-2xl font-light leading-relaxed drop-shadow-md mx-auto">
+                        <p className="text-lg md:text-xl text-white/90 max-w-2xl font-light leading-relaxed tracking-wide drop-shadow-md mx-auto">
                             {subtitle}
                         </p>
                     )}
-                    {children && <div className="mt-8">{children}</div>}
+                    {children && <div className="mt-10">{children}</div>}
                 </FadeIn>
             </div>
         </div>

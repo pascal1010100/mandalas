@@ -16,20 +16,25 @@ function SidebarContent({ pathname }: { pathname: string }) {
     ]
 
     return (
-        <div className="flex flex-col h-full">
-            <div className="h-20 flex items-center px-6 border-b border-white/10">
+        <div className="flex flex-col h-full bg-stone-950 text-stone-300">
+            {/* Logo Area */}
+            <div className="h-24 flex items-center px-8 border-b border-white/5">
                 <Link href="/" className="group flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/20">
-                        <Sparkles className="w-4 h-4" />
+                    <div className="w-10 h-10 rounded-full bg-stone-900 border border-white/10 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500">
+                        <Sparkles className="w-4 h-4 text-amber-500/80" />
                     </div>
-                    <span className="text-xl font-bold font-heading tracking-tight text-white">
-                        Mandalas<span className="text-purple-500">.</span>
-                    </span>
+                    <div className="flex flex-col">
+                        <span className="text-xl font-light font-heading tracking-[0.2em] text-white uppercase">
+                            Mandalas
+                        </span>
+                        <span className="text-[0.6rem] uppercase tracking-widest text-stone-500">Admin Portal</span>
+                    </div>
                 </Link>
             </div>
 
-            <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                <div className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-4 px-2">Menu Principal</div>
+            {/* Navigation */}
+            <nav className="flex-1 p-6 space-y-2 overflow-y-auto">
+                <div className="text-xs font-medium text-stone-600 uppercase tracking-widest mb-6 px-4">Menu Principal</div>
                 {navItems.map((item) => {
                     const Icon = item.icon
                     const isActive = pathname === item.href
@@ -38,35 +43,39 @@ function SidebarContent({ pathname }: { pathname: string }) {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative",
+                                "flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-500 group relative overflow-hidden",
                                 isActive
-                                    ? "bg-white/10 text-white shadow-sm"
-                                    : "text-stone-400 hover:bg-white/5 hover:text-white"
+                                    ? "bg-white/5 text-white shadow-xl shadow-black/20"
+                                    : "text-stone-500 hover:bg-white/[0.02] hover:text-stone-300"
                             )}
                         >
                             {isActive && (
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-purple-500 rounded-full" />
+                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-600" />
                             )}
-                            <Icon className={cn("w-5 h-5 transition-colors", isActive ? "text-purple-400" : "text-stone-500 group-hover:text-stone-300")} />
-                            <span className="font-medium tracking-wide">{item.label}</span>
+                            <Icon className={cn("w-5 h-5 transition-colors duration-300", isActive ? "text-amber-500" : "text-stone-600 group-hover:text-stone-400")} />
+                            <span className={cn("font-medium tracking-wide text-sm", isActive ? "font-semibold" : "")}>{item.label}</span>
                         </Link>
                     )
                 })}
             </nav>
 
-            <div className="p-6 border-t border-white/10 space-y-4">
-                <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                    <p className="text-xs font-medium text-stone-300 mb-2">Estado del Sistema</p>
+            {/* Footer / Logout */}
+            <div className="p-6 border-t border-white/5 space-y-6">
+                <div className="bg-stone-900/50 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
+                    <p className="text-[10px] uppercase tracking-widest text-stone-500 mb-3">Estado del Sistema</p>
                     <div className="flex items-center gap-2">
-                        <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-                        <span className="text-xs text-stone-400">En línea</span>
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span className="text-xs text-stone-300 font-medium">Operativo</span>
                     </div>
                 </div>
 
                 <Link href="/">
-                    <Button variant="ghost" className="w-full justify-start text-stone-400 hover:text-white hover:bg-white/5 h-12 rounded-xl">
-                        <Home className="w-4 h-4 mr-3" />
-                        Volver al Sitio
+                    <Button variant="ghost" className="w-full justify-start text-stone-500 hover:text-stone-200 hover:bg-white/5 h-12 rounded-xl group">
+                        <Home className="w-4 h-4 mr-3 group-hover:text-white transition-colors" />
+                        <span className="text-sm font-medium">Ir al Sitio Público</span>
                     </Button>
                 </Link>
             </div>
@@ -78,32 +87,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const pathname = usePathname()
 
     return (
-        <div className="flex h-screen w-full bg-[#FAFAFA] text-stone-900 font-sans overflow-hidden">
+        <div className="flex h-screen w-full bg-[#F5F5F4] text-stone-900 font-sans overflow-hidden">
             {/* Desktop Sidebar */}
-            <aside className="hidden md:flex w-72 flex-col h-full flex-shrink-0 z-30 bg-stone-900 border-r border-stone-800 text-stone-300">
+            <aside className="hidden md:flex w-80 flex-col h-full flex-shrink-0 z-30 shadow-2xl shadow-stone-900/20">
                 <SidebarContent pathname={pathname} />
             </aside>
 
             {/* Mobile Header */}
-            <div className="md:hidden fixed top-0 w-full h-16 bg-white/80 backdrop-blur-md border-b z-40 flex items-center justify-between px-6">
+            <div className="md:hidden fixed top-0 w-full h-16 bg-stone-950/90 backdrop-blur-md border-b border-white/5 z-40 flex items-center justify-between px-6">
                 <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded bg-gradient-to-br from-purple-600 to-pink-600" />
-                    <span className="font-bold font-heading">Admin</span>
+                    <span className="font-light font-heading uppercase tracking-widest text-white text-lg">Mandalas</span>
                 </div>
                 <Sheet>
                     <SheetTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-stone-600"><Menu /></Button>
+                        <Button variant="ghost" size="icon" className="text-stone-400 hover:text-white hover:bg-white/10"><Menu /></Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="p-0 w-[280px] bg-stone-900">
+                    <SheetContent side="left" className="p-0 w-[300px] border-r-0 bg-stone-950">
                         <SidebarContent pathname={pathname} />
                     </SheetContent>
                 </Sheet>
             </div>
 
             {/* Main Content Area */}
-            <main className="flex-1 h-full overflow-y-auto relative scroll-smooth">
-                <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10 pointer-events-none" />
-                <div className="container mx-auto p-6 md:p-10 pt-24 md:pt-10 max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <main className="flex-1 h-full overflow-y-auto relative scroll-smooth bg-[#F5F5F4]">
+                {/* Subtle Grain/Noise if needed, or clean stone background */}
+                <div className="container mx-auto p-6 md:p-12 pt-24 md:pt-12 max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-700">
                     {children}
                 </div>
             </main>

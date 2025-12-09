@@ -49,161 +49,137 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div className="space-y-12">
+        <div className="space-y-10">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-stone-200/60 pb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 className="text-4xl font-bold tracking-tight text-stone-900 font-heading">
+                    <h2 className="text-3xl font-light font-heading tracking-[0.2em] text-stone-900 uppercase">
                         Dashboard
                     </h2>
-                    <p className="text-stone-500 text-lg mt-1">Bienvenido de nuevo, Jefe.</p>
+                    <p className="text-stone-500 font-light tracking-wide mt-2">Visión general del estado de Mandalas.</p>
                 </div>
                 <div className="flex gap-3">
-                    <Link href="/">
-                        <Button variant="outline" className="h-11 px-6 border-stone-200 hover:bg-stone-50 text-stone-600">
-                            <ArrowUpRight className="w-4 h-4 mr-2" />
-                            Ver Sitio Público
+                    <Link href="/" target="_blank">
+                        <Button variant="outline" className="h-10 px-6 border-stone-200 hover:bg-stone-50 text-stone-600 rounded-full font-medium text-xs tracking-wide">
+                            <ArrowUpRight className="w-3 h-3 mr-2" />
+                            SITIO PÚBLICO
                         </Button>
                     </Link>
-                    <Button className="bg-stone-900 text-white hover:bg-stone-800 shadow-lg shadow-stone-900/20 rounded-xl h-11 px-6">
-                        Descargar Reporte
+                    <Button className="bg-stone-900 text-white hover:bg-stone-800 shadow-xl shadow-stone-900/10 rounded-full h-10 px-6 font-medium text-xs tracking-wide">
+                        DESCARGAR REPORTE
                     </Button>
                 </div>
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-                {/* Revenue Card - Gradient */}
-                <Card
-                    className="border-none shadow-xl relative overflow-hidden group"
-                    style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)' }}
-                >
-                    <div className="absolute right-0 top-0 h-32 w-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 transition-all group-hover:scale-110" />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {/* Revenue Card */}
+                <Card className="border-none shadow-lg bg-stone-900 text-white relative overflow-hidden group">
+                    <div className="absolute right-0 top-0 h-32 w-32 bg-amber-500/10 rounded-full blur-3xl -mr-10 -mt-10 transition-all group-hover:scale-110" />
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                        <CardTitle className="text-sm font-medium text-white/90">Ingresos Totales</CardTitle>
-                        <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                            <DollarSign className="h-4 w-4 text-white" />
-                        </div>
+                        <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Ingresos Totales</CardTitle>
+                        <DollarSign className="h-4 w-4 text-amber-500" />
                     </CardHeader>
                     <CardContent className="relative z-10">
-                        <div className="text-3xl font-bold font-heading tracking-tight mt-2 text-white">${totalRevenue.toFixed(2)}</div>
-                        <p className="text-xs text-white/80 flex items-center mt-1 font-medium bg-white/10 w-fit px-2 py-1 rounded-full">
-                            <ArrowUpRight className="w-3 h-3 mr-1" /> +20.1% este mes
+                        <div className="text-2xl font-light font-heading tracking-wide mt-2">${totalRevenue.toFixed(2)}</div>
+                        <p className="text-xs text-stone-400 flex items-center mt-2">
+                            <span className="text-emerald-400 flex items-center mr-1"><ArrowUpRight className="w-3 h-3 mr-0.5" /> +20.1%</span> vs mes anterior
                         </p>
                     </CardContent>
                 </Card>
 
-                <Card className="relative overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group">
+                {/* Active Bookings */}
+                <Card className="border-none shadow-md bg-white hover:shadow-lg transition-all duration-300">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-600">Reservas Activas</CardTitle>
-                        <CalendarDays className="h-5 w-5 text-purple-500" />
+                        <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Reservas Activas</CardTitle>
+                        <CalendarDays className="h-4 w-4 text-stone-400" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold font-heading text-stone-900">{activeBookings}</div>
-                        <p className="text-xs text-stone-500 mt-2 flex items-center gap-1">
-                            <span className="text-blue-600 font-medium">{confirmedBookings} confirmadas</span>
-                            <span className="text-stone-400">•</span>
-                            <span className="text-yellow-600 font-medium">{pendingBookings} pendientes</span>
+                        <div className="text-2xl font-light font-heading tracking-wide text-stone-900 mt-2">{activeBookings}</div>
+                        <p className="text-xs text-stone-500 mt-2">
+                            {confirmedBookings} confirmadas · {pendingBookings} pendientes
                         </p>
                     </CardContent>
                 </Card>
 
-                {/* Card 3: Upcoming Check-ins */}
-                <Card className="relative overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group">
+                {/* Upcoming */}
+                <Card className="border-none shadow-md bg-white hover:shadow-lg transition-all duration-300">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-600">Próximas Llegadas</CardTitle>
-                        <Users className="h-5 w-5 text-orange-500" />
+                        <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Próximas Llegadas</CardTitle>
+                        <Users className="h-4 w-4 text-stone-400" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold font-heading text-stone-900">{upcomingCheckIns}</div>
-                        <p className="text-xs text-stone-500 mt-2 flex items-center gap-1">
-                            <span className="text-stone-600">Próximos 7 días</span>
+                        <div className="text-2xl font-light font-heading tracking-wide text-stone-900 mt-2">{upcomingCheckIns}</div>
+                        <p className="text-xs text-stone-500 mt-2">
+                            Check-ins en los próximos 7 días
                         </p>
                     </CardContent>
                 </Card>
 
-                {/* Card 4: Occupancy Rate */}
-                <Card className="relative overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 group">
+                {/* Occupancy */}
+                <Card className="border-none shadow-md bg-white hover:shadow-lg transition-all duration-300">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-600">Ocupación</CardTitle>
-                        <Activity className="h-5 w-5 text-teal-500" />
+                        <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Ocupación</CardTitle>
+                        <Activity className="h-4 w-4 text-lime-600" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold font-heading text-stone-900">{occupancyRate}%</div>
-                        <div className="mt-2 w-full bg-stone-200 rounded-full h-2">
+                        <div className="text-2xl font-light font-heading tracking-wide text-stone-900 mt-2">{occupancyRate}%</div>
+                        <div className="mt-3 w-full bg-stone-100 rounded-full h-1.5 overflow-hidden">
                             <div
-                                className="bg-gradient-to-r from-teal-500 to-emerald-500 h-2 rounded-full transition-all duration-500"
+                                className="bg-lime-600 h-full rounded-full transition-all duration-500 ease-out"
                                 style={{ width: `${occupancyRate}%` }}
                             />
                         </div>
                     </CardContent>
                 </Card>
-
-                <Card className="border-stone-100 shadow-lg hover:shadow-xl transition-all duration-300">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-stone-500">Salud del Sistema</CardTitle>
-                        <div className="p-2 bg-green-50 rounded-lg text-green-600">
-                            <Activity className="h-4 w-4" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-3xl font-bold font-heading text-stone-900 mt-2">100%</div>
-                        <p className="text-sm text-stone-400 mt-1">
-                            Todos los sistemas nominales
-                        </p>
-                    </CardContent>
-                </Card>
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-3">
                 {/* Recent Bookings Table */}
-                <Card className="col-span-2 border-stone-100 shadow-xl overflow-hidden">
-                    <CardHeader className="bg-stone-50/50 border-b border-stone-100">
+                <Card className="md:col-span-2 border-stone-100 shadow-lg overflow-hidden bg-white">
+                    <CardHeader className="border-b border-stone-100/50 p-6">
                         <div className="flex justify-between items-center">
                             <div>
-                                <CardTitle className="font-heading text-xl">Reservas Recientes</CardTitle>
-                                <CardDescription>Últimas solicitudes recibidas en tiempo real.</CardDescription>
+                                <CardTitle className="font-heading font-light text-lg tracking-wide uppercase text-stone-900">Reservas Recientes</CardTitle>
+                                <CardDescription className="text-xs mt-1">Últimas solicitudes recibidas.</CardDescription>
                             </div>
-                            <Button variant="outline" size="sm" className="hidden sm:flex">Ver Todas</Button>
+                            <Button variant="ghost" size="sm" className="hidden sm:flex text-stone-400 hover:text-stone-900 text-xs uppercase tracking-wider">Ver Todas</Button>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
                         <Table>
                             <TableHeader>
-                                <TableRow className="bg-transparent hover:bg-transparent border-stone-100">
-                                    <TableHead className="pl-6">Huésped</TableHead>
-                                    <TableHead>Ubicación</TableHead>
-                                    <TableHead>Monto</TableHead>
-                                    <TableHead className="text-center pr-6">Estado</TableHead>
+                                <TableRow className="bg-stone-50/30 hover:bg-stone-50/30 border-stone-100">
+                                    <TableHead className="pl-6 text-[10px] uppercase tracking-widest font-bold text-stone-400 py-3">Huésped</TableHead>
+                                    <TableHead className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Ubicación</TableHead>
+                                    <TableHead className="text-[10px] uppercase tracking-widest font-bold text-stone-400">Monto</TableHead>
+                                    <TableHead className="text-center pr-6 text-[10px] uppercase tracking-widest font-bold text-stone-400">Estado</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {bookings.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="h-32 text-center text-stone-500">
-                                            <div className="flex flex-col items-center gap-2">
-                                                <Users className="w-8 h-8 text-stone-300" />
-                                                <p>Sin reservas recientes.</p>
-                                            </div>
+                                        <TableCell colSpan={4} className="h-32 text-center text-stone-400 text-sm">
+                                            Sin reservas recientes.
                                         </TableCell>
                                     </TableRow>
                                 ) : (
                                     bookings.slice(0, 5).map((booking) => (
-                                        <TableRow key={booking.id} className="hover:bg-purple-50/30 transition-colors border-stone-100 cursor-pointer">
-                                            <TableCell className="font-medium pl-6">
+                                        <TableRow key={booking.id} className="hover:bg-stone-50/50 transition-colors border-stone-100 cursor-pointer group">
+                                            <TableCell className="font-medium pl-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white flex items-center justify-center text-xs font-bold shadow-md">
+                                                    <div className="w-8 h-8 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center text-xs font-bold border border-stone-200 group-hover:bg-stone-200 transition-colors">
                                                         {booking.guestName.charAt(0)}
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <span className="text-stone-900">{booking.guestName}</span>
-                                                        <span className="text-xs text-stone-400">{booking.roomType}</span>
+                                                        <span className="text-sm font-medium text-stone-700 group-hover:text-stone-900 transition-colors">{booking.guestName}</span>
+                                                        <span className="text-[10px] text-stone-400 uppercase tracking-wide">{booking.roomType}</span>
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="capitalize text-stone-600">{booking.location}</TableCell>
-                                            <TableCell className="font-bold text-stone-900">${booking.totalPrice}</TableCell>
+                                            <TableCell className="capitalize text-stone-500 text-sm">{booking.location}</TableCell>
+                                            <TableCell className="font-medium text-stone-900 text-sm">${booking.totalPrice}</TableCell>
                                             <TableCell className="text-center pr-6">
                                                 {getStatusBadge(booking.status)}
                                             </TableCell>
@@ -217,23 +193,20 @@ export default function AdminDashboard() {
 
                 {/* Quick Actions Panel */}
                 <div className="space-y-6">
-                    <div className="bg-stone-900 rounded-2xl p-6 text-white shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-                        <h3 className="text-lg font-bold font-heading mb-1 relative z-10">Acciones Rápidas</h3>
-                        <p className="text-stone-400 text-sm mb-6 relative z-10">Gestión eficiente del hostal.</p>
-
-                        <div className="space-y-3 relative z-10">
-                            <button className="w-full text-left p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all group flex items-center justify-between">
-                                <span className="font-medium text-sm">Nuevo Evento</span>
-                                <ArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transform group-hover:translate-x-1 transition-all" />
+                    <div className="bg-white rounded-2xl p-6 shadow-lg border border-stone-100 h-full">
+                        <h3 className="text-sm font-bold font-heading uppercase tracking-widest text-stone-400 mb-6">Acciones Rápidas</h3>
+                        <div className="space-y-3">
+                            <button className="w-full text-left p-4 rounded-xl bg-stone-50 hover:bg-stone-100 border border-stone-100 transition-all group flex items-center justify-between">
+                                <span className="font-medium text-sm text-stone-600 group-hover:text-stone-900">Nuevo Evento</span>
+                                <ArrowRight className="w-4 h-4 text-stone-300 group-hover:text-stone-500 transform group-hover:translate-x-1 transition-all" />
                             </button>
-                            <button className="w-full text-left p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all group flex items-center justify-between">
-                                <span className="font-medium text-sm">Bloquear Fecha</span>
-                                <ArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transform group-hover:translate-x-1 transition-all" />
+                            <button className="w-full text-left p-4 rounded-xl bg-stone-50 hover:bg-stone-100 border border-stone-100 transition-all group flex items-center justify-between">
+                                <span className="font-medium text-sm text-stone-600 group-hover:text-stone-900">Bloquear Fecha</span>
+                                <ArrowRight className="w-4 h-4 text-stone-300 group-hover:text-stone-500 transform group-hover:translate-x-1 transition-all" />
                             </button>
-                            <button className="w-full text-left p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all group flex items-center justify-between">
-                                <span className="font-medium text-sm">Contactar Huésped</span>
-                                <ArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transform group-hover:translate-x-1 transition-all" />
+                            <button className="w-full text-left p-4 rounded-xl bg-stone-50 hover:bg-stone-100 border border-stone-100 transition-all group flex items-center justify-between">
+                                <span className="font-medium text-sm text-stone-600 group-hover:text-stone-900">Contactar Huésped</span>
+                                <ArrowRight className="w-4 h-4 text-stone-300 group-hover:text-stone-500 transform group-hover:translate-x-1 transition-all" />
                             </button>
                         </div>
                     </div>
