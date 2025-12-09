@@ -63,6 +63,23 @@ export function BookingModal({
     // Store Action
     const addBooking = useAppStore(state => state.addBooking)
 
+    // Dynamic styling based on location
+    const theme = location === "pueblo" ? {
+        gradient: "from-amber-500 to-orange-600",
+        lightGradient: "from-amber-50 to-orange-50",
+        border: "border-orange-200",
+        text: "text-orange-700",
+        button: "bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-orange-900/20",
+        icon: "bg-orange-100 text-orange-600"
+    } : {
+        gradient: "from-lime-600 to-green-700",
+        lightGradient: "from-lime-50 to-green-50",
+        border: "border-lime-200",
+        text: "text-lime-800",
+        button: "bg-gradient-to-r from-lime-600 to-green-700 hover:from-lime-700 hover:to-green-800 shadow-lime-900/20",
+        icon: "bg-lime-100 text-lime-700"
+    }
+
     const handleNext = () => {
         if (step === 2) {
             // Validation
@@ -101,8 +118,8 @@ export function BookingModal({
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] bg-stone-50 p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col">
                 <DialogHeader className="p-6 pb-4 border-b border-stone-200 flex-shrink-0">
-                    <DialogTitle className="text-2xl font-bold font-heading text-stone-900">
-                        Reserva tu Estadía
+                    <DialogTitle className="text-2xl font-bold font-heading text-stone-900 flex items-center gap-2">
+                        Reservar en <span className={cn("capitalize", theme.text)}>{location}</span>
                     </DialogTitle>
                     <DialogDescription className="text-stone-600">
                         Completa los pasos para confirmar tu reserva en Mandalas
@@ -115,7 +132,11 @@ export function BookingModal({
                         onValueChange={(value) => setLocation(value as 'pueblo' | 'hideout')}
                         className="w-full mb-6"
                     >
-                        {/* ... Tabs ... */}
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="pueblo">Mandalas Pueblo</TabsTrigger>
+                            <TabsTrigger value="hideout">Mandalas Hideout</TabsTrigger>
+                        </TabsList>
+                        {/* We don't need content here as we just use the trigger to switch context state */}
                     </Tabs>
 
                     {step === 1 && (
@@ -131,6 +152,11 @@ export function BookingModal({
                                         selected={date}
                                         onSelect={setDate}
                                         numberOfMonths={1}
+                                        className={cn("p-3 pointer-events-auto")}
+                                        classNames={{
+                                            day_selected: cn("bg-stone-900 text-white hover:bg-stone-800", theme.button),
+                                            day_range_middle: "bg-stone-100 text-stone-900",
+                                        }}
                                     />
                                 </div>
                             </div>
@@ -140,17 +166,17 @@ export function BookingModal({
                     {step === 2 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
                             {/* Room Selection Display */}
-                            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
+                            <div className={cn("bg-gradient-to-r p-4 rounded-lg border", theme.lightGradient, theme.border)}>
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs text-purple-600 font-medium uppercase tracking-wider mb-1">Habitación Seleccionada</p>
+                                        <p className={cn("text-xs font-bold uppercase tracking-wider mb-1", theme.text)}>Habitación Seleccionada</p>
                                         <p className="font-bold text-stone-900">
                                             {roomName || (roomType === "dorm" ? "Dormitorio Compartido" : roomType === "private" ? "Habitación Privada" : "Suite con Vista")}
                                         </p>
                                         <p className="text-sm text-stone-600">${pricePerNight} / noche</p>
                                     </div>
                                     <Select value={roomType} onValueChange={setRoomType}>
-                                        <SelectTrigger className="w-[140px]">
+                                        <SelectTrigger className="w-[140px] bg-white/50 border-stone-200">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -252,12 +278,12 @@ export function BookingModal({
                     {step === 3 && (
                         // ... Success Step ...
                         <div className="text-center py-8 space-y-4 animate-in fade-in zoom-in duration-300">
-                            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+                            <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mx-auto", theme.icon)}>
                                 <Check className="w-8 h-8" />
                             </div>
-                            <h3 className="text-2xl font-bold text-stone-800">¡Solicitud Recibida!</h3>
+                            <h3 className="text-2xl font-bold text-stone-900 font-heading">¡Solicitud Recibida!</h3>
                             <p className="text-stone-600 max-w-xs mx-auto">
-                                Hemos recibido tu solicitud. Te enviaremos un correo de confirmación en breve a tu email.
+                                Hemos recibido tu solicitud para <span className="font-bold capitalize">{location}</span>. Te enviaremos un correo de confirmación en breve.
                             </p>
                         </div>
                     )}
@@ -265,17 +291,17 @@ export function BookingModal({
 
                 <DialogFooter className="p-6 bg-stone-50 border-t flex justify-between sm:justify-between items-center flex-shrink-0">
                     {step > 1 && step < 3 && (
-                        <Button variant="outline" onClick={handleBack}>
+                        <Button variant="outline" onClick={handleBack} className="hover:bg-stone-100">
                             Atrás
                         </Button>
                     )}
                     {step < 3 ? (
-                        <Button onClick={handleNext} className="ml-auto w-full sm:w-auto" disabled={step === 1 && !date}>
+                        <Button onClick={handleNext} className={cn("ml-auto w-full sm:w-auto text-white shadow-md transition-all", theme.button)} disabled={step === 1 && !date}>
                             {step === 1 ? "Continuar" : "Confirmar Reserva"}
                         </Button>
                     ) : (
                         <DialogTrigger asChild>
-                            <Button className="w-full">Cerrar</Button>
+                            <Button className="w-full bg-stone-900 hover:bg-stone-800 text-white">Cerrar</Button>
                         </DialogTrigger>
                     )}
                 </DialogFooter>
