@@ -6,6 +6,7 @@ import { LayoutDashboard, CalendarDays, Users, Home, Menu, Sparkles } from "luci
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { ModeToggle } from "@/components/shared/mode-toggle"
 
 // Sidebar component extracted to avoid React lint error
 function SidebarContent({ pathname }: { pathname: string }) {
@@ -20,8 +21,9 @@ function SidebarContent({ pathname }: { pathname: string }) {
             {/* Logo Area */}
             <div className="h-24 flex items-center px-8 border-b border-white/5">
                 <Link href="/" className="group flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-stone-900 border border-white/10 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500">
-                        <Sparkles className="w-4 h-4 text-amber-500/80" />
+                    <div className="w-10 h-10 rounded-full bg-stone-900 border border-white/10 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] opacity-20" />
+                        <Sparkles className="w-4 h-4 text-amber-500 relative z-10" />
                     </div>
                     <div className="flex flex-col">
                         <span className="text-xl font-light font-heading tracking-[0.2em] text-white uppercase">
@@ -45,14 +47,14 @@ function SidebarContent({ pathname }: { pathname: string }) {
                             className={cn(
                                 "flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-500 group relative overflow-hidden",
                                 isActive
-                                    ? "bg-white/5 text-white shadow-xl shadow-black/20"
-                                    : "text-stone-500 hover:bg-white/[0.02] hover:text-stone-300"
+                                    ? "bg-white/10 text-white shadow-lg shadow-amber-900/20"
+                                    : "text-stone-500 hover:bg-white/[0.05] hover:text-stone-300"
                             )}
                         >
                             {isActive && (
-                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 to-orange-600" />
+                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[image:var(--pueblo-gradient-linear)] shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
                             )}
-                            <Icon className={cn("w-5 h-5 transition-colors duration-300", isActive ? "text-amber-500" : "text-stone-600 group-hover:text-stone-400")} />
+                            <Icon className={cn("w-5 h-5 transition-colors duration-300", isActive ? "text-amber-400 drop-shadow-md" : "text-stone-600 group-hover:text-stone-400")} />
                             <span className={cn("font-medium tracking-wide text-sm", isActive ? "font-semibold" : "")}>{item.label}</span>
                         </Link>
                     )
@@ -60,16 +62,10 @@ function SidebarContent({ pathname }: { pathname: string }) {
             </nav>
 
             {/* Footer / Logout */}
-            <div className="p-6 border-t border-white/5 space-y-6">
-                <div className="bg-stone-900/50 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
-                    <p className="text-[10px] uppercase tracking-widest text-stone-500 mb-3">Estado del Sistema</p>
-                    <div className="flex items-center gap-2">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        <span className="text-xs text-stone-300 font-medium">Operativo</span>
-                    </div>
+            <div className="p-6 border-t border-white/5 space-y-4">
+                <div className="flex justify-between items-center bg-stone-900/50 p-3 rounded-xl border border-white/5 backdrop-blur-sm">
+                    <span className="text-[10px] uppercase tracking-widest text-stone-500 pl-1">Tema</span>
+                    <ModeToggle />
                 </div>
 
                 <Link href="/">
@@ -87,7 +83,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const pathname = usePathname()
 
     return (
-        <div className="flex h-screen w-full bg-[#F5F5F4] text-stone-900 font-sans overflow-hidden">
+        <div className="flex h-screen w-full bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans overflow-hidden transition-colors duration-500">
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex w-80 flex-col h-full flex-shrink-0 z-30 shadow-2xl shadow-stone-900/20">
                 <SidebarContent pathname={pathname} />
@@ -109,7 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
 
             {/* Main Content Area */}
-            <main className="flex-1 h-full overflow-y-auto relative scroll-smooth bg-[#F5F5F4]">
+            <main className="flex-1 h-full overflow-y-auto relative scroll-smooth bg-stone-50 dark:bg-stone-950 transition-colors duration-500">
                 {/* Subtle Grain/Noise if needed, or clean stone background */}
                 <div className="container mx-auto p-6 md:p-12 pt-24 md:pt-12 max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-700">
                     {children}

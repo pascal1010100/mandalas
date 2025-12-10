@@ -84,35 +84,41 @@ export default function EventsPage() {
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-stone-900 font-heading">Eventos & Actividades</h2>
-                    <p className="text-stone-500">Programa la agenda cultural y social del hostal.</p>
+                    <h2 className="text-3xl font-bold tracking-tight text-stone-900 dark:text-white font-heading">Eventos & Actividades</h2>
+                    <p className="text-stone-500 dark:text-stone-400">Programa la agenda cultural y social del hostal.</p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-stone-900 hover:bg-stone-800 text-white shadow-lg shadow-stone-900/20">
+                        <Button className="bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 shadow-lg shadow-stone-900/20">
                             <Plus className="w-4 h-4 mr-2" /> Nuevo Evento
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
+                    <DialogContent className="sm:max-w-[500px] bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100">
                         <DialogHeader>
                             <DialogTitle>Crear Nuevo Evento</DialogTitle>
-                            <DialogDescription>
+                            <DialogDescription className="text-stone-500 dark:text-stone-400">
                                 Agrega una actividad al calendario público del hostal.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="title">Título del Evento</Label>
-                                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej. Noche de Jazz" />
+                                <Label htmlFor="title" className="text-stone-900 dark:text-stone-200">Título del Evento</Label>
+                                <Input
+                                    id="title"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder="Ej. Noche de Jazz"
+                                    className="bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400"
+                                />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label>Categoría</Label>
+                                    <Label className="text-stone-900 dark:text-stone-200">Categoría</Label>
                                     <Select value={category} onValueChange={(val) => setCategory(val as 'music' | 'food' | 'social' | 'wellness')}>
-                                        <SelectTrigger className="bg-white">
+                                        <SelectTrigger className="bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100">
                                             <SelectValue placeholder="Categoría" />
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
                                             <SelectItem value="music">Música</SelectItem>
                                             <SelectItem value="food">Comida</SelectItem>
                                             <SelectItem value="social">Social</SelectItem>
@@ -121,12 +127,12 @@ export default function EventsPage() {
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Ubicación</Label>
+                                    <Label className="text-stone-900 dark:text-stone-200">Ubicación</Label>
                                     <Select value={location} onValueChange={(val) => setLocation(val as 'Pueblo' | 'Hideout')}>
-                                        <SelectTrigger className="bg-white">
+                                        <SelectTrigger className="bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100">
                                             <SelectValue placeholder="Ubicación" />
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
                                             <SelectItem value="Pueblo">Pueblo</SelectItem>
                                             <SelectItem value="Hideout">Hideout</SelectItem>
                                         </SelectContent>
@@ -134,13 +140,13 @@ export default function EventsPage() {
                                 </div>
                             </div>
                             <div className="grid gap-2">
-                                <Label>Fecha y Hora</Label>
+                                <Label className="text-stone-900 dark:text-stone-200">Fecha y Hora</Label>
                                 <Popover>
                                     <PopoverTrigger asChild>
                                         <Button
                                             variant={"outline"}
                                             className={cn(
-                                                "w-full justify-start text-left font-normal",
+                                                "w-full justify-start text-left font-normal bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100",
                                                 !date && "text-muted-foreground"
                                             )}
                                         >
@@ -148,23 +154,30 @@ export default function EventsPage() {
                                             {date ? format(date, "PPP", { locale: es }) : <span>Seleccionar fecha</span>}
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
+                                    <PopoverContent className="w-auto p-0 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
                                         <Calendar
                                             mode="single"
                                             selected={date}
                                             onSelect={setDate}
                                             initialFocus
+                                            className="bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100"
                                         />
                                     </PopoverContent>
                                 </Popover>
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="description">Descripción</Label>
-                                <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalles del evento..." />
+                                <Label htmlFor="description" className="text-stone-900 dark:text-stone-200">Descripción</Label>
+                                <Textarea
+                                    id="description"
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder="Detalles del evento..."
+                                    className="bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 placeholder:text-stone-400"
+                                />
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button type="submit" onClick={handleSubmit} className="bg-stone-900 text-white hover:bg-stone-800">Guardar Evento</Button>
+                            <Button type="submit" onClick={handleSubmit} className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-200">Guardar Evento</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
@@ -172,14 +185,14 @@ export default function EventsPage() {
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {events.length === 0 ? (
-                    <div className="col-span-full h-64 flex flex-col items-center justify-center text-stone-400 border-2 border-dashed border-stone-200 rounded-xl bg-stone-50/50">
+                    <div className="col-span-full h-64 flex flex-col items-center justify-center text-stone-400 dark:text-stone-500 border-2 border-dashed border-stone-200 dark:border-stone-800 rounded-xl bg-stone-50/50 dark:bg-stone-900/30">
                         <CalendarIcon className="w-12 h-12 mb-4 opacity-20" />
                         <p className="font-medium text-lg">No hay eventos programados</p>
                         <p className="text-sm">Crea el primer evento para comenzar.</p>
                     </div>
                 ) : (
                     events.map((event) => (
-                        <Card key={event.id} className="border-stone-100 shadow-sm hover:shadow-md transition-all group overflow-hidden">
+                        <Card key={event.id} className="border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm hover:shadow-md transition-all group overflow-hidden">
                             <div className={cn("h-2 w-full",
                                 event.category === 'music' ? "bg-purple-500" :
                                     event.category === 'food' ? "bg-orange-500" : "bg-blue-500"
@@ -187,28 +200,28 @@ export default function EventsPage() {
                             <CardHeader>
                                 <div className="flex justify-between items-start">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <span className="p-2 bg-stone-50 rounded-lg">
+                                        <span className="p-2 bg-stone-50 dark:bg-stone-800 rounded-lg">
                                             {getCategoryIcon(event.category)}
                                         </span>
-                                        <span className="text-xs font-medium uppercase tracking-wider text-stone-400">
+                                        <span className="text-xs font-medium uppercase tracking-wider text-stone-400 dark:text-stone-500">
                                             {event.category}
                                         </span>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="text-stone-300 hover:text-red-500 -mt-2 -mr-2" onClick={() => removeEvent(event.id)}>
+                                    <Button variant="ghost" size="icon" className="text-stone-300 dark:text-stone-600 hover:text-red-500 dark:hover:text-red-400 -mt-2 -mr-2" onClick={() => removeEvent(event.id)}>
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
                                 </div>
-                                <CardTitle className="font-heading text-xl">{event.title}</CardTitle>
-                                <CardDescription className="flex items-center gap-2 mt-1">
+                                <CardTitle className="font-heading text-xl text-stone-900 dark:text-stone-100">{event.title}</CardTitle>
+                                <CardDescription className="flex items-center gap-2 mt-1 text-stone-500 dark:text-stone-400">
                                     <Clock className="w-3.5 h-3.5" />
                                     {format(new Date(event.date), "PPP", { locale: es })}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-sm text-stone-600 line-clamp-2">{event.description}</p>
+                                <p className="text-sm text-stone-600 dark:text-stone-400 line-clamp-2">{event.description}</p>
                             </CardContent>
-                            <CardFooter className="bg-stone-50/50 border-t border-stone-100 pt-4 pb-4">
-                                <div className="flex items-center text-xs font-medium text-stone-500">
+                            <CardFooter className="bg-stone-50/50 dark:bg-stone-800/20 border-t border-stone-100 dark:border-stone-800 pt-4 pb-4">
+                                <div className="flex items-center text-xs font-medium text-stone-500 dark:text-stone-400">
                                     <MapPin className="w-3.5 h-3.5 mr-1" />
                                     Mandalas {event.location}
                                 </div>
