@@ -66,23 +66,26 @@ export function BookingModal({
     const addBooking = useAppStore(state => state.addBooking)
 
     // Dynamic styling based on location - Updated for Dark Mode support
+    // Dynamic styling based on location - Elite "Quiet Luxury" Refinement
     const theme = location === "pueblo" ? {
-        gradient: "from-amber-500 to-orange-600",
-        lightGradient: "from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30",
-        border: "border-orange-200 dark:border-orange-800",
-        text: "text-orange-700 dark:text-orange-400",
-        button: "bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 shadow-orange-900/20",
-        icon: "bg-orange-100 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400"
+        gradient: "bg-[image:var(--pueblo-gradient-linear)]",
+        lightGradient: "from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-l-4 border-l-[#D97706]",
+        border: "border-orange-100 dark:border-orange-900/50",
+        text: "text-[#B45309] dark:text-[#F59E0B]",
+        button: "bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 shadow-[0_0_20px_-5px_rgba(217,119,6,0.4)] transition-all duration-300",
+        icon: "bg-amber-100/50 text-[#D97706] dark:bg-amber-900/20 dark:text-[#fbbf24] ring-1 ring-amber-200 dark:ring-amber-800"
     } : {
-        gradient: "from-lime-600 to-green-700",
-        lightGradient: "from-lime-50 to-green-50 dark:from-lime-950/30 dark:to-green-950/30",
-        border: "border-lime-200 dark:border-lime-800",
-        text: "text-lime-800 dark:text-lime-400",
-        button: "bg-gradient-to-r from-lime-600 to-green-700 hover:from-lime-700 hover:to-green-800 shadow-lime-900/20",
-        icon: "bg-lime-100 text-lime-700 dark:bg-lime-900/20 dark:text-lime-400"
+        gradient: "bg-[image:var(--hideout-gradient-linear)]",
+        lightGradient: "from-lime-50 to-green-50 dark:from-lime-950/20 dark:to-green-950/20 border-l-4 border-l-[#65a30d]",
+        border: "border-lime-100 dark:border-lime-900/50",
+        text: "text-[#3f6212] dark:text-[#a3e635]",
+        button: "bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 shadow-[0_0_20px_-5px_rgba(101,163,13,0.4)] transition-all duration-300",
+        icon: "bg-lime-100/50 text-[#65a30d] dark:bg-lime-900/20 dark:text-[#a3e635] ring-1 ring-lime-200 dark:ring-lime-800"
     }
 
-    const handleNext = () => {
+    const [isSubmitting, setIsSubmitting] = React.useState(false)
+
+    const handleNext = async () => {
         if (step === 2) {
             // Validation
             if (!guestName.trim() || !email.trim()) {
@@ -91,6 +94,10 @@ export function BookingModal({
             }
 
             if (date?.from && date?.to) {
+                setIsSubmitting(true)
+                // Simulate network delay for "Elite" feel
+                await new Promise(resolve => setTimeout(resolve, 1500))
+
                 const nights = Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24))
                 const totalPrice = pricePerNight * nights * 1.1 // Include 10% tax
 
@@ -106,6 +113,8 @@ export function BookingModal({
                     checkOut: date.to.toISOString(),
                     totalPrice: Math.round(totalPrice * 100) / 100
                 })
+
+                setIsSubmitting(false)
             }
         }
         setStep(step + 1)
@@ -285,9 +294,9 @@ export function BookingModal({
                             <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mx-auto", theme.icon)}>
                                 <Check className="w-8 h-8" />
                             </div>
-                            <h3 className="text-2xl font-bold text-stone-900 dark:text-stone-100 font-heading">¡Solicitud Recibida!</h3>
-                            <p className="text-stone-600 dark:text-stone-400 max-w-xs mx-auto">
-                                Hemos recibido tu solicitud para <span className="font-bold capitalize">{location}</span>. Te enviaremos un correo de confirmación en breve.
+                            <h3 className="text-2xl font-bold text-stone-900 dark:text-stone-100 font-heading">¡Solicitud Enviada!</h3>
+                            <p className="text-stone-600 dark:text-stone-400 max-w-sm mx-auto leading-relaxed">
+                                El universo conspira para tu llegada a <span className="font-bold capitalize text-stone-900 dark:text-stone-200">{location}</span>. Revisa tu correo, pronto te contactaremos para confirmar tu espacio.
                             </p>
                         </div>
                     )}
@@ -300,8 +309,15 @@ export function BookingModal({
                         </Button>
                     )}
                     {step < 3 ? (
-                        <Button onClick={handleNext} className={cn("ml-auto w-full sm:w-auto text-white shadow-md transition-all", theme.button)} disabled={step === 1 && !date}>
-                            {step === 1 ? "Continuar" : "Confirmar Reserva"}
+                        <Button onClick={handleNext} className={cn("ml-auto w-full sm:w-auto text-white shadow-md transition-all", theme.button)} disabled={(step === 1 && !date) || isSubmitting}>
+                            {isSubmitting ? (
+                                <span className="flex items-center gap-2">
+                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                    Procesando...
+                                </span>
+                            ) : (
+                                step === 1 ? "Continuar" : "Confirmar Reserva"
+                            )}
                         </Button>
                     ) : (
                         <DialogTrigger asChild>

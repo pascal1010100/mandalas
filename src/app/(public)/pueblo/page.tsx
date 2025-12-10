@@ -68,7 +68,7 @@ export default function PuebloPage() {
                             {/* Room 1 */}
                             <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-amber-400 to-orange-500 group-hover:scale-105 transition-transform duration-500" />
+                                    <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                     {/* Placeholder for image */}
                                 </div>
                                 <CardHeader>
@@ -89,7 +89,7 @@ export default function PuebloPage() {
                                         roomName="Dormitorio Compartido"
                                         pricePerNight={18}
                                     >
-                                        <Button className="w-full rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
+                                        <Button className="w-full rounded-full bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -97,7 +97,7 @@ export default function PuebloPage() {
                             {/* Room 2 */}
                             <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-orange-500 to-red-500 group-hover:scale-105 transition-transform duration-500" />
+                                    <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                 </div>
                                 <CardHeader>
                                     <CardTitle>Privada Estándar</CardTitle>
@@ -117,7 +117,7 @@ export default function PuebloPage() {
                                         roomName="Habitación Privada Estándar"
                                         pricePerNight={35}
                                     >
-                                        <Button className="w-full rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
+                                        <Button className="w-full rounded-full bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -125,7 +125,7 @@ export default function PuebloPage() {
                             {/* Room 3 */}
                             <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-yellow-500 to-amber-600 group-hover:scale-105 transition-transform duration-500" />
+                                    <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                 </div>
                                 <CardHeader>
                                     <CardTitle>Suite con Vista</CardTitle>
@@ -145,7 +145,7 @@ export default function PuebloPage() {
                                         roomName="Suite con Vista"
                                         pricePerNight={55}
                                     >
-                                        <Button className="w-full rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
+                                        <Button className="w-full rounded-full bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -159,9 +159,11 @@ export default function PuebloPage() {
                 <FadeIn>
                     <h2 className="text-3xl md:text-5xl font-bold mb-6">¿Listo para la aventura?</h2>
                     <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Reserva directamente con nosotros para obtener los mejores precios y beneficios exclusivos.</p>
-                    <Button size="lg" className="rounded-full bg-white text-black hover:bg-stone-200 text-lg px-10 py-6">
-                        Reservar Ahora
-                    </Button>
+                    <BookingModal defaultLocation="pueblo">
+                        <Button size="lg" className="rounded-full bg-white text-black hover:bg-stone-200 text-lg px-10 py-6 transition-transform hover:scale-105 duration-300">
+                            Reservar Ahora
+                        </Button>
+                    </BookingModal>
                 </FadeIn>
             </section>
         </div>

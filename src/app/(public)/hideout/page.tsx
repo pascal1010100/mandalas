@@ -19,9 +19,11 @@ export default function HideoutPage() {
                 backgroundGradient="linear-gradient(135deg, #84cc16 0%, #65a30d 40%, #3f6212 100%)"
                 align="center"
             >
-                <Button size="lg" className="rounded-full bg-white text-lime-800 hover:bg-stone-50 font-bold text-lg px-8 shadow-xl shadow-lime-900/10">
-                    Reservar Retiro
-                </Button>
+                <BookingModal defaultLocation="hideout">
+                    <Button size="lg" className="rounded-full bg-white text-lime-800 hover:bg-stone-50 font-bold text-lg px-8 shadow-xl shadow-lime-900/10 transition-transform hover:scale-105 duration-300">
+                        Reservar Retiro
+                    </Button>
+                </BookingModal>
             </Hero>
 
             {/* Intro Section */}
@@ -61,7 +63,7 @@ export default function HideoutPage() {
                             {/* Room 1 */}
                             <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-lime-400 to-green-500 group-hover:scale-105 transition-transform duration-500" />
+                                    <div className="absolute inset-0 bg-[image:var(--hideout-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                 </div>
                                 <CardHeader>
                                     <CardTitle>Bungalow Ecológico</CardTitle>
@@ -82,7 +84,7 @@ export default function HideoutPage() {
                                         pricePerNight={16}
                                     >
                                         {/* Force re-render */}
-                                        <Button className="w-full rounded-full" variant="outline">Reservar Ahora</Button>
+                                        <Button className="w-full rounded-full bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02]">Reservar Ahora</Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -90,7 +92,7 @@ export default function HideoutPage() {
                             {/* Room 2 */}
                             <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-green-500 to-emerald-600 group-hover:scale-105 transition-transform duration-500" />
+                                    <div className="absolute inset-0 bg-[image:var(--hideout-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                 </div>
                                 <CardHeader>
                                     <CardTitle>Glamping Tent</CardTitle>
@@ -110,7 +112,7 @@ export default function HideoutPage() {
                                         roomName="Cabaña Privada"
                                         pricePerNight={40}
                                     >
-                                        <Button className="w-full rounded-full" variant="outline">Reservar Ahora</Button>
+                                        <Button className="w-full rounded-full bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02]">Reservar Ahora</Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -118,7 +120,7 @@ export default function HideoutPage() {
                             {/* Room 3 */}
                             <Card className="border-none shadow-lg overflow-hidden group hover-lift">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500 to-lime-600 group-hover:scale-105 transition-transform duration-500" />
+                                    <div className="absolute inset-0 bg-[image:var(--hideout-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                 </div>
                                 <CardHeader>
                                     <CardTitle>Dormitorio Nature</CardTitle>
@@ -138,7 +140,7 @@ export default function HideoutPage() {
                                         roomName="Suite Lakefront Premium"
                                         pricePerNight={55}
                                     >
-                                        <Button className="w-full rounded-full bg-gradient-to-r from-lime-600 to-green-700 hover:from-lime-700 hover:to-green-800 text-white shadow-md hover:shadow-lg transition-all duration-300">Reservar Ahora</Button>
+                                        <Button className="w-full rounded-full bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02]">Reservar Ahora</Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -152,7 +154,7 @@ export default function HideoutPage() {
                 <FadeIn>
                     <h2 className="text-3xl md:text-5xl font-bold mb-6">Tu escapada perfecta</h2>
                     <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Reserva directamente y obtén desayuno gratis en tu primera mañana.</p>
-                    <BookingModal>
+                    <BookingModal defaultLocation="hideout">
                         <Button size="lg" className="rounded-full bg-white text-black hover:bg-stone-200 text-lg px-10 py-6">
                             Reservar Ahora
                         </Button>

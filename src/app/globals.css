@@ -82,14 +82,16 @@
   /* rich amber */
   --pueblo-accent: #B45309;
   /* deep terracotta */
-  --pueblo-gradient: linear-gradient(135deg, #F59E0B 0%, #D97706 50%, #B45309 100%);
+  --pueblo-gradient: radial-gradient(circle at center, #F59E0B 0%, #B45309 60%, #78350F 100%);
+  --pueblo-gradient-linear: linear-gradient(135deg, #F59E0B 0%, #D97706 50%, #B45309 100%);
 
   /* Hideout Theme - Zen Sanctuary */
   --hideout-primary: #65a30d;
   /* calm lime */
   --hideout-accent: #3f6212;
   /* deep moss */
-  --hideout-gradient: linear-gradient(135deg, #84cc16 0%, #65a30d 40%, #3f6212 100%);
+  --hideout-gradient: radial-gradient(circle at center, #84cc16 0%, #3f6212 60%, #1a2e05 100%);
+  --hideout-gradient-linear: linear-gradient(135deg, #84cc16 0%, #65a30d 40%, #3f6212 100%);
 }
 
 .dark {
@@ -131,12 +133,14 @@
   /* Pueblo Theme - Dark Mode (Rich Amber Glow) */
   --pueblo-primary: #fbbf24;
   --pueblo-accent: #d97706;
-  --pueblo-gradient: linear-gradient(135deg, #78350f 0%, #b45309 50%, #f59e0b 100%);
+  --pueblo-gradient: radial-gradient(circle at center, #d97706 0%, #b45309 60%, #78350f 100%);
+  --pueblo-gradient-linear: linear-gradient(135deg, #78350f 0%, #b45309 50%, #f59e0b 100%);
 
   /* Hideout Theme - Dark Mode (Deep Zen Green) */
   --hideout-primary: #a3e635;
   --hideout-accent: #65a30d;
-  --hideout-gradient: linear-gradient(135deg, #1a2e05 0%, #3f6212 50%, #84cc16 100%);
+  --hideout-gradient: radial-gradient(circle at center, #4d7c0f 0%, #3f6212 60%, #1a2e05 100%);
+  --hideout-gradient-linear: linear-gradient(135deg, #1a2e05 0%, #3f6212 50%, #84cc16 100%);
 }
 
 @layer base {

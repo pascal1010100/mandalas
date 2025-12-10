@@ -35,7 +35,7 @@ export default function LandingPage() {
           className="absolute inset-0 bg-cover bg-center transition-transform duration-[1.5s] group-hover:scale-105"
           style={{
             // Living Light - Warm, Radiant Core
-            background: "radial-gradient(circle at center, #F59E0B 0%, #B45309 60%, #78350F 100%)",
+            background: "var(--pueblo-gradient)",
           }}
         />
         {/* Depth Overlay - Darker for more contrast with refined text */}
@@ -54,7 +54,7 @@ export default function LandingPage() {
             </div>
 
             <h2 className="text-3xl md:text-5xl font-light mb-8 tracking-[0.3em] font-heading uppercase text-amber-50/90 drop-shadow-lg">
-              Pueblo
+              Mandalas
             </h2>
 
             <div className="w-px h-12 bg-gradient-to-b from-transparent via-amber-200/50 to-transparent mb-8" />
@@ -88,7 +88,7 @@ export default function LandingPage() {
           className="absolute inset-0 bg-cover bg-center transition-transform duration-[1.5s] group-hover:scale-105"
           style={{
             // Living Light - Organic, Forest Canopy
-            background: "radial-gradient(circle at center, #84cc16 0%, #3f6212 60%, #1a2e05 100%)",
+            background: "var(--hideout-gradient)",
           }}
         />
         {/* Depth Overlay */}

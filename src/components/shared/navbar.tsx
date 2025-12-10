@@ -62,10 +62,10 @@ export function Navbar() {
             className={cn(
                 "fixed top-0 w-full z-50 transition-all duration-300 border-b",
                 scrolled
-                    ? "bg-white/95 dark:bg-stone-950/90 backdrop-blur-xl border-stone-200/50 dark:border-stone-800/50 shadow-lg shadow-stone-900/5 dark:shadow-black/20"
+                    ? "bg-white/80 dark:bg-stone-950/80 backdrop-blur-xl border-stone-200/50 dark:border-white/10 shadow-lg shadow-stone-900/5 dark:shadow-black/20 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-stone-950/60"
                     : isHome
                         ? "bg-transparent border-transparent text-white"
-                        : "bg-white/95 dark:bg-stone-950/90 backdrop-blur-xl border-stone-200/50 dark:border-stone-800/50 shadow-lg shadow-stone-900/5 dark:shadow-black/20"
+                        : "bg-white/80 dark:bg-stone-950/80 backdrop-blur-xl border-stone-200/50 dark:border-white/10 shadow-lg shadow-stone-900/5 dark:shadow-black/20 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-stone-950/60"
             )}
         >
             <div className="container mx-auto px-4 h-20 flex items-center justify-between">
