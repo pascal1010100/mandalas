@@ -1,6 +1,7 @@
 "use client"
 
 import { BookingModal } from "@/components/shared/booking-modal"
+import { useAppStore } from "@/lib/store"
 
 import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
@@ -8,8 +9,11 @@ import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reve
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Leaf, Waves, Mountain, Flame, Cloud, Stars } from "lucide-react"
+import { EventsCalendar } from "@/components/shared/events-calendar"
 
 export default function HideoutPage() {
+    const { prices } = useAppStore()
+
     return (
         <div className="bg-background min-h-screen">
             <Hero
@@ -54,14 +58,20 @@ export default function HideoutPage() {
                 </FadeIn>
             </section>
 
+            {/* Events Section - Added for consistency */}
+            <div className="bg-stone-950/5">
+                <EventsCalendar filterLocation="Hideout" />
+            </div>
+
             {/* Rooms Section */}
-            <section className="py-24 bg-card">
+            <section className="py-24 bg-stone-50 dark:bg-stone-950/50">
                 <div className="container mx-auto px-4">
                     <FadeIn>
                         <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em] mb-12 text-center">Alojamientos</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* Room 1 */}
-                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
+                            {/* Room 1 */}
+                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-lime-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-[image:var(--hideout-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                 </div>
@@ -70,18 +80,22 @@ export default function HideoutPage() {
                                     <CardDescription>Rustic chic en armonía con el entorno</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2">
+                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
                                         <li>• Baño privado al aire libre</li>
                                         <li>• Porche con hamaca</li>
                                         <li>• Construcción de bambú</li>
                                     </ul>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-bold text-lime-600">${prices?.['hideout_dorm'] || 16}</span>
+                                        <span className="text-sm text-stone-500">/ noche</span>
+                                    </div>
                                 </CardContent>
                                 <CardFooter>
                                     <BookingModal
                                         defaultLocation="hideout"
                                         defaultRoomType="dorm"
                                         roomName="Dormitorio Compartido Hideout"
-                                        pricePerNight={16}
+                                        pricePerNight={prices?.['hideout_dorm'] || 16}
                                     >
                                         {/* Force re-render */}
                                         <Button className="w-full rounded-full bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02]">Reservar Ahora</Button>
@@ -90,7 +104,8 @@ export default function HideoutPage() {
                             </Card>
 
                             {/* Room 2 */}
-                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
+                            {/* Room 2 */}
+                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-lime-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-[image:var(--hideout-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                 </div>
@@ -99,18 +114,22 @@ export default function HideoutPage() {
                                     <CardDescription>Acampa con estilo y confort</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2">
+                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
                                         <li>• Cama Queen real</li>
                                         <li>• Electricidad y WiFi</li>
                                         <li>• Sonidos de la naturaleza</li>
                                     </ul>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-bold text-lime-600">${prices?.['hideout_private'] || 40}</span>
+                                        <span className="text-sm text-stone-500">/ noche</span>
+                                    </div>
                                 </CardContent>
                                 <CardFooter>
                                     <BookingModal
                                         defaultLocation="hideout"
                                         defaultRoomType="private"
                                         roomName="Cabaña Privada"
-                                        pricePerNight={40}
+                                        pricePerNight={prices?.['hideout_private'] || 40}
                                     >
                                         <Button className="w-full rounded-full bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02]">Reservar Ahora</Button>
                                     </BookingModal>
@@ -118,7 +137,8 @@ export default function HideoutPage() {
                             </Card>
 
                             {/* Room 3 */}
-                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
+                            {/* Room 3 */}
+                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-lime-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-[image:var(--hideout-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                 </div>
@@ -127,18 +147,22 @@ export default function HideoutPage() {
                                     <CardDescription>Comparte en un ambiente tranquilo</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2">
+                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
                                         <li>• Espacioso y aireado</li>
                                         <li>• Vistas al jardín</li>
                                         <li>• Ideal para grupos</li>
                                     </ul>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-bold text-lime-600">${prices?.['hideout_suite'] || 55}</span>
+                                        <span className="text-sm text-stone-500">/ noche</span>
+                                    </div>
                                 </CardContent>
                                 <CardFooter>
                                     <BookingModal
                                         defaultLocation="hideout"
                                         defaultRoomType="suite"
                                         roomName="Suite Lakefront Premium"
-                                        pricePerNight={55}
+                                        pricePerNight={prices?.['hideout_suite'] || 55}
                                     >
                                         <Button className="w-full rounded-full bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02]">Reservar Ahora</Button>
                                     </BookingModal>

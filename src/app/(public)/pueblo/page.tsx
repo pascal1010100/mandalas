@@ -8,8 +8,11 @@ import { Button } from "@/components/ui/button"
 import { Wifi, Beer, Coffee, Music, Users, Sun } from "lucide-react"
 import { EventsCalendar } from "@/components/shared/events-calendar"
 import { BookingModal } from "@/components/shared/booking-modal"
+import { useAppStore } from "@/lib/store"
 
 export default function PuebloPage() {
+    const { prices } = useAppStore()
+
     return (
         <div className="bg-background min-h-screen">
             <Hero
@@ -56,17 +59,18 @@ export default function PuebloPage() {
 
             {/* Events Section */}
             <FadeIn>
-                <EventsCalendar />
+                <EventsCalendar filterLocation="Pueblo" />
             </FadeIn>
 
             {/* Rooms Section */}
-            <section className="py-24 bg-card">
+            <section className="py-24 bg-stone-50 dark:bg-stone-950/50">
                 <div className="container mx-auto px-4">
                     <FadeIn>
                         <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em] mb-12 text-center">Nuestras Habitaciones</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {/* Room 1 */}
-                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
+                            {/* Room 1 */}
+                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-orange-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                     {/* Placeholder for image */}
@@ -76,18 +80,22 @@ export default function PuebloPage() {
                                     <CardDescription>Ideal para conocer gente nueva</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2">
+                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
                                         <li>• Camas con cortinas de privacidad</li>
                                         <li>• Lockers individuales</li>
                                         <li>• Enchufe y luz de lectura</li>
                                     </ul>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-bold text-amber-600">${prices?.['pueblo_dorm'] || 18}</span>
+                                        <span className="text-sm text-stone-500">/ noche</span>
+                                    </div>
                                 </CardContent>
                                 <CardFooter>
                                     <BookingModal
                                         defaultLocation="pueblo"
                                         defaultRoomType="dorm"
                                         roomName="Dormitorio Compartido"
-                                        pricePerNight={18}
+                                        pricePerNight={prices?.['pueblo_dorm'] || 18}
                                     >
                                         <Button className="w-full rounded-full bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
                                     </BookingModal>
@@ -95,7 +103,8 @@ export default function PuebloPage() {
                             </Card>
 
                             {/* Room 2 */}
-                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
+                            {/* Room 2 */}
+                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-orange-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                 </div>
@@ -104,18 +113,22 @@ export default function PuebloPage() {
                                     <CardDescription>Tu propio espacio de confort</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2">
+                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
                                         <li>• Cama Matrimonial</li>
                                         <li>• Baño Privado</li>
                                         <li>• Ventilador de techo</li>
                                     </ul>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-bold text-amber-600">${prices?.['pueblo_private'] || 35}</span>
+                                        <span className="text-sm text-stone-500">/ noche</span>
+                                    </div>
                                 </CardContent>
                                 <CardFooter>
                                     <BookingModal
                                         defaultLocation="pueblo"
                                         defaultRoomType="private"
                                         roomName="Habitación Privada Estándar"
-                                        pricePerNight={35}
+                                        pricePerNight={prices?.['pueblo_private'] || 35}
                                     >
                                         <Button className="w-full rounded-full bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
                                     </BookingModal>
@@ -123,7 +136,8 @@ export default function PuebloPage() {
                             </Card>
 
                             {/* Room 3 */}
-                            <Card className="border-none shadow-lg overflow-hidden group hover-lift">
+                            {/* Room 3 */}
+                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-orange-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
                                     <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
                                 </div>
@@ -132,18 +146,22 @@ export default function PuebloPage() {
                                     <CardDescription>Lujo relajado frente al lago</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2">
+                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
                                         <li>• Vista panorámica al lago</li>
                                         <li>• Balcón privado</li>
                                         <li>• Cama King Size</li>
                                     </ul>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-3xl font-bold text-amber-600">${prices?.['pueblo_suite'] || 55}</span>
+                                        <span className="text-sm text-stone-500">/ noche</span>
+                                    </div>
                                 </CardContent>
                                 <CardFooter>
                                     <BookingModal
                                         defaultLocation="pueblo"
                                         defaultRoomType="suite"
                                         roomName="Suite con Vista"
-                                        pricePerNight={55}
+                                        pricePerNight={prices?.['pueblo_suite'] || 55}
                                     >
                                         <Button className="w-full rounded-full bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
                                     </BookingModal>

@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
 
 export default function AdminDashboard() {
-    const { bookings, events } = useAppStore()
+    const { bookings } = useAppStore()
 
     // Calculate real metrics
     const totalRevenue = bookings.reduce((sum, b) => sum + b.totalPrice, 0)
@@ -66,7 +66,8 @@ export default function AdminDashboard() {
                             SITIO PÚBLICO
                         </Button>
                     </Link>
-                    <Button className="bg-stone-900 text-white hover:bg-stone-800 shadow-xl shadow-stone-900/10 rounded-full h-10 px-6 font-medium text-xs tracking-wide">
+                    {/* Placeholder for future Report generation functionality */}
+                    <Button disabled className="bg-stone-900/50 text-white hover:bg-stone-800 shadow-xl shadow-stone-900/10 rounded-full h-10 px-6 font-medium text-xs tracking-wide cursor-not-allowed opacity-50">
                         DESCARGAR REPORTE
                     </Button>
                 </div>
@@ -154,7 +155,9 @@ export default function AdminDashboard() {
                                 <CardTitle className="font-heading font-light text-lg tracking-wide uppercase text-stone-900 dark:text-stone-100">Reservas Recientes</CardTitle>
                                 <CardDescription className="text-xs mt-1 text-stone-500 dark:text-stone-400">Últimas solicitudes recibidas.</CardDescription>
                             </div>
-                            <Button variant="ghost" size="sm" className="hidden sm:flex text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 text-xs uppercase tracking-wider">Ver Todas</Button>
+                            <Button variant="ghost" size="sm" asChild className="hidden sm:flex text-stone-400 dark:text-stone-500 hover:text-stone-900 dark:hover:text-stone-100 text-xs uppercase tracking-wider">
+                                <Link href="/admin/reservations">Ver Todas</Link>
+                            </Button>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
@@ -206,17 +209,21 @@ export default function AdminDashboard() {
                     <div className="bg-white dark:bg-stone-900/50 rounded-2xl p-6 shadow-lg border border-stone-100 dark:border-stone-800 h-full backdrop-blur-sm">
                         <h3 className="text-sm font-bold font-heading uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-6">Acciones Rápidas</h3>
                         <div className="space-y-3">
-                            <button className="w-full text-left p-4 rounded-xl bg-stone-50 dark:bg-stone-800/50 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-100 dark:border-stone-700 transition-all group flex items-center justify-between shadow-sm">
-                                <span className="font-medium text-sm text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white">Nuevo Evento</span>
-                                <ArrowRight className="w-4 h-4 text-stone-300 dark:text-stone-600 group-hover:text-stone-500 dark:group-hover:text-stone-400 transform group-hover:translate-x-1 transition-all" />
+                            <Link href="/admin/events?action=new" className="block">
+                                <div className="w-full text-left p-4 rounded-xl bg-stone-50 dark:bg-stone-800/50 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-100 dark:border-stone-700 transition-all group flex items-center justify-between shadow-sm cursor-pointer">
+                                    <span className="font-medium text-sm text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white">Nuevo Evento</span>
+                                    <ArrowRight className="w-4 h-4 text-stone-300 dark:text-stone-600 group-hover:text-stone-500 dark:group-hover:text-stone-400 transform group-hover:translate-x-1 transition-all" />
+                                </div>
+                            </Link>
+
+                            {/* Actions below are placeholders for Phase 7 */}
+                            <button disabled className="w-full text-left p-4 rounded-xl bg-stone-50/50 dark:bg-stone-800/30 border border-stone-100 dark:border-stone-700/50 opacity-60 cursor-not-allowed flex items-center justify-between">
+                                <span className="font-medium text-sm text-stone-400 dark:text-stone-500">Bloquear Fecha (Próx)</span>
+                                <ArrowRight className="w-4 h-4 text-stone-300/50 dark:text-stone-600/50" />
                             </button>
-                            <button className="w-full text-left p-4 rounded-xl bg-stone-50 dark:bg-stone-800/50 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-100 dark:border-stone-700 transition-all group flex items-center justify-between shadow-sm">
-                                <span className="font-medium text-sm text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white">Bloquear Fecha</span>
-                                <ArrowRight className="w-4 h-4 text-stone-300 dark:text-stone-600 group-hover:text-stone-500 dark:group-hover:text-stone-400 transform group-hover:translate-x-1 transition-all" />
-                            </button>
-                            <button className="w-full text-left p-4 rounded-xl bg-stone-50 dark:bg-stone-800/50 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-100 dark:border-stone-700 transition-all group flex items-center justify-between shadow-sm">
-                                <span className="font-medium text-sm text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white">Contactar Huésped</span>
-                                <ArrowRight className="w-4 h-4 text-stone-300 dark:text-stone-600 group-hover:text-stone-500 dark:group-hover:text-stone-400 transform group-hover:translate-x-1 transition-all" />
+                            <button disabled className="w-full text-left p-4 rounded-xl bg-stone-50/50 dark:bg-stone-800/30 border border-stone-100 dark:border-stone-700/50 opacity-60 cursor-not-allowed flex items-center justify-between">
+                                <span className="font-medium text-sm text-stone-400 dark:text-stone-500">Contactar Huésped (Próx)</span>
+                                <ArrowRight className="w-4 h-4 text-stone-300/50 dark:text-stone-600/50" />
                             </button>
                         </div>
                     </div>

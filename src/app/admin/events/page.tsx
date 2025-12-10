@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
 import { useAppStore } from "@/lib/store"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -40,9 +41,27 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 
-export default function EventsPage() {
+import { Suspense } from "react"
+
+// ... imports
+
+function EventsContent() {
     const { events, addEvent, removeEvent } = useAppStore()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const searchParams = useSearchParams()
+
+    useEffect(() => {
+        const action = searchParams.get('action')
+        if (action === 'new') {
+            // Delay slightly to avoid React state update conflict during render phase
+            setTimeout(() => setIsDialogOpen(true), 0)
+
+            // Cleanup url
+            const newUrl = new URL(window.location.href)
+            newUrl.searchParams.delete('action')
+            window.history.replaceState({}, '', newUrl)
+        }
+    }, [searchParams])
 
     // Form State
     const [title, setTitle] = useState("")
@@ -231,5 +250,13 @@ export default function EventsPage() {
                 )}
             </div>
         </div>
+    )
+}
+
+export default function EventsPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center p-12 text-stone-400">Cargando eventos...</div>}>
+            <EventsContent />
+        </Suspense>
     )
 }

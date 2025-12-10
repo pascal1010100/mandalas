@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { Utensils, Music, Zap, CalendarDays } from "lucide-react"
 
 // --- Types ---
 
@@ -33,17 +32,30 @@ export interface AppEvent {
 interface AppState {
     bookings: Booking[];
     events: AppEvent[];
+    prices: Record<string, number>;
 
     // Actions
-    addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'status'>) => void;
+    addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'status'>, totalPrice?: number) => void;
     updateBookingStatus: (id: string, status: BookingStatus) => void;
     addEvent: (event: Omit<AppEvent, 'id'>) => void;
     removeEvent: (id: string) => void;
+    updatePrice: (key: string, value: number) => void;
     resetData: () => void;
-    // Removed specific updateEvent for simplicity now
+    checkAvailability: (location: string, roomType: string, startDate: string, endDate: string) => boolean;
 }
 
 // --- Initial Data ---
+
+const initialPrices: Record<string, number> = {
+    // Pueblo
+    'pueblo_dorm': 18,
+    'pueblo_private': 35,
+    'pueblo_suite': 55,
+    // Hideout
+    'hideout_dorm': 16,
+    'hideout_private': 40,
+    'hideout_suite': 55,
+}
 
 const initialEvents: AppEvent[] = [
     {
@@ -84,15 +96,21 @@ const initialEvents: AppEvent[] = [
 
 export const useAppStore = create<AppState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             bookings: [],
             events: initialEvents,
+            prices: initialPrices,
 
-            addBooking: (bookingData) => set((state) => ({
+            updatePrice: (key, value) => set((state) => ({
+                prices: { ...state.prices, [key]: value }
+            })),
+
+            addBooking: (bookingData, totalPrice) => set((state) => ({
                 bookings: [
                     ...state.bookings,
                     {
                         ...bookingData,
+                        totalPrice: totalPrice || bookingData.totalPrice || 0, // Ensure total is captured
                         id: Math.random().toString(36).substring(7),
                         createdAt: new Date(),
                         status: 'pending'
@@ -115,7 +133,26 @@ export const useAppStore = create<AppState>()(
                 events: state.events.filter(e => e.id !== id)
             })),
 
-            resetData: () => set({ bookings: [], events: initialEvents })
+            resetData: () => set({ bookings: [], events: initialEvents }),
+
+            checkAvailability: (location, roomType, startDate, endDate) => {
+                const state = get();
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+
+                return !state.bookings.some(booking => {
+                    if (booking.status === 'cancelled') return false;
+                    if (booking.location !== location) return false;
+                    if (booking.roomType !== roomType) return false;
+
+                    const bookingStart = new Date(booking.checkIn);
+                    const bookingEnd = new Date(booking.checkOut);
+
+                    // Check for overlap
+                    // Overlap exists if: (StartA < EndB) and (EndA > StartB)
+                    return start < bookingEnd && end > bookingStart;
+                });
+            }
         }),
         {
             name: 'mandalas-storage',

@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { format } from "date-fns"
-import { Calendar as CalendarIcon, Check, Users, BedDouble } from "lucide-react"
+import { Check, Users, BedDouble } from "lucide-react"
 import { DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
@@ -26,7 +25,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 
@@ -63,7 +62,12 @@ export function BookingModal({
     const [phone, setPhone] = React.useState("")
 
     // Store Action
-    const addBooking = useAppStore(state => state.addBooking)
+    const { bookings, addBooking, prices, checkAvailability } = useAppStore()
+
+    // Determine Price dynamically
+    const priceKey = `${location}_${roomType}`
+    const currentPrice = prices?.[priceKey] || pricePerNight // Fallback to prop if not found
+
 
     // Dynamic styling based on location - Updated for Dark Mode support
     // Dynamic styling based on location - Elite "Quiet Luxury" Refinement
@@ -94,12 +98,33 @@ export function BookingModal({
             }
 
             if (date?.from && date?.to) {
+                // Final Availability Check
+                // Iterate through all days in range to ensure no gaps are blocked
+                const curr = new Date(date.from);
+                const end = new Date(date.to);
+                let isBlocked = false;
+
+                while (curr < end) {
+                    if (!checkAvailability(location, roomType, curr.toISOString(), new Date(curr.getTime() + 86400000).toISOString())) {
+                        isBlocked = true;
+                        break;
+                    }
+                    curr.setDate(curr.getDate() + 1);
+                }
+
+                if (isBlocked) {
+                    alert("Lo sentimos, algunas fechas seleccionadas ya no están disponibles. Por favor verifica el calendario.");
+                    setStep(1); // Go back to calendar
+                    setIsSubmitting(false);
+                    return;
+                }
+
                 setIsSubmitting(true)
                 // Simulate network delay for "Elite" feel
                 await new Promise(resolve => setTimeout(resolve, 1500))
 
                 const nights = Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24))
-                const totalPrice = pricePerNight * nights * 1.1 // Include 10% tax
+                const totalPrice = currentPrice * nights * 1.1 // Include 10% tax
 
                 // Save to store
                 addBooking({
@@ -162,11 +187,26 @@ export function BookingModal({
                                         selected={date}
                                         onSelect={setDate}
                                         numberOfMonths={1}
+                                        disabled={(day) => {
+                                            // Disable past dates
+                                            if (day < new Date()) return true;
+
+                                            // Availability Logic: Check against store bookings
+                                            const isAvailable = checkAvailability(
+                                                location,
+                                                roomType,
+                                                day.toISOString(),
+                                                new Date(day.getTime() + 86400000).toISOString() // Check next day for overlap logic
+                                            );
+                                            // The store function returns true if AVAILABLE (not blocked).
+                                            // react-day-picker 'disabled' prop expects true if DISABLED (blocked).
+                                            return !isAvailable;
+                                        }}
                                         className={cn("p-3 pointer-events-auto")}
                                         classNames={{
                                             day_selected: cn("bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200", theme.button),
                                             day_range_middle: "bg-stone-100 text-stone-900 dark:bg-stone-700 dark:text-stone-100",
-                                            day: "text-stone-900 dark:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-700",
+                                            day: "text-stone-900 dark:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-700 data-[disabled]:text-stone-300 dark:data-[disabled]:text-stone-700 data-[disabled]:hover:bg-transparent",
                                             caption_label: "text-stone-900 dark:text-stone-100 font-bold",
                                             head_cell: "text-stone-500 dark:text-stone-400",
                                         }}
@@ -186,7 +226,7 @@ export function BookingModal({
                                         <p className="font-bold text-stone-900 dark:text-stone-100">
                                             {roomName || (roomType === "dorm" ? "Dormitorio Compartido" : roomType === "private" ? "Habitación Privada" : "Suite con Vista")}
                                         </p>
-                                        <p className="text-sm text-stone-600 dark:text-stone-400">${pricePerNight} / noche</p>
+                                        <p className="text-sm text-stone-600 dark:text-stone-400">${currentPrice} / noche</p>
                                     </div>
                                     <Select value={roomType} onValueChange={setRoomType}>
                                         <SelectTrigger className="w-[140px] bg-white/50 dark:bg-stone-800/50 border-stone-200 dark:border-stone-700 text-stone-900 dark:text-stone-100">
@@ -266,21 +306,21 @@ export function BookingModal({
                                 </h4>
                                 <div className="flex justify-between text-sm text-stone-700 dark:text-stone-300">
                                     <span>{location === "pueblo" ? "Mandalas Pueblo" : "Mandalas Hideout"}</span>
-                                    <span className="font-bold">${pricePerNight} / noche</span>
+                                    <span className="font-bold">${currentPrice} / noche</span>
                                 </div>
                                 {date?.from && date?.to && (
                                     <>
                                         <div className="flex justify-between text-sm text-stone-500 dark:text-stone-400">
                                             <span>{Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24))} noches</span>
-                                            <span>${pricePerNight * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24))}</span>
+                                            <span>${currentPrice * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24))}</span>
                                         </div>
                                         <div className="flex justify-between text-sm text-stone-500 dark:text-stone-400">
                                             <span>Impuestos y servicios (10%)</span>
-                                            <span>${(pricePerNight * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) * 0.1).toFixed(2)}</span>
+                                            <span>${(currentPrice * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) * 0.1).toFixed(2)}</span>
                                         </div>
                                         <div className="border-t border-stone-200 dark:border-stone-700 pt-2 flex justify-between font-bold text-lg text-stone-900 dark:text-stone-100">
                                             <span>Total</span>
-                                            <span>${(pricePerNight * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) * 1.1).toFixed(2)}</span>
+                                            <span>${(currentPrice * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) * 1.1).toFixed(2)}</span>
                                         </div>
                                     </>
                                 )}
