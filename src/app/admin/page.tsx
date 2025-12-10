@@ -16,7 +16,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
 
-export default function AdminDashboard() {
+import { Suspense } from "react"
+
+function AdminContent() {
     const { bookings } = useAppStore()
 
     // Calculate real metrics
@@ -230,5 +232,13 @@ export default function AdminDashboard() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function AdminDashboard() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center p-12 text-stone-400">Cargando dashboard...</div>}>
+            <AdminContent />
+        </Suspense>
     )
 }
