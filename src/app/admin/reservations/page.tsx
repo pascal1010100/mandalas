@@ -30,13 +30,15 @@ import {
     Calendar as CalendarIcon,
     MapPin,
     List,
-    LayoutGrid
+    LayoutGrid,
+    Plus
 } from "lucide-react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 
 import { ReservationCalendar } from "@/components/admin/reservations/reservation-calendar"
 import { ReservationDetailsModal } from "@/components/admin/reservations/reservation-details-modal"
+import { CreateReservationModal } from "@/components/admin/reservations/create-reservation-modal"
 
 export default function ReservationsPage() {
     const { bookings, updateBookingStatus } = useAppStore()
@@ -48,6 +50,9 @@ export default function ReservationsPage() {
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isCancellationMode, setIsCancellationMode] = useState(false)
+
+    // Create Modal State
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
     const filteredBookings = bookings.filter(booking => {
         const matchesSearch = booking.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -93,6 +98,13 @@ export default function ReservationsPage() {
                     <p className="text-stone-500 dark:text-stone-400 font-light tracking-wide mt-2">Gestiona y administra todas las solicitudes de hospedaje.</p>
                 </div>
                 <div className="flex gap-3">
+                    <Button
+                        className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-full shadow-lg hover:shadow-xl transition-all"
+                        onClick={() => setIsCreateModalOpen(true)}
+                    >
+                        <Plus className="w-4 h-4 mr-2" /> Nueva Reserva
+                    </Button>
+
                     <div className="bg-stone-100 dark:bg-stone-800 p-1 rounded-full flex gap-1">
                         <Button
                             variant={viewMode === 'list' ? 'secondary' : 'ghost'}
@@ -296,6 +308,11 @@ export default function ReservationsPage() {
                 open={isModalOpen}
                 onOpenChange={setIsModalOpen}
                 defaultOpenCancellation={isCancellationMode}
+            />
+
+            <CreateReservationModal
+                open={isCreateModalOpen}
+                onOpenChange={setIsCreateModalOpen}
             />
         </div>
     )

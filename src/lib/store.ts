@@ -39,7 +39,7 @@ interface AppState {
     prices: Record<string, number>;
 
     // Actions
-    addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'status' | 'totalPrice'> & { totalPrice?: number }, totalPrice?: number) => void
+    addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'totalPrice' | 'status'> & { totalPrice?: number, status?: BookingStatus }, totalPrice?: number) => void
     updateBookingStatus: (id: string, status: 'confirmed' | 'pending' | 'cancelled') => void
     updateBooking: (id: string, data: Partial<Omit<Booking, 'id' | 'createdAt'>>) => void
     deleteBooking: (id: string) => void
@@ -119,7 +119,7 @@ export const useAppStore = create<AppState>()(
                         totalPrice: totalPrice || bookingData.totalPrice || 0, // Ensure total is captured
                         id: Math.random().toString(36).substring(7),
                         createdAt: new Date(),
-                        status: 'pending'
+                        status: bookingData.status || 'pending'
                     }
                 ]
             })),
