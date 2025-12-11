@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ModeToggle } from "@/components/shared/mode-toggle"
+import { LogoutButton } from "@/components/admin/logout-button"
 
 // Sidebar component extracted to avoid React lint error
 function SidebarContent({ pathname }: { pathname: string }) {
@@ -70,11 +71,12 @@ function SidebarContent({ pathname }: { pathname: string }) {
                 </div>
 
                 <Link href="/">
-                    <Button variant="ghost" className="w-full justify-start text-stone-500 hover:text-stone-200 hover:bg-white/5 h-12 rounded-xl group">
+                    <Button variant="ghost" className="w-full justify-start text-stone-500 hover:text-stone-200 hover:bg-white/5 h-12 rounded-xl group mb-2">
                         <Home className="w-4 h-4 mr-3 group-hover:text-white transition-colors" />
                         <span className="text-sm font-medium">Ir al Sitio Público</span>
                     </Button>
                 </Link>
+                <LogoutButton />
             </div>
         </div>
     )
