@@ -18,6 +18,10 @@ export interface Booking {
     status: BookingStatus;
     totalPrice: number;
     createdAt: Date;
+    // Cancellation Metadata
+    cancellationReason?: string;
+    refundStatus?: 'none' | 'partial' | 'full';
+    cancelledAt?: string;
 }
 
 export interface AppEvent {
@@ -35,8 +39,10 @@ interface AppState {
     prices: Record<string, number>;
 
     // Actions
-    addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'status'>, totalPrice?: number) => void;
-    updateBookingStatus: (id: string, status: BookingStatus) => void;
+    addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'status' | 'totalPrice'> & { totalPrice?: number }, totalPrice?: number) => void
+    updateBookingStatus: (id: string, status: 'confirmed' | 'pending' | 'cancelled') => void
+    updateBooking: (id: string, data: Partial<Omit<Booking, 'id' | 'createdAt'>>) => void
+    deleteBooking: (id: string) => void
     addEvent: (event: Omit<AppEvent, 'id'>) => void;
     removeEvent: (id: string) => void;
     updatePrice: (key: string, value: number) => void;
@@ -120,6 +126,14 @@ export const useAppStore = create<AppState>()(
 
             updateBookingStatus: (id, status) => set((state) => ({
                 bookings: state.bookings.map(b => b.id === id ? { ...b, status } : b)
+            })),
+
+            updateBooking: (id, data) => set((state) => ({
+                bookings: state.bookings.map(b => b.id === id ? { ...b, ...data } : b)
+            })),
+
+            deleteBooking: (id) => set((state) => ({
+                bookings: state.bookings.filter(b => b.id !== id)
             })),
 
             addEvent: (eventData) => set((state) => ({
