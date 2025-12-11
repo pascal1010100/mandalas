@@ -3,12 +3,13 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { Lock, ArrowRight, Loader2, Sparkles } from "lucide-react"
+import { Loader2, ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
-import { cn } from "@/lib/utils"
+
+import { supabase } from "@/lib/supabase"
 
 export default function LoginPage() {
     const router = useRouter()
@@ -20,22 +21,37 @@ export default function LoginPage() {
         e.preventDefault()
         setIsLoading(true)
 
-        // SIMULATED AUTH DELAY
-        await new Promise(resolve => setTimeout(resolve, 1500))
-
-        // TEMPORARY LOCAL CHECK (For Phase 1 Demo)
-        // This will be replaced by Supabase Phase 2
-        if (email === "admin@mandalas.com" && password === "admin123") {
-            // Set a dummy cookie to pass the middleware check
-            document.cookie = "mandalas_admin_session=true; path=/; max-age=86400" // 1 day
-
-            toast.success("Bienvenido", {
-                description: "Acceso autorizado al sistema central."
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
             })
-            router.push("/admin")
-        } else {
-            toast.error("Acceso Denegado", {
-                description: "Credenciales inválidas. Intenta de nuevo."
+
+            if (error) {
+                console.error("Login error:", error)
+                toast.error("Acceso Denegado", {
+                    description: error.message === "Invalid login credentials"
+                        ? "Credenciales inválidas."
+                        : "Error al conectar con el servidor."
+                })
+                setIsLoading(false)
+                return
+            }
+
+            if (data.session) {
+                // Bridge for our existing Middleware
+                // In a future refactor, we will use Supabase Auth Helpers for proper server-side session
+                document.cookie = "mandalas_admin_session=true; path=/; max-age=86400" // 1 day
+
+                toast.success("Bienvenido", {
+                    description: "Acceso autorizado al sistema central."
+                })
+                router.push("/admin")
+            }
+        } catch (err) {
+            console.error("Unexpected error:", err)
+            toast.error("Error del Sistema", {
+                description: "Ocurrió un error inesperado."
             })
             setIsLoading(false)
         }

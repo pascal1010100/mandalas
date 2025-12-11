@@ -3,6 +3,7 @@ import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "sonner"
+import { DataInitializer } from "@/components/shared/data-initializer"
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -33,6 +34,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <DataInitializer />
           {children}
           <Toaster />
         </ThemeProvider>
