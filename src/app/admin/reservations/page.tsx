@@ -39,6 +39,8 @@ import { es } from "date-fns/locale"
 import { ReservationCalendar } from "@/components/admin/reservations/reservation-calendar"
 import { ReservationDetailsModal } from "@/components/admin/reservations/reservation-details-modal"
 import { CreateReservationModal } from "@/components/admin/reservations/create-reservation-modal"
+import { DashboardStats } from "@/components/admin/dashboard/dashboard-stats"
+
 
 export default function ReservationsPage() {
     const { bookings, updateBookingStatus } = useAppStore()
@@ -92,6 +94,7 @@ export default function ReservationsPage() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-stone-200/60 pb-8">
                 <div>
                     <h2 className="text-3xl font-light font-heading tracking-[0.2em] text-stone-900 dark:text-white uppercase">Reservas</h2>
@@ -125,6 +128,9 @@ export default function ReservationsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Dashboard Stats */}
+            <DashboardStats />
 
             {/* Filters Toolbar */}
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white dark:bg-stone-900/50 p-4 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 backdrop-blur-sm transition-colors duration-300">

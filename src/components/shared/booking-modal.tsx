@@ -87,18 +87,18 @@ export function BookingModal({
 
     // Dynamic styling based on location - Elite "Quiet Luxury" Refinement
     const theme = location === "pueblo" ? {
-        gradient: "bg-[image:var(--pueblo-gradient-linear)]",
+        gradient: "bg-gradient-to-r from-amber-500 to-orange-600",
         lightGradient: "from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-l-4 border-l-[#D97706]",
         border: "border-orange-100 dark:border-orange-900/50",
         text: "text-[#B45309] dark:text-[#F59E0B]",
-        button: "bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 shadow-[0_0_20px_-5px_rgba(217,119,6,0.4)] transition-all duration-300",
+        button: "bg-gradient-to-r from-amber-500 to-orange-600 hover:brightness-110 shadow-[0_0_20px_-5px_rgba(217,119,6,0.4)] transition-all duration-300",
         icon: "bg-amber-100/50 text-[#D97706] dark:bg-amber-900/20 dark:text-[#fbbf24] ring-1 ring-amber-200 dark:ring-amber-800"
     } : {
-        gradient: "bg-[image:var(--hideout-gradient-linear)]",
+        gradient: "bg-gradient-to-r from-lime-500 to-lime-700",
         lightGradient: "from-lime-50 to-green-50 dark:from-lime-950/20 dark:to-green-950/20 border-l-4 border-l-[#65a30d]",
         border: "border-lime-100 dark:border-lime-900/50",
         text: "text-[#3f6212] dark:text-[#a3e635]",
-        button: "bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 shadow-[0_0_20px_-5px_rgba(101,163,13,0.4)] transition-all duration-300",
+        button: "bg-gradient-to-r from-lime-500 to-lime-700 hover:brightness-110 shadow-[0_0_20px_-5px_rgba(101,163,13,0.4)] transition-all duration-300",
         icon: "bg-lime-100/50 text-[#65a30d] dark:bg-lime-900/20 dark:text-[#a3e635] ring-1 ring-lime-200 dark:ring-lime-800"
     }
 

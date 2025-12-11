@@ -8,7 +8,7 @@ export function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     <div className="space-y-6">
                         <h3 className="text-2xl font-black text-white tracking-tighter font-heading">
-                            MANDALAS<span className="text-transparent bg-clip-text bg-[image:var(--pueblo-gradient-linear)]">.</span>
+                            MANDALAS<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">.</span>
                         </h3>
                         <p className="text-sm leading-relaxed max-w-xs text-stone-500 font-light">
                             Fusionando la energía social del pueblo con la paz de la naturaleza. San Pedro La Laguna, Atitlán.

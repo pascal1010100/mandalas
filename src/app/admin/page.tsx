@@ -80,7 +80,7 @@ function AdminContent() {
             <StaggerReveal className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {/* Revenue Card (Amber/Pueblo Theme) */}
                 <StaggerItem>
-                    <Card className="border-none shadow-lg relative overflow-hidden group bg-[image:var(--pueblo-gradient-linear)] text-white">
+                    <Card className="border-none shadow-lg relative overflow-hidden group bg-gradient-to-r from-amber-500 to-orange-600 text-white">
                         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors duration-500" />
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
                             <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-amber-100">Ingresos Totales</CardTitle>

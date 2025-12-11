@@ -72,7 +72,7 @@ export default function PuebloPage() {
                             {/* Room 1 */}
                             <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-orange-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 group-hover:scale-105 transition-transform duration-500" />
                                     {/* Placeholder for image */}
                                 </div>
                                 <CardHeader>
@@ -97,7 +97,11 @@ export default function PuebloPage() {
                                         roomName="Dormitorio Compartido"
                                         pricePerNight={prices?.['pueblo_dorm'] || 18}
                                     >
-                                        <Button className="w-full rounded-full bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
+                                        <Button
+                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
+                                        >
+                                            Reservar Ahora
+                                        </Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -106,7 +110,9 @@ export default function PuebloPage() {
                             {/* Room 2 */}
                             <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-orange-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
+                                    <div
+                                        className="absolute inset-0 group-hover:scale-105 transition-transform duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
+                                    />
                                 </div>
                                 <CardHeader>
                                     <CardTitle>Privada Estándar</CardTitle>
@@ -130,7 +136,11 @@ export default function PuebloPage() {
                                         roomName="Habitación Privada Estándar"
                                         pricePerNight={prices?.['pueblo_private'] || 35}
                                     >
-                                        <Button className="w-full rounded-full bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
+                                        <Button
+                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
+                                        >
+                                            Reservar Ahora
+                                        </Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -139,7 +149,9 @@ export default function PuebloPage() {
                             {/* Room 3 */}
                             <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-orange-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
+                                    <div
+                                        className="absolute inset-0 group-hover:scale-105 transition-transform duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
+                                    />
                                 </div>
                                 <CardHeader>
                                     <CardTitle>Suite con Vista</CardTitle>
@@ -163,7 +175,11 @@ export default function PuebloPage() {
                                         roomName="Suite con Vista"
                                         pricePerNight={prices?.['pueblo_suite'] || 55}
                                     >
-                                        <Button className="w-full rounded-full bg-[image:var(--pueblo-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500">Reservar Ahora</Button>
+                                        <Button
+                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
+                                        >
+                                            Reservar Ahora
+                                        </Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>

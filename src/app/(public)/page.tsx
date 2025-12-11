@@ -8,6 +8,12 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MagneticButton } from "@/components/animations/magnetic-button"
 
+// Gradient Constants to ensure stability
+const GRADIENTS = {
+  pueblo: "radial-gradient(circle at center, #F59E0B 0%, #D97706 60%, #78350F 100%)", // Brighter Amber start
+  hideout: "radial-gradient(circle at center, #84cc16 0%, #4d7c0f 60%, #1a2e05 100%)" // Vibrant Lime start (User preference)
+}
+
 export default function LandingPage() {
   const [hovered, setHovered] = useState<"pueblo" | "hideout" | null>(null)
 
@@ -32,10 +38,10 @@ export default function LandingPage() {
         transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1] }}
       >
         <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-[1.5s] group-hover:scale-105"
+          className="absolute inset-0 transition-transform duration-[1.5s] group-hover:scale-105"
           style={{
             // Living Light - Warm, Radiant Core
-            background: "var(--pueblo-gradient)",
+            backgroundImage: GRADIENTS.pueblo,
           }}
         />
         {/* Depth Overlay - Darker for more contrast with refined text */}
@@ -85,10 +91,10 @@ export default function LandingPage() {
         transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1] }}
       >
         <div
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-[1.5s] group-hover:scale-105"
+          className="absolute inset-0 transition-transform duration-[1.5s] group-hover:scale-105"
           style={{
             // Living Light - Organic, Forest Canopy
-            background: "var(--hideout-gradient)",
+            backgroundImage: GRADIENTS.hideout,
           }}
         />
         {/* Depth Overlay */}

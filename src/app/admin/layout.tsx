@@ -23,7 +23,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
             <div className="h-24 flex items-center px-8 border-b border-white/5">
                 <Link href="/" className="group flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-stone-900 border border-white/10 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500 relative overflow-hidden">
-                        <div className="absolute inset-0 bg-[image:var(--pueblo-gradient-linear)] opacity-20" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 opacity-20" />
                         <Sparkles className="w-4 h-4 text-amber-500 relative z-10" />
                     </div>
                     <div className="flex flex-col">
@@ -53,7 +53,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
                             )}
                         >
                             {isActive && (
-                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[image:var(--pueblo-gradient-linear)] shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
+                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-r from-amber-500 to-orange-600 shadow-[0_0_15px_rgba(245,158,11,0.5)]" />
                             )}
                             <Icon className={cn("w-5 h-5 transition-colors duration-300", isActive ? "text-amber-400 drop-shadow-md" : "text-stone-600 group-hover:text-stone-400")} />
                             <span className={cn("font-medium tracking-wide text-sm", isActive ? "font-semibold" : "")}>{item.label}</span>

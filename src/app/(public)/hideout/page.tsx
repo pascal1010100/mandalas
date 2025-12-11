@@ -73,7 +73,7 @@ export default function HideoutPage() {
                             {/* Room 1 */}
                             <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-lime-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-[image:var(--hideout-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-lime-500 to-lime-700 group-hover:scale-105 transition-transform duration-500" />
                                 </div>
                                 <CardHeader>
                                     <CardTitle>Bungalow Ecológico</CardTitle>
@@ -98,7 +98,11 @@ export default function HideoutPage() {
                                         pricePerNight={prices?.['hideout_dorm'] || 16}
                                     >
                                         {/* Force re-render */}
-                                        <Button className="w-full rounded-full bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02]">Reservar Ahora</Button>
+                                        <Button
+                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-lime-500 to-lime-700"
+                                        >
+                                            Reservar Ahora
+                                        </Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -107,7 +111,9 @@ export default function HideoutPage() {
                             {/* Room 2 */}
                             <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-lime-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-[image:var(--hideout-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
+                                    <div
+                                        className="absolute inset-0 group-hover:scale-105 transition-transform duration-500 bg-gradient-to-r from-lime-500 to-lime-700"
+                                    />
                                 </div>
                                 <CardHeader>
                                     <CardTitle>Glamping Tent</CardTitle>
@@ -131,7 +137,11 @@ export default function HideoutPage() {
                                         roomName="Cabaña Privada"
                                         pricePerNight={prices?.['hideout_private'] || 40}
                                     >
-                                        <Button className="w-full rounded-full bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02]">Reservar Ahora</Button>
+                                        <Button
+                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-lime-500 to-lime-700"
+                                        >
+                                            Reservar Ahora
+                                        </Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
@@ -140,7 +150,9 @@ export default function HideoutPage() {
                             {/* Room 3 */}
                             <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-lime-500/30">
                                 <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-[image:var(--hideout-gradient-linear)] group-hover:scale-105 transition-transform duration-500" />
+                                    <div
+                                        className="absolute inset-0 group-hover:scale-105 transition-transform duration-500 bg-gradient-to-r from-lime-500 to-lime-700"
+                                    />
                                 </div>
                                 <CardHeader>
                                     <CardTitle>Dormitorio Nature</CardTitle>
@@ -164,7 +176,11 @@ export default function HideoutPage() {
                                         roomName="Suite Lakefront Premium"
                                         pricePerNight={prices?.['hideout_suite'] || 55}
                                     >
-                                        <Button className="w-full rounded-full bg-[image:var(--hideout-gradient-linear)] hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02]">Reservar Ahora</Button>
+                                        <Button
+                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-lime-500 to-lime-700"
+                                        >
+                                            Reservar Ahora
+                                        </Button>
                                     </BookingModal>
                                 </CardFooter>
                             </Card>
