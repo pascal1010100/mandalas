@@ -100,16 +100,19 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({ isLoading: true })
 
         // Check if user is authenticated to avoid RLS error on public pages
-        const { data: { session } } = await supabase.auth.getSession()
+        // const { data: { session } } = await supabase.auth.getSession()
+        // console.log('[Store] Fetching bookings. Session:', session ? 'Active' : 'None')
 
-        if (!session) {
-            // If public, we currently don't fetch full bookings list (Privacy)
-            // In a future update, we should fetch a "Public Availability View" (dates only)
-            set({ isLoading: false, bookings: [] })
-            return
-        }
+        // if (!session) {
+        //     console.log('[Store] No session, returning empty bookings')
+        //     // If public, we currently don't fetch full bookings list (Privacy)
+        //     // In a future update, we should fetch a "Public Availability View" (dates only)
+        //     set({ isLoading: false, bookings: [] })
+        //     return
+        // }
 
         const { data, error } = await supabase.from('bookings').select('*').order('created_at', { ascending: false })
+        console.log('[Store] Supabase response:', { dataCount: data?.length, error })
 
         if (error) {
             console.error('Error fetching bookings:', error)

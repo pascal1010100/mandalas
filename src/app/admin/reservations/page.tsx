@@ -37,6 +37,7 @@ import { format } from "date-fns"
 import { es } from "date-fns/locale"
 
 import { ReservationCalendar } from "@/components/admin/reservations/reservation-calendar"
+import { TimelineView } from "@/components/admin/reservations/timeline-view"
 import { ReservationDetailsModal } from "@/components/admin/reservations/reservation-details-modal"
 import { CreateReservationModal } from "@/components/admin/reservations/create-reservation-modal"
 import { DashboardStats } from "@/components/admin/dashboard/dashboard-stats"
@@ -48,7 +49,7 @@ export default function ReservationsPage() {
     const [statusFilter, setStatusFilter] = useState<"ALL" | "confirmed" | "pending" | "cancelled">("ALL")
 
     // View State
-    const [viewMode, setViewMode] = useState<"list" | "calendar">("list")
+    const [viewMode, setViewMode] = useState<"list" | "calendar" | "timeline">("list")
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isCancellationMode, setIsCancellationMode] = useState(false)
@@ -123,7 +124,15 @@ export default function ReservationsPage() {
                             className="rounded-full px-4 text-xs font-medium"
                             onClick={() => setViewMode('calendar')}
                         >
-                            <LayoutGrid className="w-3.5 h-3.5 mr-2" /> Calendario
+                            <CalendarIcon className="w-3.5 h-3.5 mr-2" /> Mes
+                        </Button>
+                        <Button
+                            variant={viewMode === 'timeline' ? 'secondary' : 'ghost'}
+                            size="sm"
+                            className="rounded-full px-4 text-xs font-medium"
+                            onClick={() => setViewMode('timeline')}
+                        >
+                            <LayoutGrid className="w-3.5 h-3.5 mr-2" /> Timeline
                         </Button>
                     </div>
                 </div>
@@ -302,8 +311,13 @@ export default function ReservationsPage() {
                         </TableBody>
                     </Table>
                 </div>
-            ) : (
+            ) : viewMode === 'calendar' ? (
                 <ReservationCalendar
+                    bookings={filteredBookings}
+                    onSelectBooking={(b) => handleSelectBooking(b)}
+                />
+            ) : (
+                <TimelineView
                     bookings={filteredBookings}
                     onSelectBooking={(b) => handleSelectBooking(b)}
                 />

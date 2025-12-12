@@ -113,9 +113,11 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                                     const isEnd = isSameDay(day, parseISO(b.checkOut))
 
                                     // Style based on status/location
-                                    const colorClass = b.location === 'pueblo'
-                                        ? "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800"
-                                        : "bg-lime-100 text-lime-700 border-lime-200 dark:bg-lime-900/30 dark:text-lime-300 dark:border-lime-800"
+                                    const colorClass = b.status === 'confirmed'
+                                        ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800"
+                                        : b.status === 'cancelled'
+                                            ? "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800"
+                                            : "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800"
 
                                     return (
                                         <button
