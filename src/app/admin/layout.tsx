@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { LayoutDashboard, CalendarDays, Users, Home, Menu, Sparkles, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { ModeToggle } from "@/components/shared/mode-toggle"
 import { LogoutButton } from "@/components/admin/logout-button"
 
@@ -102,6 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <Button variant="ghost" size="icon" className="text-stone-400 hover:text-white hover:bg-white/10"><Menu /></Button>
                     </SheetTrigger>
                     <SheetContent side="left" className="p-0 w-[300px] border-r-0 bg-stone-950">
+                        <SheetTitle className="sr-only">Navegación Admin</SheetTitle>
                         <SidebarContent pathname={pathname} />
                     </SheetContent>
                 </Sheet>

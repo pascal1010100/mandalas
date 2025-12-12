@@ -58,6 +58,9 @@ export function DashboardStats() {
     // 3. Pending Actions
     const pendingCount = bookings.filter(b => b.status === 'pending').length
 
+    // DEBUG: Inspect ALL bookings to see statuses
+
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {/* Revenue Card */}

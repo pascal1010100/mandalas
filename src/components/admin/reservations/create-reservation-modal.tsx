@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format, addDays, differenceInDays } from "date-fns" // Fixed import
+import { format, addDays, differenceInCalendarDays, differenceInDays, startOfDay, subDays } from "date-fns" // Fixed import
 import { es } from "date-fns/locale"
 import {
     Calendar as CalendarIcon,
@@ -106,6 +106,8 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
         })
     }, [location, dateRange, checkAvailability, prices])
 
+
+
     const handleNextStep = () => {
         if (step === 1) {
             if (!dateRange.from || !dateRange.to) {
@@ -135,7 +137,15 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
         if (!dateRange.from || !dateRange.to || !selectedRoom) return
 
         const nights = differenceInDays(dateRange.to, dateRange.from)
-        const total = selectedRoom.price * nights * parseInt(guests) // Basic calculation
+        const numGuests = parseInt(guests) || 1
+
+        if (numGuests < 1) {
+            toast.error("Número de huéspedes inválido")
+            return
+        }
+
+        const total = selectedRoom.price * nights * numGuests
+
 
         addBooking({
             guestName,
@@ -219,7 +229,7 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                                         selected={dateRange}
                                         onSelect={(range: { from?: Date; to?: Date } | undefined) => setDateRange(range as { from: Date | undefined; to: Date | undefined } || { from: undefined, to: undefined })}
                                         numberOfMonths={2}
-                                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                                        disabled={(date) => date < subDays(new Date(), 1)}
                                         locale={es}
                                         className="rounded-md"
                                     />

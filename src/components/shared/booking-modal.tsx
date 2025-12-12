@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Check, Users, BedDouble, Calendar as CalendarIcon, Loader2, PartyPopper, Copy } from "lucide-react"
 import { DateRange } from "react-day-picker"
+import { subDays } from "date-fns"
 import { AnimatePresence, motion } from "framer-motion"
 import { toast } from "sonner"
 
@@ -264,7 +265,7 @@ export function BookingModal({
                                             onSelect={setDate}
                                             numberOfMonths={1}
                                             disabled={(day) => {
-                                                if (day < new Date()) return true;
+                                                if (day < subDays(new Date(), 1)) return true;
                                                 const isAvailable = checkAvailability(
                                                     location,
                                                     roomType,

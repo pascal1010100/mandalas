@@ -72,19 +72,19 @@ const initialPrices: Record<string, number> = {
 const initialEvents: AppEvent[] = [
     {
         id: '1', title: "Cena Familiar", description: "Pasta casera y vino para compartir.",
-        date: new Date().toISOString(), category: 'food', location: 'Pueblo'
+        date: "2025-12-12T20:00:00.000Z", category: 'food', location: 'Pueblo'
     },
     {
         id: '2', title: "Noche de Salsa", description: "Clases gratis para principiantes.",
-        date: new Date(Date.now() + 86400000).toISOString(), category: 'music', location: 'Pueblo'
+        date: "2025-12-13T21:00:00.000Z", category: 'music', location: 'Pueblo'
     },
     {
         id: '3', title: "Trivia Night", description: "Premios en tragos para los ganadores.",
-        date: new Date(Date.now() + 172800000).toISOString(), category: 'social', location: 'Hideout'
+        date: "2025-12-14T19:30:00.000Z", category: 'social', location: 'Hideout'
     },
     {
         id: '4', title: "Yoga & Brunch", description: "Recupera tu energía frente al lago.",
-        date: new Date(Date.now() + 259200000).toISOString(), category: 'wellness', location: 'Hideout'
+        date: "2025-12-15T10:00:00.000Z", category: 'wellness', location: 'Hideout'
     },
 ]
 
@@ -240,20 +240,32 @@ export const useAppStore = create<AppState>((set, get) => ({
         const start = new Date(startDate);
         const end = new Date(endDate);
 
-        return !state.bookings.some(booking => {
+        const overlappingBookings = state.bookings.filter(booking => {
             if (booking.status === 'cancelled') return false;
             // Booking location/room must match
             if (booking.location !== location) return false;
-            // For dorms, we might check bed count vs capacity, but for now 1 booking = 1 unit
-            // If dorms need individual bed logic, we'd need capacity checks. 
-            // Assuming private rooms logic for simplicity or that roomType is specific enough.
             if (booking.roomType !== roomType) return false;
 
             const bookingStart = new Date(booking.checkIn);
             const bookingEnd = new Date(booking.checkOut);
 
             // Check for overlap
-            return start < bookingEnd && end > bookingStart;
+            const isOverlap = start < bookingEnd && end > bookingStart;
+            return isOverlap;
         });
+
+        // Capacity Logic
+        const capacity = roomType.includes('dorm') ? 8 : 1; // Assuming 'dorm' in roomType implies dorm capacity
+        const blocked = overlappingBookings.length >= capacity;
+
+        if (blocked) {
+            console.log(`[Availability] Blocked: Region ${location} | Type ${roomType}`, {
+                capacity,
+                overlaps: overlappingBookings.length,
+                overlappingIDs: overlappingBookings.map(b => b.id)
+            })
+        }
+
+        return !blocked;
     }
 }))
