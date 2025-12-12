@@ -53,7 +53,8 @@ interface AppState {
 
     // Prices
     updatePrice: (key: string, value: number) => void;
-    checkAvailability: (location: string, roomType: string, startDate: string, endDate: string) => boolean;
+    checkAvailability: (location: string, roomType: string, startDate: string, endDate: string, requestedGuests?: number) => boolean;
+    getRemainingCapacity: (location: string, roomType: string, startDate: string, endDate: string) => number;
 }
 
 // --- Initial Data ---
@@ -234,9 +235,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     resetData: () => set({ bookings: [], events: initialEvents }),
 
-    checkAvailability: (location, roomType, startDate, endDate) => {
+    checkAvailability: (location, roomType, startDate, endDate, requestedGuests = 1) => {
         const state = get();
-        // Uses the current state.bookings (which should be synced via fetchBookings)
         const start = new Date(startDate);
         const end = new Date(endDate);
 
@@ -255,17 +255,71 @@ export const useAppStore = create<AppState>((set, get) => ({
         });
 
         // Capacity Logic
-        const capacity = roomType.includes('dorm') ? 8 : 1; // Assuming 'dorm' in roomType implies dorm capacity
-        const blocked = overlappingBookings.length >= capacity;
+        const isDorm = roomType.includes('dorm');
+        const capacity = isDorm ? 6 : 1; // User specified 6 beds for dorms
 
-        if (blocked) {
-            console.log(`[Availability] Blocked: Region ${location} | Type ${roomType}`, {
-                capacity,
-                overlaps: overlappingBookings.length,
-                overlappingIDs: overlappingBookings.map(b => b.id)
-            })
+        if (isDorm) {
+            // For dorms, we sum the distinct guests
+            const currentOccupancy = overlappingBookings.reduce((sum, booking) => {
+                const g = parseInt(booking.guests) || 1;
+                console.log(`[CheckAvail] Found overlapping booking: ${booking.id} (${booking.guestName}) - Guests: ${g} - Status: ${booking.status}`);
+                return sum + g;
+            }, 0);
+
+            const blocked = (currentOccupancy + requestedGuests) > capacity;
+
+            if (blocked || currentOccupancy > 0) {
+                console.log(`[Availability] Dorm Check: ${location} | ${roomType}`, {
+                    capacity,
+                    currentOccupancy,
+                    requestedGuests,
+                    willBlock: blocked,
+                    overlappingCount: overlappingBookings.length
+                });
+            }
+            return !blocked;
+
+        } else {
+            // For Private/Suite, any overlap blocks the room (Capacity 1 booking)
+            const blocked = overlappingBookings.length >= 1;
+            if (blocked) {
+                console.log(`[Availability] Blocked Private: ${location} | ${roomType}`, {
+                    overlaps: overlappingBookings.length
+                });
+            }
+            return !blocked;
         }
+    },
 
-        return !blocked;
+    getRemainingCapacity: (location, roomType, startDate, endDate) => {
+        const state = get();
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const isDorm = roomType.includes('dorm');
+        const capacity = isDorm ? 6 : 1;
+
+        const overlappingBookings = state.bookings.filter(booking => {
+            if (booking.status === 'cancelled') return false;
+            // Booking location/room must match
+            if (booking.location !== location) return false;
+            if (booking.roomType !== roomType) return false;
+
+            const bookingStart = new Date(booking.checkIn);
+            const bookingEnd = new Date(booking.checkOut);
+
+            // Check for overlap
+            return start < bookingEnd && end > bookingStart;
+        });
+
+        if (isDorm) {
+            const currentOccupancy = overlappingBookings.reduce((sum, booking) => {
+                return sum + (parseInt(booking.guests) || 1);
+            }, 0);
+            console.log(`[RemainingCap] ${location} ${roomType}: Limit ${capacity} - Occupied ${currentOccupancy} = Remaining ${Math.max(0, capacity - currentOccupancy)}`);
+            return Math.max(0, capacity - currentOccupancy);
+        } else {
+            // For Private/Suite
+            return overlappingBookings.length >= 1 ? 0 : 1;
+        }
     }
 }))

@@ -96,7 +96,8 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                 location,
                 room.id,
                 dateRange.from!.toISOString(),
-                dateRange.to!.toISOString()
+                dateRange.to!.toISOString(),
+                parseInt(guests) || 1
             )
             return {
                 ...room,
@@ -104,7 +105,7 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                 available: isAvailable
             }
         })
-    }, [location, dateRange, checkAvailability, prices])
+    }, [location, dateRange, checkAvailability, prices, guests])
 
 
 

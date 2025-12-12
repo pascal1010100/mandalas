@@ -79,7 +79,7 @@ export function BookingModal({
     }, [step])
 
     // Store Action
-    const { bookings, addBooking, prices, checkAvailability } = useAppStore()
+    const { bookings, addBooking, prices, checkAvailability, getRemainingCapacity } = useAppStore()
 
     // Determine Price dynamically
     const priceKey = `${location}_${roomType}`
@@ -120,20 +120,27 @@ export function BookingModal({
                 const curr = new Date(date.from);
                 const end = new Date(date.to);
                 let isBlocked = false;
+                let minRemaining = 100; // Arbitrary high number
 
                 while (curr < end) {
-                    if (!checkAvailability(location, roomType, curr.toISOString(), new Date(curr.getTime() + 86400000).toISOString())) {
+                    const nextDay = new Date(curr.getTime() + 86400000);
+                    const remaining = getRemainingCapacity(location, roomType, curr.toISOString(), nextDay.toISOString());
+
+                    if (remaining < minRemaining) minRemaining = remaining;
+
+                    // Check if requested guests fit
+                    if ((parseInt(guests) || 1) > remaining) {
                         isBlocked = true;
-                        break;
                     }
                     curr.setDate(curr.getDate() + 1);
                 }
 
                 if (isBlocked) {
-                    toast.error("Fechas no disponibles", {
-                        description: "Alguien acaba de reservar estas fechas. Por favor selecciona otras."
+                    toast.error("Cupo Excedido", {
+                        description: `Lo sentimos, para alguna de las fechas seleccionadas solo quedan ${minRemaining} lugares disponibles.`
                     })
-                    setStep(1); // Go back to calendar
+                    // STY ON STEP 2 so user can adjust guests
+                    // setStep(1); // REMOVED
                     setIsSubmitting(false);
                     return;
                 }
@@ -270,7 +277,8 @@ export function BookingModal({
                                                     location,
                                                     roomType,
                                                     day.toISOString(),
-                                                    new Date(day.getTime() + 86400000).toISOString()
+                                                    new Date(day.getTime() + 86400000).toISOString(),
+                                                    parseInt(guests) || 1
                                                 );
                                                 return !isAvailable;
                                             }}

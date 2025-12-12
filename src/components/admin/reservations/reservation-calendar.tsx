@@ -16,7 +16,7 @@ import {
     subMonths
 } from "date-fns"
 import { es } from "date-fns/locale"
-import { ChevronLeft, ChevronRight, User } from "lucide-react"
+import { ChevronLeft, ChevronRight, User, LogIn, LogOut } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -112,12 +112,42 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                                     const isStart = isSameDay(day, parseISO(b.checkIn))
                                     const isEnd = isSameDay(day, parseISO(b.checkOut))
 
-                                    // Style based on status/location
-                                    const colorClass = b.status === 'confirmed'
-                                        ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800"
-                                        : b.status === 'cancelled'
-                                            ? "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800"
-                                            : "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800"
+                                    // Status Color Configurations
+                                    const statusStyles = {
+                                        confirmed: {
+                                            solid: "bg-emerald-600 text-white border-emerald-600 shadow-sm hover:bg-emerald-700",
+                                            outline: "bg-white border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:bg-stone-900 dark:border-emerald-800 dark:text-emerald-400",
+                                            light: "bg-emerald-100/50 text-emerald-800 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/50"
+                                        },
+                                        pending: {
+                                            solid: "bg-amber-500 text-white border-amber-500 shadow-sm hover:bg-amber-600",
+                                            outline: "bg-white border-amber-200 text-amber-600 hover:bg-amber-50 dark:bg-stone-900 dark:border-amber-800 dark:text-amber-400",
+                                            light: "bg-amber-100/50 text-amber-800 border-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-900/50"
+                                        },
+                                        cancelled: {
+                                            solid: "bg-rose-500 text-white border-rose-500 opacity-60",
+                                            outline: "bg-white border-rose-200 text-rose-400 opacity-60 dark:bg-stone-900 dark:border-rose-900 dark:text-rose-500",
+                                            light: "bg-rose-50 text-rose-400 border-rose-100 opacity-60 dark:bg-rose-900/10 dark:text-rose-500 dark:border-rose-900/20"
+                                        }
+                                    }
+
+                                    const style = statusStyles[b.status as keyof typeof statusStyles] || statusStyles.pending
+
+                                    let variantClass = ""
+                                    let icon = null
+
+                                    if (isEnd) {
+                                        // Check-out: Outline style of the status
+                                        variantClass = `${style.outline} border`
+                                        icon = <LogOut className="w-3 h-3" />
+                                    } else if (isStart) {
+                                        // Check-in: Solid style of the status
+                                        variantClass = `${style.solid} border`
+                                        icon = <LogIn className="w-3 h-3" />
+                                    } else {
+                                        // Stay: Light style
+                                        variantClass = style.light
+                                    }
 
                                     return (
                                         <button
@@ -127,14 +157,15 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                                                 onSelectBooking(b)
                                             }}
                                             className={cn(
-                                                "w-full text-left text-[10px] font-medium px-1.5 py-1 rounded truncate border shadow-sm transition-transform hover:scale-[1.02] flex items-center gap-1",
-                                                colorClass,
-                                                // Check in/out visual cues could be added here
-                                                b.status === 'pending' && "opacity-70 border-dashed"
+                                                "w-full text-left text-[10px] font-medium px-2 py-1.5 rounded-md truncate transition-all hover:scale-[1.02] flex items-center gap-2",
+                                                variantClass,
+                                                b.status === 'pending' && !isStart && "border-dashed"
                                             )}
                                         >
-                                            <div className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />
-                                            <span className="truncate">{b.guestName}</span>
+                                            {icon || <div className="w-1.5 h-1.5 rounded-full bg-current shrink-0" />}
+                                            <span className="truncate tracking-tight font-medium">
+                                                {b.guestName}
+                                            </span>
                                         </button>
                                     )
                                 })}
@@ -148,6 +179,6 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                     )
                 })}
             </div>
-        </div>
+        </div >
     )
 }
