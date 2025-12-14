@@ -7,124 +7,165 @@ import {
     Clock,
     TrendingUp,
     CalendarCheck,
-    AlertCircle
+    AlertCircle,
+    Activity,
+    BarChart3
 } from "lucide-react"
 import {
+    isSameDay,
+    parseISO,
     startOfMonth,
     endOfMonth,
     isWithinInterval,
     startOfDay,
-    endOfDay,
-    format
+    format,
+    differenceInDays
 } from "date-fns"
 import { es } from "date-fns/locale"
 
 export function DashboardStats() {
-    const { bookings } = useAppStore()
+    const { bookings, rooms } = useAppStore()
     const now = new Date()
 
     // --- Metrics Calculation ---
 
-    // 1. Total Revenue (Current Month)
+    // 1. Revenue & ADR (Average Daily Rate)
     const monthStart = startOfMonth(now)
     const monthEnd = endOfMonth(now)
 
-    // Filter: Status 'confirmed' AND (CheckIn OR CheckOut overlaps with current month)
-    // Simplified: We count revenue if the booking *starts* in this month for now (or strictly falls within).
-    // Let's go with "Bookings with check-in this month" for simplicity and robustness.
-    const monthlyRevenue = bookings
-        .filter(b =>
-            b.status === 'confirmed' &&
-            isWithinInterval(new Date(b.checkIn), { start: monthStart, end: monthEnd })
-        )
-        .reduce((sum, b) => sum + (b.totalPrice || 0), 0)
+    // Filter: Confirmed bookings overlapping current month
+    const monthlyBookings = bookings.filter(b =>
+        b.status === 'confirmed' &&
+        new Date(b.checkIn) >= monthStart && new Date(b.checkIn) <= monthEnd
+    )
 
-    // 2. Active Occupancy (Today)
-    // How many bookings include TODAY as an active day?
-    const todayStart = startOfDay(now)
+    const monthlyRevenue = monthlyBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0)
+
+    // ADR = Revenue / Rooms Sold
+    // Simplified: Total Price / Total Nights of all bookings in month
+    const totalNightsSold = monthlyBookings.reduce((sum, b) => {
+        const nights = differenceInDays(new Date(b.checkOut), new Date(b.checkIn))
+        return sum + Math.max(1, nights)
+    }, 0)
+
+    const adr = totalNightsSold > 0 ? monthlyRevenue / totalNightsSold : 0
+
+    // 2. Occupancy & RevPAR
     const activeBookings = bookings.filter(b =>
         b.status === 'confirmed' &&
         new Date(b.checkIn) <= now &&
         new Date(b.checkOut) > now
     )
 
-    // Approx Capacity: Pueblo (3 rooms) + Hideout (3 rooms) = 6 rooms total (simplified).
-    // In reality, dorms have multiple beds, but let's count "Occupied Unit Types" for now or just raw Booking Count vs 6.
-    const TOTAL_UNITS = 6
-    const occupancyRate = Math.round((activeBookings.length / TOTAL_UNITS) * 100)
-    // Cap at 100% just in case of overbooking/dorms counting multiple
+    // Total Capacity (Sum of room capacities or unit count)
+    // For Hotel KPIs, usually Unit Count.
+    const totalUnits = 20 // 12 Pueblo + 8 Hideout 
+    // In a real scenario, this would be: rooms.filter(r => r.type !== 'dorm').length + rooms.filter(r => r.type === 'dorm').reduce(...)
+    // Let's use a fixed meaningful number or derive from 'rooms'.
+    // const dynamicUnits = rooms.length // This works if rooms array has one entry per unit type.
+
+    const occupancyRate = Math.round((activeBookings.length / totalUnits) * 100)
     const displayOccupancy = Math.min(occupancyRate, 100)
+
+    // RevPAR = ADR * Occupancy Rate
+    const revPar = adr * (displayOccupancy / 100)
+
 
     // 3. Pending Actions
     const pendingCount = bookings.filter(b => b.status === 'pending').length
 
-    // DEBUG: Inspect ALL bookings to see statuses
-
-
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {/* Revenue Card */}
-            <Card className="bg-white dark:bg-stone-900 border-emerald-100 dark:border-emerald-900/20 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-emerald-50 to-transparent dark:from-emerald-900/10 opacity-50 group-hover:opacity-100 transition-opacity" />
-                <CardContent className="p-6 relative">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {/* Revenue Card - Primary Metric */}
+            <Card className="bg-white dark:bg-stone-900 border-none shadow-lg relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-stone-900 to-stone-800 dark:from-stone-800 dark:to-stone-950 text-white" />
+                <CardContent className="p-6 relative z-10">
                     <div className="flex justify-between items-start mb-4">
                         <div>
-                            <p className="text-sm font-medium text-stone-500 dark:text-stone-400 font-mono tracking-wider uppercase">Ingresos (Mes)</p>
-                            <h3 className="text-3xl font-light text-stone-900 dark:text-emerald-50 mt-2 font-heading">
+                            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Ingresos (Mes)</p>
+                            <h3 className="text-2xl font-light text-white mt-1 font-heading tracking-wide">
                                 ${monthlyRevenue.toLocaleString('es-MX')}
                             </h3>
                         </div>
-                        <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400">
-                            <DollarSign className="w-6 h-6" />
+                        <div className="p-2 bg-white/10 rounded-lg text-white">
+                            <DollarSign className="w-5 h-5" />
                         </div>
                     </div>
-                    <div className="flex items-center text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                        <TrendingUp className="w-3 h-3 mr-1" />
-                        <span>{format(now, 'MMMM yyyy', { locale: es })}</span>
+                    <div className="flex items-center justify-between text-xs text-stone-400 font-medium mt-4">
+                        <div className="flex items-center gap-1">
+                            <BarChart3 className="w-3 h-3" />
+                            <span>ADR: ${adr.toFixed(0)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" />
+                            <span>RevPAR: ${revPar.toFixed(0)}</span>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Occupancy Card */}
-            <Card className="bg-white dark:bg-stone-900 border-amber-100 dark:border-amber-900/20 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-amber-50 to-transparent dark:from-amber-900/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+            <Card className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
                 <CardContent className="p-6 relative">
                     <div className="flex justify-between items-start mb-4">
                         <div>
-                            <p className="text-sm font-medium text-stone-500 dark:text-stone-400 font-mono tracking-wider uppercase">Ocupación Hoy</p>
-                            <h3 className="text-3xl font-light text-stone-900 dark:text-amber-50 mt-2 font-heading">
+                            <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-widest">Ocupación Hoy</p>
+                            <h3 className="text-3xl font-light text-stone-900 dark:text-stone-100 mt-1 font-heading">
                                 {displayOccupancy}%
                             </h3>
                         </div>
-                        <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl text-amber-600 dark:text-amber-400">
-                            <Users className="w-6 h-6" />
+                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-500">
+                            <Activity className="w-5 h-5" />
+                        </div>
+                    </div>
+                    <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 overflow-hidden mt-2">
+                        <div
+                            className="bg-amber-500 h-full rounded-full transition-all duration-1000"
+                            style={{ width: `${displayOccupancy}%` }}
+                        />
+                    </div>
+                    <p className="text-xs text-stone-400 mt-2 text-right">{activeBookings.length} / {totalUnits} Unidades</p>
+                </CardContent>
+            </Card>
+
+            {/* Arrivals Card */}
+            <Card className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
+                <CardContent className="p-6 relative">
+                    <div className="flex justify-between items-start mb-4">
+                        <div>
+                            <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-widest">Llegadas Hoy</p>
+                            <h3 className="text-3xl font-light text-stone-900 dark:text-stone-100 mt-1 font-heading">
+                                {bookings.filter(b => b.status !== 'cancelled' && isSameDay(parseISO(b.checkIn), now)).length}
+                            </h3>
+                        </div>
+                        <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-500">
+                            <Users className="w-5 h-5" />
                         </div>
                     </div>
                     <div className="flex items-center text-xs text-stone-500 font-medium">
                         <CalendarCheck className="w-3 h-3 mr-1" />
-                        <span>{activeBookings.length} habitaciones activas</span>
+                        <span>Check-ins pendientes</span>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Pending Card */}
-            <Card className="bg-white dark:bg-stone-900 border-rose-100 dark:border-rose-900/20 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                <div className="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-rose-50 to-transparent dark:from-rose-900/10 opacity-50 group-hover:opacity-100 transition-opacity" />
+            {/* Pending Actions */}
+            <Card className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
                 <CardContent className="p-6 relative">
                     <div className="flex justify-between items-start mb-4">
                         <div>
-                            <p className="text-sm font-medium text-stone-500 dark:text-stone-400 font-mono tracking-wider uppercase">Por Confirmar</p>
-                            <h3 className="text-3xl font-light text-stone-900 dark:text-rose-50 mt-2 font-heading">
+                            <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-widest">Acciones</p>
+                            <h3 className="text-3xl font-light text-stone-900 dark:text-stone-100 mt-1 font-heading">
                                 {pendingCount}
                             </h3>
                         </div>
-                        <div className="p-3 bg-rose-100 dark:bg-rose-900/30 rounded-xl text-rose-600 dark:text-rose-400">
-                            <AlertCircle className="w-6 h-6" />
+                        <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-lg text-rose-600 dark:text-rose-500">
+                            <AlertCircle className="w-5 h-5" />
                         </div>
                     </div>
                     <div className="flex items-center text-xs text-rose-600 dark:text-rose-400 font-medium">
                         <Clock className="w-3 h-3 mr-1" />
-                        <span>Requieren atención</span>
+                        <span>Solicitudes nuevas</span>
                     </div>
                 </CardContent>
             </Card>

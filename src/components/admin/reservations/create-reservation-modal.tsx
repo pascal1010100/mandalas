@@ -9,6 +9,7 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -28,7 +29,9 @@ import {
     ChevronLeft,
     Users,
     BedDouble,
-    ArrowRight
+    ArrowRight,
+    Sparkles,
+    Check
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -38,18 +41,19 @@ interface CreateReservationModalProps {
     onOpenChange: (open: boolean) => void
 }
 
-const ROOM_OPTIONS = {
-    pueblo: [
-        { id: 'dorm', label: 'Dormitorio Compartido', key: 'pueblo_dorm' },
-        { id: 'private', label: 'Habitación Privada', key: 'pueblo_private' },
-        { id: 'suite', label: 'Suite con Baño', key: 'pueblo_suite' },
-    ],
-    hideout: [
-        { id: 'dorm', label: 'Dormitorio Selva', key: 'hideout_dorm' },
-        { id: 'private', label: 'Cabaña Privada', key: 'hideout_private' },
-        { id: 'suite', label: 'Master Suite', key: 'hideout_suite' },
-    ]
+const ROOM_DETAILS: Record<string, string[]> = {
+    // Pueblo
+    'pueblo_dorm': ["Camas con cortinas de privacidad", "Lockers individuales", "Enchufe y luz de lectura"],
+    'pueblo_private': ["Cama Matrimonial", "Baño Privado", "Ventilador de techo"],
+    'pueblo_suite': ["Vista panorámica al lago", "Balcón privado", "Cama King Size"],
+
+    // Hideout
+    'hideout_dorm': ["Baño privado al aire libre", "Porche con hamaca", "Construcción de bambú"],
+    'hideout_private': ["Cama Queen real", "Electricidad y WiFi", "Sonidos de la naturaleza"],
+    'hideout_suite': ["Espacioso y aireado", "Vistas al jardín", "Ideal para grupos"] // Matches public page logic for 'Suite' slot
 }
+
+
 
 export function CreateReservationModal({ open, onOpenChange }: CreateReservationModalProps) {
     const { addBooking, checkAvailability, rooms } = useAppStore()
@@ -92,28 +96,34 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
     const availableRooms = useMemo(() => {
         if (!dateRange.from || !dateRange.to) return []
 
-        const opts = ROOM_OPTIONS[location]
-        return opts.map(room => {
-            const roomConfig = rooms.find(r => r.id === room.key)
-            const price = roomConfig?.basePrice || 0
-            const maxGuests = roomConfig?.maxGuests || 2 // Default fallback
+        // Filter rooms by current location selection and map to display format
+        const dynamicRooms = rooms.filter(r => r.location === location)
 
-            // Infer type from ID for display
+        // Sort by hierarchy: Dorm -> Private -> Suite
+        const sortedRooms = dynamicRooms.sort((a, b) => {
+            const order: Record<string, number> = { 'dorm': 1, 'private': 2, 'suite': 3 }
+            return (order[a.type] || 99) - (order[b.type] || 99)
+        })
+
+        return sortedRooms.map(roomConfig => {
+            // Infer type label for display
             let typeLabel = "Cama"
-            if (room.id === 'private') typeLabel = "Habitación"
-            if (room.id === 'suite') typeLabel = "Suite"
+            if (roomConfig.type === 'private') typeLabel = "Habitación"
+            if (roomConfig.type === 'suite') typeLabel = "Suite"
 
             const isAvailable = checkAvailability(
                 location,
-                room.id,
+                roomConfig.id,
                 dateRange.from!.toISOString(),
                 dateRange.to!.toISOString(),
                 parseInt(guests) || 1
             )
             return {
-                ...room,
-                price: price,
-                maxGuests: maxGuests,
+                id: roomConfig.id, // Use actual RoomConfig ID (e.g. pueblo_dorm)
+                label: roomConfig.label,
+                key: roomConfig.id, // redundant but kept for compatibility if needed
+                price: roomConfig.basePrice,
+                maxGuests: roomConfig.maxGuests,
                 type: typeLabel,
                 available: isAvailable
             }
@@ -168,8 +178,8 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
             location,
             roomType: selectedRoom.id,
             guests,
-            checkIn: dateRange.from.toISOString(),
-            checkOut: dateRange.to.toISOString(),
+            checkIn: format(dateRange.from, 'yyyy-MM-dd'),
+            checkOut: format(dateRange.to, 'yyyy-MM-dd'),
             status: status === 'confirmed' ? 'confirmed' : 'pending',
             cancellationReason: undefined,
             refundStatus: undefined,
@@ -249,6 +259,31 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                                     />
                                 </div>
                             </div>
+
+                            {/* Room Amenities Cheat Sheet */}
+                            {selectedRoom && ROOM_DETAILS[selectedRoom.id] && (
+                                <div className="bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-900 dark:to-stone-800/50 p-5 rounded-2xl border border-stone-200 dark:border-stone-800 mt-4 shadow-sm relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                        <Sparkles className="w-12 h-12 text-amber-500" />
+                                    </div>
+                                    <div className="relative z-10">
+                                        <h4 className="text-[10px] uppercase tracking-[0.2em] font-bold text-amber-600 dark:text-amber-500 mb-3 flex items-center gap-2">
+                                            <Sparkles className="w-3 h-3" />
+                                            Experiencia Incluida
+                                        </h4>
+                                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            {ROOM_DETAILS[selectedRoom.id].map((feature, idx) => (
+                                                <li key={idx} className="text-xs text-stone-700 dark:text-stone-300 flex items-start gap-2">
+                                                    <div className="mt-0.5 p-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
+                                                        <Check className="w-2.5 h-2.5" strokeWidth={3} />
+                                                    </div>
+                                                    <span className="leading-tight">{feature}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -265,6 +300,9 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                             <div className="grid grid-cols-1 gap-3">
                                 {availableRooms.map((room) => {
                                     const isSelected = selectedRoom?.id === room.id
+                                    const numGuests = parseInt(guests) || 1
+                                    const numNights = (dateRange.from && dateRange.to) ? differenceInDays(dateRange.to, dateRange.from) : 1
+                                    const totalPrice = room.price * numGuests * numNights
 
                                     // Define static images for admin view (reliable fallback)
                                     let roomImage = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300"; // Dorm default
@@ -276,49 +314,78 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                                             key={room.id}
                                             onClick={() => handleSelectRoom(room)}
                                             className={cn(
-                                                "relative flex gap-4 p-3 rounded-xl border cursor-pointer transition-all duration-200 group bg-white dark:bg-stone-900",
+                                                "relative flex flex-col md:flex-row gap-4 p-4 rounded-2xl border cursor-pointer transition-all duration-300 group bg-white dark:bg-stone-900",
                                                 isSelected
-                                                    ? "border-amber-500 ring-1 ring-amber-500 shadow-md bg-amber-50/10"
-                                                    : "border-stone-200 dark:border-stone-800 hover:border-amber-400/50 hover:shadow-sm",
-                                                !room.available && "opacity-50 cursor-not-allowed grayscale"
+                                                    ? "border-amber-500 ring-2 ring-amber-500/20 shadow-lg bg-orange-50/10 dark:bg-orange-900/10"
+                                                    : "border-stone-200 dark:border-stone-800 hover:border-amber-500/50 hover:shadow-md",
+                                                !room.available && "opacity-60 cursor-not-allowed grayscale-[0.5]"
                                             )}
                                         >
                                             {/* Thumbnail */}
-                                            <div className="w-24 h-20 rounded-lg bg-stone-200 shrink-0 overflow-hidden relative">
-                                                <img src={roomImage} alt={room.label} className="w-full h-full object-cover" />
+                                            <div className="w-full md:w-32 h-32 rounded-xl bg-stone-200 shrink-0 overflow-hidden relative shadow-inner">
+                                                <img src={roomImage} alt={room.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                                 {isSelected && (
-                                                    <div className="absolute inset-0 bg-amber-500/20 grid place-items-center">
-                                                        <div className="bg-amber-500 text-white rounded-full p-1">
-                                                            <CheckCircle className="w-4 h-4" />
+                                                    <div className="absolute inset-0 bg-amber-500/20 grid place-items-center backdrop-blur-[2px]">
+                                                        <div className="bg-amber-500 text-white rounded-full p-1.5 shadow-lg animate-in zoom-in-50">
+                                                            <CheckCircle className="w-5 h-5" />
                                                         </div>
                                                     </div>
                                                 )}
                                             </div>
 
                                             {/* Info */}
-                                            <div className="flex-1 flex flex-col justify-center">
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <h4 className={cn("font-bold text-sm", isSelected ? "text-amber-700 dark:text-amber-400" : "text-stone-900 dark:text-stone-100")}>
-                                                            {room.label}
-                                                        </h4>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <Users className="w-3 h-3" /> Max {room.maxGuests}
-                                                            <BedDouble className="w-3 h-3" /> {room.type}
+                                            <div className="flex-1 flex flex-col justify-between py-1">
+                                                <div>
+                                                    <div className="flex justify-between items-start">
+                                                        <div>
+                                                            <h4 className={cn("font-bold text-base font-heading tracking-wide", isSelected ? "text-amber-700 dark:text-amber-400" : "text-stone-900 dark:text-stone-100")}>
+                                                                {room.label}
+                                                            </h4>
+                                                            <div className="flex items-center gap-3 mt-2">
+                                                                <Badge variant="secondary" className="bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700 h-6">
+                                                                    <BedDouble className="w-3 h-3 mr-1.5" />
+                                                                    {room.type === 'dorm' ? 'Dormitorio' : room.type === 'private' ? 'Privada' : 'Suite'}
+                                                                </Badge>
+                                                                <div className="text-xs text-stone-500 flex items-center gap-1">
+                                                                    <Users className="w-3 h-3" />
+                                                                    Máx. {room.maxGuests}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Price Block */}
+                                                        <div className="text-right">
+                                                            <div className="font-heading font-bold text-xl text-stone-900 dark:text-white flex items-center justify-end gap-1">
+                                                                ${totalPrice.toLocaleString('es-MX')}
+                                                                <span className="text-[10px] uppercase font-sans font-normal text-stone-400 translate-y-0.5">Total</span>
+                                                            </div>
+                                                            {/* Explicit Breakdown for Clarity */}
+                                                            <div className="text-[10px] text-stone-400 font-mono mt-1 bg-stone-50 dark:bg-stone-800 px-2 py-1 rounded inline-block border border-stone-100 dark:border-stone-700">
+                                                                ${room.price} x {numGuests}p x {numNights}n
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <div className="font-heading font-bold text-lg text-stone-900 dark:text-white">
-                                                            ${room.price}
-                                                        </div>
-                                                        <span className="text-[10px] text-stone-400">/ noche</span>
-                                                    </div>
+                                                </div>
+
+                                                {/* Mini Amenities Line */}
+                                                <div className="mt-3 flex gap-4 text-xs text-stone-500 border-t border-dashed border-stone-100 dark:border-stone-800 pt-3">
+                                                    {/* Dynamic Amenities from ROOM_DETAILS could go here simply */}
+                                                    {ROOM_DETAILS[room.id] && ROOM_DETAILS[room.id].slice(0, 2).map((feat, i) => (
+                                                        <span key={i} className="flex items-center gap-1 opacity-80">
+                                                            <div className="w-1 h-1 bg-amber-500 rounded-full" /> {feat}
+                                                        </span>
+                                                    ))}
+                                                    {ROOM_DETAILS[room.id] && ROOM_DETAILS[room.id].length > 2 && (
+                                                        <span className="opacity-60">+ más</span>
+                                                    )}
                                                 </div>
                                             </div>
 
                                             {!room.available && (
-                                                <div className="absolute inset-0 bg-white/40 dark:bg-black/40 flex items-center justify-center backdrop-blur-[1px] z-10 cursor-not-allowed">
-                                                    <span className="bg-stone-900 text-white text-xs px-2 py-1 rounded font-bold uppercase tracking-wider shadow-lg">Ocupada</span>
+                                                <div className="absolute inset-0 bg-white/60 dark:bg-black/60 flex items-center justify-center backdrop-blur-[2px] z-20 cursor-not-allowed rounded-2xl">
+                                                    <Badge variant="destructive" className="text-xs px-3 py-1 font-bold uppercase tracking-wider shadow-xl scale-110">
+                                                        No Disponible
+                                                    </Badge>
                                                 </div>
                                             )}
                                         </div>

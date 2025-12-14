@@ -11,8 +11,14 @@ interface EventsCalendarProps {
     filterLocation?: 'Pueblo' | 'Hideout'
 }
 
+import { useEffect } from "react"
+
 export function EventsCalendar({ filterLocation }: EventsCalendarProps) {
-    const { events } = useAppStore()
+    const { events, fetchEvents } = useAppStore()
+
+    useEffect(() => {
+        fetchEvents()
+    }, [])
 
     const filteredEvents = filterLocation
         ? events.filter(e => e.location === filterLocation)
@@ -60,15 +66,15 @@ export function EventsCalendar({ filterLocation }: EventsCalendarProps) {
                     </p>
                 </div>
 
-                <StaggerReveal className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredEvents.length === 0 ? (
-                        <div className="col-span-full h-64 flex flex-col items-center justify-center text-stone-400 dark:text-stone-500 border-2 border-dashed border-stone-200 dark:border-stone-800 rounded-xl bg-stone-50/50 dark:bg-stone-900/30">
-                            <CalendarDays className="w-12 h-12 mb-4 opacity-20" />
-                            <p className="font-medium text-lg">No hay eventos programados</p>
-                            <p className="text-sm">Pronto actualizaremos la agenda.</p>
-                        </div>
-                    ) : (
-                        filteredEvents.map((event) => {
+                {filteredEvents.length === 0 ? (
+                    <div className="h-64 flex flex-col items-center justify-center text-stone-400 dark:text-stone-500 border-2 border-dashed border-stone-200 dark:border-stone-800 rounded-xl bg-stone-50/50 dark:bg-stone-900/30">
+                        <CalendarDays className="w-12 h-12 mb-4 opacity-20" />
+                        <p className="font-medium text-lg">No hay eventos programados</p>
+                        <p className="text-sm">Pronto actualizaremos la agenda.</p>
+                    </div>
+                ) : (
+                    <StaggerReveal className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {filteredEvents.map((event) => {
                             const { icon: Icon, style } = getEventProps(event.category)
                             const dateObj = new Date(event.date)
 
@@ -101,9 +107,9 @@ export function EventsCalendar({ filterLocation }: EventsCalendarProps) {
                                     </div>
                                 </StaggerItem>
                             )
-                        })
-                    )}
-                </StaggerReveal>
+                        })}
+                    </StaggerReveal>
+                )}
             </div>
         </section>
     )

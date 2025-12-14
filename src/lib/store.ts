@@ -170,11 +170,22 @@ export const useAppStore = create<AppState>()(
                 const { data, error } = await supabase.from('events').select('*').order('date', { ascending: true })
                 if (error) {
                     console.error('Error fetching events:', error)
+                    // Don't clear events on error, keep current state (which might be initialEvents)
                     return
                 }
                 console.log("Events fetched:", data?.length)
-                if (data) {
+
+                if (data && data.length > 0) {
                     set({ events: data as AppEvent[] })
+                } else {
+                    // Fallback: Force initial demo data if DB is empty to ensure UI is lively
+                    console.log("No events in DB or fetch failed, validating fallback...")
+                    set(state => {
+                        if (state.events.length === 0) {
+                            return { events: initialEvents }
+                        }
+                        return {}
+                    })
                 }
             },
 
@@ -336,22 +347,24 @@ export const useAppStore = create<AppState>()(
 
             resetData: () => set({ bookings: [], events: initialEvents }),
 
-            checkAvailability: (location, roomType, startDate, endDate, requestedGuests = 1) => {
+            checkAvailability: (location, roomId, startDate, endDate, requestedGuests = 1) => {
                 const state = get();
                 const start = new Date(startDate);
                 const end = new Date(endDate);
 
-                // Dynamic Capacity Logic
-                const roomId = `${location}_${roomType}`;
+                // Use the passed ID directly. It should match the DB key (e.g. 'pueblo_dorm')
                 const roomConfig = state.rooms.find(r => r.id === roomId);
-                const capacity = roomConfig?.capacity || (roomType.includes('dorm') ? 6 : 1);
-                const isDorm = roomType.includes('dorm');
-
+                // Fallback capacity logic
+                const isDorm = roomId.includes('dorm');
+                const capacity = roomConfig?.capacity || (isDorm ? 6 : 1);
 
                 const overlappingBookings = state.bookings.filter(booking => {
                     if (booking.status === 'cancelled') return false;
-                    if (booking.location !== location) return false;
-                    if (booking.roomType !== roomType) return false;
+                    // Double check location just in case
+                    if (booking.location && booking.location !== location) return false;
+
+                    // Match the stored roomType (which is actually the ID) against the checked ID
+                    if (booking.roomType !== roomId) return false;
 
                     const bookingStart = new Date(booking.checkIn);
                     const bookingEnd = new Date(booking.checkOut);
@@ -368,12 +381,7 @@ export const useAppStore = create<AppState>()(
                     const blocked = (currentOccupancy + requestedGuests) > capacity;
 
                     if (blocked || currentOccupancy > 0) {
-                        console.log(`[Availability] Dorm Check (Dynamic): ${location} | ${roomType}`, {
-                            limit: capacity,
-                            current: currentOccupancy,
-                            request: requestedGuests,
-                            willBlock: blocked
-                        });
+                        console.log(`[Availability] Dorm Check: ${roomId} (${currentOccupancy}/${capacity}) + Req: ${requestedGuests} -> Blocked: ${blocked}`);
                     }
                     return !blocked;
 
@@ -381,36 +389,30 @@ export const useAppStore = create<AppState>()(
                     // Private/Suite Checks:
 
                     // 1. Max Occupancy Check (Physical limit)
-                    // If roomConfig says maxGuests is 2, and we request 3, it's blocked.
                     if (roomConfig && requestedGuests > roomConfig.maxGuests) {
-                        console.log(`[Availability] Blocked Private (MaxGuests): ${location} | ${roomType} - Req: ${requestedGuests} > Max: ${roomConfig.maxGuests}`);
                         return false;
                     }
 
                     // 2. Inventory Check (Capacity = Number of Rooms)
-                    // Private/Suite logic implies capacity is 1 booking unit.
+                    // If we have 1 unit, and 1 overlap, it's full.
                     const blocked = overlappingBookings.length >= capacity;
-                    if (blocked) {
-                        console.log(`[Availability] Blocked Private (Inventory): ${location} | ${roomType} - Count: ${overlappingBookings.length}/${capacity}`);
-                    }
                     return !blocked;
                 }
             },
 
-            getRemainingCapacity: (location, roomType, startDate, endDate) => {
+            getRemainingCapacity: (location, roomId, startDate, endDate) => {
                 const state = get();
                 const start = new Date(startDate);
                 const end = new Date(endDate);
 
-                const roomId = `${location}_${roomType}`;
                 const roomConfig = state.rooms.find(r => r.id === roomId);
-                const capacity = roomConfig?.capacity || (roomType.includes('dorm') ? 6 : 1);
-                const isDorm = roomType.includes('dorm');
+                const isDorm = roomId.includes('dorm');
+                const capacity = roomConfig?.capacity || (isDorm ? 6 : 1);
 
                 const overlappingBookings = state.bookings.filter(booking => {
                     if (booking.status === 'cancelled') return false;
-                    if (booking.location !== location) return false;
-                    if (booking.roomType !== roomType) return false;
+                    if (booking.location && booking.location !== location) return false;
+                    if (booking.roomType !== roomId) return false;
 
                     const bookingStart = new Date(booking.checkIn);
                     const bookingEnd = new Date(booking.checkOut);
@@ -424,7 +426,6 @@ export const useAppStore = create<AppState>()(
                     }, 0);
                     return Math.max(0, capacity - currentOccupancy);
                 } else {
-                    // For Private rooms, if we have multiple units (capacity > 1), we return remaining units.
                     return Math.max(0, capacity - overlappingBookings.length);
                 }
             }
