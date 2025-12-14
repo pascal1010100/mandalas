@@ -12,7 +12,7 @@ import { Leaf, Waves, Mountain, Flame, Cloud, Stars } from "lucide-react"
 import { EventsCalendar } from "@/components/shared/events-calendar"
 
 export default function HideoutPage() {
-    const { prices } = useAppStore()
+    const { rooms } = useAppStore()
 
     return (
         <div className="bg-background min-h-screen">
@@ -86,7 +86,7 @@ export default function HideoutPage() {
                                         <li>• Construcción de bambú</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-lime-600">${prices?.['hideout_dorm'] || 16}</span>
+                                        <span className="text-3xl font-bold text-lime-600">${rooms?.find(r => r.id === 'hideout_dorm')?.basePrice || 16}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
@@ -95,7 +95,7 @@ export default function HideoutPage() {
                                         defaultLocation="hideout"
                                         defaultRoomType="dorm"
                                         roomName="Dormitorio Compartido Hideout"
-                                        pricePerNight={prices?.['hideout_dorm'] || 16}
+                                        pricePerNight={rooms?.find(r => r.id === 'hideout_dorm')?.basePrice || 16}
                                     >
                                         {/* Force re-render */}
                                         <Button
@@ -126,7 +126,7 @@ export default function HideoutPage() {
                                         <li>• Sonidos de la naturaleza</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-lime-600">${prices?.['hideout_private'] || 40}</span>
+                                        <span className="text-3xl font-bold text-lime-600">${rooms?.find(r => r.id === 'hideout_private')?.basePrice || 40}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
@@ -135,7 +135,7 @@ export default function HideoutPage() {
                                         defaultLocation="hideout"
                                         defaultRoomType="private"
                                         roomName="Cabaña Privada"
-                                        pricePerNight={prices?.['hideout_private'] || 40}
+                                        pricePerNight={rooms?.find(r => r.id === 'hideout_private')?.basePrice || 40}
                                     >
                                         <Button
                                             className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-lime-500 to-lime-700"
@@ -165,7 +165,7 @@ export default function HideoutPage() {
                                         <li>• Ideal para grupos</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-lime-600">${prices?.['hideout_suite'] || 55}</span>
+                                        <span className="text-3xl font-bold text-lime-600">${rooms?.find(r => r.id === 'hideout_suite')?.basePrice || 55}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
@@ -174,7 +174,7 @@ export default function HideoutPage() {
                                         defaultLocation="hideout"
                                         defaultRoomType="suite"
                                         roomName="Suite Lakefront Premium"
-                                        pricePerNight={prices?.['hideout_suite'] || 55}
+                                        pricePerNight={rooms?.find(r => r.id === 'hideout_suite')?.basePrice || 55}
                                     >
                                         <Button
                                             className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-lime-500 to-lime-700"

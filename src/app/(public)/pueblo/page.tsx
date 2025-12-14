@@ -11,7 +11,7 @@ import { BookingModal } from "@/components/shared/booking-modal"
 import { useAppStore } from "@/lib/store"
 
 export default function PuebloPage() {
-    const { prices } = useAppStore()
+    const { rooms } = useAppStore()
 
     return (
         <div className="bg-background min-h-screen">
@@ -86,7 +86,7 @@ export default function PuebloPage() {
                                         <li>• Enchufe y luz de lectura</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">${prices?.['pueblo_dorm'] || 18}</span>
+                                        <span className="text-3xl font-bold text-amber-600">${rooms?.find(r => r.id === 'pueblo_dorm')?.basePrice || 18}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
@@ -95,7 +95,7 @@ export default function PuebloPage() {
                                         defaultLocation="pueblo"
                                         defaultRoomType="dorm"
                                         roomName="Dormitorio Compartido"
-                                        pricePerNight={prices?.['pueblo_dorm'] || 18}
+                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_dorm')?.basePrice || 18}
                                     >
                                         <Button
                                             className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
@@ -125,7 +125,7 @@ export default function PuebloPage() {
                                         <li>• Ventilador de techo</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">${prices?.['pueblo_private'] || 35}</span>
+                                        <span className="text-3xl font-bold text-amber-600">${rooms?.find(r => r.id === 'pueblo_private')?.basePrice || 35}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
@@ -134,7 +134,7 @@ export default function PuebloPage() {
                                         defaultLocation="pueblo"
                                         defaultRoomType="private"
                                         roomName="Habitación Privada Estándar"
-                                        pricePerNight={prices?.['pueblo_private'] || 35}
+                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_private')?.basePrice || 35}
                                     >
                                         <Button
                                             className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
@@ -164,7 +164,7 @@ export default function PuebloPage() {
                                         <li>• Cama King Size</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">${prices?.['pueblo_suite'] || 55}</span>
+                                        <span className="text-3xl font-bold text-amber-600">${rooms?.find(r => r.id === 'pueblo_suite')?.basePrice || 55}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
@@ -173,7 +173,7 @@ export default function PuebloPage() {
                                         defaultLocation="pueblo"
                                         defaultRoomType="suite"
                                         roomName="Suite con Vista"
-                                        pricePerNight={prices?.['pueblo_suite'] || 55}
+                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_suite')?.basePrice || 55}
                                     >
                                         <Button
                                             className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"

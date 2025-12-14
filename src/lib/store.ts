@@ -34,10 +34,20 @@ export interface AppEvent {
     location: 'Pueblo' | 'Hideout';
 }
 
+export interface RoomConfig {
+    id: string; // Composite key: `${location}_${roomType}`
+    label: string;
+    location: 'pueblo' | 'hideout';
+    type: 'dorm' | 'private' | 'suite';
+    capacity: number;
+    basePrice: number;
+}
+
 interface AppState {
     bookings: Booking[];
     events: AppEvent[];
-    prices: Record<string, number>;
+
+    rooms: RoomConfig[];
     isLoading: boolean;
 
     // Actions
@@ -47,28 +57,34 @@ interface AppState {
     updateBooking: (id: string, data: Partial<Omit<Booking, 'id' | 'createdAt'>>) => Promise<void>;
     deleteBooking: (id: string) => Promise<void>;
 
-    // Events (Still local for now, or move to DB later)
-    addEvent: (event: Omit<AppEvent, 'id'>) => void;
-    removeEvent: (id: string) => void;
+    // Events
+    fetchEvents: () => Promise<void>;
+    addEvent: (event: Omit<AppEvent, 'id'>) => Promise<void>;
+    removeEvent: (id: string) => Promise<void>;
 
-    // Prices
-    updatePrice: (key: string, value: number) => void;
+    // Room & Price Management
+    updateRoomPrice: (roomId: string, price: number) => void;
+    updateRoomCapacity: (roomId: string, newCapacity: number) => void;
+
+    // Logic
     checkAvailability: (location: string, roomType: string, startDate: string, endDate: string, requestedGuests?: number) => boolean;
     getRemainingCapacity: (location: string, roomType: string, startDate: string, endDate: string) => number;
 }
 
 // --- Initial Data ---
 
-const initialPrices: Record<string, number> = {
-    // Pueblo
-    'pueblo_dorm': 18,
-    'pueblo_private': 35,
-    'pueblo_suite': 55,
-    // Hideout
-    'hideout_dorm': 16,
-    'hideout_private': 40,
-    'hideout_suite': 55,
-}
+const initialRooms: RoomConfig[] = [
+    // PUEBLO
+    { id: 'pueblo_dorm', location: 'pueblo', type: 'dorm', label: 'Dormitorio Pueblo', capacity: 6, basePrice: 18 },
+    { id: 'pueblo_private', location: 'pueblo', type: 'private', label: 'Habitación Privada Pueblo', capacity: 1, basePrice: 35 },
+    { id: 'pueblo_suite', location: 'pueblo', type: 'suite', label: 'Suite Pueblo', capacity: 1, basePrice: 55 },
+    // HIDEOUT
+    { id: 'hideout_dorm', location: 'hideout', type: 'dorm', label: 'Dormitorio Hideout', capacity: 6, basePrice: 16 }, // Assuming 6 for now
+    { id: 'hideout_private', location: 'hideout', type: 'private', label: 'Habitación Privada Hideout', capacity: 1, basePrice: 40 },
+    { id: 'hideout_suite', location: 'hideout', type: 'suite', label: 'Suite Hideout', capacity: 1, basePrice: 55 },
+]
+
+
 
 const initialEvents: AppEvent[] = [
     {
@@ -91,235 +107,252 @@ const initialEvents: AppEvent[] = [
 
 // --- Store ---
 
-export const useAppStore = create<AppState>((set, get) => ({
-    bookings: [],
-    events: initialEvents,
-    prices: initialPrices,
-    isLoading: false,
+import { persist } from 'zustand/middleware'
 
-    fetchBookings: async () => {
-        set({ isLoading: true })
+export const useAppStore = create<AppState>()(
+    persist(
+        (set, get) => ({
+            bookings: [],
+            events: [],
+            rooms: initialRooms,
+            isLoading: false,
 
-        // Check if user is authenticated to avoid RLS error on public pages
-        // const { data: { session } } = await supabase.auth.getSession()
-        // console.log('[Store] Fetching bookings. Session:', session ? 'Active' : 'None')
+            fetchBookings: async () => {
+                set({ isLoading: true })
+                const { data, error } = await supabase.from('bookings').select('*').order('created_at', { ascending: false })
+                console.log('[Store] Supabase response:', { dataCount: data?.length, error })
 
-        // if (!session) {
-        //     console.log('[Store] No session, returning empty bookings')
-        //     // If public, we currently don't fetch full bookings list (Privacy)
-        //     // In a future update, we should fetch a "Public Availability View" (dates only)
-        //     set({ isLoading: false, bookings: [] })
-        //     return
-        // }
+                if (error) {
+                    console.error('Error fetching bookings:', error)
+                    toast.error('Error al cargar reservas')
+                    set({ isLoading: false })
+                    return
+                }
 
-        const { data, error } = await supabase.from('bookings').select('*').order('created_at', { ascending: false })
-        console.log('[Store] Supabase response:', { dataCount: data?.length, error })
+                if (data) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const mappedBookings: Booking[] = data.map((row: any) => ({
+                        id: row.id,
+                        guestName: row.guest_name,
+                        email: row.email,
+                        phone: row.phone,
+                        location: row.location,
+                        roomType: row.room_type,
+                        guests: row.guests,
+                        checkIn: row.check_in,
+                        checkOut: row.check_out,
+                        status: row.status,
+                        totalPrice: row.total_price,
+                        createdAt: new Date(row.created_at),
+                        cancellationReason: row.cancellation_reason,
+                        refundStatus: row.refund_status,
+                        cancelledAt: row.cancelled_at,
+                    }))
+                    set({ bookings: mappedBookings, isLoading: false })
+                }
+            },
 
-        if (error) {
-            console.error('Error fetching bookings:', error)
-            toast.error('Error al cargar reservas')
-            set({ isLoading: false })
-            return
-        }
+            fetchEvents: async () => {
+                const { data, error } = await supabase.from('events').select('*').order('date', { ascending: true })
+                if (error) {
+                    console.error('Error fetching events:', error)
+                    return
+                }
+                if (data) {
+                    set({ events: data as AppEvent[] })
+                }
+            },
 
-        if (data) {
-            // Map DB snake_case to Frontend camelCase
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const mappedBookings: Booking[] = data.map((row: any) => ({
-                id: row.id,
-                guestName: row.guest_name,
-                email: row.email,
-                phone: row.phone,
-                location: row.location,
-                roomType: row.room_type,
-                guests: row.guests,
-                checkIn: row.check_in,
-                checkOut: row.check_out,
-                status: row.status,
-                totalPrice: row.total_price,
-                createdAt: new Date(row.created_at),
-                cancellationReason: row.cancellation_reason,
-                refundStatus: row.refund_status,
-                cancelledAt: row.cancelled_at, // Ensure DB has this or map appropriately
-            }))
-            set({ bookings: mappedBookings, isLoading: false })
-        }
-    },
+            updateRoomPrice: (roomId, price) => set((state) => ({
+                rooms: state.rooms.map(room =>
+                    room.id === roomId ? { ...room, basePrice: price } : room
+                )
+            })),
 
-    updatePrice: (key, value) => set((state) => ({
-        prices: { ...state.prices, [key]: value }
-    })),
+            updateRoomCapacity: (roomId, newCapacity) => set((state) => ({
+                rooms: state.rooms.map(room =>
+                    room.id === roomId ? { ...room, capacity: newCapacity } : room
+                )
+            })),
 
-    addBooking: async (bookingData, totalPrice) => {
-        // Prepare payload for Supabase (snake_case)
-        const computedTotal = totalPrice || bookingData.totalPrice || 0
-        const status = bookingData.status || 'pending'
+            addBooking: async (bookingData, totalPrice) => {
+                const computedTotal = totalPrice || bookingData.totalPrice || 0
+                const status = bookingData.status || 'pending'
 
-        const payload = {
-            guest_name: bookingData.guestName,
-            email: bookingData.email,
-            phone: bookingData.phone,
-            location: bookingData.location,
-            room_type: bookingData.roomType,
-            guests: bookingData.guests,
-            check_in: bookingData.checkIn, // Date "YYYY-MM-DD"
-            check_out: bookingData.checkOut,
-            total_price: computedTotal,
-            status: status
-        }
+                const payload = {
+                    guest_name: bookingData.guestName,
+                    email: bookingData.email,
+                    phone: bookingData.phone,
+                    location: bookingData.location,
+                    room_type: bookingData.roomType,
+                    guests: bookingData.guests,
+                    check_in: bookingData.checkIn,
+                    check_out: bookingData.checkOut,
+                    total_price: computedTotal,
+                    status: status
+                }
 
-        const { error } = await supabase.from('bookings').insert([payload])
+                const { error } = await supabase.from('bookings').insert([payload])
 
-        if (error) {
-            console.error('Error adding booking:', error)
-            toast.error('Error al guardar reserva')
-            throw error
-        }
+                if (error) {
+                    console.error('Error adding booking:', error)
+                    toast.error('Error al guardar reserva')
+                    throw error
+                }
 
-        // Optimistic update or refetch
-        await get().fetchBookings()
-    },
+                await get().fetchBookings()
+            },
 
-    updateBookingStatus: async (id, status) => {
-        const { error } = await supabase.from('bookings').update({ status }).eq('id', id)
-        if (error) {
-            console.error('Error updating status:', error)
-            toast.error('Error al actualizar estado')
-            return
-        }
-        await get().fetchBookings()
-    },
+            updateBookingStatus: async (id, status) => {
+                const { error } = await supabase.from('bookings').update({ status }).eq('id', id)
+                if (error) {
+                    console.error('Error updating status:', error)
+                    toast.error('Error al actualizar estado')
+                    return
+                }
+                await get().fetchBookings()
+            },
 
-    updateBooking: async (id, data) => {
-        // Map partial updates to snake_case if needed
-        // For now simpler to just support status/reasons or general refetch
-        // Implementing support for cancellation logic:
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const payload: any = {}
-        if (data.status) payload.status = data.status
-        if (data.cancellationReason) payload.cancellation_reason = data.cancellationReason
-        if (data.refundStatus) payload.refund_status = data.refundStatus
-        // Add cancelled_at logic if needed, usually handled by trigger or here
-        if (data.status === 'cancelled') payload.cancelled_at = new Date().toISOString()
+            updateBooking: async (id, data) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const payload: any = {}
+                if (data.status) payload.status = data.status
+                if (data.cancellationReason) payload.cancellation_reason = data.cancellationReason
+                if (data.refundStatus) payload.refund_status = data.refundStatus
+                if (data.status === 'cancelled') payload.cancelled_at = new Date().toISOString()
+                // Allow updating other fields if needed, e.g. guests/dates logic handled elsewhere for now
 
-        const { error } = await supabase.from('bookings').update(payload).eq('id', id)
+                const { error } = await supabase.from('bookings').update(payload).eq('id', id)
 
-        if (error) {
-            console.error('Error updating booking:', error)
-            return
-        }
-        await get().fetchBookings()
-    },
+                if (error) {
+                    console.error('Error updating booking:', error)
+                    return
+                }
+                await get().fetchBookings()
+            },
 
-    deleteBooking: async (id) => {
-        const { error } = await supabase.from('bookings').delete().eq('id', id)
-        if (error) {
-            console.error('Error deleting booking:', error)
-            return
-        }
-        set((state) => ({
-            bookings: state.bookings.filter(b => b.id !== id)
-        }))
-    },
+            deleteBooking: async (id) => {
+                const { error } = await supabase.from('bookings').delete().eq('id', id)
+                if (error) {
+                    console.error('Error deleting booking:', error)
+                    return
+                }
+                set((state) => ({
+                    bookings: state.bookings.filter(b => b.id !== id)
+                }))
+            },
 
-    addEvent: (eventData) => set((state) => ({
-        events: [
-            ...state.events,
-            { ...eventData, id: Math.random().toString(36).substring(7) }
-        ]
-    })),
+            addEvent: async (eventData) => {
+                const { error } = await supabase.from('events').insert([eventData])
+                if (error) {
+                    console.error('Error adding event:', error)
+                    toast.error('Error al crear evento')
+                    return
+                }
+                await get().fetchEvents()
+            },
 
-    removeEvent: (id) => set((state) => ({
-        events: state.events.filter(e => e.id !== id)
-    })),
+            removeEvent: async (id) => {
+                const { error } = await supabase.from('events').delete().eq('id', id)
+                if (error) {
+                    console.error('Error deleting event:', error)
+                    toast.error('Error al eliminar evento')
+                    return
+                }
+                await get().fetchEvents()
+            },
 
-    resetData: () => set({ bookings: [], events: initialEvents }),
+            resetData: () => set({ bookings: [], events: initialEvents }),
 
-    checkAvailability: (location, roomType, startDate, endDate, requestedGuests = 1) => {
-        const state = get();
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+            checkAvailability: (location, roomType, startDate, endDate, requestedGuests = 1) => {
+                const state = get();
+                const start = new Date(startDate);
+                const end = new Date(endDate);
 
-        const overlappingBookings = state.bookings.filter(booking => {
-            if (booking.status === 'cancelled') return false;
-            // Booking location/room must match
-            if (booking.location !== location) return false;
-            if (booking.roomType !== roomType) return false;
+                // Dynamic Capacity Logic
+                const roomId = `${location}_${roomType}`;
+                const roomConfig = state.rooms.find(r => r.id === roomId);
+                const capacity = roomConfig?.capacity || (roomType.includes('dorm') ? 6 : 1);
+                const isDorm = roomType.includes('dorm');
 
-            const bookingStart = new Date(booking.checkIn);
-            const bookingEnd = new Date(booking.checkOut);
 
-            // Check for overlap
-            const isOverlap = start < bookingEnd && end > bookingStart;
-            return isOverlap;
-        });
+                const overlappingBookings = state.bookings.filter(booking => {
+                    if (booking.status === 'cancelled') return false;
+                    if (booking.location !== location) return false;
+                    if (booking.roomType !== roomType) return false;
 
-        // Capacity Logic
-        const isDorm = roomType.includes('dorm');
-        const capacity = isDorm ? 6 : 1; // User specified 6 beds for dorms
+                    const bookingStart = new Date(booking.checkIn);
+                    const bookingEnd = new Date(booking.checkOut);
 
-        if (isDorm) {
-            // For dorms, we sum the distinct guests
-            const currentOccupancy = overlappingBookings.reduce((sum, booking) => {
-                const g = parseInt(booking.guests) || 1;
-                console.log(`[CheckAvail] Found overlapping booking: ${booking.id} (${booking.guestName}) - Guests: ${g} - Status: ${booking.status}`);
-                return sum + g;
-            }, 0);
-
-            const blocked = (currentOccupancy + requestedGuests) > capacity;
-
-            if (blocked || currentOccupancy > 0) {
-                console.log(`[Availability] Dorm Check: ${location} | ${roomType}`, {
-                    capacity,
-                    currentOccupancy,
-                    requestedGuests,
-                    willBlock: blocked,
-                    overlappingCount: overlappingBookings.length
+                    return start < bookingEnd && end > bookingStart;
                 });
-            }
-            return !blocked;
 
-        } else {
-            // For Private/Suite, any overlap blocks the room (Capacity 1 booking)
-            const blocked = overlappingBookings.length >= 1;
-            if (blocked) {
-                console.log(`[Availability] Blocked Private: ${location} | ${roomType}`, {
-                    overlaps: overlappingBookings.length
+                if (isDorm) {
+                    const currentOccupancy = overlappingBookings.reduce((sum, booking) => {
+                        const g = parseInt(booking.guests) || 1;
+                        return sum + g;
+                    }, 0);
+
+                    const blocked = (currentOccupancy + requestedGuests) > capacity;
+
+                    if (blocked || currentOccupancy > 0) {
+                        console.log(`[Availability] Dorm Check (Dynamic): ${location} | ${roomType}`, {
+                            limit: capacity,
+                            current: currentOccupancy,
+                            request: requestedGuests,
+                            willBlock: blocked
+                        });
+                    }
+                    return !blocked;
+
+                } else {
+                    // Private/Suite logic implies capacity is 1 booking (regardless of people count inside)
+                    // Unless we want to support multiple private rooms of same type, but simpler model is 1 unit.
+                    // If capacity > 1 for private, it means we have multiple private rooms.
+                    // UPDATE: If capacity is e.g. 3 Private Rooms, we check overlapping count.
+                    const blocked = overlappingBookings.length >= capacity;
+                    if (blocked) {
+                        console.log(`[Availability] Blocked Private (Dynamic): ${location} | ${roomType} - Count: ${overlappingBookings.length}/${capacity}`);
+                    }
+                    return !blocked;
+                }
+            },
+
+            getRemainingCapacity: (location, roomType, startDate, endDate) => {
+                const state = get();
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+
+                const roomId = `${location}_${roomType}`;
+                const roomConfig = state.rooms.find(r => r.id === roomId);
+                const capacity = roomConfig?.capacity || (roomType.includes('dorm') ? 6 : 1);
+                const isDorm = roomType.includes('dorm');
+
+                const overlappingBookings = state.bookings.filter(booking => {
+                    if (booking.status === 'cancelled') return false;
+                    if (booking.location !== location) return false;
+                    if (booking.roomType !== roomType) return false;
+
+                    const bookingStart = new Date(booking.checkIn);
+                    const bookingEnd = new Date(booking.checkOut);
+
+                    return start < bookingEnd && end > bookingStart;
                 });
+
+                if (isDorm) {
+                    const currentOccupancy = overlappingBookings.reduce((sum, booking) => {
+                        return sum + (parseInt(booking.guests) || 1);
+                    }, 0);
+                    return Math.max(0, capacity - currentOccupancy);
+                } else {
+                    // For Private rooms, if we have multiple units (capacity > 1), we return remaining units.
+                    return Math.max(0, capacity - overlappingBookings.length);
+                }
             }
-            return !blocked;
+        }),
+        {
+            name: 'mandalas-storage',
+            partialize: (state) => ({ rooms: state.rooms }),
         }
-    },
-
-    getRemainingCapacity: (location, roomType, startDate, endDate) => {
-        const state = get();
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const isDorm = roomType.includes('dorm');
-        const capacity = isDorm ? 6 : 1;
-
-        const overlappingBookings = state.bookings.filter(booking => {
-            if (booking.status === 'cancelled') return false;
-            // Booking location/room must match
-            if (booking.location !== location) return false;
-            if (booking.roomType !== roomType) return false;
-
-            const bookingStart = new Date(booking.checkIn);
-            const bookingEnd = new Date(booking.checkOut);
-
-            // Check for overlap
-            return start < bookingEnd && end > bookingStart;
-        });
-
-        if (isDorm) {
-            const currentOccupancy = overlappingBookings.reduce((sum, booking) => {
-                return sum + (parseInt(booking.guests) || 1);
-            }, 0);
-            console.log(`[RemainingCap] ${location} ${roomType}: Limit ${capacity} - Occupied ${currentOccupancy} = Remaining ${Math.max(0, capacity - currentOccupancy)}`);
-            return Math.max(0, capacity - currentOccupancy);
-        } else {
-            // For Private/Suite
-            return overlappingBookings.length >= 1 ? 0 : 1;
-        }
-    }
-}))
+    )
+)

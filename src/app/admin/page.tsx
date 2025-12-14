@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useAppStore } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { DollarSign, Users, CalendarDays, Activity, ArrowRight, ArrowUpRight } from "lucide-react"
+import { format } from "date-fns"
 import {
     Table,
     TableBody,
@@ -206,27 +207,70 @@ function AdminContent() {
                     </CardContent>
                 </Card>
 
-                {/* Quick Actions Panel */}
+                {/* Daily Operations Feed */}
                 <div className="space-y-6">
                     <div className="bg-white dark:bg-stone-900/50 rounded-2xl p-6 shadow-lg border border-stone-100 dark:border-stone-800 h-full backdrop-blur-sm">
-                        <h3 className="text-sm font-bold font-heading uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-6">Acciones Rápidas</h3>
-                        <div className="space-y-3">
-                            <Link href="/admin/events?action=new" className="block">
-                                <div className="w-full text-left p-4 rounded-xl bg-stone-50 dark:bg-stone-800/50 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-100 dark:border-stone-700 transition-all group flex items-center justify-between shadow-sm cursor-pointer">
-                                    <span className="font-medium text-sm text-stone-600 dark:text-stone-300 group-hover:text-stone-900 dark:group-hover:text-white">Nuevo Evento</span>
-                                    <ArrowRight className="w-4 h-4 text-stone-300 dark:text-stone-600 group-hover:text-stone-500 dark:group-hover:text-stone-400 transform group-hover:translate-x-1 transition-all" />
-                                </div>
-                            </Link>
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-sm font-bold font-heading uppercase tracking-widest text-stone-900 dark:text-stone-100">
+                                Operaciones del Día
+                            </h3>
+                            <span className="text-xs font-mono text-stone-400 bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">
+                                {format(new Date(), 'dd MMM', { locale: require("date-fns/locale").es })}
+                            </span>
+                        </div>
 
-                            {/* Actions below are placeholders for Phase 7 */}
-                            <button disabled className="w-full text-left p-4 rounded-xl bg-stone-50/50 dark:bg-stone-800/30 border border-stone-100 dark:border-stone-700/50 opacity-60 cursor-not-allowed flex items-center justify-between">
-                                <span className="font-medium text-sm text-stone-400 dark:text-stone-500">Bloquear Fecha (Próx)</span>
-                                <ArrowRight className="w-4 h-4 text-stone-300/50 dark:text-stone-600/50" />
-                            </button>
-                            <button disabled className="w-full text-left p-4 rounded-xl bg-stone-50/50 dark:bg-stone-800/30 border border-stone-100 dark:border-stone-700/50 opacity-60 cursor-not-allowed flex items-center justify-between">
-                                <span className="font-medium text-sm text-stone-400 dark:text-stone-500">Contactar Huésped (Próx)</span>
-                                <ArrowRight className="w-4 h-4 text-stone-300/50 dark:text-stone-600/50" />
-                            </button>
+                        <div className="space-y-6">
+                            {/* Check-ins */}
+                            <div>
+                                <h4 className="text-xs font-bold uppercase text-stone-400 mb-3 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                    Llegadas (Check-in)
+                                </h4>
+                                <div className="space-y-2">
+                                    {bookings.filter(b => b.checkIn === format(new Date(), 'yyyy-MM-dd') && b.status !== 'cancelled').length === 0 ? (
+                                        <p className="text-sm text-stone-400 italic pl-4">No hay llegadas programadas.</p>
+                                    ) : (
+                                        bookings.filter(b => b.checkIn === format(new Date(), 'yyyy-MM-dd') && b.status !== 'cancelled').map(b => (
+                                            <div key={b.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-stone-50 dark:bg-stone-800/50 border border-stone-100 dark:border-stone-700/50 group hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors cursor-pointer">
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="font-bold text-sm text-stone-700 dark:text-stone-200 truncate">{b.guestName}</p>
+                                                    <p className="text-[10px] text-stone-400 uppercase tracking-wide truncate">{b.roomType.replace('_', ' ')} • {b.guests} pax</p>
+                                                </div>
+                                                <Badge className={b.status === 'confirmed' ? "bg-emerald-100 text-emerald-700 border-none shrink-0" : "bg-amber-100 text-amber-700 border-none shrink-0"}>
+                                                    {b.status === 'confirmed' ? 'Conf.' : 'Pend.'}
+                                                </Badge>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="h-px bg-stone-100 dark:bg-stone-800" />
+
+                            {/* Check-outs */}
+                            <div>
+                                <h4 className="text-xs font-bold uppercase text-stone-400 mb-3 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
+                                    Salidas (Check-out)
+                                </h4>
+                                <div className="space-y-2">
+                                    {bookings.filter(b => b.checkOut === format(new Date(), 'yyyy-MM-dd') && b.status !== 'cancelled').length === 0 ? (
+                                        <p className="text-sm text-stone-400 italic pl-4">No hay salidas programadas.</p>
+                                    ) : (
+                                        bookings.filter(b => b.checkOut === format(new Date(), 'yyyy-MM-dd') && b.status !== 'cancelled').map(b => (
+                                            <div key={b.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-stone-50 dark:bg-stone-800/50 border border-stone-100 dark:border-stone-700/50 opacity-75 hover:opacity-100 transition-opacity">
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="font-medium text-sm text-stone-600 dark:text-stone-300 decoration-stone-400 text-stone-500 truncate">{b.guestName}</p>
+                                                    <p className="text-[10px] text-stone-400 uppercase tracking-wide truncate">{b.location}</p>
+                                                </div>
+                                                <div className="text-xs font-mono text-stone-400 shrink-0">
+                                                    ...{b.id.substring(0, 4)}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

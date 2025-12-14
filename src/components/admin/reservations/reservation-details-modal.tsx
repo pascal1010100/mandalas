@@ -368,7 +368,7 @@ export function ReservationDetailsModal({ booking, open, onOpenChange, defaultOp
                                 <p className="text-[10px] uppercase font-bold text-stone-400">Check-in</p>
                                 <p className="font-semibold text-sm text-stone-900 dark:text-stone-100">
                                     {booking.checkIn && !isNaN(new Date(booking.checkIn).getTime())
-                                        ? format(new Date(booking.checkIn), "dd MMM yyyy", { locale: es })
+                                        ? format(new Date(booking.checkIn + 'T12:00:00'), "dd MMM yyyy", { locale: es })
                                         : "Fecha inválida"}
                                 </p>
                             </div>
@@ -378,7 +378,7 @@ export function ReservationDetailsModal({ booking, open, onOpenChange, defaultOp
                             <p className="text-[10px] uppercase font-bold text-stone-400">Check-out</p>
                             <p className="font-semibold text-sm text-stone-900 dark:text-stone-100">
                                 {booking.checkOut && !isNaN(new Date(booking.checkOut).getTime())
-                                    ? format(new Date(booking.checkOut), "dd MMM yyyy", { locale: es })
+                                    ? format(new Date(booking.checkOut + 'T12:00:00'), "dd MMM yyyy", { locale: es })
                                     : "Fecha inválida"}
                             </p>
                         </div>

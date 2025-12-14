@@ -159,60 +159,74 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                                     style={{ height: `${ROW_HEIGHT}px` }}
                                 >
                                     {/* Bookings will reside here absolutely positioned */}
-                                    {bookings
-                                        .filter(b => {
-                                            // MATCH LOGIC:
-                                            // 1. Explicit composite ID match (e.g. "pueblo_dorm" === "pueblo_dorm")
-                                            // 2. Semantic match (location "pueblo" + type "dorm" === "pueblo_dorm")
+                                    {(() => {
+                                        // 1. FILTER bookings for this room
+                                        const roomBookings = bookings.filter(b => {
                                             const isCompositeMatch = b.roomType === room.id
                                             const isSemanticMatch = b.location === room.location && b.roomType === room.type
-
-                                            // Must match one of the above AND not be cancelled
                                             return (isCompositeMatch || isSemanticMatch) && b.status !== 'cancelled'
-                                        })
-                                        // TODO: Implement advanced collision detection here later
-                                        // For now, simple mapping
-                                        .filter(b => {
+                                        }).filter(b => {
                                             const start = parseISO(b.checkIn)
                                             const end = parseISO(b.checkOut)
-                                            // Only show if overlaps visible window
                                             return start <= viewEnd && end >= viewStart
                                         })
-                                        .map((booking, idx) => {
+
+                                        // 2. SORT by start date
+                                        roomBookings.sort((a, b) => parseISO(a.checkIn).getTime() - parseISO(b.checkIn).getTime())
+
+                                        // 3. CALCULATE overlaps (simple greedy algorithm)
+                                        // We assign a "lane" or "row" (0, 1, 2...) to each booking so they don't overlap visually
+                                        const lanes: Date[] = [] // Stores the end date of the last booking in each lane
+
+                                        return roomBookings.map((booking) => {
                                             const start = parseISO(booking.checkIn)
                                             const end = parseISO(booking.checkOut)
 
-                                            // Handle edge cases where booking starts before view
+                                            // Find the first lane where this booking fits (start > lane release date)
+                                            let laneIndex = lanes.findIndex(laneEnd => start >= laneEnd)
+
+                                            if (laneIndex === -1) {
+                                                // No available lane found, create a new one
+                                                laneIndex = lanes.length
+                                                lanes.push(end)
+                                            } else {
+                                                // Update existing lane
+                                                lanes[laneIndex] = end
+                                            }
+
+                                            // Render
                                             const effectiveStart = start < viewStart ? viewStart : start
                                             const duration = differenceInDays(end, effectiveStart)
-                                            // Ensure at least 1 day width
                                             const width = Math.max(duration, 1) * DAY_WIDTH
                                             const left = getPosition(effectiveStart)
+
+                                            // Calculate vertical position based on lane (36px height per bar + 4px gap)
+                                            const top = 8 + (laneIndex * 36)
 
                                             return (
                                                 <div
                                                     key={booking.id}
                                                     onClick={() => onSelectBooking(booking)}
                                                     className={cn(
-                                                        "absolute top-2 h-8 rounded-md px-2 flex items-center shadow-sm cursor-pointer hover:brightness-95 transition-all text-[10px] font-medium truncate select-none border",
+                                                        "absolute h-8 rounded-md px-2 flex items-center shadow-sm cursor-pointer hover:brightness-95 transition-all text-[10px] font-medium truncate select-none border group overflow-hidden",
                                                         booking.status === 'confirmed'
                                                             ? "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-800"
                                                             : booking.status === 'cancelled'
                                                                 ? "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/40 dark:text-rose-200 dark:border-rose-800"
-                                                                : "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800",
-                                                        // Simple offset for overlaps (temporary, will improve)
-                                                        idx % 2 === 0 ? "top-2" : "top-11"
+                                                                : "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800"
                                                     )}
                                                     style={{
                                                         left: `${left}px`,
                                                         width: `${width - 4}px`, // -4 for gap
+                                                        top: `${top}px`,
+                                                        zIndex: 10 + laneIndex
                                                     }}
                                                 >
-                                                    {booking.guestName}
+                                                    <span className="truncate">{booking.guestName}</span>
                                                 </div>
                                             )
                                         })
-                                    }
+                                    })()}
                                 </div>
                             ))}
                         </div>

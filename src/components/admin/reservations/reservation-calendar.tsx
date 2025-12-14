@@ -94,25 +94,25 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                         <div
                             key={day.toString()}
                             className={cn(
-                                "min-h-[120px] bg-white dark:bg-stone-900 p-2 transition-colors hover:bg-stone-50/80 dark:hover:bg-stone-900/80 relative group",
+                                "min-h-[80px] md:min-h-[120px] bg-white dark:bg-stone-900 p-1 md:p-2 transition-colors hover:bg-stone-50/80 dark:hover:bg-stone-900/80 relative group flex flex-col justify-between",
                                 !isCurrentMonth && "bg-stone-50/30 dark:bg-stone-900/30 text-stone-300 dark:text-stone-600"
                             )}
                         >
                             <span className={cn(
-                                "text-sm font-medium block mb-2",
+                                "text-xs md:text-sm font-medium block mb-1 md:mb-2",
                                 isSameDay(day, new Date())
-                                    ? "bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 w-7 h-7 flex items-center justify-center rounded-full shadow-md"
+                                    ? "bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-full shadow-md"
                                     : "text-stone-500 dark:text-stone-400"
                             )}>
                                 {format(day, "d")}
                             </span>
 
-                            <div className="space-y-1">
+                            {/* Desktop View: Full Booking Buttons */}
+                            <div className="hidden md:flex flex-col gap-1">
                                 {dayBookings.slice(0, 3).map(b => {
                                     const isStart = isSameDay(day, parseISO(b.checkIn))
                                     const isEnd = isSameDay(day, parseISO(b.checkOut))
 
-                                    // Status Color Configurations
                                     const statusStyles = {
                                         confirmed: {
                                             solid: "bg-emerald-600 text-white border-emerald-600 shadow-sm hover:bg-emerald-700",
@@ -137,15 +137,12 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                                     let icon = null
 
                                     if (isEnd) {
-                                        // Check-out: Outline style of the status
                                         variantClass = `${style.outline} border`
                                         icon = <LogOut className="w-3 h-3" />
                                     } else if (isStart) {
-                                        // Check-in: Solid style of the status
                                         variantClass = `${style.solid} border`
                                         icon = <LogIn className="w-3 h-3" />
                                     } else {
-                                        // Stay: Light style
                                         variantClass = style.light
                                     }
 
@@ -173,6 +170,23 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                                     <div className="text-[10px] text-stone-400 font-medium pl-1">
                                         + {dayBookings.length - 3} más
                                     </div>
+                                )}
+                            </div>
+
+                            {/* Mobile View: Simple Dots */}
+                            <div className="md:hidden flex flex-wrap gap-1 content-end">
+                                {dayBookings.slice(0, 6).map(b => (
+                                    <div
+                                        key={b.id}
+                                        className={cn(
+                                            "w-1.5 h-1.5 rounded-full",
+                                            b.status === 'confirmed' ? "bg-emerald-500" :
+                                                b.status === 'pending' ? "bg-amber-400" : "bg-rose-400"
+                                        )}
+                                    />
+                                ))}
+                                {dayBookings.length > 6 && (
+                                    <span className="text-[8px] text-stone-400 leading-none">+</span>
                                 )}
                             </div>
                         </div>

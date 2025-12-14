@@ -49,7 +49,7 @@ export function BookingModal({
     className,
     defaultLocation = "pueblo",
     defaultRoomType = "dorm",
-    roomName,
+    // roomName, // Removed unused prop to fix lint
     pricePerNight = 25
 }: BookingModalProps) {
     const [date, setDate] = React.useState<DateRange | undefined>()
@@ -79,11 +79,12 @@ export function BookingModal({
     }, [step])
 
     // Store Action
-    const { bookings, addBooking, prices, checkAvailability, getRemainingCapacity } = useAppStore()
+    const { addBooking, rooms, checkAvailability, getRemainingCapacity } = useAppStore()
 
     // Determine Price dynamically
     const priceKey = `${location}_${roomType}`
-    const currentPrice = prices?.[priceKey] || pricePerNight // Fallback to prop if not found
+    const roomConfig = rooms.find(r => r.id === priceKey)
+    const currentPrice = roomConfig?.basePrice || pricePerNight // Fallback to prop if not found
 
 
     // Dynamic styling based on location - Elite "Quiet Luxury" Refinement

@@ -55,7 +55,7 @@ const ROOM_OPTIONS = {
 }
 
 export function CreateReservationModal({ open, onOpenChange }: CreateReservationModalProps) {
-    const { addBooking, checkAvailability, prices, updatePrice } = useAppStore()
+    const { addBooking, checkAvailability, rooms } = useAppStore()
 
     // Steps: 1 = Search, 2 = Select Room, 3 = Guest Details
     const [step, setStep] = useState(1)
@@ -92,6 +92,10 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
 
         const opts = ROOM_OPTIONS[location]
         return opts.map(room => {
+            // Find room config in store to get the REAL price
+            const roomConfig = rooms.find(r => r.id === room.key)
+            const price = roomConfig?.basePrice || 0
+
             const isAvailable = checkAvailability(
                 location,
                 room.id,
@@ -101,11 +105,11 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
             )
             return {
                 ...room,
-                price: prices[room.key] || 0,
+                price: price,
                 available: isAvailable
             }
         })
-    }, [location, dateRange, checkAvailability, prices, guests])
+    }, [location, dateRange, checkAvailability, rooms, guests])
 
 
 
