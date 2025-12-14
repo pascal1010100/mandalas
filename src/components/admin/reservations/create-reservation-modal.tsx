@@ -23,15 +23,19 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format, addDays, differenceInCalendarDays, differenceInDays, startOfDay, subDays } from "date-fns" // Fixed import
 import { es } from "date-fns/locale"
 import {
-    Calendar as CalendarIcon,
-    ArrowRight,
-    CheckCircle,
-    Search,
-    MapPin,
+    Check,
+    ChevronsUpDown,
+    CalendarIcon,
+    AlertCircle,
+    Info,
+    Ban,
+    Trash2,
     Users,
     BedDouble,
+    CheckCircle,
     ChevronLeft,
-    Loader2
+    Loader2,
+    ArrowRight
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -87,14 +91,24 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
         setStatus("confirmed")
     }
 
+    const handleSelectRoom = (room: any) => {
+        if (!room.available) return
+        setSelectedRoom({ id: room.id, label: room.label, price: room.price })
+    }
+
     const availableRooms = useMemo(() => {
         if (!dateRange.from || !dateRange.to) return []
 
         const opts = ROOM_OPTIONS[location]
         return opts.map(room => {
-            // Find room config in store to get the REAL price
             const roomConfig = rooms.find(r => r.id === room.key)
             const price = roomConfig?.basePrice || 0
+            const maxGuests = roomConfig?.maxGuests || 2 // Default fallback
+
+            // Infer type from ID for display
+            let typeLabel = "Cama"
+            if (room.id === 'private') typeLabel = "Habitación"
+            if (room.id === 'suite') typeLabel = "Suite"
 
             const isAvailable = checkAvailability(
                 location,
@@ -106,6 +120,8 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
             return {
                 ...room,
                 price: price,
+                maxGuests: maxGuests,
+                type: typeLabel,
                 available: isAvailable
             }
         })
@@ -243,55 +259,92 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                         </div>
                     )}
 
-                    {/* STEP 2: ROOM SELECTION */}
+                    {/* STEP 2: SELECT ROOM */}
                     {step === 2 && (
-                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                            {availableRooms.map((room) => (
-                                <div
-                                    key={room.id}
-                                    onClick={() => room.available && setSelectedRoom({ id: room.id, label: room.label, price: room.price })}
-                                    className={cn(
-                                        "flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden",
-                                        selectedRoom?.id === room.id
-                                            ? "border-amber-500 bg-amber-50/50 dark:bg-amber-900/10 ring-1 ring-amber-500"
-                                            : "border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 bg-white dark:bg-stone-900",
-                                        !room.available && "opacity-50 cursor-not-allowed grayscale bg-stone-100 dark:bg-stone-800/50"
-                                    )}
+                        <div className="space-y-4 py-4">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-base font-semibold">Seleccionar Habitación</Label>
+                                <span className="text-xs text-stone-500 uppercase tracking-wider font-medium bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">
+                                    {location}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-3">
+                                {availableRooms.map((room) => {
+                                    const isSelected = selectedRoom?.id === room.id
+
+                                    // Define static images for admin view (reliable fallback)
+                                    let roomImage = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300"; // Dorm default
+                                    if (room.id.includes('private')) roomImage = "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=300";
+                                    if (room.id.includes('suite')) roomImage = "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=300";
+
+                                    return (
+                                        <div
+                                            key={room.id}
+                                            onClick={() => handleSelectRoom(room)}
+                                            className={cn(
+                                                "relative flex gap-4 p-3 rounded-xl border cursor-pointer transition-all duration-200 group bg-white dark:bg-stone-900",
+                                                isSelected
+                                                    ? "border-amber-500 ring-1 ring-amber-500 shadow-md bg-amber-50/10"
+                                                    : "border-stone-200 dark:border-stone-800 hover:border-amber-400/50 hover:shadow-sm",
+                                                !room.available && "opacity-50 cursor-not-allowed grayscale"
+                                            )}
+                                        >
+                                            {/* Thumbnail */}
+                                            <div className="w-24 h-20 rounded-lg bg-stone-200 shrink-0 overflow-hidden relative">
+                                                <img src={roomImage} alt={room.label} className="w-full h-full object-cover" />
+                                                {isSelected && (
+                                                    <div className="absolute inset-0 bg-amber-500/20 grid place-items-center">
+                                                        <div className="bg-amber-500 text-white rounded-full p-1">
+                                                            <CheckCircle className="w-4 h-4" />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Info */}
+                                            <div className="flex-1 flex flex-col justify-center">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h4 className={cn("font-bold text-sm", isSelected ? "text-amber-700 dark:text-amber-400" : "text-stone-900 dark:text-stone-100")}>
+                                                            {room.label}
+                                                        </h4>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <Users className="w-3 h-3" /> Max {room.maxGuests}
+                                                            <BedDouble className="w-3 h-3" /> {room.type}
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="font-heading font-bold text-lg text-stone-900 dark:text-white">
+                                                            ${room.price}
+                                                        </div>
+                                                        <span className="text-[10px] text-stone-400">/ noche</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {!room.available && (
+                                                <div className="absolute inset-0 bg-white/40 dark:bg-black/40 flex items-center justify-center backdrop-blur-[1px] z-10 cursor-not-allowed">
+                                                    <span className="bg-stone-900 text-white text-xs px-2 py-1 rounded font-bold uppercase tracking-wider shadow-lg">Ocupada</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+
+                            <div className="flex justify-between pt-4">
+                                <Button variant="ghost" onClick={() => setStep(1)} className="text-stone-500">
+                                    <ChevronLeft className="w-4 h-4 mr-2" /> Volver
+                                </Button>
+                                <Button
+                                    onClick={() => setStep(3)}
+                                    disabled={!selectedRoom}
+                                    className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className={cn(
-                                            "w-10 h-10 rounded-full flex items-center justify-center",
-                                            room.available ? "bg-stone-100 dark:bg-stone-800 text-stone-600" : "bg-stone-200 text-stone-400"
-                                        )}>
-                                            <BedDouble className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-semibold text-stone-900 dark:text-stone-100">{room.label}</h4>
-                                            <p className="text-xs text-stone-500">
-                                                {room.available ? `${room.price} USD / noche` : "No disponible"}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {selectedRoom?.id === room.id && (
-                                        <div className="bg-amber-500 text-white rounded-full p-1">
-                                            <CheckCircle className="w-4 h-4" />
-                                        </div>
-                                    )}
-
-                                    {!room.available && (
-                                        <div className="absolute inset-0 bg-white/40 dark:bg-black/40 flex items-center justify-center backdrop-blur-[1px]">
-                                            <span className="bg-stone-900 text-white text-xs px-2 py-1 rounded font-bold uppercase tracking-wider">Ocupada</span>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-
-                            {availableRooms.length === 0 && (
-                                <div className="text-center py-10 text-stone-500">
-                                    No hay habitaciones configuradas para esta ubicación.
-                                </div>
-                            )}
+                                    Continuar <ArrowRight className="w-4 h-4 ml-2" />
+                                </Button>
+                            </div>
                         </div>
                     )}
 

@@ -16,10 +16,13 @@ import {
     Clock,
     Edit2,
     Save,
-    Trash2,
+    Trash2, // Keeping Trash2 as I see it used in actions
     X,
-    MoreVertical
+    MoreVertical,
+    LogOut,
+    // CreditCard, // Removing unused
 } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -62,13 +65,16 @@ interface ReservationDetailsModalProps {
 }
 
 export function ReservationDetailsModal({ booking, open, onOpenChange, defaultOpenCancellation = false }: ReservationDetailsModalProps) {
-    const { updateBooking, updateBookingStatus, deleteBooking } = useAppStore() // Assuming deleteBooking might be needed later, for now we just status change
+    const { updateBooking, updateBookingStatus, deleteBooking, checkOutBooking } = useAppStore()
 
     const [isEditing, setIsEditing] = React.useState(false)
     const [formData, setFormData] = React.useState<Partial<Booking>>({})
 
     const [showCancellation, setShowCancellation] = React.useState(false)
     const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false)
+    const [showCheckOut, setShowCheckOut] = React.useState(false)
+    const [isPaymentSettled, setIsPaymentSettled] = React.useState(true)
+
     const [cancellationReason, setCancellationReason] = React.useState("")
     const [refundStatus, setRefundStatus] = React.useState<"none" | "partial" | "full">("none")
 
@@ -99,10 +105,12 @@ export function ReservationDetailsModal({ booking, open, onOpenChange, defaultOp
             } else {
                 setShowCancellation(false)
                 setShowDeleteConfirmation(false)
+                setShowCheckOut(false)
             }
 
             setCancellationReason("")
             setRefundStatus("none")
+            setIsPaymentSettled(true)
         }
     }, [booking, open, defaultOpenCancellation])
 
@@ -142,12 +150,79 @@ export function ReservationDetailsModal({ booking, open, onOpenChange, defaultOp
         onOpenChange(false)
     }
 
+    const handleCheckOut = async () => {
+        if (!booking.id) return
+        await checkOutBooking(booking.id, isPaymentSettled ? 'paid' : 'pending')
+        toast.success("Check-out realizado exitosamente", {
+            description: isPaymentSettled ? "La cuenta ha sido marcada como pagada." : "El pago quedó pendiente."
+        })
+        setShowCheckOut(false)
+        onOpenChange(false)
+    }
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case "confirmed": return "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200"
             case "cancelled": return "text-rose-600 bg-rose-50 dark:bg-rose-900/20 border-rose-200"
+            case "checked_out": return "text-stone-500 bg-stone-100 dark:bg-stone-800 border-stone-200"
             default: return "text-amber-600 bg-amber-50 dark:bg-amber-900/20 border-amber-200"
         }
+    }
+
+    if (showCheckOut) {
+        return (
+            <Dialog open={open} onOpenChange={(val) => {
+                if (!val) setShowCheckOut(false)
+                onOpenChange(val)
+            }}>
+                <DialogContent className="sm:max-w-[425px] bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                            <LogOut className="w-5 h-5 text-indigo-500" /> Realizar Check-Out
+                        </DialogTitle>
+                        <DialogDescription>
+                            Confirma la salida del huésped y el estado de su cuenta.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="py-4 space-y-4">
+                        <div className="bg-stone-50 dark:bg-stone-900/50 p-4 rounded-lg border border-stone-100 dark:border-stone-800 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{booking.guestName}</p>
+                                <p className="text-xs text-stone-500">ID: {booking.id.slice(0, 8)}...</p>
+                            </div>
+                            <Badge variant="outline" className={cn("capitalize shadow-sm", getStatusColor(booking.status))}>
+                                {booking.status === 'confirmed' ? 'Confirmada' : booking.status}
+                            </Badge>
+                        </div>
+
+                        <div className="flex items-start space-x-3 space-y-0 rounded-md border border-stone-200 dark:border-stone-800 p-4 shadow-sm bg-white dark:bg-stone-950">
+                            <Checkbox id="payment_settled" checked={isPaymentSettled} onCheckedChange={(c) => setIsPaymentSettled(!!c)} />
+                            <div className="space-y-1 leading-none">
+                                <Label htmlFor="payment_settled" className="font-semibold cursor-pointer">
+                                    Cuenta Liquidada
+                                </Label>
+                                <p className="text-sm text-stone-500 dark:text-stone-400">
+                                    Marcar si el huésped ha pagado el total de ${booking.totalPrice}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setShowCheckOut(false)}>
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={handleCheckOut}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                        >
+                            <LogOut className="w-4 h-4 mr-2" /> Confirmar Salida
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        )
     }
 
     if (showDeleteConfirmation) {
@@ -268,70 +343,91 @@ export function ReservationDetailsModal({ booking, open, onOpenChange, defaultOp
         }}>
             <DialogContent className="sm:max-w-[500px] p-0 gap-0 overflow-hidden bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-2xl">
                 {/* Header with Visual Status */}
-                <div className={cn("px-6 py-6 border-b border-stone-100 dark:border-stone-800 flex justify-between items-start",
-                    booking.status === 'confirmed' ? "bg-emerald-50/30 dark:bg-emerald-900/5" :
-                        booking.status === 'cancelled' ? "bg-rose-50/30 dark:bg-rose-900/5" : "bg-amber-50/30 dark:bg-amber-900/5"
-                )}>
-                    <div>
-                        <DialogTitle className="text-xl font-bold font-heading flex items-center gap-2">
-                            {isEditing ? "Editar Reserva" : "Detalles de Reserva"}
-                        </DialogTitle>
-                        <DialogDescription className="text-xs font-mono mt-1 text-stone-500">
-                            ID: {booking.id}
-                        </DialogDescription>
+                {/* Header with Visual Status & Cover Image */}
+                <div className="relative h-40 overflow-hidden">
+                    {/* Dynamic Cover Image */}
+                    <div className="absolute inset-0">
+                        <img
+                            src={booking.location === 'hideout'
+                                ? "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=600"
+                                : "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600"}
+                            alt="Room Cover"
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent" />
                     </div>
 
-                    <div className="flex gap-2">
-                        {!isEditing && (
-                            <Badge variant="outline" className={cn("capitalize shadow-sm", getStatusColor(booking.status))}>
-                                {booking.status === 'confirmed' ? <CheckCircle className="w-3 h-3 mr-1" /> :
-                                    booking.status === 'cancelled' ? <XCircle className="w-3 h-3 mr-1" /> :
-                                        <Clock className="w-3 h-3 mr-1" />}
-                                {booking.status === 'cancelled' ? 'Cancelada' :
-                                    booking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
-                            </Badge>
-                        )}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8 -mt-1 -mr-2 text-stone-400">
-                                    <MoreVertical className="w-4 h-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                {booking.status !== 'cancelled' && (
-                                    <>
-                                        <DropdownMenuItem onClick={() => setIsEditing(!isEditing)}>
-                                            <Edit2 className="w-4 h-4 mr-2" /> {isEditing ? "Cancelar Edición" : "Editar"}
+                    {/* Content Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-between items-end">
+                        <div className="text-white">
+                            <DialogTitle className="text-2xl font-bold font-heading flex items-center gap-2 drop-shadow-md">
+                                {isEditing ? "Editar Reserva" : booking.guestName}
+                            </DialogTitle>
+                            <DialogDescription className="text-xs font-mono mt-1 text-stone-200/80 flex items-center gap-2">
+                                <span className="bg-white/20 px-1.5 py-0.5 rounded backdrop-blur-sm text-white">ID: {booking.id.slice(0, 8)}</span>
+                                <span className="flex items-center gap-1 uppercase tracking-wider"><MapPin className="w-3 h-3" /> {booking.location}</span>
+                            </DialogDescription>
+                        </div>
+
+                        <div className="flex gap-2">
+                            {!isEditing && (
+                                <Badge variant="outline" className={cn("capitalize shadow-sm backdrop-blur-md border-white/20 text-white font-bold px-3 py-1 scale-105",
+                                    booking.status === 'confirmed' ? "bg-emerald-500/80" :
+                                        booking.status === 'cancelled' ? "bg-rose-500/80" :
+                                            booking.status === 'checked_out' ? "bg-stone-500/80" :
+                                                "bg-amber-500/80"
+                                )}>
+                                    {booking.status === 'confirmed' ? <CheckCircle className="w-3 h-3 mr-1" /> :
+                                        booking.status === 'cancelled' ? <XCircle className="w-3 h-3 mr-1" /> :
+                                            booking.status === 'checked_out' ? <LogOut className="w-3 h-3 mr-1" /> :
+                                                <Clock className="w-3 h-3 mr-1" />}
+                                    {booking.status === 'cancelled' ? 'Cancelada' :
+                                        booking.status === 'checked_out' ? 'Check-Out' :
+                                            booking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                                </Badge>
+                            )}
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20 rounded-full">
+                                        <MoreVertical className="w-4 h-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                                    {booking.status !== 'cancelled' && (
+                                        <>
+                                            <DropdownMenuItem onClick={() => setIsEditing(!isEditing)}>
+                                                <Edit2 className="w-4 h-4 mr-2" /> {isEditing ? "Cancelar Edición" : "Editar"}
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem className="text-rose-600 focus:text-rose-700" onClick={() => setShowCancellation(true)}>
+                                                <Trash2 className="w-4 h-4 mr-2" /> Cancelar Reserva
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
+                                    {booking.status === 'checked_out' && (
+                                        <DropdownMenuItem disabled className="text-stone-400">
+                                            <LogOut className="w-4 h-4 mr-2" /> Check-out Completado
                                         </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem className="text-rose-600 focus:text-rose-700" onClick={() => setShowCancellation(true)}>
-                                            <Trash2 className="w-4 h-4 mr-2" /> Cancelar Reserva
-                                        </DropdownMenuItem>
-                                    </>
-                                )}
-                                {booking.status === 'cancelled' && (
-                                    <>
-                                        <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, 'pending')}>
-                                            <Clock className="w-4 h-4 mr-2" /> Reactivar (Marcar Pendiente)
-                                        </DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem
-                                            className="text-rose-600 focus:text-rose-700 font-bold bg-rose-50 dark:bg-rose-900/10 focus:bg-rose-100 dark:focus:bg-rose-900/30"
-                                            onClick={() => {
-                                                if (confirm("¿Estás seguro de ELIMINAR permanentemente esta reserva? Esta acción no se puede deshacer.")) {
-                                                    deleteBooking(booking.id)
-                                                    toast.success("Reserva eliminada permanentemente")
-                                                    onOpenChange(false)
-                                                }
-                                            }}
-                                        >
-                                            <Trash2 className="w-4 h-4 mr-2" /> Eliminar Permanentemente
-                                        </DropdownMenuItem>
-                                    </>
-                                )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                                    )}
+                                    {booking.status === 'cancelled' && (
+                                        <>
+                                            <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, 'pending')}>
+                                                <Clock className="w-4 h-4 mr-2" /> Reactivar (Marcar Pendiente)
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem
+                                                className="text-rose-600 focus:text-rose-700 font-bold bg-rose-50 dark:bg-rose-900/10 focus:bg-rose-100 dark:focus:bg-rose-900/30"
+                                                onClick={() => setShowDeleteConfirmation(true)} // Fixed direct handler
+                                            >
+                                                <Trash2 className="w-4 h-4 mr-2" /> Eliminar Permanentemente
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     </div>
                 </div>
 
@@ -506,14 +602,33 @@ export function ReservationDetailsModal({ booking, open, onOpenChange, defaultOp
                         </div>
                     </div>
 
-                    {/* Financials */}
-                    <div className="bg-stone-50 dark:bg-stone-800/30 p-4 rounded-xl flex justify-between items-center">
-                        <span className="text-sm font-medium text-stone-600 dark:text-stone-400 flex items-center gap-2">
-                            <DollarSign className="w-4 h-4" /> Total Estimado
-                        </span>
-                        <span className="text-2xl font-bold font-heading text-stone-900 dark:text-stone-100">
-                            ${booking.totalPrice}
-                        </span>
+                    {/* Financials & Actions */}
+                    <div className="flex items-center gap-4">
+                        <div className="flex-1 bg-stone-50 dark:bg-stone-800/30 p-4 rounded-xl flex justify-between items-center border border-stone-100 dark:border-stone-800">
+                            <div>
+                                <p className="text-[10px] uppercase font-bold text-stone-400">Total a Pagar</p>
+                                <span className="text-2xl font-bold font-heading text-stone-900 dark:text-stone-100 flex items-center gap-1">
+                                    <DollarSign className="w-5 h-5 text-emerald-500" /> {booking.totalPrice}
+                                </span>
+                            </div>
+                            {booking.status === 'confirmed' && (
+                                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700">Pagado</Badge>
+                            )}
+                        </div>
+
+                        {/* Quick Check-Out Button for Confirmed Bookings */}
+                        {booking.status === 'confirmed' && !isEditing && (
+                            <Button
+                                onClick={() => setShowCheckOut(true)}
+                                className="h-full py-4 px-6 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-white text-white dark:text-stone-900 shadow-lg hover:shadow-xl transition-all"
+                            >
+                                <LogOut className="w-5 h-5 mr-2" />
+                                <div className="text-left">
+                                    <span className="block text-[10px] uppercase opacity-70 leading-none">Acción</span>
+                                    <span className="font-bold">Check-Out</span>
+                                </div>
+                            </Button>
+                        )}
                     </div>
                 </div>
 

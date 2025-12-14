@@ -8,8 +8,8 @@ import {
     eachDayOfInterval,
     isSameMonth,
     isSameDay,
-    isWithinInterval,
     parseISO,
+    isWithinInterval,
     startOfWeek,
     endOfWeek,
     addMonths,
@@ -61,7 +61,11 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                 <h2 className="text-lg font-bold font-heading capitalize text-stone-900 dark:text-stone-100">
                     {format(currentDate, "MMMM yyyy", { locale: es })}
                 </h2>
-                <div className="flex gap-1">
+                <div className="flex gap-1 items-center">
+                    <div className="flex items-center gap-2 mr-4 text-[10px] font-medium uppercase tracking-wider text-stone-500">
+                        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-500" /> Pueblo</span>
+                        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500" /> Hideout</span>
+                    </div>
                     <Button variant="ghost" size="icon" onClick={prevMonth} className="h-8 w-8 hover:bg-stone-100 dark:hover:bg-stone-800">
                         <ChevronLeft className="w-4 h-4" />
                     </Button>
@@ -113,37 +117,37 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                                     const isStart = isSameDay(day, parseISO(b.checkIn))
                                     const isEnd = isSameDay(day, parseISO(b.checkOut))
 
-                                    const statusStyles = {
-                                        confirmed: {
-                                            solid: "bg-emerald-600 text-white border-emerald-600 shadow-sm hover:bg-emerald-700",
-                                            outline: "bg-white border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:bg-stone-900 dark:border-emerald-800 dark:text-emerald-400",
-                                            light: "bg-emerald-100/50 text-emerald-800 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/50"
-                                        },
-                                        pending: {
+                                    const locationStyles = {
+                                        pueblo: {
                                             solid: "bg-amber-500 text-white border-amber-500 shadow-sm hover:bg-amber-600",
                                             outline: "bg-white border-amber-200 text-amber-600 hover:bg-amber-50 dark:bg-stone-900 dark:border-amber-800 dark:text-amber-400",
                                             light: "bg-amber-100/50 text-amber-800 border-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-900/50"
                                         },
-                                        cancelled: {
-                                            solid: "bg-rose-500 text-white border-rose-500 opacity-60",
-                                            outline: "bg-white border-rose-200 text-rose-400 opacity-60 dark:bg-stone-900 dark:border-rose-900 dark:text-rose-500",
-                                            light: "bg-rose-50 text-rose-400 border-rose-100 opacity-60 dark:bg-rose-900/10 dark:text-rose-500 dark:border-rose-900/20"
+                                        hideout: {
+                                            solid: "bg-emerald-600 text-white border-emerald-600 shadow-sm hover:bg-emerald-700",
+                                            outline: "bg-white border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:bg-stone-900 dark:border-emerald-800 dark:text-emerald-400",
+                                            light: "bg-emerald-100/50 text-emerald-800 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-900/50"
                                         }
                                     }
 
-                                    const style = statusStyles[b.status as keyof typeof statusStyles] || statusStyles.pending
+                                    const theme = b.location === 'hideout' ? locationStyles.hideout : locationStyles.pueblo
 
                                     let variantClass = ""
                                     let icon = null
 
-                                    if (isEnd) {
-                                        variantClass = `${style.outline} border`
-                                        icon = <LogOut className="w-3 h-3" />
-                                    } else if (isStart) {
-                                        variantClass = `${style.solid} border`
-                                        icon = <LogIn className="w-3 h-3" />
+                                    // Status Overrides (Cancelled/CheckedOut should be grey/dimmed regardless of location)
+                                    if (b.status === 'cancelled') {
+                                        variantClass = "bg-rose-100 text-rose-800 border-rose-200 opacity-60 line-through decoration-rose-500"
                                     } else {
-                                        variantClass = style.light
+                                        if (isEnd) {
+                                            variantClass = `${theme.outline} border`
+                                            icon = <LogOut className="w-3 h-3" />
+                                        } else if (isStart) {
+                                            variantClass = `${theme.solid} border`
+                                            icon = <LogIn className="w-3 h-3" />
+                                        } else {
+                                            variantClass = theme.light
+                                        }
                                     }
 
                                     return (

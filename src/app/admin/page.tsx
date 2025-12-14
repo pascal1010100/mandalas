@@ -184,13 +184,24 @@ function AdminContent() {
                                     bookings.slice(0, 5).map((booking) => (
                                         <TableRow key={booking.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-800/50 transition-colors border-stone-100 dark:border-stone-800 cursor-pointer group">
                                             <TableCell className="font-medium pl-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 flex items-center justify-center text-xs font-bold border border-stone-200 dark:border-stone-700 group-hover:bg-stone-200 dark:group-hover:bg-stone-700 transition-colors">
-                                                        {booking.guestName.charAt(0)}
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-10 rounded bg-stone-100 dark:bg-stone-800 overflow-hidden shadow-sm shrink-0">
+                                                        <img
+                                                            src={booking.location === 'pueblo'
+                                                                ? "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=100"
+                                                                : "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=100"}
+                                                            alt="Room"
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-sm font-medium text-stone-700 dark:text-stone-200 group-hover:text-stone-900 dark:group-hover:text-white transition-colors">{booking.guestName}</span>
-                                                        <span className="text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-wide">{booking.roomType}</span>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 flex items-center justify-center text-xs font-bold border border-stone-200 dark:border-stone-700 group-hover:bg-stone-200 dark:group-hover:bg-stone-700 transition-colors">
+                                                            {booking.guestName.charAt(0)}
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-medium text-stone-700 dark:text-stone-200 group-hover:text-stone-900 dark:group-hover:text-white transition-colors">{booking.guestName}</span>
+                                                            <span className="text-[10px] text-stone-400 dark:text-stone-500 uppercase tracking-wide">{booking.roomType}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </TableCell>

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Check, Users, BedDouble, Calendar as CalendarIcon, Loader2, PartyPopper, Copy } from "lucide-react"
+import { Check, CheckCircle, Users, BedDouble, Calendar as CalendarIcon, Loader2, PartyPopper, Copy } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { subDays } from "date-fns"
 import { AnimatePresence, motion } from "framer-motion"
@@ -81,10 +81,18 @@ export function BookingModal({
     // Store Action
     const { addBooking, rooms, checkAvailability, getRemainingCapacity } = useAppStore()
 
-    // Determine Price dynamically
+    // Determine Price & Max Guests dynamically
     const priceKey = `${location}_${roomType}`
     const roomConfig = rooms.find(r => r.id === priceKey)
     const currentPrice = roomConfig?.basePrice || pricePerNight // Fallback to prop if not found
+    const maxGuests = roomConfig?.maxGuests || 6
+
+    // Reset guests if selected exceeds max (e.g. switch from Dorm to Private)
+    React.useEffect(() => {
+        if (parseInt(guests) > maxGuests) {
+            setGuests(maxGuests.toString())
+        }
+    }, [roomType, maxGuests, guests])
 
 
     // Dynamic styling based on location - Elite "Quiet Luxury" Refinement
@@ -151,7 +159,10 @@ export function BookingModal({
                 await new Promise(resolve => setTimeout(resolve, 2000))
 
                 const nights = Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24))
-                const totalPrice = currentPrice * nights * 1.1 // Include 10% tax
+                // Pricing Logic: Dorms = Per Person. Private = Per Room.
+                const guestMultiplier = roomType === 'dorm' ? (parseInt(guests) || 1) : 1
+                const baseTotal = currentPrice * nights * guestMultiplier
+                const totalPrice = baseTotal * 1.1 // Include 10% tax
                 const newId = Math.random().toString(36).substring(7).toUpperCase();
                 setBookingId(newId);
 
@@ -309,26 +320,94 @@ export function BookingModal({
                                 exit="exit"
                                 className="p-6 pb-24 space-y-4" // Removed h-full overflow-y-auto. Keeping padding.
                             >
-                                {/* Room Selection Display - Compacted */}
-                                <div className={cn("p-3 rounded-xl border relative overflow-hidden group", theme.lightGradient, theme.border)}>
-                                    <div className="absolute top-0 right-0 p-3 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-500">
-                                        <BedDouble className={cn("w-12 h-12", theme.text)} />
-                                    </div>
-                                    <div className="flex items-center justify-between relative z-10">
-                                        <div>
-                                            <p className={cn("text-[10px] font-bold uppercase tracking-widest mb-0.5", theme.text)}>Habitación</p>
-                                            <Select value={roomType} onValueChange={setRoomType}>
-                                                <SelectTrigger className="h-8 p-0 border-none bg-transparent hover:bg-transparent shadow-none focus:ring-0 text-base font-bold text-stone-900 dark:text-stone-100 gap-2">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent className="dark:bg-stone-900 dark:border-stone-800">
-                                                    <SelectItem value="dorm">Dormitorio Compartido</SelectItem>
-                                                    <SelectItem value="private">Habitación Privada</SelectItem>
-                                                    <SelectItem value="suite">Suite con Vista</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <p className="text-xs font-medium text-stone-500 dark:text-stone-400">${currentPrice} <span className="text-[10px] font-normal opacity-70">/ noche</span></p>
-                                        </div>
+                                {/* Room Selection - Visual Cards */}
+                                <div className="space-y-3">
+                                    <Label className="text-stone-900 dark:text-stone-100 flex items-center gap-2 text-sm font-semibold">
+                                        <BedDouble className="w-4 h-4 text-stone-400" /> Elige tu Habitación
+                                    </Label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        {[
+                                            {
+                                                id: 'dorm',
+                                                title: 'Dormitorio',
+                                                subtitle: 'Cama en compartido',
+                                                price: location === 'pueblo' ? 18 : 16,
+                                                priceUnit: '/ persona',
+                                                capacity: location === 'pueblo' ? 8 : 6,
+                                                image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300"
+                                            },
+                                            {
+                                                id: 'private',
+                                                title: 'Privada',
+                                                subtitle: 'Habitación Estándar',
+                                                price: location === 'pueblo' ? 35 : 40,
+                                                priceUnit: '/ noche',
+                                                capacity: location === 'pueblo' ? 2 : 2,
+                                                image: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=300"
+                                            },
+                                            {
+                                                id: 'suite',
+                                                title: 'Suite',
+                                                subtitle: 'Vista & Confort',
+                                                price: 55,
+                                                priceUnit: '/ noche',
+                                                capacity: 4,
+                                                image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=300"
+                                            }
+                                        ].map((room) => {
+                                            const isSelected = roomType === room.id;
+                                            return (
+                                                <div
+                                                    key={room.id}
+                                                    onClick={() => setRoomType(room.id)}
+                                                    className={cn(
+                                                        "relative overflow-hidden rounded-xl border cursor-pointer transition-all duration-300 group",
+                                                        isSelected
+                                                            ? "border-amber-500 ring-2 ring-amber-500/20 shadow-lg scale-[1.02]"
+                                                            : "border-stone-200 dark:border-stone-800 hover:border-amber-300 hover:shadow-md"
+                                                    )}
+                                                >
+                                                    {/* Image Background with Gradient */}
+                                                    <div className="h-24 w-full relative">
+                                                        <div className="absolute inset-0 bg-stone-900/20 group-hover:bg-stone-900/10 transition-colors z-10" />
+                                                        <div className={cn("absolute inset-0 bg-gradient-to-t from-stone-900/90 to-transparent z-20", isSelected ? "opacity-90" : "opacity-80")} />
+                                                        <img src={room.image} alt={room.title} className="w-full h-full object-cover" />
+
+                                                        {/* Checkmark Badge */}
+                                                        {isSelected && (
+                                                            <div className="absolute top-2 right-2 z-30 bg-amber-500 text-white rounded-full p-0.5 shadow-sm">
+                                                                <CheckCircle className="w-3 h-3" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Content */}
+                                                    <div className="p-3 pt-2 bg-white dark:bg-stone-900 relative">
+                                                        <div className="flex justify-between items-start">
+                                                            <div>
+                                                                <h4 className={cn("font-bold text-sm", isSelected ? "text-amber-600 dark:text-amber-400" : "text-stone-900 dark:text-stone-100")}>
+                                                                    {room.title}
+                                                                </h4>
+                                                                <p className="text-[10px] text-stone-500 dark:text-stone-400 leading-tight mb-1.5">
+                                                                    {room.subtitle}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex items-end justify-between mt-1">
+                                                            <div className="flex items-baseline gap-0.5">
+                                                                <span className="text-base font-bold font-heading text-stone-900 dark:text-stone-100">${room.price}</span>
+                                                                <span className="text-[9px] text-stone-500 dark:text-stone-500">{room.priceUnit}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1 text-[10px] text-stone-400 bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded-sm">
+                                                                <Users className="w-3 h-3" />
+                                                                <span>max {room.capacity}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 
@@ -383,7 +462,7 @@ export function BookingModal({
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent className="dark:bg-stone-900 dark:border-stone-800">
-                                                {[1, 2, 3, 4, 5, 6].map(num => (
+                                                {Array.from({ length: maxGuests }, (_, i) => i + 1).map(num => (
                                                     <SelectItem key={num} value={num.toString()}>{num} Persona{num > 1 ? 's' : ''}</SelectItem>
                                                 ))}
                                             </SelectContent>
@@ -400,18 +479,22 @@ export function BookingModal({
                                         </div>
                                         <div className="space-y-1">
                                             <div className="flex justify-between text-[10px] text-stone-500 dark:text-stone-400">
-                                                <span>Subtotal</span>
-                                                <span>${currentPrice * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24))}</span>
+                                                <span>Subtotal {roomType === 'dorm' && parseInt(guests) > 1 && `(${guests} personas)`}</span>
+                                                <span>
+                                                    ${(currentPrice * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) * (roomType === 'dorm' ? parseInt(guests) : 1)).toFixed(2)}
+                                                </span>
                                             </div>
                                             <div className="flex justify-between text-[10px] text-stone-500 dark:text-stone-400">
                                                 <span>Servicio (10%)</span>
-                                                <span>${(currentPrice * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) * 0.1).toFixed(2)}</span>
+                                                <span>
+                                                    ${(currentPrice * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) * (roomType === 'dorm' ? parseInt(guests) : 1) * 0.1).toFixed(2)}
+                                                </span>
                                             </div>
                                         </div>
                                         <div className="border-t border-stone-100 dark:border-stone-800 pt-2 mt-1 flex justify-between items-end">
                                             <span className="text-xs font-semibold text-stone-900 dark:text-stone-100">Total</span>
                                             <span className="text-xl font-bold font-heading text-stone-900 dark:text-stone-100">
-                                                ${(currentPrice * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) * 1.1).toFixed(2)}
+                                                ${(currentPrice * Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) * (roomType === 'dorm' ? parseInt(guests) : 1) * 1.1).toFixed(2)}
                                             </span>
                                         </div>
                                     </div>
@@ -498,6 +581,6 @@ export function BookingModal({
                     )}
                 </DialogFooter>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     )
 }

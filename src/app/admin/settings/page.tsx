@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DollarSign, Save, Loader2, BedDouble } from "lucide-react"
 
 export default function SettingsPage() {
-    const { rooms, updateRoomCapacity, updateRoomPrice } = useAppStore()
+    const { rooms, updateRoomCapacity, updateRoomPrice, updateRoomMaxGuests } = useAppStore()
     const [isSaving, setIsSaving] = useState(false)
 
     // Local state to handle inputs before saving
@@ -35,6 +35,12 @@ export default function SettingsPage() {
         ))
     }
 
+    const handleMaxGuestsChange = (roomId: string, value: string) => {
+        setLocalRooms(prev => prev.map(room =>
+            room.id === roomId ? { ...room, maxGuests: parseInt(value) || 1 } : room
+        ))
+    }
+
     const handleSave = async () => {
         setIsSaving(true)
         // Simulate network request
@@ -44,6 +50,7 @@ export default function SettingsPage() {
         localRooms.forEach(room => {
             updateRoomCapacity(room.id, room.capacity)
             updateRoomPrice(room.id, room.basePrice)
+            if (room.maxGuests) updateRoomMaxGuests(room.id, room.maxGuests)
         })
 
         setIsSaving(false)
@@ -84,16 +91,33 @@ export default function SettingsPage() {
                                             <span className="text-[10px] uppercase font-bold text-stone-400">{room.type}</span>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <Input
-                                                id={room.id}
-                                                type="number"
-                                                min="1"
-                                                value={room.capacity}
-                                                onChange={(e) => handleRoomCapacityChange(room.id, e.target.value)}
-                                                className="bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 w-24 text-center font-bold"
-                                            />
-                                            <span className="text-sm text-stone-500">
-                                                {room.type === 'dorm' ? 'camas / huéspedes' : 'habitaciones'}
+                                            <div className="flex flex-col items-center">
+                                                <Label className="text-[10px] text-stone-400 mb-1">Inventario</Label>
+                                                <Input
+                                                    id={room.id}
+                                                    type="number"
+                                                    min="1"
+                                                    value={room.capacity}
+                                                    onChange={(e) => handleRoomCapacityChange(room.id, e.target.value)}
+                                                    className="bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 w-20 text-center font-bold"
+                                                />
+                                            </div>
+
+                                            {room.type !== 'dorm' && (
+                                                <div className="flex flex-col items-center">
+                                                    <Label className="text-[10px] text-stone-400 mb-1">Max Huéspedes</Label>
+                                                    <Input
+                                                        type="number"
+                                                        min="1"
+                                                        value={room.maxGuests}
+                                                        onChange={(e) => handleMaxGuestsChange(room.id, e.target.value)}
+                                                        className="bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 w-20 text-center font-bold text-stone-600"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            <span className="text-xs text-stone-500 mt-5 ml-2">
+                                                {room.type === 'dorm' ? 'Camas Totales' : 'Habitaciones'}
                                             </span>
                                         </div>
                                     </div>
@@ -120,16 +144,33 @@ export default function SettingsPage() {
                                             <span className="text-[10px] uppercase font-bold text-stone-400">{room.type}</span>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <Input
-                                                id={room.id}
-                                                type="number"
-                                                min="1"
-                                                value={room.capacity}
-                                                onChange={(e) => handleRoomCapacityChange(room.id, e.target.value)}
-                                                className="bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 w-24 text-center font-bold"
-                                            />
-                                            <span className="text-sm text-stone-500">
-                                                {room.type === 'dorm' ? 'camas / huéspedes' : 'habitaciones'}
+                                            <div className="flex flex-col items-center">
+                                                <Label className="text-[10px] text-stone-400 mb-1">Inventario</Label>
+                                                <Input
+                                                    id={room.id}
+                                                    type="number"
+                                                    min="1"
+                                                    value={room.capacity}
+                                                    onChange={(e) => handleRoomCapacityChange(room.id, e.target.value)}
+                                                    className="bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 w-20 text-center font-bold"
+                                                />
+                                            </div>
+
+                                            {room.type !== 'dorm' && (
+                                                <div className="flex flex-col items-center">
+                                                    <Label className="text-[10px] text-stone-400 mb-1">Max Huéspedes</Label>
+                                                    <Input
+                                                        type="number"
+                                                        min="1"
+                                                        value={room.maxGuests}
+                                                        onChange={(e) => handleMaxGuestsChange(room.id, e.target.value)}
+                                                        className="bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 w-20 text-center font-bold text-stone-600"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            <span className="text-xs text-stone-500 mt-5 ml-2">
+                                                {room.type === 'dorm' ? 'Camas Totales' : 'Habitaciones'}
                                             </span>
                                         </div>
                                     </div>

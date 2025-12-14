@@ -10,11 +10,10 @@ import {
     addMonths,
     subMonths,
     differenceInDays,
-    parseISO,
-    isWithinInterval
+    parseISO
 } from "date-fns"
 import { es } from "date-fns/locale"
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -213,7 +212,9 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                                                             ? "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-800"
                                                             : booking.status === 'cancelled'
                                                                 ? "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/40 dark:text-rose-200 dark:border-rose-800"
-                                                                : "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800"
+                                                                : booking.status === 'checked_out'
+                                                                    ? "bg-stone-200 text-stone-600 border-stone-300 dark:bg-stone-800 dark:text-stone-400 dark:border-stone-700 opacity-60 grayscale"
+                                                                    : "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800"
                                                     )}
                                                     style={{
                                                         left: `${left}px`,

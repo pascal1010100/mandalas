@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 
 // --- Types ---
 
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled';
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'checked_out';
 
 export interface Booking {
     id: string;
@@ -23,6 +23,9 @@ export interface Booking {
     cancellationReason?: string;
     refundStatus?: 'none' | 'partial' | 'full';
     cancelledAt?: string;
+    // Check-Out Metadata
+    actualCheckOut?: string;
+    paymentStatus?: 'pending' | 'paid';
 }
 
 export interface AppEvent {
@@ -40,6 +43,7 @@ export interface RoomConfig {
     location: 'pueblo' | 'hideout';
     type: 'dorm' | 'private' | 'suite';
     capacity: number;
+    maxGuests: number; // New: Physical limit per unit (for Private/Suite)
     basePrice: number;
 }
 
@@ -53,8 +57,9 @@ interface AppState {
     // Actions
     fetchBookings: () => Promise<void>;
     addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'totalPrice' | 'status'> & { totalPrice?: number, status?: BookingStatus }, totalPrice?: number) => Promise<void>;
-    updateBookingStatus: (id: string, status: 'confirmed' | 'pending' | 'cancelled') => Promise<void>;
+    updateBookingStatus: (id: string, status: 'confirmed' | 'pending' | 'cancelled' | 'checked_out') => Promise<void>;
     updateBooking: (id: string, data: Partial<Omit<Booking, 'id' | 'createdAt'>>) => Promise<void>;
+    checkOutBooking: (id: string, paymentStatus: 'paid' | 'pending') => Promise<void>;
     deleteBooking: (id: string) => Promise<void>;
 
     // Events
@@ -65,23 +70,25 @@ interface AppState {
     // Room & Price Management
     updateRoomPrice: (roomId: string, price: number) => void;
     updateRoomCapacity: (roomId: string, newCapacity: number) => void;
+    updateRoomMaxGuests: (roomId: string, maxGuests: number) => void;
 
     // Logic
     checkAvailability: (location: string, roomType: string, startDate: string, endDate: string, requestedGuests?: number) => boolean;
     getRemainingCapacity: (location: string, roomType: string, startDate: string, endDate: string) => number;
+    fetchRooms: () => Promise<void>;
 }
 
 // --- Initial Data ---
 
 const initialRooms: RoomConfig[] = [
     // PUEBLO
-    { id: 'pueblo_dorm', location: 'pueblo', type: 'dorm', label: 'Dormitorio Pueblo', capacity: 6, basePrice: 18 },
-    { id: 'pueblo_private', location: 'pueblo', type: 'private', label: 'Habitación Privada Pueblo', capacity: 1, basePrice: 35 },
-    { id: 'pueblo_suite', location: 'pueblo', type: 'suite', label: 'Suite Pueblo', capacity: 1, basePrice: 55 },
+    { id: 'pueblo_dorm', location: 'pueblo', type: 'dorm', label: 'Dormitorio Pueblo', capacity: 8, maxGuests: 8, basePrice: 18 },
+    { id: 'pueblo_private', location: 'pueblo', type: 'private', label: 'Habitación Privada Pueblo', capacity: 4, maxGuests: 2, basePrice: 35 },
+    { id: 'pueblo_suite', location: 'pueblo', type: 'suite', label: 'Suite Pueblo', capacity: 1, maxGuests: 4, basePrice: 55 },
     // HIDEOUT
-    { id: 'hideout_dorm', location: 'hideout', type: 'dorm', label: 'Dormitorio Hideout', capacity: 6, basePrice: 16 }, // Assuming 6 for now
-    { id: 'hideout_private', location: 'hideout', type: 'private', label: 'Habitación Privada Hideout', capacity: 1, basePrice: 40 },
-    { id: 'hideout_suite', location: 'hideout', type: 'suite', label: 'Suite Hideout', capacity: 1, basePrice: 55 },
+    { id: 'hideout_dorm', location: 'hideout', type: 'dorm', label: 'Dormitorio Hideout', capacity: 6, maxGuests: 6, basePrice: 16 },
+    { id: 'hideout_private', location: 'hideout', type: 'private', label: 'Habitación Privada Hideout', capacity: 3, maxGuests: 2, basePrice: 40 },
+    { id: 'hideout_suite', location: 'hideout', type: 'suite', label: 'Suite Hideout', capacity: 2, maxGuests: 4, basePrice: 55 },
 ]
 
 
@@ -119,6 +126,10 @@ export const useAppStore = create<AppState>()(
 
             fetchBookings: async () => {
                 set({ isLoading: true })
+                // Fetch Rooms First (Best Effort)
+                await get().fetchRooms().catch(e => console.error("Room fetch failed", e));
+
+                // Fetch Bookings
                 const { data, error } = await supabase.from('bookings').select('*').order('created_at', { ascending: false })
                 console.log('[Store] Supabase response:', { dataCount: data?.length, error })
 
@@ -147,33 +158,77 @@ export const useAppStore = create<AppState>()(
                         cancellationReason: row.cancellation_reason,
                         refundStatus: row.refund_status,
                         cancelledAt: row.cancelled_at,
+                        actualCheckOut: row.actual_check_out,
+                        paymentStatus: row.payment_status || 'pending',
                     }))
                     set({ bookings: mappedBookings, isLoading: false })
                 }
             },
 
             fetchEvents: async () => {
+                console.log("Fetching events from Supabase...")
                 const { data, error } = await supabase.from('events').select('*').order('date', { ascending: true })
                 if (error) {
                     console.error('Error fetching events:', error)
                     return
                 }
+                console.log("Events fetched:", data?.length)
                 if (data) {
                     set({ events: data as AppEvent[] })
                 }
             },
 
-            updateRoomPrice: (roomId, price) => set((state) => ({
-                rooms: state.rooms.map(room =>
-                    room.id === roomId ? { ...room, basePrice: price } : room
-                )
-            })),
+            fetchRooms: async () => {
+                const { data, error } = await supabase.from('rooms').select('*')
+                if (!error && data && data.length > 0) {
+                    // Map DB keys (snake_case) to Store keys (camelCase) if needed
+                    // Dbtable: id, location, type, label, capacity, max_guests, base_price
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const mappedRooms: RoomConfig[] = data.map((r: any) => ({
+                        id: r.id,
+                        location: r.location,
+                        type: r.type,
+                        label: r.label,
+                        capacity: r.capacity,
+                        maxGuests: r.max_guests,
+                        basePrice: r.base_price
+                    }));
+                    set({ rooms: mappedRooms });
+                    console.log("Loaded rooms from DB:", mappedRooms.length);
+                } else {
+                    console.log("Using local/fallback rooms (DB empty or error)");
+                }
+            },
 
-            updateRoomCapacity: (roomId, newCapacity) => set((state) => ({
-                rooms: state.rooms.map(room =>
-                    room.id === roomId ? { ...room, capacity: newCapacity } : room
-                )
-            })),
+            updateRoomPrice: async (roomId, price) => {
+                set((state) => ({
+                    rooms: state.rooms.map(room =>
+                        room.id === roomId ? { ...room, basePrice: price } : room
+                    )
+                }))
+                // Persist to DB
+                await supabase.from('rooms').update({ base_price: price }).eq('id', roomId);
+            },
+
+            updateRoomCapacity: async (roomId, newCapacity) => {
+                set((state) => ({
+                    rooms: state.rooms.map(room =>
+                        room.id === roomId ? { ...room, capacity: newCapacity } : room
+                    )
+                }))
+                // Persist to DB
+                await supabase.from('rooms').update({ capacity: newCapacity }).eq('id', roomId);
+            },
+
+            updateRoomMaxGuests: async (roomId, maxGuests) => {
+                set((state) => ({
+                    rooms: state.rooms.map(room =>
+                        room.id === roomId ? { ...room, maxGuests: maxGuests } : room
+                    )
+                }))
+                // Persist to DB
+                await supabase.from('rooms').update({ max_guests: maxGuests }).eq('id', roomId);
+            },
 
             addBooking: async (bookingData, totalPrice) => {
                 const computedTotal = totalPrice || bookingData.totalPrice || 0
@@ -220,12 +275,29 @@ export const useAppStore = create<AppState>()(
                 if (data.cancellationReason) payload.cancellation_reason = data.cancellationReason
                 if (data.refundStatus) payload.refund_status = data.refundStatus
                 if (data.status === 'cancelled') payload.cancelled_at = new Date().toISOString()
+                if (data.actualCheckOut) payload.actual_check_out = data.actualCheckOut
+                if (data.paymentStatus) payload.payment_status = data.paymentStatus
                 // Allow updating other fields if needed, e.g. guests/dates logic handled elsewhere for now
 
                 const { error } = await supabase.from('bookings').update(payload).eq('id', id)
 
                 if (error) {
                     console.error('Error updating booking:', error)
+                    return
+                }
+                await get().fetchBookings()
+            },
+
+            checkOutBooking: async (id, paymentStatus) => {
+                const payload = {
+                    status: 'checked_out',
+                    actual_check_out: new Date().toISOString(),
+                    payment_status: paymentStatus
+                }
+                const { error } = await supabase.from('bookings').update(payload).eq('id', id)
+                if (error) {
+                    console.error('Error checking out:', error)
+                    toast.error('Error al realizar check-out')
                     return
                 }
                 await get().fetchBookings()
@@ -306,13 +378,20 @@ export const useAppStore = create<AppState>()(
                     return !blocked;
 
                 } else {
-                    // Private/Suite logic implies capacity is 1 booking (regardless of people count inside)
-                    // Unless we want to support multiple private rooms of same type, but simpler model is 1 unit.
-                    // If capacity > 1 for private, it means we have multiple private rooms.
-                    // UPDATE: If capacity is e.g. 3 Private Rooms, we check overlapping count.
+                    // Private/Suite Checks:
+
+                    // 1. Max Occupancy Check (Physical limit)
+                    // If roomConfig says maxGuests is 2, and we request 3, it's blocked.
+                    if (roomConfig && requestedGuests > roomConfig.maxGuests) {
+                        console.log(`[Availability] Blocked Private (MaxGuests): ${location} | ${roomType} - Req: ${requestedGuests} > Max: ${roomConfig.maxGuests}`);
+                        return false;
+                    }
+
+                    // 2. Inventory Check (Capacity = Number of Rooms)
+                    // Private/Suite logic implies capacity is 1 booking unit.
                     const blocked = overlappingBookings.length >= capacity;
                     if (blocked) {
-                        console.log(`[Availability] Blocked Private (Dynamic): ${location} | ${roomType} - Count: ${overlappingBookings.length}/${capacity}`);
+                        console.log(`[Availability] Blocked Private (Inventory): ${location} | ${roomType} - Count: ${overlappingBookings.length}/${capacity}`);
                     }
                     return !blocked;
                 }
@@ -353,6 +432,15 @@ export const useAppStore = create<AppState>()(
         {
             name: 'mandalas-storage',
             partialize: (state) => ({ rooms: state.rooms }),
+            version: 2, // Increment to force reset of initialRooms
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            migrate: (persistedState: any, version) => {
+                if (version === 0) {
+                    // if version 0 (or undefined), ignore persisted rooms and use initial
+                    return { ...persistedState, rooms: initialRooms }
+                }
+                return persistedState
+            },
         }
     )
 )

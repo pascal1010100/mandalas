@@ -224,13 +224,25 @@ export default function ReservationsPage() {
                                         onClick={() => handleSelectBooking(booking)}
                                     >
                                         <TableCell className="font-medium pl-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-stone-100 dark:bg-stone-800/80 text-stone-600 dark:text-stone-300 flex items-center justify-center font-bold border border-stone-200 dark:border-stone-700 group-hover:bg-stone-200 dark:group-hover:bg-stone-700 transition-colors">
-                                                    {booking.guestName.charAt(0)}
+                                            <div className="flex items-center gap-4">
+                                                {/* Room Image Thumbnail */}
+                                                <div className="w-16 h-12 rounded-lg bg-stone-100 dark:bg-stone-800 overflow-hidden shadow-sm relative group-hover:scale-105 transition-transform duration-300">
+                                                    <img
+                                                        src={booking.location === 'pueblo'
+                                                            ? "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=200"
+                                                            : "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=200"}
+                                                        alt="Room"
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                 </div>
-                                                <div>
-                                                    <div className="font-medium text-stone-900 dark:text-stone-100">{booking.guestName}</div>
-                                                    <div className="text-xs text-stone-400 dark:text-stone-500 font-mono">ID: {booking.id.slice(0, 8)}</div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-stone-100 dark:bg-stone-800/80 text-stone-600 dark:text-stone-300 flex items-center justify-center font-bold border border-stone-200 dark:border-stone-700 group-hover:bg-stone-200 dark:group-hover:bg-stone-700 transition-colors">
+                                                        {booking.guestName.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-medium text-stone-900 dark:text-stone-100 font-heading">{booking.guestName}</div>
+                                                        <div className="text-xs text-stone-400 dark:text-stone-500 font-mono">ID: {booking.id.slice(0, 8)}</div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </TableCell>

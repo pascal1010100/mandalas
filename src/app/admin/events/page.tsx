@@ -46,9 +46,13 @@ import { Suspense } from "react"
 // ... imports
 
 function EventsContent() {
-    const { events, addEvent, removeEvent } = useAppStore()
+    const { events, addEvent, removeEvent, fetchEvents } = useAppStore()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const searchParams = useSearchParams()
+
+    useEffect(() => {
+        fetchEvents()
+    }, [fetchEvents])
 
     useEffect(() => {
         const action = searchParams.get('action')
