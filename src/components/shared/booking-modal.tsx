@@ -1,6 +1,6 @@
 "use client"
 
-import * as React from "react"
+import { useState, useEffect, useRef, ReactNode } from "react"
 import { Check, CheckCircle, Users, BedDouble, Calendar as CalendarIcon, Loader2, PartyPopper, Copy } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { subDays } from "date-fns"
@@ -36,7 +36,7 @@ import { Card } from "@/components/ui/card"
 // ... imports remain the same ...
 
 interface BookingModalProps {
-    children: React.ReactNode
+    children: ReactNode
     className?: string
     defaultLocation?: 'pueblo' | 'hideout'
     defaultRoomType?: string
@@ -52,27 +52,27 @@ export function BookingModal({
     // roomName, // Removed unused prop to fix lint
     pricePerNight = 25
 }: BookingModalProps) {
-    const [date, setDate] = React.useState<DateRange | undefined>()
-    const [step, setStep] = React.useState(1)
-    const [location, setLocation] = React.useState(defaultLocation)
+    const [date, setDate] = useState<DateRange | undefined>()
+    const [step, setStep] = useState(1)
+    const [location, setLocation] = useState(defaultLocation)
 
     // Form State
-    const [guests, setGuests] = React.useState("1")
-    const [roomType, setRoomType] = React.useState(defaultRoomType)
+    const [guests, setGuests] = useState("1")
+    const [roomType, setRoomType] = useState(defaultRoomType)
 
     // Contact Form State (NEW)
-    const [guestName, setGuestName] = React.useState("")
-    const [email, setEmail] = React.useState("")
-    const [phone, setPhone] = React.useState("")
+    const [guestName, setGuestName] = useState("")
+    const [email, setEmail] = useState("")
+    const [phone, setPhone] = useState("")
 
     // Receipt State
-    const [bookingId, setBookingId] = React.useState("")
+    const [bookingId, setBookingId] = useState("")
 
     // Scroll Container
-    const scrollContainerRef = React.useRef<HTMLDivElement>(null)
+    const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     // Reset scroll when step changes
-    React.useEffect(() => {
+    useEffect(() => {
         if (scrollContainerRef.current) {
             scrollContainerRef.current.scrollTop = 0
         }
@@ -88,7 +88,7 @@ export function BookingModal({
     const maxGuests = roomConfig?.maxGuests || 6
 
     // Reset guests if selected exceeds max (e.g. switch from Dorm to Private)
-    React.useEffect(() => {
+    useEffect(() => {
         if (parseInt(guests) > maxGuests) {
             setGuests(maxGuests.toString())
         }
@@ -112,7 +112,7 @@ export function BookingModal({
         icon: "bg-lime-100/50 text-[#65a30d] dark:bg-lime-900/20 dark:text-[#a3e635] ring-1 ring-lime-200 dark:ring-lime-800"
     }
 
-    const [isSubmitting, setIsSubmitting] = React.useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleNext = async () => {
         if (step === 2) {
