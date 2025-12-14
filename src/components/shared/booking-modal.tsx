@@ -87,13 +87,11 @@ export function BookingModal({
     const currentPrice = roomConfig?.basePrice || pricePerNight // Fallback to prop if not found
     const maxGuests = roomConfig?.maxGuests || 6
 
-    // Reset guests if selected exceeds max (e.g. switch from Dorm to Private)
-    useEffect(() => {
-        if (parseInt(guests) > maxGuests) {
-            setGuests(maxGuests.toString())
-        }
-    }, [roomType, maxGuests, guests])
+    // Ensure guests doesn't exceed maxGuests (Derived validation, not state effect)
+    // If current guests > maxGuests, we effectively clamp it for logic, 
+    // but to update UI we should do it when roomType changes.
 
+    // We'll update the roomType handler to clamp guests.
 
     // Dynamic styling based on location - Elite "Quiet Luxury" Refinement
     const theme = location === "pueblo" ? {
@@ -359,7 +357,12 @@ export function BookingModal({
                                             return (
                                                 <div
                                                     key={room.id}
-                                                    onClick={() => setRoomType(room.id)}
+                                                    onClick={() => {
+                                                        // When switching room, reset guests if needed
+                                                        setRoomType(room.id)
+                                                        // Reset guests to "1" to be safe when switching rooms.
+                                                        setGuests("1")
+                                                    }}
                                                     className={cn(
                                                         "relative overflow-hidden rounded-xl border cursor-pointer transition-all duration-300 group",
                                                         isSelected

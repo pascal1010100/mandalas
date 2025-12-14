@@ -19,23 +19,15 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { useState, useEffect, useMemo } from "react"
-import { format, addDays, differenceInCalendarDays, differenceInDays, startOfDay, subDays } from "date-fns" // Fixed import
+
+
+import { format, differenceInDays, subDays } from "date-fns" // Fixed import
 import { es } from "date-fns/locale"
 import {
-    Check,
-    ChevronsUpDown,
-    CalendarIcon,
-    AlertCircle,
-    Info,
-    Ban,
-    Trash2,
-    Users,
-    BedDouble,
     CheckCircle,
     ChevronLeft,
-    Loader2,
+    Users,
+    BedDouble,
     ArrowRight
 } from "lucide-react"
 import { toast } from "sonner"
@@ -92,7 +84,7 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
         setStatus("confirmed")
     }
 
-    const handleSelectRoom = (room: any) => {
+    const handleSelectRoom = (room: { id: string, label: string, price: number, available: boolean }) => {
         if (!room.available) return
         setSelectedRoom({ id: room.id, label: room.label, price: room.price })
     }

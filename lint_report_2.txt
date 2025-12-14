@@ -1,0 +1,59 @@
+
+> mandalas@0.1.0 lint
+> eslint
+
+
+/Users/usuario/proyectos/mandalas/src/app/(public)/contact/page.tsx
+  12:23  warning  'MapPin' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/app/(public)/page.tsx
+  6:10  warning  'ArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+  8:10  warning  'cn' is defined but never used          @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/app/admin/page.tsx
+    6:53  warning  'ArrowRight' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  190:57  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/app/admin/reservations/page.tsx
+   26:5   warning  'Filter' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  230:53  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/app/admin/settings/page.tsx
+  22:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/usuario/proyectos/mandalas/src/app/admin/settings/page.tsx:22:13
+  20 |     useEffect(() => {
+  21 |         if (rooms && rooms.length > 0 && localRooms.length === 0) {
+> 22 |             setLocalRooms(rooms)
+     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  23 |         }
+  24 |     }, [rooms, localRooms.length])
+  25 |  react-hooks/set-state-in-effect
+
+/Users/usuario/proyectos/mandalas/src/components/admin/dashboard/dashboard-stats.tsx
+  17:5   warning  'endOfDay' is defined but never used             @typescript-eslint/no-unused-vars
+  44:11  warning  'todayStart' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/admin/reservations/create-reservation-modal.tsx
+  288:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/components/admin/reservations/reservation-calendar.tsx
+  19:37  warning  'User' is defined but never used    @typescript-eslint/no-unused-vars
+  89:41  warning  'dayIdx' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/admin/reservations/reservation-details-modal.tsx
+   20:5   warning  'X' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+  350:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/components/shared/booking-modal.tsx
+  363:63  warning  'newMax' is assigned a value but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  381:57  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+✖ 17 problems (1 error, 16 warnings)
+

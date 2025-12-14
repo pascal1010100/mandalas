@@ -5,6 +5,7 @@ import { useAppStore } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { DollarSign, Users, CalendarDays, Activity, ArrowRight, ArrowUpRight } from "lucide-react"
 import { format } from "date-fns"
+import { es } from "date-fns/locale"
 import {
     Table,
     TableBody,
@@ -226,7 +227,7 @@ function AdminContent() {
                                 Operaciones del Día
                             </h3>
                             <span className="text-xs font-mono text-stone-400 bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">
-                                {format(new Date(), 'dd MMM', { locale: require("date-fns/locale").es })}
+                                {format(new Date(), 'dd MMM', { locale: es })}
                             </span>
                         </div>
 

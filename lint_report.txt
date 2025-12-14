@@ -1,0 +1,91 @@
+
+> mandalas@0.1.0 lint
+> eslint
+
+
+/Users/usuario/proyectos/mandalas/src/app/(public)/contact/page.tsx
+  12:23  warning  'MapPin' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/app/(public)/page.tsx
+  6:10  warning  'ArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+  8:10  warning  'cn' is defined but never used          @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/app/admin/page.tsx
+    6:53  warning  'ArrowRight' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  189:57  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  229:73  error    A `require()` style import is forbidden                                                                                                                                                                                                                                                  @typescript-eslint/no-require-imports
+
+/Users/usuario/proyectos/mandalas/src/app/admin/reservations/page.tsx
+   26:5   warning  'Filter' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  230:53  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/app/admin/settings/page.tsx
+  22:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/usuario/proyectos/mandalas/src/app/admin/settings/page.tsx:22:13
+  20 |     useEffect(() => {
+  21 |         if (rooms && rooms.length > 0) {
+> 22 |             setLocalRooms(rooms)
+     |             ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  23 |         }
+  24 |     }, [rooms])
+  25 |  react-hooks/set-state-in-effect
+
+/Users/usuario/proyectos/mandalas/src/components/admin/dashboard/dashboard-stats.tsx
+  17:5   warning  'endOfDay' is defined but never used             @typescript-eslint/no-unused-vars
+  44:11  warning  'todayStart' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/admin/reservations/create-reservation-modal.tsx
+    1:27  warning  'useEffect' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+   22:10  warning  'Popover' is defined but never used                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   22:19  warning  'PopoverContent' is defined but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   22:35  warning  'PopoverTrigger' is defined but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   24:18  warning  'addDays' is defined but never used                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   24:27  warning  'differenceInCalendarDays' is defined but never used                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   24:71  warning  'startOfDay' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   27:5   warning  'Check' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   28:5   warning  'ChevronsUpDown' is defined but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   29:5   warning  'CalendarIcon' is defined but never used                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   30:5   warning  'AlertCircle' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   31:5   warning  'Info' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   32:5   warning  'Ban' is defined but never used                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+   33:5   warning  'Trash2' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   38:5   warning  'Loader2' is defined but never used                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   95:37  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  296:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/components/admin/reservations/reservation-calendar.tsx
+  19:37  warning  'User' is defined but never used    @typescript-eslint/no-unused-vars
+  89:41  warning  'dayIdx' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/admin/reservations/reservation-details-modal.tsx
+   20:5   warning  'X' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+  350:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/components/shared/booking-modal.tsx
+   93:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/usuario/proyectos/mandalas/src/components/shared/booking-modal.tsx:93:13
+  91 |     useEffect(() => {
+  92 |         if (parseInt(guests) > maxGuests) {
+> 93 |             setGuests(maxGuests.toString())
+     |             ^^^^^^^^^ Avoid calling setState() directly within an effect
+  94 |         }
+  95 |     }, [roomType, maxGuests, guests])
+  96 |  react-hooks/set-state-in-effect
+  374:57  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @next/next/no-img-element
+
+✖ 34 problems (4 errors, 30 warnings)
+

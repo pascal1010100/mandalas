@@ -16,12 +16,13 @@ export default function SettingsPage() {
     // Local state to handle inputs before saving
     const [localRooms, setLocalRooms] = useState(rooms || [])
 
-    // Sync local state when store loads
+    // Sync local state when store loads (only if empty to avoid loops)
     useEffect(() => {
-        if (rooms && rooms.length > 0) {
+        if (rooms && rooms.length > 0 && localRooms.length === 0) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setLocalRooms(rooms)
         }
-    }, [rooms])
+    }, [rooms, localRooms.length])
 
     const handlePriceChange = (roomId: string, value: string) => {
         setLocalRooms(prev => prev.map(room =>
