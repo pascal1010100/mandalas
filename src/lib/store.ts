@@ -1,10 +1,11 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
+import { format } from 'date-fns'
 
 // --- Types ---
 
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'checked_out';
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'checked_out' | 'maintenance';
 
 export interface Booking {
     id: string;
@@ -13,6 +14,7 @@ export interface Booking {
     phone?: string;
     location: 'pueblo' | 'hideout';
     roomType: string;
+    unitId?: string; // New: Specific bed/room assignment (e.g., "1", "2")
     guests: string;
     checkIn: string;
     checkOut: string;
@@ -45,6 +47,9 @@ export interface RoomConfig {
     capacity: number;
     maxGuests: number; // New: Physical limit per unit (for Private/Suite)
     basePrice: number;
+    description?: string;
+    image?: string;
+    housekeeping_status?: 'clean' | 'dirty' | 'maintenance'; // New: Housekeeping
 }
 
 interface AppState {
@@ -61,6 +66,11 @@ interface AppState {
     updateBooking: (id: string, data: Partial<Omit<Booking, 'id' | 'createdAt'>>) => Promise<void>;
     checkOutBooking: (id: string, paymentStatus: 'paid' | 'pending') => Promise<void>;
     deleteBooking: (id: string) => Promise<void>;
+
+    // Maintenance
+    blockUnit: (roomId: string, location: 'pueblo' | 'hideout', unitId?: string) => Promise<void>;
+    unblockUnit: (bookingId: string) => Promise<void>;
+    updateRoomStatus: (roomId: string, status: 'clean' | 'dirty' | 'maintenance') => Promise<void>; // New Action
 
     // Events
     fetchEvents: () => Promise<void>;
@@ -82,13 +92,62 @@ interface AppState {
 
 const initialRooms: RoomConfig[] = [
     // PUEBLO
-    { id: 'pueblo_dorm', location: 'pueblo', type: 'dorm', label: 'Dormitorio Pueblo', capacity: 8, maxGuests: 8, basePrice: 18 },
-    { id: 'pueblo_private', location: 'pueblo', type: 'private', label: 'Habitación Privada Pueblo', capacity: 4, maxGuests: 2, basePrice: 35 },
-    { id: 'pueblo_suite', location: 'pueblo', type: 'suite', label: 'Suite Pueblo', capacity: 1, maxGuests: 4, basePrice: 55 },
+    // PUEBLO
+    {
+        id: 'pueblo_dorm_mixed_8', location: 'pueblo', type: 'dorm', label: 'Dormitorio Mixto (8 Camas)', capacity: 8, maxGuests: 8, basePrice: 18,
+        description: 'Espacioso dormitorio mixto con lockers individuales',
+        image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
+    {
+        id: 'pueblo_dorm_female_6', location: 'pueblo', type: 'dorm', label: 'Dormitorio Femenino (6 Camas)', capacity: 6, maxGuests: 6, basePrice: 20,
+        description: 'Dormitorio exclusivo para chicas, más privacidad',
+        image: "https://images.unsplash.com/photo-1520277739336-7bf67edfa768?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
+    {
+        id: 'pueblo_private_1', location: 'pueblo', type: 'private', label: 'Habitación Privada 1 (Jardín)', capacity: 4, maxGuests: 2, basePrice: 45,
+        description: 'Privada con vista directa al jardín',
+        image: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
+    {
+        id: 'pueblo_private_2', location: 'pueblo', type: 'private', label: 'Habitación Privada 2 (Estándar)', capacity: 4, maxGuests: 2, basePrice: 40,
+        description: 'Habitación tranquila y confortable',
+        image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
+    {
+        id: 'pueblo_private_family', location: 'pueblo', type: 'private', label: 'Habitación Familiar', capacity: 4, maxGuests: 4, basePrice: 60,
+        description: 'Espacio amplio ideal para familias o grupos pequeños',
+        image: "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
+    {
+        id: 'pueblo_suite_balcony', location: 'pueblo', type: 'suite', label: 'Suite con Balcón', capacity: 1, maxGuests: 3, basePrice: 75,
+        description: 'Suite de lujo con el mejor balcón del pueblo',
+        image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
     // HIDEOUT
-    { id: 'hideout_dorm', location: 'hideout', type: 'dorm', label: 'Dormitorio Hideout', capacity: 6, maxGuests: 6, basePrice: 16 },
-    { id: 'hideout_private', location: 'hideout', type: 'private', label: 'Habitación Privada Hideout', capacity: 3, maxGuests: 2, basePrice: 40 },
-    { id: 'hideout_suite', location: 'hideout', type: 'suite', label: 'Suite Hideout', capacity: 2, maxGuests: 4, basePrice: 55 },
+    {
+        id: 'hideout_dorm_female', location: 'hideout', type: 'dorm', label: 'Dormitorio Solo Chicas', capacity: 6, maxGuests: 6, basePrice: 16,
+        description: 'Espacio exclusivo para mujeres',
+        image: "https://images.unsplash.com/photo-1520277739336-7bf67edfa768?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
+    {
+        id: 'hideout_dorm_mixed', location: 'hideout', type: 'dorm', label: 'Dormitorio Mixto', capacity: 6, maxGuests: 6, basePrice: 16,
+        description: 'Ambiente social y compartido',
+        image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
+    {
+        id: 'hideout_private', location: 'hideout', type: 'private', label: 'Habitación Privada', capacity: 4, maxGuests: 2, basePrice: 40,
+        description: 'Tranquilidad y privacidad en el Hideout',
+        image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
 ]
 
 
@@ -142,25 +201,32 @@ export const useAppStore = create<AppState>()(
 
                 if (data) {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const mappedBookings: Booking[] = data.map((row: any) => ({
-                        id: row.id,
-                        guestName: row.guest_name,
-                        email: row.email,
-                        phone: row.phone,
-                        location: row.location,
-                        roomType: row.room_type,
-                        guests: row.guests,
-                        checkIn: row.check_in,
-                        checkOut: row.check_out,
-                        status: row.status,
-                        totalPrice: row.total_price,
-                        createdAt: new Date(row.created_at),
-                        cancellationReason: row.cancellation_reason,
-                        refundStatus: row.refund_status,
-                        cancelledAt: row.cancelled_at,
-                        actualCheckOut: row.actual_check_out,
-                        paymentStatus: row.payment_status || 'pending',
-                    }))
+                    const mappedBookings: Booking[] = data.map((row: any) => {
+                        // Hack: If guest_name is MANTENIMIENTO, treat as maintenance internally
+                        // This allows using 'confirmed' in DB to bypass enum constraints if 'maintenance' isn't allowed
+                        const isMaintenance = row.guest_name === 'MANTENIMIENTO' || row.status === 'maintenance';
+
+                        return {
+                            id: row.id,
+                            guestName: row.guest_name,
+                            email: row.email,
+                            phone: row.phone,
+                            location: row.location,
+                            roomType: row.room_type,
+                            guests: row.guests,
+                            checkIn: row.check_in,
+                            checkOut: row.check_out,
+                            status: isMaintenance ? 'maintenance' : row.status,
+                            totalPrice: row.total_price,
+                            createdAt: new Date(row.created_at),
+                            cancellationReason: row.cancellation_reason,
+                            refundStatus: row.refund_status,
+                            cancelledAt: row.cancelled_at,
+                            actualCheckOut: row.actual_check_out,
+                            paymentStatus: row.payment_status || 'pending',
+                            unitId: row.unit_id // Map DB column
+                        }
+                    })
                     set({ bookings: mappedBookings, isLoading: false })
                 }
             },
@@ -193,7 +259,7 @@ export const useAppStore = create<AppState>()(
                 const { data, error } = await supabase.from('rooms').select('*')
                 if (!error && data && data.length > 0) {
                     // Map DB keys (snake_case) to Store keys (camelCase) if needed
-                    // Dbtable: id, location, type, label, capacity, max_guests, base_price
+                    // Dbtable: id, location, type, label, capacity, max_guests, base_price, housekeeping_status
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const mappedRooms: RoomConfig[] = data.map((r: any) => ({
                         id: r.id,
@@ -202,13 +268,31 @@ export const useAppStore = create<AppState>()(
                         label: r.label,
                         capacity: r.capacity,
                         maxGuests: r.max_guests,
-                        basePrice: r.base_price
+                        basePrice: r.base_price,
+                        // If DB doesn't have image column, it will be undefined here. 
+                        // But we want to preserve images from initial state if they are static constants?
+                        // Actually, if we want dynamic images from DB, we need an image column.
+                        // For now, let's merge with initialRooms to keep the images!
+                        description: initialRooms.find(ir => ir.id === r.id)?.description,
+                        image: initialRooms.find(ir => ir.id === r.id)?.image,
+                        housekeeping_status: r.housekeeping_status || 'clean'
                     }));
                     set({ rooms: mappedRooms });
                     console.log("Loaded rooms from DB:", mappedRooms.length);
                 } else {
                     console.log("Using local/fallback rooms (DB empty or error)");
                 }
+            },
+
+            updateRoomStatus: async (roomId, status) => {
+                set((state) => ({
+                    rooms: state.rooms.map(room =>
+                        room.id === roomId ? { ...room, housekeeping_status: status } : room
+                    )
+                }))
+                // Persist to DB
+                await supabase.from('rooms').update({ housekeeping_status: status }).eq('id', roomId);
+                toast.success(`Habitación marquée como ${status === 'clean' ? 'Limpia' : status === 'dirty' ? 'Sucia' : 'Mantenimiento'}`)
             },
 
             updateRoomPrice: async (roomId, price) => {
@@ -255,7 +339,8 @@ export const useAppStore = create<AppState>()(
                     check_in: bookingData.checkIn,
                     check_out: bookingData.checkOut,
                     total_price: computedTotal,
-                    status: status
+                    status: status,
+                    unit_id: bookingData.unitId // ENABLED: Specific bed assignment
                 }
 
                 const { error } = await supabase.from('bookings').insert([payload])
@@ -285,15 +370,20 @@ export const useAppStore = create<AppState>()(
                 if (data.status) payload.status = data.status
                 if (data.cancellationReason) payload.cancellation_reason = data.cancellationReason
                 if (data.refundStatus) payload.refund_status = data.refundStatus
-                if (data.status === 'cancelled') payload.cancelled_at = new Date().toISOString()
+
+                // ENABLED: Cancellation timestamp behavior (Schema updated)
+                if (data.status === 'cancelled') {
+                    payload.cancelled_at = new Date().toISOString()
+                }
+
                 if (data.actualCheckOut) payload.actual_check_out = data.actualCheckOut
                 if (data.paymentStatus) payload.payment_status = data.paymentStatus
-                // Allow updating other fields if needed, e.g. guests/dates logic handled elsewhere for now
 
                 const { error } = await supabase.from('bookings').update(payload).eq('id', id)
 
                 if (error) {
                     console.error('Error updating booking:', error)
+                    toast.error('Error al actualizar reserva')
                     return
                 }
                 await get().fetchBookings()
@@ -323,6 +413,41 @@ export const useAppStore = create<AppState>()(
                 set((state) => ({
                     bookings: state.bookings.filter(b => b.id !== id)
                 }))
+            },
+
+            blockUnit: async (roomId, location, unitId) => {
+                // Maintenance Block Logic
+                const today = new Date()
+                const nextYear = new Date(today)
+                nextYear.setFullYear(today.getFullYear() + 1)
+
+                const payload = {
+                    guest_name: "MANTENIMIENTO",
+                    email: "admin@mandalas.com",
+                    location: location,
+                    room_type: roomId,
+                    guests: "1",
+                    check_in: format(today, 'yyyy-MM-dd'),
+                    check_out: format(nextYear, 'yyyy-MM-dd'),
+                    status: 'confirmed', // Uses confirmed to bypass enum issues if any
+                    total_price: 0,
+                    unit_id: unitId // ENABLED: Block specific unit
+                }
+
+                const { error } = await supabase.from('bookings').insert([payload])
+
+                if (error) {
+                    console.error('Error blocking unit:', error)
+                    toast.error('Error al bloquear unidad')
+                    return
+                }
+                await get().fetchBookings()
+                toast.success('Unidad bloqueada')
+            },
+
+            unblockUnit: async (bookingId) => {
+                await get().deleteBooking(bookingId)
+                toast.success('Unidad desbloqueada')
             },
 
             addEvent: async (eventData) => {
@@ -433,11 +558,11 @@ export const useAppStore = create<AppState>()(
         {
             name: 'mandalas-storage',
             partialize: (state) => ({ rooms: state.rooms }),
-            version: 2, // Increment to force reset of initialRooms
+            version: 5, // FORCE CACHE RESET: Bumped to 5 to load new Pueblo rooms
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             migrate: (persistedState: any, version) => {
-                if (version === 0) {
-                    // if version 0 (or undefined), ignore persisted rooms and use initial
+                if (version < 4) {
+                    // Ignore old persisted rooms if version < 4
                     return { ...persistedState, rooms: initialRooms }
                 }
                 return persistedState

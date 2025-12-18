@@ -1,10 +1,12 @@
+import { Fragment, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useAppStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { format, isSameDay, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
-import { LayoutGrid, BedDouble, User } from "lucide-react"
+import { LayoutGrid, BedDouble, User, Brush, Hammer, CheckCircle2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 import { Booking, RoomConfig } from "@/lib/store"
 
@@ -13,7 +15,8 @@ interface RoomStatusGridProps {
 }
 
 export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
-    const { rooms, bookings } = useAppStore()
+    const { rooms, bookings, blockUnit, unblockUnit, updateRoomStatus } = useAppStore()
+    const [isHousekeepingMode, setIsHousekeepingMode] = useState(false)
 
     // Helper: Group rooms by location
     const groupedRooms = {
@@ -33,51 +36,110 @@ export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
     const getRoomUnits = (roomConfig: RoomConfig) => {
         const today = new Date()
 
-        // precise filtering and stable sort by ID to prevent "jumping"
+        // precise filtering
         const activeBookings = bookings.filter(b =>
             (b.roomType === roomConfig.id || b.roomType === roomConfig.type) &&
             b.location.toLowerCase() === roomConfig.location.toLowerCase() &&
-            (b.status === 'confirmed' || b.status === 'pending') &&
+            (b.status === 'confirmed' || b.status === 'pending' || b.status === 'maintenance') &&
             (
                 (new Date(b.checkIn) <= today && new Date(b.checkOut) > today) ||
                 isSameDay(parseISO(b.checkIn), today) ||
                 isSameDay(parseISO(b.checkOut), today)
             )
-        ).sort((a, b) => a.id.localeCompare(b.id))
+        )
 
-        const units = []
-        for (let i = 0; i < roomConfig.capacity; i++) {
-            const booking = activeBookings[i]
-            let status = 'available'
-            let guestName = ''
-
-            if (booking) {
-                const isCheckOutToday = isSameDay(parseISO(booking.checkOut), today)
-                const isCheckInToday = isSameDay(parseISO(booking.checkIn), today)
-
-                if (isCheckOutToday) status = 'checkout'
-                else if (isCheckInToday) status = 'checkin'
-                else status = 'occupied'
-
-                // Override for pending
-                if (booking.status === 'pending') status = 'pending'
-
-                guestName = booking.guestName
-            }
-
-            // Generate logical label based on type
+        // Initialize empty units
+        const units = Array.from({ length: roomConfig.capacity }, (_, i) => {
+            // Default label logic
             let label = ''
             if (roomConfig.type === 'dorm') label = `C${i + 1}`
             if (roomConfig.type === 'private') label = `H${i + 1}`
             if (roomConfig.type === 'suite') label = `STE`
 
-            // If multiple rooms of same type (e.g. 2 private rooms), we might need better logic if they were separate rows in DB
-            // But currently rooms are aggregated by config. 
-            // IMPROVEMENT: If we ever split room configs (e.g. Private 1, Private 2), this loop would be size 1.
+            return {
+                id: `${roomConfig.id}-${i}`,
+                unitId: (i + 1).toString(), // The logical ID of this unit
+                status: 'available',
+                guestName: '',
+                label,
+                booking: undefined as Booking | undefined,
+                housekeeping: roomConfig.housekeeping_status || 'clean'
+            }
+        })
 
-            units.push({ id: `${roomConfig.id}-${i}`, status, guestName, label, booking })
+        // 1. Assign bookings with specific unitId
+        const unassignedBookings: Booking[] = []
+
+        activeBookings.forEach(booking => {
+            if (booking.unitId) {
+                const index = parseInt(booking.unitId) - 1
+                if (index >= 0 && index < roomConfig.capacity) {
+                    // Assign to specific slot
+                    units[index].booking = booking
+                } else {
+                    // Invalid unitId, fallback to unassigned
+                    unassignedBookings.push(booking)
+                }
+            } else {
+                unassignedBookings.push(booking)
+            }
+        })
+
+        // 2. Fill remaining empty slots with unassigned bookings
+        let unassignedIndex = 0
+        units.forEach(unit => {
+            if (!unit.booking && unassignedIndex < unassignedBookings.length) {
+                unit.booking = unassignedBookings[unassignedIndex]
+                unassignedIndex++
+            }
+        })
+
+        // 3. Compute status/display for each unit
+        return units.map(unit => {
+            if (!unit.booking) return unit // Still available
+
+            const booking = unit.booking
+            let status = 'occupied'
+            let guestName = booking.guestName
+
+            const isCheckOutToday = isSameDay(parseISO(booking.checkOut), today)
+            const isCheckInToday = isSameDay(parseISO(booking.checkIn), today)
+
+            if (isCheckOutToday) status = 'checkout'
+            else if (isCheckInToday) status = 'checkin'
+
+            if (booking.status === 'pending') status = 'pending'
+
+            if (booking.status === 'maintenance') {
+                status = 'maintenance'
+                guestName = 'M'
+            }
+
+            return { ...unit, status, guestName }
+        })
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleUnitClick = (room: RoomConfig, unit: any) => {
+        if (isHousekeepingMode) {
+            // Toggle Logic: Clean -> Dirty -> Maintenance -> Clean
+            const current = room.housekeeping_status || 'clean'
+            let next: 'clean' | 'dirty' | 'maintenance' = 'dirty'
+            if (current === 'dirty') next = 'maintenance'
+            if (current === 'maintenance') next = 'clean'
+
+            updateRoomStatus(room.id, next)
+            return
         }
-        return units
+
+        if (unit.status === 'available') {
+            // Block specific unit (e.g. "1", "2")
+            blockUnit(room.id, room.location, unit.unitId)
+        } else if (unit.status === 'maintenance' && unit.booking) {
+            unblockUnit(unit.booking.id)
+        } else if (unit.booking && onSelectBooking) {
+            onSelectBooking(unit.booking)
+        }
     }
 
     const renderRoomSection = (title: string, roomsList: typeof rooms, colorClass: string) => {
@@ -92,17 +154,25 @@ export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
                         getRoomUnits(room).map((unit, idx) => (
                             <div
                                 key={unit.id}
-                                onClick={() => unit.booking && onSelectBooking?.(unit.booking)}
-                                title={unit.guestName ? `${unit.guestName} (${room.label})` : room.label}
+                                onClick={() => handleUnitClick(room, unit)}
+                                title={unit.status === 'maintenance' ? 'Mantenimiento (Click para Habilitar)' : (unit.guestName ? `${unit.guestName} (${room.label})` : room.label)}
                                 className={cn(
                                     "w-10 h-10 md:w-12 md:h-12 rounded-lg border flex flex-col items-center justify-center p-1 transition-all hover:scale-105 relative overflow-hidden group shadow-sm",
+                                    isHousekeepingMode && "ring-2 ring-primary ring-offset-2 cursor-pointer",
+                                    // Status Colors
                                     unit.booking ? "cursor-pointer" : "cursor-default",
                                     unit.status === 'available' && "bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-300",
                                     unit.status === 'occupied' && "bg-rose-50 border-rose-100 text-rose-500 dark:bg-rose-900/20 dark:border-rose-900/30",
                                     unit.status === 'checkout' && "bg-amber-50 border-amber-100 text-amber-500 dark:bg-amber-900/20 dark:border-amber-900/30",
                                     unit.status === 'checkin' && "bg-blue-50 border-blue-100 text-blue-500 dark:bg-blue-900/20 dark:border-blue-900/30",
                                     unit.status === 'pending' && "bg-orange-50 border-orange-100 text-orange-500 dark:bg-orange-900/20 dark:border-orange-900/30 border-dashed",
-                                )}
+                                    unit.status === 'maintenance' && "bg-stone-200 border-stone-300 text-stone-500 dark:bg-stone-800 dark:border-stone-700",
+
+                                    // Housekeeping Overrides
+                                    room.housekeeping_status === 'dirty' && "border-rose-300 bg-rose-50/50 dark:border-rose-800/50",
+                                    room.housekeeping_status === 'maintenance' && "border-stone-400 bg-stone-100 dark:border-stone-600"
+                                )
+                                }
                             >
                                 <span className="text-[9px] font-bold uppercase opacity-60">
                                     {unit.label}
@@ -110,7 +180,15 @@ export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
                                 {unit.status !== 'available' ? (
                                     <User className="w-4 h-4" />
                                 ) : (
-                                    <div className={`w-1.5 h-1.5 rounded-full ${colorClass}`} />
+                                    <>
+                                        {room.housekeeping_status === 'dirty' ? (
+                                            <Brush className="w-4 h-4 text-rose-400 animate-pulse" />
+                                        ) : room.housekeeping_status === 'maintenance' ? (
+                                            <Hammer className="w-4 h-4 text-stone-500" />
+                                        ) : (
+                                            <div className={`w-1.5 h-1.5 rounded-full ${colorClass}`} />
+                                        )}
+                                    </>
                                 )}
 
                                 {unit.status !== 'available' && (
@@ -118,6 +196,15 @@ export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
                                         <span className="text-[8px] text-white font-bold text-center px-1 truncate w-full">
                                             {unit.guestName.split(' ')[0]}
                                         </span>
+                                    </div>
+                                )}
+
+                                {/* Housekeeping Badge Overlay */}
+                                {isHousekeepingMode && (
+                                    <div className="absolute top-0 right-0 p-0.5">
+                                        {room.housekeeping_status === 'dirty' && <div className="w-2 h-2 bg-rose-500 rounded-full" />}
+                                        {room.housekeeping_status === 'clean' && <div className="w-2 h-2 bg-emerald-500 rounded-full" />}
+                                        {room.housekeeping_status === 'maintenance' && <div className="w-2 h-2 bg-stone-500 rounded-full" />}
                                     </div>
                                 )}
                             </div>
@@ -142,10 +229,19 @@ export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
                             En vivo: {format(new Date(), "EEEE d 'de' MMMM", { locale: es })}
                         </CardDescription>
                     </div>
-                    <div className="flex items-center gap-3 text-[10px] uppercase font-bold tracking-wider text-stone-500">
-                        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-stone-200" /> Libre</span>
-                        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-rose-500" /> Ocupado</span>
-                        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-amber-400" /> Salida</span>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant={isHousekeepingMode ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setIsHousekeepingMode(!isHousekeepingMode)}
+                            className={cn(
+                                "flex items-center gap-2 text-xs uppercase font-bold tracking-wider rounded-full transition-all",
+                                isHousekeepingMode ? "bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600" : "text-stone-500 border-stone-200"
+                            )}
+                        >
+                            <Brush className="w-3 h-3" />
+                            {isHousekeepingMode ? 'Modo Limpieza' : 'Limpieza'}
+                        </Button>
                     </div>
                 </div>
             </CardHeader>
@@ -156,7 +252,12 @@ export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
                         <h4 className="text-sm font-bold uppercase tracking-widest text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2 border-b border-stone-100 dark:border-stone-800 pb-2">
                             <div className="w-2 h-2 rounded-full bg-amber-500" /> Pueblo
                         </h4>
-                        {renderRoomSection("Dormitorios", groupedRooms.pueblo.dorms, "bg-amber-500/30")}
+                        {/* Split specific dorms for clear visibility */}
+                        {groupedRooms.pueblo.dorms.map(room => (
+                            <Fragment key={room.id}>
+                                {renderRoomSection(room.label, [room], "bg-amber-500/30")}
+                            </Fragment>
+                        ))}
                         {renderRoomSection("Privadas", groupedRooms.pueblo.privates, "bg-amber-500/30")}
                         {renderRoomSection("Suites", groupedRooms.pueblo.suites, "bg-amber-500/30")}
                     </div>
@@ -166,7 +267,12 @@ export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
                         <h4 className="text-sm font-bold uppercase tracking-widest text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2 border-b border-stone-100 dark:border-stone-800 pb-2">
                             <div className="w-2 h-2 rounded-full bg-emerald-500" /> Hideout
                         </h4>
-                        {renderRoomSection("Dormitorios", groupedRooms.hideout.dorms, "bg-emerald-500/30")}
+                        {/* Split specific dorms for clear visibility */}
+                        {groupedRooms.hideout.dorms.map(room => (
+                            <Fragment key={room.id}>
+                                {renderRoomSection(room.label, [room], "bg-emerald-500/30")}
+                            </Fragment>
+                        ))}
                         {renderRoomSection("Privadas", groupedRooms.hideout.privates, "bg-emerald-500/30")}
                         {renderRoomSection("Suites", groupedRooms.hideout.suites, "bg-emerald-500/30")}
                     </div>

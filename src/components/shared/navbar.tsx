@@ -126,6 +126,21 @@ export function Navbar() {
                         )}
                     </Link>
                     <Link
+                        href="/mi-reserva"
+                        className={cn(
+                            "relative px-4 py-2 rounded-lg transition-all duration-300",
+                            "hover:bg-stone-100 hover:text-stone-900",
+                            pathname === "/mi-reserva"
+                                ? "text-stone-900 bg-stone-100"
+                                : scrolled || !isHome ? "text-stone-700 dark:text-stone-300" : "text-white/90"
+                        )}
+                    >
+                        Mi Reserva
+                        {pathname === "/mi-reserva" && (
+                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-stone-600" />
+                        )}
+                    </Link>
+                    <Link
                         href="/contact"
                         className={cn(
                             "relative px-4 py-2 rounded-lg transition-all duration-300",

@@ -16,7 +16,7 @@ export default function SettingsPage() {
     // Local state to handle inputs before saving
     const [localRooms, setLocalRooms] = useState(rooms || [])
 
-    // Sync local state when store loads (only if empty to avoid loops)
+    // Sync local state when store loads
     useEffect(() => {
         if (rooms && rooms.length > 0 && localRooms.length === 0) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -58,274 +58,257 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
-            <div>
-                <h2 className="text-3xl font-bold tracking-tight text-stone-900 dark:text-white font-heading">Configuración</h2>
-                <p className="text-stone-500 dark:text-stone-400">Administra los precios, capacidades y ajustes del sistema.</p>
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex flex-col gap-1">
+                <h2 className="text-4xl font-light tracking-tight text-stone-900 dark:text-white font-heading">
+                    Configuración
+                    <span className="text-stone-400">.</span>
+                </h2>
+                <p className="text-stone-500 dark:text-stone-400 font-light text-lg">
+                    Control maestro de inventario y precios.
+                </p>
             </div>
 
-            <Tabs defaultValue="rooms" className="space-y-6">
-                <TabsList className="bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 w-full justify-start overflow-x-auto no-scrollbar">
-                    <TabsTrigger value="rooms" className="data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:shadow-sm flex-shrink-0">Habitaciones y Capacidad</TabsTrigger>
-                    <TabsTrigger value="prices" className="data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:shadow-sm flex-shrink-0">Precios Base</TabsTrigger>
+            <Tabs defaultValue="rooms" className="space-y-8">
+                <TabsList className="bg-stone-100/50 dark:bg-stone-900/50 backdrop-blur-md border border-stone-200/50 dark:border-stone-800 p-1 h-auto rounded-full w-full md:w-auto">
+                    <TabsTrigger 
+                        value="rooms" 
+                        className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-stone-900 dark:data-[state=active]:text-stone-100 data-[state=active]:shadow-sm transition-all"
+                    >
+                        Habitaciones y Capacidad
+                    </TabsTrigger>
+                    <TabsTrigger 
+                        value="prices" 
+                        className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-stone-900 dark:data-[state=active]:text-stone-100 data-[state=active]:shadow-sm transition-all"
+                    >
+                        Precios Base
+                    </TabsTrigger>
                 </TabsList>
 
                 {/* ROOMS CONTENT */}
-                <TabsContent value="rooms" className="space-y-6">
-                    <div className="grid gap-6 md:grid-cols-2">
-                        {/* PUEBLO ROOMS */}
-                        <Card className="border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
+                <TabsContent value="rooms" className="space-y-8 outline-none">
+                    <div className="grid gap-8 md:grid-cols-2">
+                        {/* PUEBLO ROOMS - Amber Theme */}
+                        <Card className="border-white/40 dark:border-stone-800 bg-white/60 dark:bg-stone-900/60 backdrop-blur-xl shadow-xl shadow-stone-200/20 dark:shadow-none overflow-hidden group">
+                            <div className="h-1 w-full bg-gradient-to-r from-amber-400 to-amber-600 opacity-80" />
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-stone-900 dark:text-stone-100">
-                                    <span className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-500">
-                                        <BedDouble className="w-4 h-4" />
+                                <CardTitle className="flex items-center gap-3 text-2xl font-light font-heading text-stone-900 dark:text-stone-100">
+                                    <span className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-500 shadow-inner">
+                                        <BedDouble className="w-5 h-5" />
                                     </span>
                                     Mandalas Pueblo
                                 </CardTitle>
-                                <CardDescription>Gestiona la capacidad máxima de cada habitación.</CardDescription>
+                                <CardDescription className="text-stone-500 font-light">
+                                    Gestión de capacidad para el área social.
+                                </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-4">
+                            <CardContent className="space-y-6">
                                 {localRooms.filter(r => r.location === 'pueblo').map(room => (
-                                    <div key={room.id} className="grid gap-2">
-                                        <div className="flex justify-between items-center px-1">
-                                            <Label htmlFor={room.id} className="cursor-pointer">{room.label}</Label>
-                                            <span className="text-[10px] uppercase font-bold text-stone-400">{room.type}</span>
+                                    <div key={room.id} className="group/item relative bg-white/40 dark:bg-stone-950/40 rounded-xl p-4 border border-stone-100 dark:border-stone-800 hover:border-amber-200 dark:hover:border-amber-900 transition-colors">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <Label htmlFor={room.id} className="text-base font-medium text-stone-700 dark:text-stone-200 cursor-pointer">
+                                                    {room.label}
+                                                </Label>
+                                                <p className="text-[10px] uppercase tracking-widest font-bold text-amber-600/70 mt-1">{room.type}</p>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex flex-col items-center">
-                                                <Label className="text-[10px] text-stone-400 mb-1">Inventario</Label>
-                                                <Input
-                                                    id={room.id}
-                                                    type="number"
-                                                    min="1"
-                                                    value={room.capacity}
-                                                    onChange={(e) => handleRoomCapacityChange(room.id, e.target.value)}
-                                                    className="bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 w-20 text-center font-bold"
-                                                />
+                                        
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-1">
+                                                <Label className="text-[10px] text-stone-400 uppercase tracking-wide mb-1.5 block">Inventario Físico</Label>
+                                                <div className="relative">
+                                                    <Input
+                                                        id={room.id}
+                                                        type="number"
+                                                        min="1"
+                                                        value={room.capacity}
+                                                        onChange={(e) => handleRoomCapacityChange(room.id, e.target.value)}
+                                                        className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-center font-bold text-lg h-10 focus-visible:ring-amber-500/30"
+                                                    />
+                                                    <span className="absolute right-3 top-2.5 text-xs text-stone-400 pointer-events-none">
+                                                        {room.type === 'dorm' ? 'Camas' : 'Units'}
+                                                    </span>
+                                                </div>
                                             </div>
 
                                             {room.type !== 'dorm' && (
-                                                <div className="flex flex-col items-center">
-                                                    <Label className="text-[10px] text-stone-400 mb-1">Max Huéspedes</Label>
-                                                    <Input
-                                                        type="number"
-                                                        min="1"
-                                                        value={room.maxGuests}
-                                                        onChange={(e) => handleMaxGuestsChange(room.id, e.target.value)}
-                                                        className="bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 w-20 text-center font-bold text-stone-600"
-                                                    />
+                                                <div className="flex-1">
+                                                    <Label className="text-[10px] text-stone-400 uppercase tracking-wide mb-1.5 block">Max. Huéspedes</Label>
+                                                    <div className="relative">
+                                                        <Input
+                                                            type="number"
+                                                            min="1"
+                                                            value={room.maxGuests}
+                                                            onChange={(e) => handleMaxGuestsChange(room.id, e.target.value)}
+                                                            className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-center font-bold text-lg h-10 text-stone-600 dark:text-stone-400 focus-visible:ring-amber-500/30"
+                                                        />
+                                                        <span className="absolute right-3 top-2.5 text-xs text-stone-400 pointer-events-none">Pax</span>
+                                                    </div>
                                                 </div>
                                             )}
-
-                                            <span className="text-xs text-stone-500 mt-5 ml-2">
-                                                {room.type === 'dorm' ? 'Camas Totales' : 'Habitaciones'}
-                                            </span>
                                         </div>
                                     </div>
                                 ))}
                             </CardContent>
                         </Card>
 
-                        {/* HIDEOUT ROOMS */}
-                        <Card className="border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
+                        {/* HIDEOUT ROOMS - Lime Theme */}
+                        <Card className="border-white/40 dark:border-stone-800 bg-white/60 dark:bg-stone-900/60 backdrop-blur-xl shadow-xl shadow-stone-200/20 dark:shadow-none overflow-hidden group">
+                            <div className="h-1 w-full bg-gradient-to-r from-lime-400 to-lime-600 opacity-80" />
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-stone-900 dark:text-stone-100">
-                                    <span className="w-8 h-8 rounded-full bg-lime-100 dark:bg-lime-900/30 flex items-center justify-center text-lime-600 dark:text-lime-500">
-                                        <BedDouble className="w-4 h-4" />
+                                <CardTitle className="flex items-center gap-3 text-2xl font-light font-heading text-stone-900 dark:text-stone-100">
+                                    <span className="w-10 h-10 rounded-2xl bg-lime-100 dark:bg-lime-900/30 flex items-center justify-center text-lime-600 dark:text-lime-500 shadow-inner">
+                                        <BedDouble className="w-5 h-5" />
                                     </span>
                                     Mandalas Hideout
                                 </CardTitle>
-                                <CardDescription>Gestiona la capacidad máxima de cada habitación.</CardDescription>
+                                <CardDescription className="text-stone-500 font-light">
+                                    Gestión de capacidad para el área zen.
+                                </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-4">
+                            <CardContent className="space-y-6">
                                 {localRooms.filter(r => r.location === 'hideout').map(room => (
-                                    <div key={room.id} className="grid gap-2">
-                                        <div className="flex justify-between items-center px-1">
-                                            <Label htmlFor={room.id} className="cursor-pointer">{room.label}</Label>
-                                            <span className="text-[10px] uppercase font-bold text-stone-400">{room.type}</span>
+                                    <div key={room.id} className="group/item relative bg-white/40 dark:bg-stone-950/40 rounded-xl p-4 border border-stone-100 dark:border-stone-800 hover:border-lime-200 dark:hover:border-lime-900 transition-colors">
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <Label htmlFor={room.id} className="text-base font-medium text-stone-700 dark:text-stone-200 cursor-pointer">
+                                                    {room.label}
+                                                </Label>
+                                                <p className="text-[10px] uppercase tracking-widest font-bold text-lime-600/70 mt-1">{room.type}</p>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex flex-col items-center">
-                                                <Label className="text-[10px] text-stone-400 mb-1">Inventario</Label>
-                                                <Input
-                                                    id={room.id}
-                                                    type="number"
-                                                    min="1"
-                                                    value={room.capacity}
-                                                    onChange={(e) => handleRoomCapacityChange(room.id, e.target.value)}
-                                                    className="bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 w-20 text-center font-bold"
-                                                />
+                                        
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-1">
+                                                <Label className="text-[10px] text-stone-400 uppercase tracking-wide mb-1.5 block">Inventario Físico</Label>
+                                                <div className="relative">
+                                                    <Input
+                                                        id={room.id}
+                                                        type="number"
+                                                        min="1"
+                                                        value={room.capacity}
+                                                        onChange={(e) => handleRoomCapacityChange(room.id, e.target.value)}
+                                                        className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-center font-bold text-lg h-10 focus-visible:ring-lime-500/30"
+                                                    />
+                                                    <span className="absolute right-3 top-2.5 text-xs text-stone-400 pointer-events-none">
+                                                        {room.type === 'dorm' ? 'Camas' : 'Units'}
+                                                    </span>
+                                                </div>
                                             </div>
 
                                             {room.type !== 'dorm' && (
-                                                <div className="flex flex-col items-center">
-                                                    <Label className="text-[10px] text-stone-400 mb-1">Max Huéspedes</Label>
-                                                    <Input
-                                                        type="number"
-                                                        min="1"
-                                                        value={room.maxGuests}
-                                                        onChange={(e) => handleMaxGuestsChange(room.id, e.target.value)}
-                                                        className="bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800 w-20 text-center font-bold text-stone-600"
-                                                    />
+                                                <div className="flex-1">
+                                                    <Label className="text-[10px] text-stone-400 uppercase tracking-wide mb-1.5 block">Max. Huéspedes</Label>
+                                                    <div className="relative">
+                                                        <Input
+                                                            type="number"
+                                                            min="1"
+                                                            value={room.maxGuests}
+                                                            onChange={(e) => handleMaxGuestsChange(room.id, e.target.value)}
+                                                            className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-center font-bold text-lg h-10 text-stone-600 dark:text-stone-400 focus-visible:ring-lime-500/30"
+                                                        />
+                                                        <span className="absolute right-3 top-2.5 text-xs text-stone-400 pointer-events-none">Pax</span>
+                                                    </div>
                                                 </div>
                                             )}
-
-                                            <span className="text-xs text-stone-500 mt-5 ml-2">
-                                                {room.type === 'dorm' ? 'Camas Totales' : 'Habitaciones'}
-                                            </span>
                                         </div>
                                     </div>
                                 ))}
                             </CardContent>
                         </Card>
                     </div>
-                    <div className="flex justify-end">
-                        <Button
-                            onClick={handleSave}
-                            disabled={isSaving}
-                            className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-200 min-w-[150px]"
-                        >
-                            {isSaving ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Guardando...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="w-4 h-4 mr-2" />
-                                    Guardar Cambios
-                                </>
-                            )}
-                        </Button>
-                    </div>
                 </TabsContent>
 
-                <TabsContent value="prices" className="space-y-6">
-                    <div className="grid gap-6 md:grid-cols-2">
+                <TabsContent value="prices" className="space-y-8 outline-none">
+                    <div className="grid gap-8 md:grid-cols-2">
                         {/* Pueblo Prices */}
-                        <Card className="border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
+                        <Card className="border-white/40 dark:border-stone-800 bg-white/60 dark:bg-stone-900/60 backdrop-blur-xl shadow-xl shadow-stone-200/20 dark:shadow-none overflow-hidden">
+                             <div className="h-1 w-full bg-gradient-to-r from-amber-400 to-amber-600 opacity-80" />
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-stone-900 dark:text-stone-100">
-                                    <span className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-500">
-                                        <DollarSign className="w-4 h-4" />
+                                <CardTitle className="flex items-center gap-3 text-2xl font-light font-heading text-stone-900 dark:text-stone-100">
+                                    <span className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-500 shadow-inner">
+                                        <DollarSign className="w-5 h-5" />
                                     </span>
-                                    Mandalas Pueblo
+                                    Precios Pueblo
                                 </CardTitle>
-                                <CardDescription>Precios base por noche (USD)</CardDescription>
+                                <CardDescription className="text-stone-500 font-light">Tarifas base por noche (USD)</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="pueblo_dorm">Dormitorio Compartido</Label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-2.5 text-stone-500">$</span>
-                                        <Input
-                                            id="pueblo_dorm"
-                                            value={localRooms.find(r => r.id === 'pueblo_dorm')?.basePrice || 0}
-                                            onChange={(e) => handlePriceChange('pueblo_dorm', e.target.value)}
-                                            className="pl-7 bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800"
-                                        />
+                                {localRooms.filter(r => r.location === 'pueblo').map(room => (
+                                    <div key={room.id} className="grid gap-2 p-3 rounded-lg hover:bg-white/40 dark:hover:bg-stone-800/40 transition-colors">
+                                        <Label htmlFor={`price-${room.id}`} className="text-sm font-medium">{room.label}</Label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-2.5 text-stone-400 font-mono">$</span>
+                                            <Input
+                                                id={`price-${room.id}`}
+                                                type="number"
+                                                min="0"
+                                                value={room.basePrice}
+                                                onChange={(e) => handlePriceChange(room.id, e.target.value)}
+                                                className="pl-7 bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800 font-mono text-lg font-bold focus-visible:ring-amber-500/30"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="pueblo_private">Habitación Privada</Label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-2.5 text-stone-500">$</span>
-                                        <Input
-                                            id="pueblo_private"
-                                            value={localRooms.find(r => r.id === 'pueblo_private')?.basePrice || 0}
-                                            onChange={(e) => handlePriceChange('pueblo_private', e.target.value)}
-                                            className="pl-7 bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="pueblo_suite">Suite con Vista</Label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-2.5 text-stone-500">$</span>
-                                        <Input
-                                            id="pueblo_suite"
-                                            value={localRooms.find(r => r.id === 'pueblo_suite')?.basePrice || 0}
-                                            onChange={(e) => handlePriceChange('pueblo_suite', e.target.value)}
-                                            className="pl-7 bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800"
-                                        />
-                                    </div>
-                                </div>
+                                ))}
                             </CardContent>
                         </Card>
 
                         {/* Hideout Prices */}
-                        <Card className="border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-sm">
+                        <Card className="border-white/40 dark:border-stone-800 bg-white/60 dark:bg-stone-900/60 backdrop-blur-xl shadow-xl shadow-stone-200/20 dark:shadow-none overflow-hidden">
+                            <div className="h-1 w-full bg-gradient-to-r from-lime-400 to-lime-600 opacity-80" />
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-stone-900 dark:text-stone-100">
-                                    <span className="w-8 h-8 rounded-full bg-lime-100 dark:bg-lime-900/30 flex items-center justify-center text-lime-600 dark:text-lime-500">
-                                        <DollarSign className="w-4 h-4" />
+                                <CardTitle className="flex items-center gap-3 text-2xl font-light font-heading text-stone-900 dark:text-stone-100">
+                                    <span className="w-10 h-10 rounded-2xl bg-lime-100 dark:bg-lime-900/30 flex items-center justify-center text-lime-600 dark:text-lime-500 shadow-inner">
+                                        <DollarSign className="w-5 h-5" />
                                     </span>
-                                    Mandalas Hideout
+                                    Precios Hideout
                                 </CardTitle>
-                                <CardDescription>Precios base por noche (USD)</CardDescription>
+                                <CardDescription className="text-stone-500 font-light">Tarifas base por noche (USD)</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="hideout_dorm">Bungalow (Dorm)</Label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-2.5 text-stone-500">$</span>
-                                        <Input
-                                            id="hideout_dorm"
-                                            value={localRooms.find(r => r.id === 'hideout_dorm')?.basePrice || 0}
-                                            onChange={(e) => handlePriceChange('hideout_dorm', e.target.value)}
-                                            className="pl-7 bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800"
-                                        />
+                                {localRooms.filter(r => r.location === 'hideout').map(room => (
+                                    <div key={room.id} className="grid gap-2 p-3 rounded-lg hover:bg-white/40 dark:hover:bg-stone-800/40 transition-colors">
+                                        <Label htmlFor={`price-${room.id}`} className="text-sm font-medium">{room.label}</Label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-2.5 text-stone-400 font-mono">$</span>
+                                            <Input
+                                                id={`price-${room.id}`}
+                                                type="number"
+                                                min="0"
+                                                value={room.basePrice}
+                                                onChange={(e) => handlePriceChange(room.id, e.target.value)}
+                                                className="pl-7 bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800 font-mono text-lg font-bold focus-visible:ring-lime-500/30"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="hideout_private">Glamping (Privada)</Label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-2.5 text-stone-500">$</span>
-                                        <Input
-                                            id="hideout_private"
-                                            value={localRooms.find(r => r.id === 'hideout_private')?.basePrice || 0}
-                                            onChange={(e) => handlePriceChange('hideout_private', e.target.value)}
-                                            className="pl-7 bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="hideout_suite">Suite Lakefront</Label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-2.5 text-stone-500">$</span>
-                                        <Input
-                                            id="hideout_suite"
-                                            value={localRooms.find(r => r.id === 'hideout_suite')?.basePrice || 0}
-                                            onChange={(e) => handlePriceChange('hideout_suite', e.target.value)}
-                                            className="pl-7 bg-stone-50 dark:bg-stone-950 border-stone-200 dark:border-stone-800"
-                                        />
-                                    </div>
-                                </div>
+                                ))}
                             </CardContent>
                         </Card>
                     </div>
-
-                    <div className="flex justify-end">
-                        <Button
-                            onClick={handleSave}
-                            disabled={isSaving}
-                            className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-200 min-w-[150px]"
-                        >
-                            {isSaving ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    Guardando...
-                                </>
-                            ) : (
-                                <>
-                                    <Save className="w-4 h-4 mr-2" />
-                                    Guardar Cambios
-                                </>
-                            )}
-                        </Button>
-                    </div>
                 </TabsContent>
             </Tabs>
+
+            <div className="flex justify-end pt-4 border-t border-stone-100 dark:border-stone-800/50">
+                <Button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    size="lg"
+                    className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-200 min-w-[180px] shadow-lg shadow-stone-500/20 rounded-full font-medium"
+                >
+                    {isSaving ? (
+                        <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Aplicando Cambios...
+                        </>
+                    ) : (
+                        <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Guardar Configuración
+                        </>
+                    )}
+                </Button>
+            </div>
         </div>
     )
 }

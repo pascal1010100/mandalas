@@ -51,17 +51,21 @@ export function DashboardStats() {
     const adr = totalNightsSold > 0 ? monthlyRevenue / totalNightsSold : 0
 
     // 2. Occupancy & RevPAR
+    // Robust Fix: Compare DATE STRINGS (YYYY-MM-DD) to avoid Timezone/Midnight shifts.
+    // 2. Occupancy & RevPAR
+    // Logic aligned with RoomStatusGrid to ensure consistency
     const activeBookings = bookings.filter(b =>
-        b.status === 'confirmed' &&
-        new Date(b.checkIn) <= now &&
-        new Date(b.checkOut) > now
+        (b.status === 'confirmed' || b.status === 'pending' || b.status === 'maintenance') &&
+        (
+            (new Date(b.checkIn) <= now && new Date(b.checkOut) > now) ||
+            isSameDay(parseISO(b.checkIn), now) ||
+            isSameDay(parseISO(b.checkOut), now)
+        )
     )
 
-    // Total Capacity (Sum of room capacities or unit count)
-    // For Hotel KPIs, usually Unit Count.
-    const totalUnits = 20 // 12 Pueblo + 8 Hideout 
-    // In a real scenario, this would be: rooms.filter(r => r.type !== 'dorm').length + rooms.filter(r => r.type === 'dorm').reduce(...)
-    // Let's use a fixed meaningful number or derive from 'rooms'.
+    // Total Capacity (Sum of room capacities from config)
+    // capacity field represents Inventory (Beds for Dorms, Quantity for Privates)
+    const totalUnits = rooms.reduce((sum, room) => sum + room.capacity, 0)
     // const dynamicUnits = rooms.length // This works if rooms array has one entry per unit type.
 
     const occupancyRate = Math.round((activeBookings.length / totalUnits) * 100)
@@ -137,20 +141,20 @@ export function DashboardStats() {
                             <h3 className="text-3xl font-light text-stone-900 dark:text-stone-100 mt-1 font-heading">
                                 {bookings.filter(b => b.status !== 'cancelled' && isSameDay(parseISO(b.checkIn), now)).length}
                             </h3>
-                        </div>
+                        </div >
                         <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-500">
                             <Users className="w-5 h-5" />
                         </div>
-                    </div>
+                    </div >
                     <div className="flex items-center text-xs text-stone-500 font-medium">
                         <CalendarCheck className="w-3 h-3 mr-1" />
                         <span>Check-ins pendientes</span>
                     </div>
-                </CardContent>
-            </Card>
+                </CardContent >
+            </Card >
 
             {/* Pending Actions */}
-            <Card className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            < Card className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300" >
                 <CardContent className="p-6 relative">
                     <div className="flex justify-between items-start mb-4">
                         <div>
@@ -168,7 +172,7 @@ export function DashboardStats() {
                         <span>Solicitudes nuevas</span>
                     </div>
                 </CardContent>
-            </Card>
-        </div>
+            </Card >
+        </div >
     )
 }

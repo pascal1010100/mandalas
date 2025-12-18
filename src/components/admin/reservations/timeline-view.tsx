@@ -13,11 +13,11 @@ import {
     parseISO
 } from "date-fns"
 import { es } from "date-fns/locale"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Booking } from "@/lib/store"
+import { useAppStore, Booking } from "@/lib/store"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 interface TimelineViewProps {
@@ -26,22 +26,19 @@ interface TimelineViewProps {
 }
 
 // Configuration Constants
-const DAY_WIDTH = 60 // pixels per day column
-const ROW_HEIGHT = 80 // pixels per room row (allows stacking)
-const HEADER_HEIGHT = 50 // sticky header
-
-// Resource Definitions (Y-Axis)
-const ROOM_TYPES = [
-    { id: 'pueblo_dorm', label: 'Dormitorio Pueblo', location: 'pueblo', type: 'dorm' },
-    { id: 'pueblo_private', label: 'Privada Pueblo', location: 'pueblo', type: 'private' },
-    { id: 'pueblo_suite', label: 'Suite Pueblo', location: 'pueblo', type: 'suite' },
-    { id: 'hideout_dorm', label: 'Dormitorio Hideout', location: 'hideout', type: 'dorm' },
-    { id: 'hideout_private', label: 'Privada Hideout', location: 'hideout', type: 'private' },
-    { id: 'hideout_suite', label: 'Suite Hideout', location: 'hideout', type: 'suite' },
-]
+const DAY_WIDTH = 64 // slightly wider for breathing room
+const ROW_HEIGHT = 88 // slightly taller
+const HEADER_HEIGHT = 56 // taller header
 
 export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
+    const { rooms } = useAppStore() // Fetch from store
     const [currentDate, setCurrentDate] = useState(new Date())
+
+    // Sort rooms logic: Pueblo first, then by type
+    const sortedRooms = [...rooms].sort((a, b) => {
+        if (a.location !== b.location) return b.location.localeCompare(a.location) // Pueblo (p) > Hideout (h)
+        return a.label.localeCompare(b.label)
+    })
 
     // Determine Visible Range (Month)
     const viewStart = startOfMonth(currentDate)
@@ -60,25 +57,35 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
     }
 
     return (
-        <div className="bg-white dark:bg-stone-900/50 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 overflow-hidden flex flex-col h-[600px]">
+        <div className="bg-white/60 dark:bg-stone-900/60 backdrop-blur-xl rounded-3xl shadow-2xl shadow-stone-200/50 dark:shadow-none border border-white/50 dark:border-stone-800 overflow-hidden flex flex-col h-[650px] animate-in fade-in duration-700">
 
             {/* 1. Toolbar */}
-            <div className="flex items-center justify-between p-4 border-b border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 z-20">
-                <div className="flex items-center gap-4">
-                    <h2 className="text-lg font-bold font-heading capitalize text-stone-900 dark:text-stone-100 w-48">
-                        {format(currentDate, "MMMM yyyy", { locale: es })}
-                    </h2>
-                    <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={prevMonth} className="h-8 w-8">
+            <div className="flex items-center justify-between p-6 border-b border-stone-200/50 dark:border-stone-800 bg-white/40 dark:bg-stone-900/40 z-20">
+                <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-stone-100 dark:bg-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400 shadow-inner">
+                            <CalendarDays className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-light font-heading capitalize text-stone-900 dark:text-stone-100">
+                                {format(currentDate, "MMMM yyyy", { locale: es })}
+                            </h2>
+                            <p className="text-xs text-stone-500 font-medium tracking-wide uppercase">Vista General</p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-2 bg-stone-100/50 dark:bg-stone-800/50 p-1 rounded-full border border-stone-200/50 dark:border-stone-700/50">
+                        <Button variant="ghost" size="icon" onClick={prevMonth} className="h-8 w-8 rounded-full hover:bg-white dark:hover:bg-stone-700 transition-all">
                             <ChevronLeft className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={nextMonth} className="h-8 w-8">
+                        <Button variant="ghost" size="icon" onClick={nextMonth} className="h-8 w-8 rounded-full hover:bg-white dark:hover:bg-stone-700 transition-all">
                             <ChevronRight className="w-4 h-4" />
                         </Button>
                     </div>
                 </div>
-                <div className="text-xs text-stone-400">
-                    Arrastra para mover • Click para detalles
+                <div className="flex items-center gap-2 text-xs font-medium text-stone-400 bg-stone-100/50 dark:bg-stone-800/50 px-3 py-1.5 rounded-full border border-stone-200/50 dark:border-stone-700/50">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Tiempo Real
                 </div>
             </div>
 
@@ -86,30 +93,40 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
             <div className="flex flex-1 overflow-hidden relative">
 
                 {/* 2a. Sidebar (Y-Axis Resources) */}
-                <div className="w-48 flex-shrink-0 border-r border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900 z-10 overflow-hidden relative mt-[50px]">
-                    {ROOM_TYPES.map(room => (
+                <div className="w-56 flex-shrink-0 border-r border-stone-200/50 dark:border-stone-800 bg-stone-50/30 dark:bg-stone-900/30 backdrop-blur-sm z-10 overflow-hidden relative mt-[56px]">
+                    {sortedRooms.map(room => (
                         <div
                             key={room.id}
-                            className="border-b border-stone-100 dark:border-stone-800 flex flex-col justify-center px-4"
+                            className="border-b border-stone-100/50 dark:border-stone-800/50 flex flex-col justify-center px-6 transition-colors hover:bg-white/40 dark:hover:bg-stone-800/40"
                             style={{ height: `${ROW_HEIGHT}px` }}
                         >
-                            <span className="font-medium text-sm text-stone-700 dark:text-stone-300">
+                            <span className="font-heading font-medium text-base text-stone-800 dark:text-stone-200 truncate leading-tight transform -translate-y-0.5">
                                 {room.label}
                             </span>
-                            <span className="text-[10px] uppercase text-stone-400 tracking-wider">
-                                {room.location}
-                            </span>
+                            <div className="flex items-center gap-2 mt-1.5">
+                                <span className={cn(
+                                    "text-[9px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded-sm border",
+                                    room.location === 'pueblo'
+                                        ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-500 dark:border-amber-800/50"
+                                        : "bg-lime-50 text-lime-700 border-lime-200 dark:bg-lime-900/20 dark:text-lime-500 dark:border-lime-800/50"
+                                )}>
+                                    {room.location}
+                                </span>
+                                <span className="text-[10px] text-stone-400 font-mono">
+                                    Cap: {room.capacity}
+                                </span>
+                            </div>
                         </div>
                     ))}
                 </div>
 
                 {/* 2b. Scrollable Grid Area (X-Axis & Content) */}
-                <ScrollArea className="flex-1 w-full">
+                <ScrollArea className="flex-1 w-full bg-stone-50/10 dark:bg-stone-900/10">
                     <div className="relative min-w-full" style={{ width: `${days.length * DAY_WIDTH}px` }}>
 
                         {/* Header Row (Sticky Dates) */}
                         <div
-                            className="flex border-b border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/80 sticky top-0 z-10"
+                            className="flex border-b border-stone-200/50 dark:border-stone-800 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md sticky top-0 z-10 shadow-sm"
                             style={{ height: `${HEADER_HEIGHT}px` }}
                         >
                             {days.map(day => {
@@ -118,20 +135,25 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                                     <div
                                         key={day.toISOString()}
                                         className={cn(
-                                            "flex-shrink-0 flex flex-col items-center justify-center border-r border-stone-100 dark:border-stone-800/50",
-                                            isToday && "bg-amber-500/10"
+                                            "flex-shrink-0 flex flex-col items-center justify-center border-r border-stone-100 dark:border-stone-800/30 transition-colors",
+                                            isToday ? "bg-amber-50/50 dark:bg-amber-900/10" : "hover:bg-stone-50 dark:hover:bg-stone-800/30"
                                         )}
                                         style={{ width: `${DAY_WIDTH}px` }}
                                     >
-                                        <span className="text-[10px] uppercase text-stone-400 font-bold">
+                                        <span className={cn(
+                                            "text-[10px] uppercase font-bold mb-0.5",
+                                            isToday ? "text-amber-600 dark:text-amber-500" : "text-stone-400"
+                                        )}>
                                             {format(day, "EEE", { locale: es })}
                                         </span>
-                                        <span className={cn(
-                                            "text-sm font-medium",
-                                            isToday ? "text-amber-600 dark:text-amber-500" : "text-stone-600 dark:text-stone-400"
+                                        <div className={cn(
+                                            "h-7 w-7 rounded-full flex items-center justify-center text-sm font-medium transition-all group",
+                                            isToday
+                                                ? "bg-amber-500 text-white shadow-lg shadow-amber-500/30 scale-110"
+                                                : "text-stone-700 dark:text-stone-300 group-hover:bg-stone-200 dark:group-hover:bg-stone-700"
                                         )}>
                                             {format(day, "d")}
-                                        </span>
+                                        </div>
                                     </div>
                                 )
                             })}
@@ -141,20 +163,28 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                         <div className="relative">
                             {/* Background Grid Lines */}
                             <div className="absolute inset-0 flex pointer-events-none">
-                                {days.map(day => (
-                                    <div
-                                        key={day.toISOString()}
-                                        className="border-r border-stone-50 dark:border-stone-800/30 flex-shrink-0 h-full"
-                                        style={{ width: `${DAY_WIDTH}px` }}
-                                    />
-                                ))}
+                                {days.map((day, i) => {
+                                    const isToday = isSameDay(day, new Date())
+                                    return (
+                                        <div
+                                            key={day.toISOString()}
+                                            className={cn(
+                                                "border-r flex-shrink-0 h-full",
+                                                isToday
+                                                    ? "bg-amber-50/30 dark:bg-amber-900/5 border-amber-200/30 dark:border-amber-800/30"
+                                                    : "border-stone-100/50 dark:border-stone-800/30"
+                                            )}
+                                            style={{ width: `${DAY_WIDTH}px` }}
+                                        />
+                                    )
+                                })}
                             </div>
 
                             {/* Resource Rows */}
-                            {ROOM_TYPES.map(room => (
+                            {sortedRooms.map(room => (
                                 <div
                                     key={room.id}
-                                    className="relative border-b border-stone-100 dark:border-stone-800/50"
+                                    className="relative border-b border-stone-100/50 dark:border-stone-800/50 hover:bg-stone-50/30 dark:hover:bg-stone-800/10 transition-colors"
                                     style={{ height: `${ROW_HEIGHT}px` }}
                                 >
                                     {/* Bookings will reside here absolutely positioned */}
@@ -173,23 +203,20 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                                         // 2. SORT by start date
                                         roomBookings.sort((a, b) => parseISO(a.checkIn).getTime() - parseISO(b.checkIn).getTime())
 
-                                        // 3. CALCULATE overlaps (simple greedy algorithm)
-                                        // We assign a "lane" or "row" (0, 1, 2...) to each booking so they don't overlap visually
-                                        const lanes: Date[] = [] // Stores the end date of the last booking in each lane
+                                        // 3. CALCULATE overlaps
+                                        const lanes: Date[] = []
 
                                         return roomBookings.map((booking) => {
                                             const start = parseISO(booking.checkIn)
                                             const end = parseISO(booking.checkOut)
 
-                                            // Find the first lane where this booking fits (start > lane release date)
+                                            // Find lane
                                             let laneIndex = lanes.findIndex(laneEnd => start >= laneEnd)
 
                                             if (laneIndex === -1) {
-                                                // No available lane found, create a new one
                                                 laneIndex = lanes.length
                                                 lanes.push(end)
                                             } else {
-                                                // Update existing lane
                                                 lanes[laneIndex] = end
                                             }
 
@@ -199,31 +226,31 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                                             const width = Math.max(duration, 1) * DAY_WIDTH
                                             const left = getPosition(effectiveStart)
 
-                                            // Calculate vertical position based on lane (36px height per bar + 4px gap)
-                                            const top = 8 + (laneIndex * 36)
+                                            // Updated Vertical positioning
+                                            const top = 12 + (laneIndex * 38)
 
                                             return (
                                                 <div
                                                     key={booking.id}
                                                     onClick={() => onSelectBooking(booking)}
                                                     className={cn(
-                                                        "absolute h-8 rounded-md px-2 flex items-center shadow-sm cursor-pointer hover:brightness-95 transition-all text-[10px] font-medium truncate select-none border group overflow-hidden",
+                                                        "absolute h-[34px] rounded-lg px-3 flex items-center shadow-lg hover:shadow-xl cursor-pointer hover:scale-[1.02] transition-all text-xs font-medium truncate select-none border group overflow-hidden z-10",
                                                         booking.status === 'confirmed'
-                                                            ? "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-200 dark:border-emerald-800"
+                                                            ? "bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-900 border-white/50 dark:from-emerald-900/60 dark:to-emerald-800/60 dark:text-emerald-100 dark:border-emerald-700"
                                                             : booking.status === 'cancelled'
-                                                                ? "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/40 dark:text-rose-200 dark:border-rose-800"
+                                                                ? "bg-rose-100 text-rose-800 border-rose-200 opacity-60"
                                                                 : booking.status === 'checked_out'
-                                                                    ? "bg-stone-200 text-stone-600 border-stone-300 dark:bg-stone-800 dark:text-stone-400 dark:border-stone-700 opacity-60 grayscale"
-                                                                    : "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/40 dark:text-amber-200 dark:border-amber-800"
+                                                                    ? "bg-stone-200 text-stone-600 border-stone-300 opacity-60 grayscale"
+                                                                    : "bg-gradient-to-br from-amber-100 to-amber-200 text-amber-900 border-white/50 dark:from-amber-900/60 dark:to-amber-800/60 dark:text-amber-100 dark:border-amber-700"
                                                     )}
                                                     style={{
-                                                        left: `${left}px`,
-                                                        width: `${width - 4}px`, // -4 for gap
+                                                        left: `${left + 2}px`, // +2 padding
+                                                        width: `${width - 8}px`, // -8 for gaps
                                                         top: `${top}px`,
-                                                        zIndex: 10 + laneIndex
+                                                        zIndex: 20 + laneIndex
                                                     }}
                                                 >
-                                                    <span className="truncate">{booking.guestName}</span>
+                                                    <span className="truncate drop-shadow-sm">{booking.guestName}</span>
                                                 </div>
                                             )
                                         })
@@ -232,7 +259,7 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                             ))}
                         </div>
                     </div>
-                    <ScrollBar orientation="horizontal" />
+                    <ScrollBar orientation="horizontal" className="h-3" />
                 </ScrollArea>
             </div>
         </div>

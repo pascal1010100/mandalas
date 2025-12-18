@@ -616,6 +616,24 @@ export function ReservationDetailsModal({ booking, open, onOpenChange, defaultOp
                             )}
                         </div>
 
+                        {/* Quick Check-In Button for Pending Bookings */}
+                        {booking.status === 'pending' && !isEditing && (
+                            <Button
+                                onClick={() => {
+                                    updateBookingStatus(booking.id, 'confirmed')
+                                    toast.success("Reserva confirmada (Check-in)")
+                                    onOpenChange(false)
+                                }}
+                                className="h-full py-4 px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transition-all"
+                            >
+                                <CheckCircle className="w-5 h-5 mr-2" />
+                                <div className="text-left">
+                                    <span className="block text-[10px] uppercase opacity-70 leading-none">Acción</span>
+                                    <span className="font-bold">Check-In</span>
+                                </div>
+                            </Button>
+                        )}
+
                         {/* Quick Check-Out Button for Confirmed Bookings */}
                         {booking.status === 'confirmed' && !isEditing && (
                             <Button

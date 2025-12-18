@@ -33,7 +33,7 @@ import {
     LayoutGrid,
     Plus
 } from "lucide-react"
-import { format } from "date-fns"
+import { format, isSameDay, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
 
 import { ReservationCalendar } from "@/components/admin/reservations/reservation-calendar"
@@ -217,108 +217,151 @@ export default function ReservationsPage() {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredBookings.map((booking) => (
-                                    <TableRow
-                                        key={booking.id}
-                                        className="hover:bg-stone-50/50 dark:hover:bg-stone-800/50 transition-colors border-stone-100 dark:border-stone-800 group cursor-pointer"
-                                        onClick={() => handleSelectBooking(booking)}
-                                    >
-                                        <TableCell className="font-medium pl-6 py-4">
-                                            <div className="flex items-center gap-4">
-                                                {/* Room Image Thumbnail */}
-                                                <div className="w-16 h-12 rounded-lg bg-stone-100 dark:bg-stone-800 overflow-hidden shadow-sm relative group-hover:scale-105 transition-transform duration-300">
-                                                    <img
-                                                        src={booking.location === 'pueblo'
-                                                            ? "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=200"
-                                                            : "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=200"}
-                                                        alt="Room"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-stone-100 dark:bg-stone-800/80 text-stone-600 dark:text-stone-300 flex items-center justify-center font-bold border border-stone-200 dark:border-stone-700 group-hover:bg-stone-200 dark:group-hover:bg-stone-700 transition-colors">
-                                                        {booking.guestName.charAt(0)}
+                                filteredBookings.map((booking) => {
+                                    // Logic: Find Room Config for Label & Image
+                                    const roomConfig = useAppStore.getState().rooms.find(r => r.id === booking.roomType)
+                                    const roomLabel = roomConfig?.label || booking.roomType
+
+                                    // Dynamic Image Logic
+                                    let roomImage = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=200" // Default Dorm
+                                    if (booking.roomType.includes('private')) roomImage = "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=200"
+                                    if (booking.roomType.includes('suite')) roomImage = "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=200"
+                                    if (booking.roomType.includes('female')) roomImage = "https://images.unsplash.com/photo-1520277739336-7bf67edfa768?auto=format&fit=crop&q=80&w=200"
+
+                                    // Quick Action Logic
+                                    const isToday = isSameDay(parseISO(booking.checkIn), new Date())
+                                    const showQuickCheckIn = booking.status === 'pending' && isToday
+
+                                    return (
+                                        <TableRow
+                                            key={booking.id}
+                                            className="hover:bg-stone-50/80 dark:hover:bg-stone-800/50 transition-colors border-stone-100 dark:border-stone-800 group cursor-pointer relative"
+                                            onClick={() => handleSelectBooking(booking)}
+                                        >
+                                            <TableCell className="font-medium pl-6 py-4">
+                                                <div className="flex items-center gap-4">
+                                                    {/* Room Image Thumbnail */}
+                                                    <div className="w-16 h-12 rounded-lg bg-stone-100 dark:bg-stone-800 overflow-hidden shadow-sm relative group-hover:scale-105 transition-transform duration-300 ring-1 ring-black/5 dark:ring-white/10">
+                                                        <img
+                                                            src={roomImage}
+                                                            alt="Room"
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                        {booking.unitId && (
+                                                            <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-tl-md font-mono backdrop-blur-md">
+                                                                #{booking.unitId}
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <div>
-                                                        <div className="font-medium text-stone-900 dark:text-stone-100 font-heading">{booking.guestName}</div>
-                                                        <div className="text-xs text-stone-400 dark:text-stone-500 font-mono">ID: {booking.id.slice(0, 8)}</div>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 flex items-center justify-center font-bold border border-stone-200 dark:border-stone-700 group-hover:border-amber-500/50 group-hover:text-amber-600 transition-colors">
+                                                            {booking.guestName.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium text-stone-900 dark:text-stone-100 font-heading leading-tight">{booking.guestName}</div>
+                                                            <div className="text-[10px] text-stone-400 dark:text-stone-500 font-mono mt-0.5 flex items-center gap-1">
+                                                                ID: <span className="text-stone-500 dark:text-stone-400">{booking.id.slice(0, 8)}</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col gap-1">
-                                                <span className="font-medium flex items-center gap-1.5 text-stone-700 dark:text-stone-300">
-                                                    <MapPin className="w-3.5 h-3.5 text-stone-400" />
-                                                    <span className="capitalize">{booking.location}</span>
-                                                </span>
-                                                <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded-full w-fit">
-                                                    {booking.roomType}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col text-sm text-stone-600 dark:text-stone-400">
-                                                <span className="flex items-center gap-2">
-                                                    <CalendarIcon className="w-3.5 h-3.5 text-stone-400" />
-                                                    {booking.checkIn && !isNaN(new Date(booking.checkIn).getTime())
-                                                        ? format(new Date(booking.checkIn), "MMM dd, yyyy", { locale: es })
-                                                        : "Fecha no disponible"}
-                                                </span>
-                                                <span className="text-xs text-stone-400 pl-5">
-                                                    al {booking.checkOut && !isNaN(new Date(booking.checkOut).getTime())
-                                                        ? format(new Date(booking.checkOut), "MMM dd, yyyy", { locale: es })
-                                                        : "N/A"}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="text-sm text-stone-600 dark:text-stone-400">
-                                                <div className="font-medium">{booking.email || "No disponible"}</div>
-                                                <div className="text-stone-400 dark:text-stone-500 text-xs">{booking.guests} huéspedes</div>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="font-bold font-heading text-lg text-stone-900 dark:text-stone-100">
-                                                ${booking.totalPrice}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            {getStatusBadge(booking.status)}
-                                        </TableCell>
-                                        <TableCell className="text-right pr-6" onClick={(e) => e.stopPropagation()}>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100">
-                                                        <span className="sr-only">Abrir menu</span>
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-48 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
-                                                    <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                                    <DropdownMenuItem onClick={() => handleSelectBooking(booking)}>
-                                                        Ver Detalles
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, "confirmed")}>
-                                                        <CheckCircle className="mr-2 h-4 w-4 text-green-600" /> Confirmar
-                                                    </DropdownMenuItem>
-                                                    {booking.status === 'cancelled' ? (
-                                                        <DropdownMenuItem onClick={() => handleSelectBooking(booking, true)}>
-                                                            <XCircle className="mr-2 h-4 w-4 text-red-600" /> Eliminar
-                                                        </DropdownMenuItem>
-                                                    ) : (
-                                                        <DropdownMenuItem onClick={() => handleSelectBooking(booking, true)}>
-                                                            <XCircle className="mr-2 h-4 w-4 text-red-600" /> Cancelar
-                                                        </DropdownMenuItem>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col gap-1.5">
+                                                    <span className="text-xs font-bold text-stone-700 dark:text-stone-300 line-clamp-1" title={roomLabel}>
+                                                        {roomLabel}
+                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-5 border-stone-200 text-stone-500 font-normal bg-stone-50 dark:bg-stone-800 dark:border-stone-700 dark:text-stone-400 uppercase tracking-widest">
+                                                            {booking.location}
+                                                        </Badge>
+                                                        {booking.unitId && (
+                                                            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-5 bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 dark:bg-amber-900/30 dark:text-amber-500 dark:border-amber-900/50">
+                                                                Cama {booking.unitId}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col text-sm text-stone-600 dark:text-stone-400 gap-0.5">
+                                                    <span className="flex items-center gap-2 font-medium text-stone-900 dark:text-stone-200">
+                                                        <CalendarIcon className="w-3.5 h-3.5 text-stone-400" />
+                                                        {booking.checkIn && !isNaN(new Date(booking.checkIn).getTime())
+                                                            ? format(new Date(booking.checkIn), "d MMM", { locale: es })
+                                                            : "--"}
+                                                    </span>
+                                                    <span className="text-xs text-stone-400 pl-5 flex items-center gap-1">
+                                                        <Clock className="w-3 h-3" />
+                                                        {booking.checkOut && !isNaN(new Date(booking.checkOut).getTime())
+                                                            ? format(new Date(booking.checkOut), "d MMM", { locale: es })
+                                                            : "--"}
+                                                    </span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="text-sm text-stone-600 dark:text-stone-400">
+                                                    <div className="truncate max-w-[120px]" title={booking.email}>{booking.email || "-"}</div>
+                                                    <div className="text-stone-400 dark:text-stone-500 text-xs mt-0.5">{booking.guests} persona{parseInt(booking.guests) > 1 ? 's' : ''}</div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="font-bold font-heading text-sm text-stone-900 dark:text-stone-100 tabular-nums">
+                                                    ${booking.totalPrice?.toLocaleString()}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                {getStatusBadge(booking.status)}
+                                            </TableCell>
+                                            <TableCell className="text-right pr-6" onClick={(e) => e.stopPropagation()}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    {showQuickCheckIn && (
+                                                        <Button
+                                                            size="sm"
+                                                            className="h-7 text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm px-3 rounded-full animate-in fade-in zoom-in duration-300"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                updateBookingStatus(booking.id, "confirmed")
+                                                            }}
+                                                        >
+                                                            Check In
+                                                        </Button>
                                                     )}
-                                                    <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, "pending")}>
-                                                        <Clock className="mr-2 h-4 w-4 text-yellow-600" /> Marcar Pendiente
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" className="h-8 w-8 p-0 text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full">
+                                                                <span className="sr-only">Abrir menu</span>
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end" className="w-48 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-xl rounded-xl p-1">
+                                                            <DropdownMenuLabel className="text-[10px] uppercase tracking-widest text-stone-400 px-2 py-1.5">Acciones</DropdownMenuLabel>
+                                                            <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800" onClick={() => handleSelectBooking(booking)}>
+                                                                <List className="mr-2 h-3.5 w-3.5" /> Ver Detalles
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800 text-emerald-600 focus:text-emerald-700" onClick={() => updateBookingStatus(booking.id, "confirmed")}>
+                                                                <CheckCircle className="mr-2 h-3.5 w-3.5" /> Confirmar / Check-In
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800 text-amber-600 focus:text-amber-700" onClick={() => updateBookingStatus(booking.id, "pending")}>
+                                                                <Clock className="mr-2 h-3.5 w-3.5" /> Marcar Pendiente
+                                                            </DropdownMenuItem>
+                                                            <div className="h-px bg-stone-100 dark:bg-stone-800 my-1" />
+                                                            {booking.status === 'cancelled' ? (
+                                                                <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800 text-rose-600 focus:text-rose-700" onClick={() => handleSelectBooking(booking, true)}>
+                                                                    <XCircle className="mr-2 h-3.5 w-3.5" /> Eliminar Definitivamente
+                                                                </DropdownMenuItem>
+                                                            ) : (
+                                                                <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800 text-rose-600 focus:text-rose-700" onClick={() => handleSelectBooking(booking, true)}>
+                                                                    <XCircle className="mr-2 h-3.5 w-3.5" /> Cancelar Reserva
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })
                             )}
                         </TableBody>
                     </Table>

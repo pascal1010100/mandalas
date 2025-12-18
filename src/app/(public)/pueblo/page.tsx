@@ -93,9 +93,9 @@ export default function PuebloPage() {
                                 <CardFooter>
                                     <BookingModal
                                         defaultLocation="pueblo"
-                                        defaultRoomType="dorm"
+                                        defaultRoomType="pueblo_dorm_mixed_8"
                                         roomName="Dormitorio Compartido"
-                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_dorm')?.basePrice || 18}
+                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_dorm_mixed_8')?.basePrice || 18}
                                     >
                                         <Button
                                             className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
@@ -125,16 +125,16 @@ export default function PuebloPage() {
                                         <li>• Ventilador de techo</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">${rooms?.find(r => r.id === 'pueblo_private')?.basePrice || 35}</span>
+                                        <span className="text-3xl font-bold text-amber-600">${rooms?.find(r => r.id === 'pueblo_private_2')?.basePrice || 40}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
                                 <CardFooter>
                                     <BookingModal
                                         defaultLocation="pueblo"
-                                        defaultRoomType="private"
+                                        defaultRoomType="pueblo_private_2"
                                         roomName="Habitación Privada Estándar"
-                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_private')?.basePrice || 35}
+                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_private_2')?.basePrice || 40}
                                     >
                                         <Button
                                             className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
@@ -164,16 +164,16 @@ export default function PuebloPage() {
                                         <li>• Cama King Size</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">${rooms?.find(r => r.id === 'pueblo_suite')?.basePrice || 55}</span>
+                                        <span className="text-3xl font-bold text-amber-600">${rooms?.find(r => r.id === 'pueblo_suite_balcony')?.basePrice || 75}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
                                 <CardFooter>
                                     <BookingModal
                                         defaultLocation="pueblo"
-                                        defaultRoomType="suite"
+                                        defaultRoomType="pueblo_suite_balcony"
                                         roomName="Suite con Vista"
-                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_suite')?.basePrice || 55}
+                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_suite_balcony')?.basePrice || 75}
                                     >
                                         <Button
                                             className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"

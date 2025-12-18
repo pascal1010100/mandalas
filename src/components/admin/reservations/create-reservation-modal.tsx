@@ -43,17 +43,34 @@ interface CreateReservationModalProps {
 
 const ROOM_DETAILS: Record<string, string[]> = {
     // Pueblo
-    'pueblo_dorm': ["Camas con cortinas de privacidad", "Lockers individuales", "Enchufe y luz de lectura"],
-    'pueblo_private': ["Cama Matrimonial", "Baño Privado", "Ventilador de techo"],
-    'pueblo_suite': ["Vista panorámica al lago", "Balcón privado", "Cama King Size"],
+    // Pueblo
+    'pueblo_dorm_mixed_8': ["8 Camas", "Lockers Grandes", "Baño Compartido"],
+    'pueblo_dorm_female_6': ["6 Camas", "Espejo Tocador", "Baño Interno"],
+    'pueblo_private_1': ["Vista al Jardín", "Cama Queen", "Escritorio"],
+    'pueblo_private_2': ["Interior Silencioso", "Cama Matrimonial", "Smart TV"],
+    'pueblo_private_family': ["2 Camas Dobles", "Mini-refri", "Mesa para 4"],
+    'pueblo_suite_balcony': ["Balcón Privado", "Cama King", "Hamaca", "Vista 360°"],
 
     // Hideout
-    'hideout_dorm': ["Baño privado al aire libre", "Porche con hamaca", "Construcción de bambú"],
-    'hideout_private': ["Cama Queen real", "Electricidad y WiFi", "Sonidos de la naturaleza"],
-    'hideout_suite': ["Espacioso y aireado", "Vistas al jardín", "Ideal para grupos"] // Matches public page logic for 'Suite' slot
+    'hideout_dorm_female': ["Exclusivo Chicas", "Literas cómodas", "Lockers seguros"],
+    'hideout_dorm_mixed': ["Ambiente social", "Literas robustas", "Vistas al jardín"],
+    'hideout_private': ["Cama Queen real", "Electricidad y WiFi", "Sonidos de la naturaleza"], // Matches new config
 }
 
 
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
+import { BedSelector } from "@/components/shared/bed-selector"
 
 export function CreateReservationModal({ open, onOpenChange }: CreateReservationModalProps) {
     const { addBooking, checkAvailability, rooms } = useAppStore()
@@ -68,7 +85,9 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
         to: undefined,
     })
     const [guests, setGuests] = useState("1")
-    const [selectedRoom, setSelectedRoom] = useState<{ id: string, label: string, price: number } | null>(null)
+    // FIXED: Added maxGuests to state type
+    const [selectedRoom, setSelectedRoom] = useState<{ id: string, label: string, price: number, maxGuests: number, capacity: number, type: 'dorm' | 'private' | 'suite' } | null>(null)
+    const [selectedUnitIds, setSelectedUnitIds] = useState<string[]>([]) // For specific bed selection
 
     // Guest Details
     const [guestName, setGuestName] = useState("")
@@ -76,21 +95,36 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
     const [phone, setPhone] = useState("")
     const [status, setStatus] = useState<"confirmed" | "pending">("confirmed")
 
+    // Confirmation State
+    const [showConfirmation, setShowConfirmation] = useState(false)
+
     const resetForm = () => {
         setStep(1)
         setLocation("pueblo")
         setDateRange({ from: undefined, to: undefined })
         setGuests("1")
         setSelectedRoom(null)
+        setSelectedUnitIds([])
         setGuestName("")
         setEmail("")
         setPhone("")
         setStatus("confirmed")
+        setShowConfirmation(false)
     }
 
-    const handleSelectRoom = (room: { id: string, label: string, price: number, available: boolean }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleSelectRoom = (room: any) => {
         if (!room.available) return
-        setSelectedRoom({ id: room.id, label: room.label, price: room.price })
+        // FIXED: Saving maxGuests to state
+        setSelectedRoom({
+            id: room.id,
+            label: room.label,
+            price: room.price,
+            maxGuests: room.maxGuests,
+            capacity: room.capacity,
+            type: room.typeVal // We need type to know if we show bed selector
+        })
+        setSelectedUnitIds([]) // Reset unit selection
     }
 
     const availableRooms = useMemo(() => {
@@ -125,7 +159,10 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                 price: roomConfig.basePrice,
                 maxGuests: roomConfig.maxGuests,
                 type: typeLabel,
-                available: isAvailable
+                available: isAvailable,
+                capacity: roomConfig.capacity,
+                typeVal: roomConfig.type, // Pass raw type for logic
+                image: roomConfig.image // Pass image from store
             }
         })
     }, [location, dateRange, checkAvailability, rooms, guests])
@@ -148,47 +185,128 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                 toast.error("Selecciona una habitación disponible")
                 return
             }
-            setStep(3)
+            if (!selectedRoom) {
+                toast.error("Selecciona una habitación disponible")
+                return
+            }
+            // If Dorm, go to Step 3 (Bed Selection) logic internally handled or extra step?
+            // Let's make Bed Selection part of Step 3 if needed, or intermediate.
+            // Simplified: If Dorm, Step 3 is Bed Selection. Step 4 is Details.
+            // But to keep it simple, let's insert a step if it's a Dorm.
+
+            if (selectedRoom.type === 'dorm') {
+                setStep(3) // Bed Selection
+            } else {
+                setStep(4) // Skip to Details
+            }
+        } else if (step === 3) {
+            // Validate Bed Selection for Dorms
+            if (selectedRoom?.type === 'dorm') {
+                if (selectedUnitIds.length !== parseInt(guests)) {
+                    // Try to auto-select or warn?
+                    // Verify count matches guests
+                    if (selectedUnitIds.length === 0) {
+                        toast.error("Selecciona las camas para tus huéspedes")
+                        return
+                    }
+                    if (selectedUnitIds.length !== parseInt(guests)) {
+                        toast.warning(`Has seleccionado ${selectedUnitIds.length} camas para ${guests} huéspedes. Ajustando número de huéspedes...`)
+                        setGuests(selectedUnitIds.length.toString())
+                    }
+                }
+            }
+            setStep(4)
         }
     }
 
-    const handleCreateBooking = () => {
+    const validateAndAskConfirmation = () => {
         if (!guestName || !email) {
             toast.error("Nombre y Email son obligatorios")
             return
         }
-
         if (!dateRange.from || !dateRange.to || !selectedRoom) return
 
-        const nights = differenceInDays(dateRange.to, dateRange.from)
         const numGuests = parseInt(guests) || 1
-
         if (numGuests < 1) {
             toast.error("Número de huéspedes inválido")
             return
         }
 
-        const total = selectedRoom.price * nights * numGuests
+        setShowConfirmation(true)
+    }
 
+    const handleCreateBooking = async () => {
+        if (!dateRange.from || !dateRange.to || !selectedRoom) return
 
-        addBooking({
-            guestName,
-            email,
-            phone,
-            location,
-            roomType: selectedRoom.id,
-            guests,
-            checkIn: format(dateRange.from, 'yyyy-MM-dd'),
-            checkOut: format(dateRange.to, 'yyyy-MM-dd'),
-            status: status === 'confirmed' ? 'confirmed' : 'pending',
-            cancellationReason: undefined,
-            refundStatus: undefined,
-            cancelledAt: undefined
-        }, total)
+        const nights = differenceInDays(dateRange.to, dateRange.from)
+        const totalGuests = parseInt(guests) || 1
 
-        toast.success("Reserva creada exitosamente")
-        onOpenChange(false)
-        resetForm()
+        // Calculate price per person/bed
+        // Total presented in UI was: Price * Nights * Guests
+        // Price per booking (per bed) = Price * Nights * 1
+        const pricePerBooking = selectedRoom.price * nights
+        const checkInDate = format(dateRange.from, 'yyyy-MM-dd')
+        const checkOutDate = format(dateRange.to, 'yyyy-MM-dd')
+
+        try {
+            // SCENARIO A: Specific Units Selected (Dorms or specific private rooms)
+            if (selectedUnitIds.length > 0) {
+                // Create one booking per selected unit
+                const promises = selectedUnitIds.map((unitId, index) => {
+                    const isPrincipal = index === 0 // Logic to flag primary guest if needed?
+                    return addBooking({
+                        guestName: isPrincipal ? guestName : `${guestName} (${index + 1})`, // Differentiate names? Or same name.
+                        // Let's keep same name for now, or append clone suffix logic if desired. 
+                        // Usually hotel PMS uses "Guest (2)" or requires names list.
+                        // For simplicity: Same name, maybe unique ID internally handle.
+                        // Better: "Juan Perez" for all.
+                        email: email,
+                        phone: phone,
+                        location: location,
+                        roomType: selectedRoom.id,
+                        guests: "1", // Each unit has 1 guest capacity consumed
+                        checkIn: checkInDate,
+                        checkOut: checkOutDate,
+                        status: status === 'confirmed' ? 'confirmed' : 'pending',
+                        cancellationReason: undefined,
+                        refundStatus: undefined,
+                        unitId: unitId
+                    }, pricePerBooking)
+                })
+
+                await Promise.all(promises)
+
+            } else {
+                // SCENARIO B: No specific units (Legacy or "Run of House" Private)
+                // Just create one booking for the whole party
+                // NOTE: If this is a private room for 2 people, we usually treat it as 1 unit occupied.
+                await addBooking({
+                    guestName,
+                    email,
+                    phone,
+                    location,
+                    roomType: selectedRoom.id,
+                    guests: guests, // Keep total guests
+                    checkIn: checkInDate,
+                    checkOut: checkOutDate,
+                    status: status === 'confirmed' ? 'confirmed' : 'pending',
+                    cancellationReason: undefined,
+                    refundStatus: undefined,
+                    unitId: undefined
+                }, pricePerBooking * totalGuests) // Full price
+            }
+
+            toast.success("Reserva(s) creada(s) exitosamente")
+            setShowConfirmation(false)
+            onOpenChange(false)
+            resetForm()
+
+        } catch (error) {
+            console.error("Error creating booking:", error)
+            // Error handling is inside store, but we catch here to stop modal close if needed? 
+            // Store throws? Yes.
+            // Toast already shown in store.
+        }
     }
 
     return (
@@ -196,36 +314,44 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
             if (!val) resetForm()
             onOpenChange(val)
         }}>
-            <DialogContent className="sm:max-w-[600px] bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 transition-all duration-300">
-                <DialogHeader>
-                    <div className="flex items-center gap-2 text-stone-400 text-sm font-mono mb-2">
-                        <span className={cn(step >= 1 ? "text-amber-500 font-bold" : "")}>01 Buscar</span>
-                        <ArrowRight className="w-3 h-3" />
-                        <span className={cn(step >= 2 ? "text-amber-500 font-bold" : "")}>02 Habitación</span>
-                        <ArrowRight className="w-3 h-3" />
-                        <span className={cn(step >= 3 ? "text-amber-500 font-bold" : "")}>03 Datos</span>
+            <DialogContent className="sm:max-w-[650px] max-h-[90vh] flex flex-col p-0 gap-0 bg-stone-50/80 dark:bg-stone-950/90 backdrop-blur-2xl border-stone-200/50 dark:border-stone-800/50 transition-all duration-300 overflow-hidden shadow-2xl rounded-3xl">
+                <DialogHeader className="p-8 pb-4 border-b-0 bg-transparent z-10 sticky top-0">
+                    <div className="flex items-center justify-between mb-6">
+                        <DialogTitle className="text-xl font-light font-heading uppercase tracking-[0.2em] text-stone-800 dark:text-stone-200">
+                            {step === 1 && "Disponibilidad"}
+                            {step === 2 && "Selección"}
+                            {step === 3 && "Camas"}
+                            {step === 4 && "Confirmación"}
+                        </DialogTitle>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Paso {step} de {selectedRoom?.type === 'dorm' ? 4 : 4}</span>
+                        </div>
                     </div>
-                    <DialogTitle className="text-2xl font-light font-heading uppercase tracking-wider text-stone-900 dark:text-stone-100">
-                        {step === 1 && "Verificar Disponibilidad"}
-                        {step === 2 && "Seleccionar Habitación"}
-                        {step === 3 && "Datos del Huésped"}
-                    </DialogTitle>
-                    <DialogDescription>
-                        {step === 1 && "Ingresa las fechas y ubicación para encontrar habitaciones libres."}
-                        {step === 2 && "Elige una de las opciones disponibles para estas fechas."}
-                        {step === 3 && "Completa la información para confirmar la reserva."}
-                    </DialogDescription>
+
+                    {/* Elite Progress Bar */}
+                    <div className="relative h-0.5 bg-stone-200 dark:bg-stone-800 w-full overflow-hidden">
+                        <div
+                            className="absolute top-0 left-0 h-full bg-stone-900 dark:bg-stone-100 transition-all duration-700 ease-in-out"
+                            style={{ width: `${(step / 4) * 100}%` }}
+                        />
+                    </div>
                 </DialogHeader>
 
-                <div className="py-6">
+                <div className="flex-1 overflow-y-auto p-8 pt-2 scrollbar-hide">
                     {/* STEP 1: SEARCH */}
                     {step === 1 && (
-                        <div className="grid gap-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Ubicación</Label>
-                                    <Select value={location} onValueChange={(v: "pueblo" | "hideout") => setLocation(v)}>
-                                        <SelectTrigger>
+                        <div className="grid gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-3">
+                                    <Label className="text-xs font-bold uppercase tracking-widest text-stone-500">Ubicación</Label>
+                                    <Select
+                                        value={location}
+                                        onValueChange={(v: "pueblo" | "hideout") => {
+                                            setLocation(v)
+                                            setSelectedRoom(null)
+                                        }}
+                                    >
+                                        <SelectTrigger className="h-12 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-xl focus:ring-0 focus:border-stone-400">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -234,20 +360,17 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Huéspedes</Label>
-                                    <Input
-                                        type="number"
-                                        min="1"
-                                        value={guests}
-                                        onChange={(e) => setGuests(e.target.value)}
-                                    />
+                                <div className="space-y-3">
+                                    <Label className="text-xs font-bold uppercase tracking-widest text-stone-400">Huéspedes</Label>
+                                    <div className="h-12 bg-stone-100 dark:bg-stone-900/50 rounded-xl flex items-center justify-center text-sm text-stone-400 border border-transparent">
+                                        Se define en Paso 3
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Fechas de Estadía</Label>
-                                <div className="border border-stone-200 dark:border-stone-800 rounded-lg p-2 flex justify-center bg-stone-50/50 dark:bg-stone-900/50">
+                            <div className="space-y-3">
+                                <Label className="text-xs font-bold uppercase tracking-widest text-stone-500">Fechas de Estadía</Label>
+                                <div className="border border-stone-100 dark:border-stone-800 rounded-2xl p-6 flex justify-center bg-white dark:bg-stone-900 shadow-sm">
                                     <Calendar
                                         mode="range"
                                         selected={dateRange}
@@ -256,238 +379,273 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                                         disabled={(date) => date < subDays(new Date(), 1)}
                                         locale={es}
                                         className="rounded-md"
+                                        classNames={{
+                                            day_selected: "bg-stone-900 text-white hover:bg-stone-700 focus:bg-stone-900 dark:bg-white dark:text-stone-900",
+                                            day_today: "bg-stone-100 text-stone-900 font-bold",
+                                            day_range_middle: "!bg-stone-100 dark:!bg-stone-800 !text-stone-900 dark:!text-stone-100 rounded-none",
+                                            head_cell: "text-stone-400 font-normal text-[10px] uppercase tracking-wider",
+                                            caption_label: "text-sm font-medium text-stone-800 dark:text-stone-200"
+                                        }}
                                     />
                                 </div>
                             </div>
-
-                            {/* Room Amenities Cheat Sheet */}
-                            {selectedRoom && ROOM_DETAILS[selectedRoom.id] && (
-                                <div className="bg-gradient-to-br from-stone-50 to-stone-100 dark:from-stone-900 dark:to-stone-800/50 p-5 rounded-2xl border border-stone-200 dark:border-stone-800 mt-4 shadow-sm relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                        <Sparkles className="w-12 h-12 text-amber-500" />
-                                    </div>
-                                    <div className="relative z-10">
-                                        <h4 className="text-[10px] uppercase tracking-[0.2em] font-bold text-amber-600 dark:text-amber-500 mb-3 flex items-center gap-2">
-                                            <Sparkles className="w-3 h-3" />
-                                            Experiencia Incluida
-                                        </h4>
-                                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {ROOM_DETAILS[selectedRoom.id].map((feature, idx) => (
-                                                <li key={idx} className="text-xs text-stone-700 dark:text-stone-300 flex items-start gap-2">
-                                                    <div className="mt-0.5 p-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
-                                                        <Check className="w-2.5 h-2.5" strokeWidth={3} />
-                                                    </div>
-                                                    <span className="leading-tight">{feature}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     )}
 
                     {/* STEP 2: SELECT ROOM */}
                     {step === 2 && (
-                        <div className="space-y-4 py-4">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-base font-semibold">Seleccionar Habitación</Label>
-                                <span className="text-xs text-stone-500 uppercase tracking-wider font-medium bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
+                            <div className="flex items-center justify-between sticky top-0 bg-stone-50/95 dark:bg-stone-950/95 z-20 py-4 backdrop-blur-md">
+                                <Label className="text-xs font-bold text-stone-400 uppercase tracking-[0.2em]">Habitaciones Disponibles</Label>
+                                <Badge variant="secondary" className="bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-mono text-[10px] uppercase tracking-wider">
                                     {location}
-                                </span>
+                                </Badge>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-3">
+                            <div className="grid grid-cols-1 gap-4">
                                 {availableRooms.map((room) => {
                                     const isSelected = selectedRoom?.id === room.id
-                                    const numGuests = parseInt(guests) || 1
-                                    const numNights = (dateRange.from && dateRange.to) ? differenceInDays(dateRange.to, dateRange.from) : 1
-                                    const totalPrice = room.price * numGuests * numNights
 
-                                    // Define static images for admin view (reliable fallback)
-                                    let roomImage = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300"; // Dorm default
-                                    if (room.id.includes('private')) roomImage = "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=300";
-                                    if (room.id.includes('suite')) roomImage = "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=300";
+                                    // Define image source: Use store image if available, else fallback
+                                    let roomImage = room.image || "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300";
+
+                                    // Fallbacks if no image in store (legacy safety)
+                                    if (!room.image) {
+                                        if (room.id.includes('private')) roomImage = "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=300";
+                                        if (room.id.includes('suite')) roomImage = "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=300";
+                                    }
 
                                     return (
                                         <div
                                             key={room.id}
                                             onClick={() => handleSelectRoom(room)}
                                             className={cn(
-                                                "relative flex flex-col md:flex-row gap-4 p-4 rounded-2xl border cursor-pointer transition-all duration-300 group bg-white dark:bg-stone-900",
+                                                "group relative flex flex-col sm:flex-row gap-6 p-4 rounded-2xl cursor-pointer transition-all duration-500 border bg-white dark:bg-stone-900",
                                                 isSelected
-                                                    ? "border-amber-500 ring-2 ring-amber-500/20 shadow-lg bg-orange-50/10 dark:bg-orange-900/10"
-                                                    : "border-stone-200 dark:border-stone-800 hover:border-amber-500/50 hover:shadow-md",
-                                                !room.available && "opacity-60 cursor-not-allowed grayscale-[0.5]"
+                                                    ? "border-stone-800 dark:border-stone-100 ring-1 ring-stone-800 dark:ring-stone-100 shadow-xl scale-[1.01]"
+                                                    : "border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-700 hover:-translate-y-1",
+                                                !room.available && "opacity-40 pointer-events-none grayscale"
                                             )}
                                         >
                                             {/* Thumbnail */}
-                                            <div className="w-full md:w-32 h-32 rounded-xl bg-stone-200 shrink-0 overflow-hidden relative shadow-inner">
-                                                <img src={roomImage} alt={room.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                                {isSelected && (
-                                                    <div className="absolute inset-0 bg-amber-500/20 grid place-items-center backdrop-blur-[2px]">
-                                                        <div className="bg-amber-500 text-white rounded-full p-1.5 shadow-lg animate-in zoom-in-50">
-                                                            <CheckCircle className="w-5 h-5" />
-                                                        </div>
-                                                    </div>
-                                                )}
+                                            <div className="w-full sm:w-32 h-24 rounded-xl bg-stone-100 shrink-0 overflow-hidden relative">
+                                                <img
+                                                    src={roomImage}
+                                                    alt={room.label}
+                                                    className={cn(
+                                                        "w-full h-full object-cover transition-transform duration-700",
+                                                        isSelected ? "scale-110" : "group-hover:scale-105"
+                                                    )}
+                                                />
                                             </div>
 
                                             {/* Info */}
-                                            <div className="flex-1 flex flex-col justify-between py-1">
-                                                <div>
-                                                    <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <h4 className={cn("font-bold text-base font-heading tracking-wide", isSelected ? "text-amber-700 dark:text-amber-400" : "text-stone-900 dark:text-stone-100")}>
-                                                                {room.label}
-                                                            </h4>
-                                                            <div className="flex items-center gap-3 mt-2">
-                                                                <Badge variant="secondary" className="bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700 h-6">
-                                                                    <BedDouble className="w-3 h-3 mr-1.5" />
-                                                                    {room.type === 'dorm' ? 'Dormitorio' : room.type === 'private' ? 'Privada' : 'Suite'}
-                                                                </Badge>
-                                                                <div className="text-xs text-stone-500 flex items-center gap-1">
-                                                                    <Users className="w-3 h-3" />
-                                                                    Máx. {room.maxGuests}
-                                                                </div>
-                                                            </div>
+                                            <div className="flex-1 flex flex-col justify-center">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                                                                {room.type === 'dorm' ? 'Dormitorio' : room.type === 'private' ? 'Privada' : 'Suite'}
+                                                            </span>
                                                         </div>
-
-                                                        {/* Price Block */}
-                                                        <div className="text-right">
-                                                            <div className="font-heading font-bold text-xl text-stone-900 dark:text-white flex items-center justify-end gap-1">
-                                                                ${totalPrice.toLocaleString('es-MX')}
-                                                                <span className="text-[10px] uppercase font-sans font-normal text-stone-400 translate-y-0.5">Total</span>
-                                                            </div>
-                                                            {/* Explicit Breakdown for Clarity */}
-                                                            <div className="text-[10px] text-stone-400 font-mono mt-1 bg-stone-50 dark:bg-stone-800 px-2 py-1 rounded inline-block border border-stone-100 dark:border-stone-700">
-                                                                ${room.price} x {numGuests}p x {numNights}n
-                                                            </div>
+                                                        <h4 className="font-heading font-medium text-lg text-stone-800 dark:text-stone-100 leading-tight">
+                                                            {room.label}
+                                                        </h4>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="font-heading font-light text-2xl text-stone-900 dark:text-white flex items-center justify-end gap-1">
+                                                            ${room.price}
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Mini Amenities Line */}
-                                                <div className="mt-3 flex gap-4 text-xs text-stone-500 border-t border-dashed border-stone-100 dark:border-stone-800 pt-3">
-                                                    {/* Dynamic Amenities from ROOM_DETAILS could go here simply */}
-                                                    {ROOM_DETAILS[room.id] && ROOM_DETAILS[room.id].slice(0, 2).map((feat, i) => (
-                                                        <span key={i} className="flex items-center gap-1 opacity-80">
-                                                            <div className="w-1 h-1 bg-amber-500 rounded-full" /> {feat}
+                                                <div className="flex items-center gap-4 text-xs text-stone-500">
+                                                    <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-stone-800 px-2 py-1 rounded-md">
+                                                        <Users className="w-3.5 h-3.5" />
+                                                        <span>Máx. {room.maxGuests}</span>
+                                                    </div>
+                                                    {isSelected && (
+                                                        <span className="text-emerald-600 font-medium animate-in fade-in flex items-center gap-1">
+                                                            <CheckCircle className="w-3.5 h-3.5" /> Seleccionada
                                                         </span>
-                                                    ))}
-                                                    {ROOM_DETAILS[room.id] && ROOM_DETAILS[room.id].length > 2 && (
-                                                        <span className="opacity-60">+ más</span>
                                                     )}
                                                 </div>
                                             </div>
-
-                                            {!room.available && (
-                                                <div className="absolute inset-0 bg-white/60 dark:bg-black/60 flex items-center justify-center backdrop-blur-[2px] z-20 cursor-not-allowed rounded-2xl">
-                                                    <Badge variant="destructive" className="text-xs px-3 py-1 font-bold uppercase tracking-wider shadow-xl scale-110">
-                                                        No Disponible
-                                                    </Badge>
-                                                </div>
-                                            )}
                                         </div>
                                     )
                                 })}
                             </div>
+                        </div>
+                    )}
 
-                            <div className="flex justify-between pt-4">
-                                <Button variant="ghost" onClick={() => setStep(1)} className="text-stone-500">
-                                    <ChevronLeft className="w-4 h-4 mr-2" /> Volver
-                                </Button>
-                                <Button
-                                    onClick={() => setStep(3)}
-                                    disabled={!selectedRoom}
-                                    className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900"
-                                >
-                                    Continuar <ArrowRight className="w-4 h-4 ml-2" />
-                                </Button>
+                    {/* STEP 3: BED SELECTION (DORMS ONLY) */}
+                    {step === 3 && selectedRoom?.type === 'dorm' && (
+                        <div className="py-2">
+                            <BedSelector
+                                room={rooms.find(r => r.id === selectedRoom.id)!} // Pass full config
+                                dateRange={dateRange}
+                                selectedUnits={selectedUnitIds}
+                                maxSelections={parseInt(guests) || 1}
+                                onToggleUnit={(unitId) => {
+                                    // Toggle logic
+                                    if (selectedUnitIds.includes(unitId)) {
+                                        setSelectedUnitIds(ids => ids.filter(id => id !== unitId))
+                                    } else {
+                                        const max = parseInt(guests) || 1
+                                        if (selectedUnitIds.length < max) {
+                                            setSelectedUnitIds(ids => [...ids, unitId])
+                                        } else {
+                                            if (max === 1) {
+                                                setSelectedUnitIds([unitId])
+                                            } else {
+                                                toast.info(`Ya seleccionaste tus ${max} camas`)
+                                            }
+                                        }
+                                    }
+                                }}
+                            />
+                            <div className="flex items-center justify-center gap-2 mt-4 text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 py-2 px-4 rounded-full border border-amber-100 dark:border-amber-900/30 w-fit mx-auto">
+                                <span className="font-bold">{selectedUnitIds.length}</span> seleccionadas de <span className="font-bold">{guests}</span> requeridas
                             </div>
                         </div>
                     )}
 
-                    {/* STEP 3: GUEST DETAILS */}
-                    {step === 3 && (
-                        <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-                            <div className="bg-stone-50 dark:bg-stone-900/50 p-4 rounded-lg flex justify-between items-center text-sm border border-stone-100 dark:border-stone-800">
-                                <div>
-                                    <p className="font-semibold text-stone-900 dark:text-stone-100">{selectedRoom?.label}</p>
-                                    <p className="text-stone-500">
-                                        {format(dateRange.from!, "d MMM", { locale: es })} - {format(dateRange.to!, "d MMM", { locale: es })}
-                                        <span className="mx-2">•</span>
-                                        {differenceInDays(dateRange.to!, dateRange.from!)} noches
+                    {/* STEP 4: GUEST DETAILS */}
+                    {step === 4 && (
+                        <div className="space-y-8 animate-in mt-4 fade-in slide-in-from-right-8 duration-500">
+                            {/* Summary Card */}
+                            <div className="bg-stone-100/50 dark:bg-stone-900/50 p-6 rounded-3xl border border-stone-200/50 dark:border-stone-800/50 flex items-center gap-6">
+                                <div className="h-16 w-16 rounded-2xl bg-white dark:bg-stone-800 flex items-center justify-center text-stone-700 dark:text-stone-300 shadow-sm shrink-0">
+                                    <Sparkles className="h-6 w-6" />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="font-heading font-medium text-lg text-stone-900 dark:text-stone-100 tracking-wide">{selectedRoom?.label}</p>
+                                    <p className="text-xs font-medium uppercase tracking-wider text-stone-500 mt-1">
+                                        {format(dateRange.from!, "d MMM", { locale: es })} - {format(dateRange.to!, "d MMM", { locale: es })} • {differenceInDays(dateRange.to!, dateRange.from!)} noches
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-bold text-lg text-amber-600">
+                                    <p className="font-light text-3xl text-stone-900 dark:text-white">
                                         ${(selectedRoom?.price || 0) * differenceInDays(dateRange.to!, dateRange.from!) * parseInt(guests)}
                                     </p>
-                                    <p className="text-[10px] uppercase text-stone-400">Total Est.</p>
+                                    <Badge variant="outline" className="text-[9px] border-stone-300 text-stone-500 bg-white dark:bg-stone-950 dark:border-stone-800 mt-1">TOTAL ESTIMADO</Badge>
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label>Nombre Completo</Label>
-                                <Input
-                                    placeholder="Ej. Juan Pérez"
-                                    value={guestName}
-                                    onChange={(e) => setGuestName(e.target.value)}
-                                />
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Email</Label>
+                            <div className="space-y-6">
+                                <div className="space-y-3">
+                                    <Label className="text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">Huésped Principal</Label>
                                     <Input
-                                        type="email"
-                                        placeholder="juan@ejemplo.com"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="Nombre Completo"
+                                        value={guestName}
+                                        onChange={(e) => setGuestName(e.target.value)}
+                                        className="h-12 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-xl px-4 focus:ring-1 focus:ring-stone-400"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Teléfono</Label>
-                                    <Input
-                                        placeholder="+52 123 456 7890"
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
-                                    />
-                                </div>
-                            </div>
 
-                            <div className="space-y-2">
-                                <Label>Estado Inicial</Label>
-                                <Select value={status} onValueChange={(v: "confirmed" | "pending") => setStatus(v)}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="confirmed">Confirmada (Pagada)</SelectItem>
-                                        <SelectItem value="pending">Pendiente (Por Pagar)</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-3">
+                                        <Label className="text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">Contacto</Label>
+                                        <Input
+                                            type="email"
+                                            placeholder="Correo Electrónico"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            className="h-12 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-xl px-4"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <Label className="text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">Teléfono</Label>
+                                        <Input
+                                            placeholder="+52..."
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            className="h-12 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-xl px-4"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-3">
+                                        <Label className="text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">Total Huéspedes</Label>
+                                        <div className="relative">
+                                            <Users className="absolute left-4 top-4 h-4 w-4 text-stone-400" />
+                                            <Input
+                                                type="number"
+                                                min="1"
+                                                max={selectedRoom ? selectedRoom.maxGuests : 10}
+                                                value={guests}
+                                                onChange={(e) => {
+                                                    const val = parseInt(e.target.value) || 1
+                                                    if (selectedRoom && val > selectedRoom.maxGuests) {
+                                                        toast.warning(`Máximo ${selectedRoom.maxGuests} personas para esta habitación`)
+                                                        setGuests(selectedRoom.maxGuests.toString())
+                                                    } else {
+                                                        setGuests(e.target.value)
+                                                    }
+                                                }}
+                                                className="pl-12 h-12 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-xl font-bold text-stone-700"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <Label className="text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">Estado de Pago</Label>
+                                        <Select value={status} onValueChange={(v: "confirmed" | "pending") => setStatus(v)}>
+                                            <SelectTrigger className="h-12 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-xl px-4">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="confirmed">Confirmada (Pagada)</SelectItem>
+                                                <SelectItem value="pending">Pendiente (Por Pagar)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
                 </div>
 
-                <DialogFooter className="flex justify-between items-center sm:justify-between w-full">
+                {/* STICKY FOOTER */}
+                <DialogFooter className="p-6 border-t border-stone-200/50 dark:border-stone-800/50 bg-white/80 dark:bg-stone-950/80 backdrop-blur-xl flex items-center justify-between sm:justify-between w-full mt-auto z-50">
                     {step > 1 ? (
-                        <Button variant="ghost" onClick={() => setStep(step - 1)}>
+                        <Button variant="ghost" onClick={() => setStep(step - 1)} className="hover:bg-stone-100 text-stone-500 rounded-full h-11 px-6">
                             <ChevronLeft className="w-4 h-4 mr-2" /> Atrás
                         </Button>
                     ) : (
                         <div /> // Spacer
                     )}
 
-                    {step < 3 ? (
-                        <Button onClick={handleNextStep} className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900">
-                            Siguiente <ArrowRight className="w-4 h-4 ml-2" />
+                    {step < 4 ? (
+                        <Button
+                            onClick={() => {
+                                if (step === 2) {
+                                    if (selectedRoom?.type === 'dorm') setStep(3)
+                                    else {
+                                        setSelectedUnitIds(["1"])
+                                        setStep(4)
+                                    }
+                                } else if (step === 3) {
+                                    if (selectedUnitIds.length === 0) {
+                                        toast.error("Selecciona al menos una cama")
+                                        return
+                                    }
+                                    setStep(4)
+                                } else {
+                                    handleNextStep()
+                                }
+                            }}
+                            disabled={
+                                (step === 1 && (!dateRange.from || !dateRange.to)) ||
+                                (step === 2 && !selectedRoom)
+                            }
+                            className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 hover:scale-105 transition-all duration-300 shadow-xl rounded-full h-12 px-8 font-medium tracking-wide text-sm"
+                        >
+                            Continuar <ArrowRight className="w-4 h-4 ml-2" />
                         </Button>
                     ) : (
-                        <Button onClick={handleCreateBooking} className="bg-amber-500 hover:bg-amber-600 text-white font-bold">
-                            <CheckCircle className="w-4 h-4 mr-2" /> Confirmar Reserva
+                        <Button onClick={handleCreateBooking} className="bg-stone-900 hover:bg-black text-white rounded-full h-12 px-8 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 text-sm font-bold tracking-widest uppercase">
+                            <CheckCircle className="w-4 h-4 mr-2" /> Confirmar
                         </Button>
                     )}
                 </DialogFooter>
