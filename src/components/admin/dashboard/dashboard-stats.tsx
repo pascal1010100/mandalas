@@ -13,25 +13,23 @@ import {
 } from "lucide-react"
 import {
     isSameDay,
-    parseISO,
     startOfMonth,
     endOfMonth,
-    isWithinInterval,
-    startOfDay,
-    format,
-    differenceInDays
+    differenceInDays,
+    parseISO
 } from "date-fns"
-import { es } from "date-fns/locale"
+
+import { getBusinessDate, isStayNight } from '@/lib/business-date'
 
 export function DashboardStats() {
     const { bookings, rooms } = useAppStore()
-    const now = new Date()
+    const businessDate = getBusinessDate() // Centralized "Hotel Today"
 
     // --- Metrics Calculation ---
 
     // 1. Revenue & ADR (Average Daily Rate)
-    const monthStart = startOfMonth(now)
-    const monthEnd = endOfMonth(now)
+    const monthStart = startOfMonth(businessDate)
+    const monthEnd = endOfMonth(businessDate)
 
     // Filter: Confirmed bookings overlapping current month
     const monthlyBookings = bookings.filter(b =>
@@ -51,16 +49,10 @@ export function DashboardStats() {
     const adr = totalNightsSold > 0 ? monthlyRevenue / totalNightsSold : 0
 
     // 2. Occupancy & RevPAR
-    // Robust Fix: Compare DATE STRINGS (YYYY-MM-DD) to avoid Timezone/Midnight shifts.
-    // 2. Occupancy & RevPAR
-    // Logic aligned with RoomStatusGrid to ensure consistency
+    // Robust Fix: Use centralized logic for "Active Stay Night"
     const activeBookings = bookings.filter(b =>
         (b.status === 'confirmed' || b.status === 'pending' || b.status === 'maintenance') &&
-        (
-            (new Date(b.checkIn) <= now && new Date(b.checkOut) > now) ||
-            isSameDay(parseISO(b.checkIn), now) ||
-            isSameDay(parseISO(b.checkOut), now)
-        )
+        isStayNight(businessDate, b.checkIn, b.checkOut)
     )
 
     // Total Capacity (Sum of room capacities from config)
@@ -139,7 +131,7 @@ export function DashboardStats() {
                         <div>
                             <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-widest">Llegadas Hoy</p>
                             <h3 className="text-3xl font-light text-stone-900 dark:text-stone-100 mt-1 font-heading">
-                                {bookings.filter(b => b.status !== 'cancelled' && isSameDay(parseISO(b.checkIn), now)).length}
+                                {bookings.filter(b => b.status !== 'cancelled' && isSameDay(parseISO(b.checkIn), businessDate)).length}
                             </h3>
                         </div >
                         <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-500">

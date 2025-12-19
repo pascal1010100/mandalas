@@ -52,6 +52,40 @@ export interface RoomConfig {
     housekeeping_status?: 'clean' | 'dirty' | 'maintenance'; // New: Housekeeping
 }
 
+// --- Database Interfaces (Snake Case) ---
+
+interface BookingRow {
+    id: string;
+    guest_name: string;
+    email: string;
+    phone?: string;
+    location: 'pueblo' | 'hideout';
+    room_type: string;
+    guests: string;
+    check_in: string;
+    check_out: string;
+    status: BookingStatus;
+    total_price: number;
+    created_at: string;
+    cancellation_reason?: string;
+    refund_status?: 'none' | 'partial' | 'full';
+    cancelled_at?: string;
+    actual_check_out?: string;
+    payment_status?: 'pending' | 'paid';
+    unit_id?: string;
+}
+
+interface RoomRow {
+    id: string;
+    location: 'pueblo' | 'hideout';
+    type: 'dorm' | 'private' | 'suite';
+    label: string;
+    capacity: number;
+    max_guests: number;
+    base_price: number;
+    housekeeping_status?: 'clean' | 'dirty' | 'maintenance';
+}
+
 interface AppState {
     bookings: Booking[];
     events: AppEvent[];
@@ -200,8 +234,7 @@ export const useAppStore = create<AppState>()(
                 }
 
                 if (data) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const mappedBookings: Booking[] = data.map((row: any) => {
+                    const mappedBookings: Booking[] = (data as unknown as BookingRow[]).map((row) => {
                         // Hack: If guest_name is MANTENIMIENTO, treat as maintenance internally
                         // This allows using 'confirmed' in DB to bypass enum constraints if 'maintenance' isn't allowed
                         const isMaintenance = row.guest_name === 'MANTENIMIENTO' || row.status === 'maintenance';
@@ -260,8 +293,7 @@ export const useAppStore = create<AppState>()(
                 if (!error && data && data.length > 0) {
                     // Map DB keys (snake_case) to Store keys (camelCase) if needed
                     // Dbtable: id, location, type, label, capacity, max_guests, base_price, housekeeping_status
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const mappedRooms: RoomConfig[] = data.map((r: any) => ({
+                    const mappedRooms: RoomConfig[] = (data as unknown as RoomRow[]).map((r) => ({
                         id: r.id,
                         location: r.location,
                         type: r.type,
@@ -365,8 +397,7 @@ export const useAppStore = create<AppState>()(
             },
 
             updateBooking: async (id, data) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const payload: any = {}
+                const payload: Partial<BookingRow> = {}
                 if (data.status) payload.status = data.status
                 if (data.cancellationReason) payload.cancellation_reason = data.cancellationReason
                 if (data.refundStatus) payload.refund_status = data.refundStatus
@@ -559,11 +590,11 @@ export const useAppStore = create<AppState>()(
             name: 'mandalas-storage',
             partialize: (state) => ({ rooms: state.rooms }),
             version: 5, // FORCE CACHE RESET: Bumped to 5 to load new Pueblo rooms
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            migrate: (persistedState: any, version) => {
+            migrate: (persistedState: unknown, version) => {
                 if (version < 4) {
                     // Ignore old persisted rooms if version < 4
-                    return { ...persistedState, rooms: initialRooms }
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    return { ...(persistedState as any), rooms: initialRooms }
                 }
                 return persistedState
             },
