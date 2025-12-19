@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { BookingModal } from "@/components/shared/booking-modal"
 import { ModeToggle } from "@/components/shared/mode-toggle"
@@ -197,39 +197,45 @@ export function Navbar() {
 
                             <StaggerReveal className="flex flex-col gap-2 flex-1">
                                 <StaggerItem>
-                                    <Link
-                                        href="/pueblo"
-                                        className={cn(
-                                            "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-amber-200 dark:hover:border-amber-900 group",
-                                            pathname === "/pueblo" ? "text-amber-600 pl-4 border-amber-200" : "text-stone-800 dark:text-stone-200 hover:pl-4 hover:text-amber-600"
-                                        )}
-                                    >
-                                        Pueblo
-                                        <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-amber-400 transition-colors">En el corazón del pueblo</span>
-                                    </Link>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/pueblo"
+                                            className={cn(
+                                                "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-amber-200 dark:hover:border-amber-900 group",
+                                                pathname === "/pueblo" ? "text-amber-600 pl-4 border-amber-200" : "text-stone-800 dark:text-stone-200 hover:pl-4 hover:text-amber-600"
+                                            )}
+                                        >
+                                            Pueblo
+                                            <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-amber-400 transition-colors">En el corazón del pueblo</span>
+                                        </Link>
+                                    </SheetClose>
                                 </StaggerItem>
                                 <StaggerItem>
-                                    <Link
-                                        href="/hideout"
-                                        className={cn(
-                                            "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-lime-200 dark:hover:border-lime-900 group",
-                                            pathname === "/hideout" ? "text-lime-600 pl-4 border-lime-200" : "text-stone-800 dark:text-stone-200 hover:pl-4 hover:text-lime-600"
-                                        )}
-                                    >
-                                        Hideout
-                                        <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-lime-400 transition-colors">Naturaleza y desconexión</span>
-                                    </Link>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/hideout"
+                                            className={cn(
+                                                "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-lime-200 dark:hover:border-lime-900 group",
+                                                pathname === "/hideout" ? "text-lime-600 pl-4 border-lime-200" : "text-stone-800 dark:text-stone-200 hover:pl-4 hover:text-lime-600"
+                                            )}
+                                        >
+                                            Hideout
+                                            <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-lime-400 transition-colors">Naturaleza y desconexión</span>
+                                        </Link>
+                                    </SheetClose>
                                 </StaggerItem>
                                 <StaggerItem>
-                                    <Link
-                                        href="/contact"
-                                        className={cn(
-                                            "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-stone-200 dark:hover:border-stone-800 group",
-                                            pathname === "/contact" ? "text-stone-900 pl-4 border-stone-200" : "text-stone-500 dark:text-stone-400 hover:pl-4 hover:text-stone-900 dark:hover:text-white"
-                                        )}
-                                    >
-                                        Contacto
-                                    </Link>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/contact"
+                                            className={cn(
+                                                "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-stone-200 dark:hover:border-stone-800 group",
+                                                pathname === "/contact" ? "text-stone-900 pl-4 border-stone-200" : "text-stone-500 dark:text-stone-400 hover:pl-4 hover:text-stone-900 dark:hover:text-white"
+                                            )}
+                                        >
+                                            Contacto
+                                        </Link>
+                                    </SheetClose>
                                 </StaggerItem>
 
                                 <div className="mt-auto mb-8 space-y-8">
