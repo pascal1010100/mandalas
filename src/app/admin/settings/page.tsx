@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DollarSign, Save, Loader2, BedDouble } from "lucide-react"
+import { DollarSign, Save, Loader2, BedDouble, RefreshCw, Copy, ExternalLink, Calendar } from "lucide-react"
+import { toast } from "sonner"
 
 export default function SettingsPage() {
-    const { rooms, updateRoomCapacity, updateRoomPrice, updateRoomMaxGuests } = useAppStore()
+    const { rooms, updateRoomCapacity, updateRoomPrice, updateRoomMaxGuests, updateRoomIcalUrl } = useAppStore()
     const [isSaving, setIsSaving] = useState(false)
 
     // Local state to handle inputs before saving
@@ -19,7 +20,7 @@ export default function SettingsPage() {
     // Sync local state when store loads
     useEffect(() => {
         if (rooms && rooms.length > 0 && localRooms.length === 0) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
+             
             setLocalRooms(rooms)
         }
     }, [rooms, localRooms.length])
@@ -42,6 +43,17 @@ export default function SettingsPage() {
         ))
     }
 
+    const handleIcalImportChange = (roomId: string, value: string) => {
+        setLocalRooms(prev => prev.map(room =>
+            room.id === roomId ? { ...room, icalImportUrl: value } : room
+        ))
+    }
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text)
+        toast.success("Enlace copiado al portapapeles")
+    }
+
     const handleSave = async () => {
         setIsSaving(true)
         // Simulate network request
@@ -52,9 +64,37 @@ export default function SettingsPage() {
             updateRoomCapacity(room.id, room.capacity)
             updateRoomPrice(room.id, room.basePrice)
             if (room.maxGuests) updateRoomMaxGuests(room.id, room.maxGuests)
+            if (room.icalImportUrl) updateRoomIcalUrl(room.id, room.icalImportUrl)
         })
 
         setIsSaving(false)
+        toast.success("Configuración guardada correctamente")
+    }
+
+    const getIcalExportUrl = (token?: string) => {
+        if (!token) return "Generando enlace..."
+        if (typeof window === 'undefined') return ""
+        return `${window.location.origin}/api/ical/${token}`
+    }
+
+    const handleSync = async (roomId: string) => {
+        const toastId = toast.loading("Sincronizando con OTA...")
+        try {
+            const res = await fetch('/api/admin/sync-ical', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomId })
+            })
+            if (!res.ok) throw new Error(await res.text())
+
+            const data = await res.json()
+            toast.dismiss(toastId)
+            toast.success(data.message)
+        } catch (error) {
+            toast.dismiss(toastId)
+            console.error(error)
+            toast.error("Error al sincronizar")
+        }
     }
 
     return (
@@ -71,17 +111,23 @@ export default function SettingsPage() {
 
             <Tabs defaultValue="rooms" className="space-y-8">
                 <TabsList className="bg-stone-100/50 dark:bg-stone-900/50 backdrop-blur-md border border-stone-200/50 dark:border-stone-800 p-1 h-auto rounded-full w-full md:w-auto">
-                    <TabsTrigger 
-                        value="rooms" 
+                    <TabsTrigger
+                        value="rooms"
                         className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-stone-900 dark:data-[state=active]:text-stone-100 data-[state=active]:shadow-sm transition-all"
                     >
                         Habitaciones y Capacidad
                     </TabsTrigger>
-                    <TabsTrigger 
-                        value="prices" 
+                    <TabsTrigger
+                        value="prices"
                         className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-stone-900 dark:data-[state=active]:text-stone-100 data-[state=active]:shadow-sm transition-all"
                     >
                         Precios Base
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="sync"
+                        className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-stone-900 dark:data-[state=active]:text-stone-100 data-[state=active]:shadow-sm transition-all"
+                    >
+                        Sincronización (iCal)
                     </TabsTrigger>
                 </TabsList>
 
@@ -113,7 +159,7 @@ export default function SettingsPage() {
                                                 <p className="text-[10px] uppercase tracking-widest font-bold text-amber-600/70 mt-1">{room.type}</p>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="flex items-center gap-4">
                                             <div className="flex-1">
                                                 <Label className="text-[10px] text-stone-400 uppercase tracking-wide mb-1.5 block">Inventario Físico</Label>
@@ -178,7 +224,7 @@ export default function SettingsPage() {
                                                 <p className="text-[10px] uppercase tracking-widest font-bold text-lime-600/70 mt-1">{room.type}</p>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="flex items-center gap-4">
                                             <div className="flex-1">
                                                 <Label className="text-[10px] text-stone-400 uppercase tracking-wide mb-1.5 block">Inventario Físico</Label>
@@ -224,7 +270,7 @@ export default function SettingsPage() {
                     <div className="grid gap-8 md:grid-cols-2">
                         {/* Pueblo Prices */}
                         <Card className="border-white/40 dark:border-stone-800 bg-white/60 dark:bg-stone-900/60 backdrop-blur-xl shadow-xl shadow-stone-200/20 dark:shadow-none overflow-hidden">
-                             <div className="h-1 w-full bg-gradient-to-r from-amber-400 to-amber-600 opacity-80" />
+                            <div className="h-1 w-full bg-gradient-to-r from-amber-400 to-amber-600 opacity-80" />
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-3 text-2xl font-light font-heading text-stone-900 dark:text-stone-100">
                                     <span className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-500 shadow-inner">
@@ -286,6 +332,106 @@ export default function SettingsPage() {
                             </CardContent>
                         </Card>
                     </div>
+                </TabsContent>
+
+                <TabsContent value="sync" className="space-y-8 outline-none">
+                    <Card className="border-white/40 dark:border-stone-800 bg-white/60 dark:bg-stone-900/60 backdrop-blur-xl shadow-xl shadow-stone-200/20 dark:shadow-none overflow-hidden">
+                        <div className="h-1 w-full bg-gradient-to-r from-indigo-400 to-purple-600 opacity-80" />
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-3 text-2xl font-light font-heading text-stone-900 dark:text-stone-100">
+                                <span className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-500 shadow-inner">
+                                    <RefreshCw className="w-5 h-5" />
+                                </span>
+                                Channel Manager (iCal)
+                            </CardTitle>
+                            <CardDescription className="text-stone-500 font-light">
+                                Conecta tus habitaciones con Booking.com, Airbnb y otros calendarios externos.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-8">
+                            {['pueblo', 'hideout'].map((loc) => {
+                                const locationRooms = localRooms.filter(r => r.location === loc);
+                                if (locationRooms.length === 0) return null;
+
+                                return (
+                                    <div key={loc} className="space-y-4">
+                                        <h3 className="text-sm font-bold uppercase tracking-widest text-stone-400 border-b border-stone-200 dark:border-stone-800 pb-2">
+                                            {loc === 'pueblo' ? 'Mandalas Pueblo' : 'Mandalas Hideout'}
+                                        </h3>
+                                        <div className="grid gap-4">
+                                            {locationRooms.map(room => (
+                                                <div key={room.id} className="bg-white/40 dark:bg-stone-950/40 rounded-xl p-4 border border-stone-100 dark:border-stone-800 hover:border-indigo-200 dark:hover:border-indigo-900 transition-colors">
+                                                    <div className="flex flex-col md:flex-row gap-6">
+                                                        {/* Room Info */}
+                                                        <div className="md:w-1/4">
+                                                            <Label className="text-base font-medium text-stone-700 dark:text-stone-200">
+                                                                {room.label}
+                                                            </Label>
+                                                            <p className="text-[10px] uppercase tracking-widest font-bold text-indigo-600/70 mt-1">{room.type}</p>
+                                                        </div>
+
+                                                        {/* Export */}
+                                                        <div className="flex-1 space-y-2">
+                                                            <Label className="text-[10px] text-stone-400 uppercase tracking-wide flex items-center gap-2">
+                                                                <ExternalLink className="w-3 h-3" />
+                                                                Para Booking.com (Exportar)
+                                                            </Label>
+                                                            <div className="relative group">
+                                                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                    <Calendar className="h-4 w-4 text-stone-400" />
+                                                                </div>
+                                                                <Input
+                                                                    readOnly
+                                                                    value={getIcalExportUrl(room.icalExportToken || 'missing-token')}
+                                                                    className="pl-10 pr-20 bg-stone-50 dark:bg-stone-900 font-mono text-xs text-stone-500 truncate"
+                                                                />
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    className="absolute right-1 top-1 h-8 text-stone-500 hover:text-indigo-600"
+                                                                    onClick={() => copyToClipboard(getIcalExportUrl(room.icalExportToken))}
+                                                                >
+                                                                    <Copy className="w-4 h-4 mr-2" />
+                                                                    Copiar
+                                                                </Button>
+                                                            </div>
+                                                            <p className="text-[10px] text-stone-400">Pega este enlace en la configuración de calendario de la OTA.</p>
+                                                        </div>
+
+                                                        {/* Import */}
+                                                        <div className="flex-1 space-y-2">
+                                                            <Label className="text-[10px] text-stone-400 uppercase tracking-wide flex items-center gap-2">
+                                                                <RefreshCw className="w-3 h-3" />
+                                                                Desde Booking.com (Importar)
+                                                            </Label>
+                                                            <div className="flex gap-2">
+                                                                <Input
+                                                                    placeholder="https://admin.booking.com/ical/..."
+                                                                    value={room.icalImportUrl || ''}
+                                                                    onChange={(e) => handleIcalImportChange(room.id, e.target.value)}
+                                                                    className="bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800 focus-visible:ring-indigo-500/30 text-xs"
+                                                                />
+                                                                <Button
+                                                                    size="icon"
+                                                                    variant="outline"
+                                                                    className="shrink-0 h-9 w-9 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+                                                                    onClick={() => handleSync(room.id)}
+                                                                    disabled={!room.icalImportUrl}
+                                                                    title="Sincronizar Ahora"
+                                                                >
+                                                                    <RefreshCw className="w-4 h-4" />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </CardContent>
+                    </Card>
                 </TabsContent>
             </Tabs>
 

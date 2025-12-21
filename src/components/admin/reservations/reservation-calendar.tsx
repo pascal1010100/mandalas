@@ -16,7 +16,7 @@ import {
     subMonths
 } from "date-fns"
 import { es } from "date-fns/locale"
-import { ChevronLeft, ChevronRight, User, LogIn, LogOut } from "lucide-react"
+import { ChevronLeft, ChevronRight, LogIn, LogOut, Wrench } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -86,7 +86,7 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
 
             {/* Grid Body */}
             <div className="grid grid-cols-7 auto-rows-fr bg-stone-100 dark:bg-stone-800 gap-[1px]">
-                {calendarDays.map((day, dayIdx) => {
+                {calendarDays.map((day) => {
                     const isCurrentMonth = isSameMonth(day, currentDate)
 
                     // Find bookings for this day
@@ -135,9 +135,12 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                                     let variantClass = ""
                                     let icon = null
 
-                                    // Status Overrides (Cancelled/CheckedOut should be grey/dimmed regardless of location)
+                                    // Status Overrides
                                     if (b.status === 'cancelled') {
                                         variantClass = "bg-rose-100 text-rose-800 border-rose-200 opacity-60 line-through decoration-rose-500"
+                                    } else if (b.status === 'maintenance') {
+                                        variantClass = "bg-stone-100 text-stone-500 border-stone-200 dark:bg-stone-800 dark:text-stone-400 border-dashed"
+                                        icon = <Wrench className="w-3 h-3" />
                                     } else {
                                         if (isEnd) {
                                             variantClass = `${theme.outline} border`

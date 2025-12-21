@@ -49,7 +49,10 @@ export interface RoomConfig {
     basePrice: number;
     description?: string;
     image?: string;
-    housekeeping_status?: 'clean' | 'dirty' | 'maintenance'; // New: Housekeeping
+    housekeeping_status?: 'clean' | 'dirty' | 'maintenance';
+    // iCal Sync
+    icalImportUrl?: string;
+    icalExportToken?: string;
 }
 
 // --- Database Interfaces (Snake Case) ---
@@ -84,6 +87,8 @@ interface RoomRow {
     max_guests: number;
     base_price: number;
     housekeeping_status?: 'clean' | 'dirty' | 'maintenance';
+    ical_import_url?: string;
+    ical_export_token?: string;
 }
 
 interface AppState {
@@ -112,9 +117,10 @@ interface AppState {
     removeEvent: (id: string) => Promise<void>;
 
     // Room & Price Management
-    updateRoomPrice: (roomId: string, price: number) => void;
-    updateRoomCapacity: (roomId: string, newCapacity: number) => void;
-    updateRoomMaxGuests: (roomId: string, maxGuests: number) => void;
+    updateRoomPrice: (roomId: string, price: number) => Promise<void>;
+    updateRoomIcalUrl: (id: string, url: string) => Promise<void>;
+    updateRoomCapacity: (roomId: string, newCapacity: number) => Promise<void>;
+    updateRoomMaxGuests: (roomId: string, maxGuests: number) => Promise<void>;
 
     // Logic
     checkAvailability: (location: string, roomType: string, startDate: string, endDate: string, requestedGuests?: number) => boolean;
@@ -307,7 +313,9 @@ export const useAppStore = create<AppState>()(
                         // For now, let's merge with initialRooms to keep the images!
                         description: initialRooms.find(ir => ir.id === r.id)?.description,
                         image: initialRooms.find(ir => ir.id === r.id)?.image,
-                        housekeeping_status: r.housekeeping_status || 'clean'
+                        housekeeping_status: r.housekeeping_status || 'clean',
+                        icalImportUrl: r.ical_import_url,
+                        icalExportToken: r.ical_export_token
                     }));
                     set({ rooms: mappedRooms });
                     console.log("Loaded rooms from DB:", mappedRooms.length);
@@ -335,6 +343,15 @@ export const useAppStore = create<AppState>()(
                 }))
                 // Persist to DB
                 await supabase.from('rooms').update({ base_price: price }).eq('id', roomId);
+            },
+
+            updateRoomIcalUrl: async (id, url) => {
+                set((state) => ({
+                    rooms: state.rooms.map(room =>
+                        room.id === id ? { ...room, icalImportUrl: url } : room
+                    )
+                }))
+                await supabase.from('rooms').update({ ical_import_url: url }).eq('id', id)
             },
 
             updateRoomCapacity: async (roomId, newCapacity) => {
