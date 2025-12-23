@@ -9,25 +9,30 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function POST(request: NextRequest) {
     try {
-        const { roomId } = await request.json()
+        const { roomId, importUrl: explicitUrl } = await request.json()
 
         if (!roomId) {
             return new NextResponse('Missing roomId', { status: 400 })
         }
 
-        // 1. Get the Import URL for this room
-        const { data: room, error } = await supabase
-            .from('rooms')
-            .select('ical_import_url')
-            .eq('id', roomId)
-            .single()
+        let urlToUse = explicitUrl
 
-        if (error || !room || !room.ical_import_url) {
-            return new NextResponse('Room has no Import URL configured', { status: 400 })
+        if (!urlToUse) {
+            // 1. Get the Import URL from DB if not provided
+            const { data: room, error } = await supabase
+                .from('rooms')
+                .select('ical_import_url')
+                .eq('id', roomId)
+                .single()
+
+            if (error || !room || !room.ical_import_url) {
+                return new NextResponse('Room has no Import URL configured', { status: 400 })
+            }
+            urlToUse = room.ical_import_url
         }
 
         // 2. Run Sync Service
-        const result = await syncRoomImport(roomId, room.ical_import_url)
+        const result = await syncRoomImport(roomId, urlToUse)
 
         if (!result.success) {
             return new NextResponse(`Sync Failed: ${result.error}`, { status: 500 })

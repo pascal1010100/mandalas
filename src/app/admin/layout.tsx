@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, CalendarDays, Users, Home, Menu, Sparkles, Settings } from "lucide-react"
+import { LayoutDashboard, CalendarDays, Users, Home, Menu, Sparkles, Settings, SprayCan } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
@@ -17,6 +17,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
         { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
         { href: "/admin/reservations", label: "Reservas", icon: Users },
         { href: "/admin/events", label: "Eventos", icon: CalendarDays },
+        { href: "/admin/housekeeping", label: "Limpieza", icon: SprayCan },
         { href: "/admin/settings", label: "Configuración", icon: Settings },
     ]
 

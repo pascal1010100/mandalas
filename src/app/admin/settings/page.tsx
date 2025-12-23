@@ -20,7 +20,7 @@ export default function SettingsPage() {
     // Sync local state when store loads
     useEffect(() => {
         if (rooms && rooms.length > 0 && localRooms.length === 0) {
-             
+
             setLocalRooms(rooms)
         }
     }, [rooms, localRooms.length])
@@ -77,13 +77,13 @@ export default function SettingsPage() {
         return `${window.location.origin}/api/ical/${token}`
     }
 
-    const handleSync = async (roomId: string) => {
+    const handleSync = async (roomId: string, importUrl?: string) => {
         const toastId = toast.loading("Sincronizando con OTA...")
         try {
             const res = await fetch('/api/admin/sync-ical', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomId })
+                body: JSON.stringify({ roomId, importUrl })
             })
             if (!res.ok) throw new Error(await res.text())
 
@@ -415,7 +415,7 @@ export default function SettingsPage() {
                                                                     size="icon"
                                                                     variant="outline"
                                                                     className="shrink-0 h-9 w-9 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
-                                                                    onClick={() => handleSync(room.id)}
+                                                                    onClick={() => handleSync(room.id, room.icalImportUrl)}
                                                                     disabled={!room.icalImportUrl}
                                                                     title="Sincronizar Ahora"
                                                                 >
