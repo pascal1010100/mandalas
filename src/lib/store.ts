@@ -343,39 +343,68 @@ export const useAppStore = create<AppState>()(
             },
 
             updateRoomStatus: async (roomId, status, unitId) => {
-                // 1. Update State & DB
-                set((state) => ({
-                    rooms: state.rooms.map(room => {
-                        if (room.id === roomId) {
-                            if (unitId) {
-                                // Unit-Level Update
-                                const currentMap = room.units_housekeeping || {}
-                                return { ...room, units_housekeeping: { ...currentMap, [unitId]: status } }
-                            } else {
-                                // Room-Level Update
-                                return { ...room, housekeeping_status: status }
-                            }
-                        }
-                        return room
-                    })
-                }))
+                const state = get()
+                const roomIndex = state.rooms.findIndex(r => r.id === roomId)
+                if (roomIndex === -1) return
 
-                try {
-                    if (unitId) {
-                        const room = get().rooms.find(r => r.id === roomId)
-                        const unitsMap = room?.units_housekeeping || {}
-                        // @ts-ignore
-                        await supabase.from('rooms').update({ units_housekeeping: unitsMap }).eq('id', roomId);
+                const room = state.rooms[roomIndex]
+                const currentMap = room.units_housekeeping || {}
+
+                const newMap = { ...currentMap }
+                let newGlobalStatus = room.housekeeping_status
+
+                if (unitId) {
+                    // Update Unit
+                    newMap[unitId] = status
+
+                    // Sync: If single unit, force global update
+                    if (room.capacity === 1) {
+                        newGlobalStatus = status
                     } else {
-                        await supabase.from('rooms').update({ housekeeping_status: status }).eq('id', roomId);
+                        // Dorm/Multi-Unit Aggregation Logic (Elite)
+                        // Rule: Room is "Maintenance" if any unit is maintenance
+                        // Rule: Room is "Dirty" if any unit is dirty (and no maintenance)
+                        // Rule: Room is "Clean" only if ALL units are clean
+
+                        const allUnits = Array.from({ length: room.capacity }, (_, i) => (i + 1).toString())
+                        // Helper to get effective status of a unit (newly updated or existing)
+                        const getUnitStatus = (uid: string) => uid === unitId ? status : (newMap[uid] || 'clean')
+
+                        const anyMaintenance = allUnits.some(uid => getUnitStatus(uid) === 'maintenance')
+                        const anyDirty = allUnits.some(uid => getUnitStatus(uid) === 'dirty')
+
+                        if (anyMaintenance) {
+                            newGlobalStatus = 'maintenance'
+                        } else if (anyDirty) {
+                            newGlobalStatus = 'dirty'
+                        } else {
+                            newGlobalStatus = 'clean'
+                        }
                     }
+                } else {
+                    // Update Global -> Propagate to all units
+                    newGlobalStatus = status
+                    for (let i = 1; i <= room.capacity; i++) {
+                        newMap[i.toString()] = status
+                    }
+                }
+
+                // Update Local
+                const updatedRooms = [...state.rooms]
+                updatedRooms[roomIndex] = { ...room, housekeeping_status: newGlobalStatus, units_housekeeping: newMap }
+                set({ rooms: updatedRooms })
+
+                // Persist
+                try {
+                    await supabase.from('rooms').update({
+                        housekeeping_status: newGlobalStatus,
+                        units_housekeeping: newMap
+                    }).eq('id', roomId);
                 } catch (e) {
                     console.error("Failed to persist status", e)
                 }
 
                 // 2. Handle Calendar Blocking
-                const state = get()
-                const room = state.rooms.find(r => r.id === roomId)
 
                 if (status === 'maintenance') {
                     // BLOCK: Create a maintenance blocking booking

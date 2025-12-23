@@ -28,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning className={`${outfit.variable} ${inter.variable} notranslate`} translate="no">
+        {/* ThemeProvider wrapping */}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

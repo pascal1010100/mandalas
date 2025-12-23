@@ -94,7 +94,8 @@ export default function HousekeepingPage() {
                                 {/* Global Status Badge (Summary) */}
                                 <Badge className={cn("uppercase tracking-widest text-[10px] px-3 py-1", statusColors[room.housekeeping_status as keyof typeof statusColors])}>
                                     {room.housekeeping_status === 'clean' ? 'Limpia' :
-                                        room.housekeeping_status === 'dirty' ? 'Sucia' : 'Mantenimiento'}
+                                        room.housekeeping_status === 'dirty' ?
+                                            `Sucia (${units.filter(u => u.status === 'dirty').length}/${room.capacity})` : 'Mantenimiento'}
                                 </Badge>
                             </div>
                         </div>
