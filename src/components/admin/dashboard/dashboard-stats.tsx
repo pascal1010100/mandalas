@@ -20,151 +20,185 @@ import {
 } from "date-fns"
 
 import { getBusinessDate, isStayNight } from '@/lib/business-date'
+import { cn } from "@/lib/utils"
 
 export function DashboardStats() {
     const { bookings, rooms } = useAppStore()
-    const businessDate = getBusinessDate() // Centralized "Hotel Today"
+    const businessDate = getBusinessDate()
 
-    // --- Metrics Calculation ---
-
-    // 1. Revenue & ADR (Average Daily Rate)
     const monthStart = startOfMonth(businessDate)
     const monthEnd = endOfMonth(businessDate)
 
-    // Filter: Confirmed bookings overlapping current month
+    // --- Financial Logic (Elite) ---
+
     const monthlyBookings = bookings.filter(b =>
-        b.status === 'confirmed' &&
+        b.status !== 'cancelled' &&
         new Date(b.checkIn) >= monthStart && new Date(b.checkIn) <= monthEnd
     )
 
-    const monthlyRevenue = monthlyBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0)
+    // 1. Revenue (Cash Flow vs Projected)
+    const collectedRevenue = monthlyBookings
+        .filter(b => b.paymentStatus === 'paid')
+        .reduce((sum, b) => sum + (b.totalPrice || 0), 0)
 
-    // ADR = Revenue / Rooms Sold
-    // Simplified: Total Price / Total Nights of all bookings in month
+    const projectedRevenue = monthlyBookings
+        .reduce((sum, b) => sum + (b.totalPrice || 0), 0)
+
+    // 2. Outstanding Debt (Global, not just this month)
+    // Critical: Money on the table from ACTIVE or PAST DUE bookings
+    const debtBookings = bookings.filter(b =>
+        (b.status === 'confirmed' || b.status === 'checked_in' || b.status === 'checked_out') &&
+        b.paymentStatus !== 'paid'
+    )
+    const totalDebt = debtBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0)
+
+    // 3. Occupancy (Efficiency)
+    const activeBookings = bookings.filter(b =>
+        (b.status === 'confirmed' || b.status === 'checked_in' || b.status === 'pending' || b.status === 'maintenance') &&
+        isStayNight(businessDate, b.checkIn, b.checkOut)
+    )
+    const totalUnits = rooms.reduce((sum, room) => sum + room.capacity, 0)
+    const occupancyRate = totalUnits > 0 ? Math.round((activeBookings.length / totalUnits) * 100) : 0
+    const displayOccupancy = Math.min(occupancyRate, 100)
+
+    // 4. ADR (Average Daily Rate) - Efficiency of Pricing
     const totalNightsSold = monthlyBookings.reduce((sum, b) => {
         const nights = differenceInDays(new Date(b.checkOut), new Date(b.checkIn))
         return sum + Math.max(1, nights)
     }, 0)
-
-    const adr = totalNightsSold > 0 ? monthlyRevenue / totalNightsSold : 0
-
-    // 2. Occupancy & RevPAR
-    // Robust Fix: Use centralized logic for "Active Stay Night"
-    const activeBookings = bookings.filter(b =>
-        (b.status === 'confirmed' || b.status === 'pending' || b.status === 'maintenance') &&
-        isStayNight(businessDate, b.checkIn, b.checkOut)
-    )
-
-    // Total Capacity (Sum of room capacities from config)
-    // capacity field represents Inventory (Beds for Dorms, Quantity for Privates)
-    const totalUnits = rooms.reduce((sum, room) => sum + room.capacity, 0)
-    // const dynamicUnits = rooms.length // This works if rooms array has one entry per unit type.
-
-    const occupancyRate = Math.round((activeBookings.length / totalUnits) * 100)
-    const displayOccupancy = Math.min(occupancyRate, 100)
-
-    // RevPAR = ADR * Occupancy Rate
-    const revPar = adr * (displayOccupancy / 100)
-
-
-    // 3. Pending Actions
-    const pendingCount = bookings.filter(b => b.status === 'pending').length
+    const adr = totalNightsSold > 0 ? projectedRevenue / totalNightsSold : 0
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {/* Revenue Card - Primary Metric */}
-            <Card className="bg-white dark:bg-stone-900 border-none shadow-lg relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-br from-stone-900 to-stone-800 dark:from-stone-800 dark:to-stone-950 text-white" />
-                <CardContent className="p-6 relative z-10">
-                    <div className="flex justify-between items-start mb-4">
-                        <div>
-                            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Ingresos (Mes)</p>
-                            <h3 className="text-2xl font-light text-white mt-1 font-heading tracking-wide">
-                                ${monthlyRevenue.toLocaleString('es-MX')}
-                            </h3>
-                        </div>
-                        <div className="p-2 bg-white/10 rounded-lg text-white">
-                            <DollarSign className="w-5 h-5" />
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-stone-400 font-medium mt-4">
-                        <div className="flex items-center gap-1">
-                            <BarChart3 className="w-3 h-3" />
-                            <span>ADR: ${adr.toFixed(0)}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <TrendingUp className="w-3 h-3" />
-                            <span>RevPAR: ${revPar.toFixed(0)}</span>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* 1. Cash Flow (Real Money) - Emerald Glass */}
+            <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-emerald-950/20 backdrop-blur-xl shadow-2xl group transition-all duration-300 hover:scale-[1.02] hover:bg-emerald-950/30">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-50 pointer-events-none" />
+                <div className="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/20 blur-[60px] rounded-full pointer-events-none group-hover:bg-emerald-500/30 transition-colors" />
 
-            {/* Occupancy Card */}
-            <Card className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                <CardContent className="p-6 relative">
-                    <div className="flex justify-between items-start mb-4">
+                <div className="p-6 relative z-10 flex flex-col justify-between h-full">
+                    <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-widest">Ocupación Hoy</p>
-                            <h3 className="text-3xl font-light text-stone-900 dark:text-stone-100 mt-1 font-heading">
-                                {displayOccupancy}%
+                            <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2 mb-2">
+                                <DollarSign className="w-3 h-3" /> Caja Real
+                            </p>
+                            <h3 className="text-3xl font-light text-white font-heading tracking-tight">
+                                ${collectedRevenue.toLocaleString('es-MX')}
                             </h3>
                         </div>
-                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-500">
+                        <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
                             <Activity className="w-5 h-5" />
                         </div>
                     </div>
-                    <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 overflow-hidden mt-2">
-                        <div
-                            className="bg-amber-500 h-full rounded-full transition-all duration-1000"
-                            style={{ width: `${displayOccupancy}%` }}
-                        />
+                    <div className="mt-6 space-y-2">
+                        <div className="flex justify-between text-[10px] font-medium text-emerald-300/60 uppercase tracking-wide">
+                            <span>Suma Proyectada</span>
+                            <span>${projectedRevenue.toLocaleString('es-MX')}</span>
+                        </div>
+                        <div className="w-full bg-emerald-950/50 rounded-full h-1.5 overflow-hidden border border-emerald-500/10">
+                            <div
+                                className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                                style={{ width: `${projectedRevenue > 0 ? (collectedRevenue / projectedRevenue) * 100 : 0}%` }}
+                            />
+                        </div>
                     </div>
-                    <p className="text-xs text-stone-400 mt-2 text-right">{activeBookings.length} / {totalUnits} Unidades</p>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
-            {/* Arrivals Card */}
-            <Card className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300">
-                <CardContent className="p-6 relative">
-                    <div className="flex justify-between items-start mb-4">
+            {/* 2. Outstanding Debt (Critical) - Rose Glass Warning */}
+            <div className={cn(
+                "relative overflow-hidden rounded-3xl border backdrop-blur-xl shadow-2xl group transition-all duration-300 hover:scale-[1.02]",
+                totalDebt > 0
+                    ? "bg-rose-950/20 border-rose-500/30 shadow-[0_0_30px_-5px_rgba(244,63,94,0.15)]"
+                    : "bg-white/5 border-white/10"
+            )}>
+                {totalDebt > 0 && <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent opacity-50 pointer-events-none" />}
+                <div className={cn("absolute -left-10 -bottom-10 w-32 h-32 blur-[60px] rounded-full pointer-events-none transition-colors", totalDebt > 0 ? "bg-rose-500/20" : "bg-white/5")} />
+
+                <div className="p-6 relative z-10 flex flex-col justify-between h-full">
+                    <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-widest">Llegadas Hoy</p>
-                            <h3 className="text-3xl font-light text-stone-900 dark:text-stone-100 mt-1 font-heading">
-                                {bookings.filter(b => b.status !== 'cancelled' && isSameDay(parseISO(b.checkIn), businessDate)).length}
+                            <p className={cn("text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-2", totalDebt > 0 ? "text-rose-400" : "text-stone-400")}>
+                                <AlertCircle className="w-3 h-3" /> Por Cobrar
+                            </p>
+                            <h3 className={cn("text-3xl font-light font-heading tracking-tight", totalDebt > 0 ? "text-white" : "text-stone-400")}>
+                                ${totalDebt.toLocaleString('es-MX')}
                             </h3>
-                        </div >
-                        <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-500">
+                        </div>
+                        <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center border shadow-lg",
+                            totalDebt > 0 ? "bg-rose-500/10 border-rose-500/20 text-rose-400 shadow-rose-900/20" : "bg-stone-800/50 border-stone-700 text-stone-500")}>
+                            <Clock className="w-5 h-5" />
+                        </div>
+                    </div>
+                    <div className="mt-6">
+                        <div className={cn("inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border",
+                            totalDebt > 0 ? "bg-rose-500/10 border-rose-500/20 text-rose-300" : "bg-stone-800/30 border-stone-700 text-stone-500")}>
+                            <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", totalDebt > 0 ? "bg-rose-500" : "bg-stone-500")} />
+                            {debtBookings.length} Reservas Pendientes
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* 3. Occupancy - Amber/Solar Glass */}
+            <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-stone-900/40 backdrop-blur-xl shadow-2xl group transition-all duration-300 hover:scale-[1.02] hover:bg-stone-900/60">
+                <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent opacity-50 pointer-events-none" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-amber-500/5 blur-[80px] rounded-full pointer-events-none group-hover:bg-amber-500/10 transition-colors" />
+
+                <div className="p-6 relative z-10 flex flex-col justify-between h-full">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest mb-2">Ocupación</p>
+                            <h3 className="text-3xl font-light text-white mt-1 font-heading">
+                                {displayOccupancy}%
+                            </h3>
+                        </div>
+                        <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
                             <Users className="w-5 h-5" />
                         </div>
-                    </div >
-                    <div className="flex items-center text-xs text-stone-500 font-medium">
-                        <CalendarCheck className="w-3 h-3 mr-1" />
-                        <span>Check-ins pendientes</span>
                     </div>
-                </CardContent >
-            </Card >
+                    <div className="mt-6">
+                        {/* Circular Progress Micro-indicator or Bar */}
+                        <div className="w-full bg-stone-800 rounded-full h-1.5 overflow-hidden border border-white/5">
+                            <div
+                                className="bg-gradient-to-r from-amber-600 to-amber-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
+                                style={{ width: `${displayOccupancy}%` }}
+                            />
+                        </div>
+                        <div className="flex justify-between text-[10px] font-medium text-stone-500 mt-2 uppercase tracking-wide">
+                            <span>{activeBookings.length} Camas</span>
+                            <span>{totalUnits} Capacidad</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            {/* Pending Actions */}
-            < Card className="bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 shadow-sm relative overflow-hidden group hover:shadow-md transition-all duration-300" >
-                <CardContent className="p-6 relative">
-                    <div className="flex justify-between items-start mb-4">
+            {/* 4. Pricing Power - Royal Glass */}
+            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-stone-900/20 backdrop-blur-xl shadow-2xl group transition-all duration-300 hover:scale-[1.02] hover:bg-stone-900/40">
+                <div className="absolute -right-10 bottom-0 w-40 h-40 bg-purple-500/10 blur-[80px] rounded-full pointer-events-none" />
+
+                <div className="p-6 relative z-10 flex flex-col justify-between h-full">
+                    <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-widest">Acciones</p>
-                            <h3 className="text-3xl font-light text-stone-900 dark:text-stone-100 mt-1 font-heading">
-                                {pendingCount}
-                            </h3>
+                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Pricing Power</p>
+                            <div className="space-y-1">
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-3xl font-light text-white font-heading">${adr.toFixed(0)}</span>
+                                    <span className="text-[10px] text-stone-500 font-mono uppercase">ADR</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="p-2 bg-rose-100 dark:bg-rose-900/30 rounded-lg text-rose-600 dark:text-rose-500">
-                            <AlertCircle className="w-5 h-5" />
+                        <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                            <TrendingUp className="w-5 h-5" />
                         </div>
                     </div>
-                    <div className="flex items-center text-xs text-rose-600 dark:text-rose-400 font-medium">
-                        <Clock className="w-3 h-3 mr-1" />
-                        <span>Solicitudes nuevas</span>
+                    <div className="mt-6 flex items-center gap-3">
+                        <div className="px-3 py-1.5 rounded-lg bg-stone-800/50 border border-white/5 flex items-center gap-2">
+                            <BarChart3 className="w-3 h-3 text-purple-400" />
+                            <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">REVPAR: <span className="text-white">${(adr * (displayOccupancy / 100)).toFixed(0)}</span></span>
+                        </div>
                     </div>
-                </CardContent>
-            </Card >
-        </div >
+                </div>
+            </div>
+        </div>
     )
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, ReactNode } from "react"
-import { Check, CheckCircle, Users, BedDouble, Calendar as CalendarIcon, Loader2, PartyPopper, Copy } from "lucide-react"
+import { Check, CheckCircle, Users, BedDouble, Calendar as CalendarIcon, Loader2, PartyPopper, Copy, CreditCard, Banknote, ShieldCheck } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { subDays } from "date-fns"
 import { AnimatePresence, motion } from "framer-motion"
@@ -32,6 +32,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { BedSelector } from "@/components/shared/bed-selector"
 
 // ... imports remain the same ...
@@ -68,9 +69,12 @@ export function BookingModal({
     const [guestName, setGuestName] = useState("")
     const [email, setEmail] = useState("")
     const [phone, setPhone] = useState("")
+    const [paymentPreference, setPaymentPreference] = useState<'card' | 'transfer' | undefined>(undefined)
 
     // Receipt State
     const [bookingId, setBookingId] = useState("")
+
+    // ...
 
     // Scroll Container
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -103,17 +107,23 @@ export function BookingModal({
     const theme = location === "pueblo" ? {
         gradient: "bg-gradient-to-r from-amber-500 to-orange-600",
         lightGradient: "from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20 border-l-4 border-l-[#D97706]",
+        glass: "bg-amber-50/90 dark:bg-amber-950/20 backdrop-blur-xl border-amber-200/50 dark:border-amber-700/30",
         border: "border-orange-100 dark:border-orange-900/50",
         text: "text-[#B45309] dark:text-[#F59E0B]",
-        button: "bg-gradient-to-r from-amber-500 to-orange-600 hover:brightness-110 shadow-[0_0_20px_-5px_rgba(217,119,6,0.4)] transition-all duration-300",
-        icon: "bg-amber-100/50 text-[#D97706] dark:bg-amber-900/20 dark:text-[#fbbf24] ring-1 ring-amber-200 dark:ring-amber-800"
+        accentText: "text-amber-600 dark:text-amber-400",
+        button: "bg-gradient-to-r from-amber-500 to-orange-600 hover:brightness-110 shadow-[0_0_20px_-5px_rgba(217,119,6,0.5)] hover:shadow-[0_0_25px_-5px_rgba(217,119,6,0.7)] transition-all duration-300",
+        icon: "bg-amber-100/50 text-[#D97706] dark:bg-amber-900/20 dark:text-[#fbbf24] ring-1 ring-amber-200 dark:ring-amber-800",
+        glow: "shadow-[0_0_30px_-10px_rgba(245,158,11,0.3)] dark:shadow-[0_0_30px_-10px_rgba(245,158,11,0.1)]"
     } : {
         gradient: "bg-gradient-to-r from-lime-500 to-lime-700",
         lightGradient: "from-lime-50 to-green-50 dark:from-lime-950/20 dark:to-green-950/20 border-l-4 border-l-[#65a30d]",
+        glass: "bg-lime-50/90 dark:bg-stone-900/40 backdrop-blur-xl border-lime-200/50 dark:border-lime-700/30",
         border: "border-lime-100 dark:border-lime-900/50",
         text: "text-[#3f6212] dark:text-[#a3e635]",
-        button: "bg-gradient-to-r from-lime-500 to-lime-700 hover:brightness-110 shadow-[0_0_20px_-5px_rgba(101,163,13,0.4)] transition-all duration-300",
-        icon: "bg-lime-100/50 text-[#65a30d] dark:bg-lime-900/20 dark:text-[#a3e635] ring-1 ring-lime-200 dark:ring-lime-800"
+        accentText: "text-lime-700 dark:text-lime-400",
+        button: "bg-gradient-to-r from-lime-500 to-lime-700 hover:brightness-110 shadow-[0_0_20px_-5px_rgba(101,163,13,0.5)] hover:shadow-[0_0_25px_-5px_rgba(101,163,13,0.7)] transition-all duration-300",
+        icon: "bg-lime-100/50 text-[#65a30d] dark:bg-lime-900/20 dark:text-[#a3e635] ring-1 ring-lime-200 dark:ring-lime-800",
+        glow: "shadow-[0_0_30px_-10px_rgba(132,204,22,0.3)] dark:shadow-[0_0_30px_-10px_rgba(132,204,22,0.1)]"
     }
 
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -206,18 +216,15 @@ export function BookingModal({
                 return
             }
 
+            if (!paymentPreference) {
+                toast.error("Método de Garantía Requerido", {
+                    description: "Por favor selecciona cómo prefieres garantizar tu reserva (Pago en Hotel o Transferencia)."
+                })
+                return
+            }
+
             if (date?.from && date?.to) {
-                // Final Availability Check
-                const curr = new Date(date.from);
-                const end = new Date(date.to);
-                // temp unused var check
-                console.log('Checking availability for', curr, end);
-                const isBlocked = false;
-
-                // ... Simplifed check for public flow ...
-                // Ideally reiterate strict checks here
-                // For now trusting UI state + Optimistic UI
-
+                // Final Availability Check (Optimistic)
                 setIsSubmitting(true)
                 // Simulate network delay for "Elite" feel
                 await new Promise(resolve => setTimeout(resolve, 2000))
@@ -243,7 +250,8 @@ export function BookingModal({
                             checkIn: date.from!.toISOString(),
                             checkOut: date.to!.toISOString(),
                             totalPrice: Math.round((totalPrice / selectedUnitIds.length) * 100) / 100, // Split price per bed
-                            status: 'confirmed'
+                            status: 'pending',
+                            paymentMethod: paymentPreference
                         })
                     })
                 } else {
@@ -257,7 +265,8 @@ export function BookingModal({
                         checkIn: date.from.toISOString(),
                         checkOut: date.to.toISOString(),
                         totalPrice: Math.round(totalPrice * 100) / 100,
-                        status: 'confirmed'
+                        status: 'pending',
+                        paymentMethod: paymentPreference
                     })
                 }
 
@@ -318,25 +327,52 @@ export function BookingModal({
             <DialogTrigger asChild>
                 <div className={className} suppressHydrationWarning>{children}</div>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[550px] bg-stone-50 dark:bg-stone-900 dark:border-stone-800 p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col shadow-2xl">
-                <DialogHeader className="p-6 pb-2 border-b border-stone-200 dark:border-stone-800 flex-shrink-0 z-10 bg-stone-50/80 dark:bg-stone-900/80 backdrop-blur-md">
-                    <DialogTitle className="text-xl font-bold font-heading text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                        {step === 5 ? (
-                            <span className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                                <PartyPopper className="w-5 h-5" /> Reserva Exitosa
-                            </span>
-                        ) : (
-                            <>
-                                Reservar en <span className={cn("capitalize underline decoration-2 underline-offset-4", theme.text, "decoration-[color:var(--current-color)]")}>{location}</span>
-                            </>
-                        )}
-                    </DialogTitle>
-                    <DialogDescription className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-widest mt-1">
-                        Paso {step} de {isDorm ? 4 : 3}
-                    </DialogDescription>
+            {/* ELITE GLASS CONTAINER */}
+            <DialogContent className={cn(
+                "sm:max-w-[600px] p-0 overflow-hidden gap-0 max-h-[90vh] flex flex-col shadow-2xl transition-all duration-500 border-0 ring-1 ring-white/20",
+                theme.glass,
+                theme.glow
+            )}>
+                {/* Header with Glass Effect */}
+                <DialogHeader className={cn(
+                    "p-6 pb-4 flex-shrink-0 z-20 backdrop-blur-md border-b bg-white/40 dark:bg-black/20",
+                    theme.border
+                )}>
+                    <div className="flex items-center justify-between">
+                        <DialogTitle className="text-2xl font-bold font-heading text-stone-900 dark:text-stone-100 flex items-center gap-2 drop-shadow-sm">
+                            {step === 5 ? (
+                                <span className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                                    <PartyPopper className="w-6 h-6 animate-bounce" /> Solicitud Enviada
+                                </span>
+                            ) : (
+                                <>
+                                    Reservar en <span className={cn("capitalize relative", theme.text)}>
+                                        {location}
+                                        <span className={cn("absolute -bottom-1 left-0 w-full h-1 rounded-full opacity-40", theme.gradient)}></span>
+                                    </span>
+                                </>
+                            )}
+                        </DialogTitle>
+                        <div className={cn("text-xs font-bold px-3 py-1 rounded-full border bg-white/50 dark:bg-black/20 backdrop-blur-md", theme.border, theme.text)}>
+                            Paso {step} <span className="opacity-60">/ {isDorm ? 4 : 3}</span>
+                        </div>
+                    </div>
+
+                    {/* Elite Progress Indicator */}
+                    <div className="mt-4 h-1 w-full bg-stone-200/50 dark:bg-stone-800/50 rounded-full overflow-hidden">
+                        <motion.div
+                            className={cn("h-full", theme.gradient)}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(step / (isDorm ? 4 : 3)) * 100}%` }}
+                            transition={{ ease: "easeInOut", duration: 0.5 }}
+                        />
+                    </div>
                 </DialogHeader>
 
-                <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden relative">
+                <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overflow-x-hidden relative scrollbar-hide">
+                    {/* Background Ambient Glow */}
+                    <div className={cn("absolute top-0 right-0 w-64 h-64 opacity-20 blur-[80px] rounded-full pointer-events-none -z-10", theme.gradient)}></div>
+                    <div className={cn("absolute bottom-0 left-0 w-64 h-64 opacity-10 blur-[80px] rounded-full pointer-events-none -z-10", theme.gradient)}></div>
                     <AnimatePresence mode="wait" initial={false} custom={step}>
                         {step === 1 && (
                             <motion.div
@@ -497,14 +533,38 @@ export function BookingModal({
                                 className="p-6 space-y-4"
                             >
                                 {/* Summary of Selection */}
-                                <div className="bg-stone-100 dark:bg-stone-800/50 p-3 rounded-lg flex items-center justify-between text-xs">
-                                    <div>
-                                        <p className="font-bold text-stone-700 dark:text-stone-300">{selectedRoomConfig?.label}</p>
-                                        <p className="text-stone-500">{date?.from?.toLocaleDateString()} - {date?.to?.toLocaleDateString()}</p>
+                                <div className="bg-stone-100 dark:bg-stone-800/50 p-4 rounded-xl flex flex-col gap-3 text-xs">
+                                    <div className="flex justify-between items-start border-b border-stone-200 dark:border-stone-700 pb-3">
+                                        <div>
+                                            <p className="font-bold text-sm text-stone-800 dark:text-stone-200">{selectedRoomConfig?.label}</p>
+                                            <p className="text-stone-500 font-medium">
+                                                {date?.from?.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} - {date?.to?.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <Badge variant="outline" className="bg-white dark:bg-stone-900 text-stone-500 border-stone-200 dark:border-stone-700">
+                                                {Math.ceil((date?.to?.getTime()! - date?.from?.getTime()!) / (1000 * 60 * 60 * 24))} Noches
+                                            </Badge>
+                                        </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="font-bold">${currentPrice}</p>
-                                        {isDorm && <p className="text-stone-500">x{guests} {parseInt(guests) > 1 ? 'personas' : 'persona'}</p>}
+
+                                    <div className="space-y-1 pt-1">
+                                        <div className="flex justify-between text-stone-500">
+                                            <span>Precio por noche</span>
+                                            <span>${currentPrice}</span>
+                                        </div>
+                                        {isDorm && (
+                                            <div className="flex justify-between text-stone-500">
+                                                <span>Huéspedes ({guests})</span>
+                                                <span>x{guests}</span>
+                                            </div>
+                                        )}
+                                        <div className="flex justify-between items-center pt-2 mt-2 border-t border-stone-200/50 dark:border-stone-700/50">
+                                            <span className="font-bold text-stone-900 dark:text-stone-100 text-sm">Total Estimado</span>
+                                            <span className="font-heading font-bold text-xl text-emerald-600 dark:text-emerald-400">
+                                                ${(currentPrice * Math.ceil((date?.to?.getTime()! - date?.from?.getTime()!) / (1000 * 60 * 60 * 24)) * (isDorm ? (parseInt(guests) || 1) : 1)).toLocaleString()}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -566,6 +626,72 @@ export function BookingModal({
                                             </Select>
                                         </div>
                                     )}
+
+                                    {/* NEW: Payment Preference - Elite Cards */}
+                                    <div className="pt-4 border-t border-stone-200/50 dark:border-stone-800/50">
+                                        <Label className="text-[10px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-widest mb-3 block flex items-center gap-2">
+                                            <ShieldCheck className="w-3 h-3" /> Método de Garantía
+                                        </Label>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {/* Pay at Hotel Option */}
+                                            <div
+                                                onClick={() => setPaymentPreference('card')}
+                                                className={cn(
+                                                    "cursor-pointer relative overflow-hidden rounded-xl border p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 group",
+                                                    paymentPreference === 'card'
+                                                        ? cn("bg-white dark:bg-stone-800 ring-2 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 shadow-md", theme.icon.split(" ")[5]) // extraction specific ring color
+                                                        : "bg-white/50 dark:bg-stone-900/50 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-md"
+                                                )}
+                                            >
+                                                {paymentPreference === 'card' && (
+                                                    <div className={cn("absolute top-2 right-2 w-2 h-2 rounded-full", theme.gradient)} />
+                                                )}
+                                                <div className={cn(
+                                                    "p-3 rounded-full transition-colors",
+                                                    paymentPreference === 'card' ? theme.icon : "bg-stone-100 dark:bg-stone-800 text-stone-400"
+                                                )}>
+                                                    <CreditCard className="w-6 h-6" />
+                                                </div>
+                                                <div className="text-center">
+                                                    <span className={cn("block text-sm font-bold mb-1", paymentPreference === 'card' ? "text-stone-900 dark:text-stone-100" : "text-stone-500")}>
+                                                        Pagar en Hotel
+                                                    </span>
+                                                    <span className="text-[10px] text-stone-400 dark:text-stone-500 leading-tight block">
+                                                        Efectivo o Tarjeta al llegar
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Transfer Option */}
+                                            <div
+                                                onClick={() => setPaymentPreference('transfer')}
+                                                className={cn(
+                                                    "cursor-pointer relative overflow-hidden rounded-xl border p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 group",
+                                                    paymentPreference === 'transfer'
+                                                        ? cn("bg-white dark:bg-stone-800 ring-2 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 shadow-md", theme.icon.split(" ")[5])
+                                                        : "bg-white/50 dark:bg-stone-900/50 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-md"
+                                                )}
+                                            >
+                                                {paymentPreference === 'transfer' && (
+                                                    <div className={cn("absolute top-2 right-2 w-2 h-2 rounded-full", theme.gradient)} />
+                                                )}
+                                                <div className={cn(
+                                                    "p-3 rounded-full transition-colors",
+                                                    paymentPreference === 'transfer' ? theme.icon : "bg-stone-100 dark:bg-stone-800 text-stone-400"
+                                                )}>
+                                                    <Banknote className="w-6 h-6" />
+                                                </div>
+                                                <div className="text-center">
+                                                    <span className={cn("block text-sm font-bold mb-1", paymentPreference === 'transfer' ? "text-stone-900 dark:text-stone-100" : "text-stone-500")}>
+                                                        Transferencia
+                                                    </span>
+                                                    <span className="text-[10px] text-stone-400 dark:text-stone-500 leading-tight block">
+                                                        Adelanta tu pago ahora
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="h-24 shrink-0" />
                             </motion.div>
@@ -593,11 +719,28 @@ export function BookingModal({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <h3 className="text-2xl font-bold text-stone-900 dark:text-stone-100 font-heading">¡Reserva Confirmada!</h3>
+                                    <h3 className="text-2xl font-bold text-stone-900 dark:text-stone-100 font-heading">¡Solicitud Recibida!</h3>
                                     <p className="text-stone-500 dark:text-stone-400 max-w-[280px] mx-auto text-sm leading-relaxed">
-                                        Hemos enviado un correo a <span className="font-semibold text-stone-900 dark:text-stone-200">{email}</span> con todos los detalles.
+                                        {paymentPreference === 'transfer' ? (
+                                            <>
+                                                Para confirmar, por favor realiza tu transferencia. Te enviaremos los datos bancarios a <span className="font-semibold text-stone-900 dark:text-stone-200">{email}</span>.
+                                            </>
+                                        ) : (
+                                            <>
+                                                Tu solicitud está registrada. El pago se realizará al llegar al hotel. Confirmación enviada a <span className="font-semibold text-stone-900 dark:text-stone-200">{email}</span>.
+                                            </>
+                                        )}
                                     </p>
                                 </div>
+
+                                {/* Bank Details Mock (Only for Transfer) */}
+                                {paymentPreference === 'transfer' && (
+                                    <div className="w-full bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-lg p-3 text-xs text-center text-amber-800 dark:text-amber-400">
+                                        <p className="font-bold mb-1">Cuenta BANRURAL</p>
+                                        <p className="font-mono">3400055228</p>
+                                        <p className="opacity-70 text-[10px] mt-1">Envía comprobante a WhatsApp</p>
+                                    </div>
+                                )}
 
                                 <Card className="w-full bg-stone-50 dark:bg-stone-900/50 border-stone-200 dark:border-stone-800 p-4 rounded-xl flex items-center justify-between group cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                                     onClick={() => {
@@ -606,7 +749,7 @@ export function BookingModal({
                                     }}
                                 >
                                     <div className="text-left">
-                                        <p className="text-[10px] uppercase tracking-widest font-bold text-stone-400">ID de Reserva</p>
+                                        <p className="text-[10px] uppercase tracking-widest font-bold text-stone-400">ID de Solicitud</p>
                                         <p className="font-mono text-lg font-bold text-stone-900 dark:text-stone-100 tracking-wider">#{bookingId}</p>
                                     </div>
                                     <Button variant="ghost" size="icon" className="text-stone-400 group-hover:text-stone-600 dark:group-hover:text-stone-300">

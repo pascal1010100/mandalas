@@ -13,7 +13,8 @@ import {
     parseISO
 } from "date-fns"
 import { es } from "date-fns/locale"
-import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react"
+import { ChevronLeft, ChevronRight, CalendarDays, Eraser } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -31,8 +32,30 @@ const ROW_HEIGHT = 88 // slightly taller
 const HEADER_HEIGHT = 56 // taller header
 
 export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
-    const { rooms } = useAppStore() // Fetch from store
+    const { rooms, deleteBooking } = useAppStore() // Fetch from store
     const [currentDate, setCurrentDate] = useState(new Date())
+    const [isPurging, setIsPurging] = useState(false)
+
+    // Ghost Logic: Find expired pending bookings
+    const expiredBookings = bookings.filter(b =>
+        b.status === 'pending' &&
+        new Date(b.checkIn) < new Date()
+    )
+
+    const handlePurge = async () => {
+        if (!confirm(`¿Eliminar ${expiredBookings.length} solicitudes expiradas?`)) return
+
+        setIsPurging(true)
+        try {
+            // Batch delete
+            await Promise.all(expiredBookings.map(b => deleteBooking(b.id)))
+            toast.success(`🧹 Se eliminaron ${expiredBookings.length} solicitudes antiguas`)
+        } catch (error) {
+            toast.error("Error al limpiar")
+        } finally {
+            setIsPurging(false)
+        }
+    }
 
     // Sort rooms logic: Pueblo first, then by type
     const sortedRooms = [...rooms].sort((a, b) => {
@@ -83,9 +106,24 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                         </Button>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-medium text-stone-400 bg-stone-100/50 dark:bg-stone-800/50 px-3 py-1.5 rounded-full border border-stone-200/50 dark:border-stone-700/50">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    Tiempo Real
+                <div className="flex items-center gap-3">
+                    {expiredBookings.length > 0 && (
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handlePurge}
+                            disabled={isPurging}
+                            className="bg-rose-100 text-rose-700 hover:bg-rose-200 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800 dark:hover:bg-rose-900/50 h-8 text-xs font-semibold px-3 rounded-full shadow-sm animate-in fade-in zoom-in"
+                        >
+                            <Eraser className={cn("w-3.5 h-3.5 mr-1.5", isPurging && "animate-spin")} />
+                            {isPurging ? "Limpiando..." : `Limpiar (${expiredBookings.length})`}
+                        </Button>
+                    )}
+
+                    <div className="flex items-center gap-2 text-xs font-medium text-stone-400 bg-stone-100/50 dark:bg-stone-800/50 px-3 py-1.5 rounded-full border border-stone-200/50 dark:border-stone-700/50">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Tiempo Real
+                    </div>
                 </div>
             </div>
 
@@ -229,6 +267,8 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                                             // Updated Vertical positioning
                                             const top = 12 + (laneIndex * 38)
 
+                                            const isExpired = booking.status === 'pending' && new Date(booking.checkIn) < new Date()
+
                                             return (
                                                 <div
                                                     key={booking.id}
@@ -237,11 +277,17 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                                                         "absolute h-[34px] rounded-lg px-3 flex items-center shadow-lg hover:shadow-xl cursor-pointer hover:scale-[1.02] transition-all text-xs font-medium truncate select-none border group overflow-hidden z-10",
                                                         booking.status === 'confirmed'
                                                             ? "bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-900 border-white/50 dark:from-emerald-900/60 dark:to-emerald-800/60 dark:text-emerald-100 dark:border-emerald-700"
-                                                            : booking.status === 'cancelled'
-                                                                ? "bg-rose-100 text-rose-800 border-rose-200 opacity-60"
+                                                            : booking.status === 'checked_in'
+                                                                ? "bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-900 border-white/50 dark:from-indigo-900/60 dark:to-indigo-800/60 dark:text-indigo-100 dark:border-indigo-700 shadow-indigo-200/50"
                                                                 : booking.status === 'checked_out'
-                                                                    ? "bg-stone-200 text-stone-600 border-stone-300 opacity-60 grayscale"
-                                                                    : "bg-gradient-to-br from-amber-100 to-amber-200 text-amber-900 border-white/50 dark:from-amber-900/60 dark:to-amber-800/60 dark:text-amber-100 dark:border-amber-700"
+                                                                    ? "bg-stone-200 text-stone-500 border-stone-300 opacity-50 grayscale decoration-stone-400 line-through"
+                                                                    : booking.status === 'cancelled'
+                                                                        ? "bg-rose-50/50 text-rose-300 border-rose-100/50 opacity-40 grayscale-[0.5] decoration-rose-300/50 line-through dashed border-dashed"
+                                                                        : booking.status === 'no_show'
+                                                                            ? "bg-stone-800 text-stone-400 border-stone-700 opacity-60 grayscale decoration-stone-500 line-through"
+                                                                            : isExpired
+                                                                                ? "bg-amber-50/50 text-amber-900/50 border-amber-200/50 border-dashed opacity-80" // Expired Pending
+                                                                                : "bg-gradient-to-br from-amber-100 to-amber-200 text-amber-900 border-white/50 dark:from-amber-900/60 dark:to-amber-800/60 dark:text-amber-100 dark:border-amber-700"
                                                     )}
                                                     style={{
                                                         left: `${left + 2}px`, // +2 padding
@@ -250,7 +296,10 @@ export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
                                                         zIndex: 20 + laneIndex
                                                     }}
                                                 >
-                                                    <span className="truncate drop-shadow-sm">{booking.guestName}</span>
+                                                    <span className="truncate drop-shadow-sm flex items-center gap-1">
+                                                        {isExpired && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />}
+                                                        {booking.guestName}
+                                                    </span>
                                                 </div>
                                             )
                                         })

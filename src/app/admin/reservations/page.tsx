@@ -103,8 +103,10 @@ export default function ReservationsPage() {
                 </div>
                 <div className="flex gap-3">
                     <Button
-                        className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-full shadow-lg hover:shadow-xl transition-all"
+                        className="bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-full shadow-lg hover:shadow-xl transition-all notranslate"
                         onClick={() => setIsCreateModalOpen(true)}
+                        translate="no"
+                        suppressHydrationWarning
                     >
                         <Plus className="w-4 h-4 mr-2" /> Nueva Reserva
                     </Button>

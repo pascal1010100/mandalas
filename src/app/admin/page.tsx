@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { useAppStore, Booking } from "@/lib/store"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { DollarSign, Users, CalendarDays, Activity, ArrowRight, ArrowUpRight } from "lucide-react"
 import { format, isSameDay, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
@@ -16,19 +15,19 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
+import { StaggerReveal } from "@/components/animations/stagger-reveal"
 import { DashboardStats } from "@/components/admin/dashboard/dashboard-stats"
 import { CreateReservationModal } from "@/components/admin/reservations/create-reservation-modal"
 import { ReservationDetailsModal } from "@/components/admin/reservations/reservation-details-modal"
 import { RoomStatusGrid } from "@/components/admin/dashboard/room-status-grid"
 import { MiniCalendarWidget } from "@/components/admin/dashboard/mini-calendar"
-import { useState } from "react"
-
-import { Suspense } from "react"
+import { useState, Suspense } from "react"
+import { cn } from "@/lib/utils"
 
 function AdminContent() {
     const { bookings } = useAppStore()
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [createModalInitialValues, setCreateModalInitialValues] = useState<{ location: "pueblo" | "hideout", roomType: string, unitId: string } | null>(null)
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
 
@@ -37,17 +36,14 @@ function AdminContent() {
         setIsDetailsModalOpen(true)
     }
 
-
-
-    const getStatusBadge = (status: string) => {
-        switch (status) {
-            case "confirmed":
-                return <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-none px-3 py-1">Confirmada</Badge>
-            case "cancelled":
-                return <Badge className="bg-red-100 text-red-700 hover:bg-red-200 border-none px-3 py-1">Cancelada</Badge>
-            default:
-                return <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-none px-3 py-1">Pendiente</Badge>
-        }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleNewBookingFromGrid = (room: any, unitId: string) => {
+        setCreateModalInitialValues({
+            location: room.location,
+            roomType: room.id,
+            unitId: unitId
+        })
+        setIsCreateModalOpen(true)
     }
 
     const handleExport = () => {
@@ -79,16 +75,20 @@ function AdminContent() {
         document.body.removeChild(link)
     }
 
+    const activeBookingsCount = bookings.filter(b => b.status === 'confirmed').length
+    const checkInsToday = bookings.filter(b => isSameDay(parseISO(b.checkIn), new Date()) && b.status !== 'cancelled')
+    const checkOutsToday = bookings.filter(b => isSameDay(parseISO(b.checkOut), new Date()) && b.status !== 'cancelled')
+
     return (
         <div className="space-y-10">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold font-heading text-stone-900 dark:text-stone-100">
+                    <h1 className="text-3xl font-bold font-heading text-stone-900 dark:text-stone-100 notranslate" translate="no" suppressHydrationWarning>
                         Panel de Control
                     </h1>
                     <p className="text-stone-500 dark:text-stone-400 max-w-2xl mt-2">
-                        Bienvenido de nuevo. Tienes <span className="font-semibold text-emerald-600 dark:text-emerald-400">{bookings.filter(b => b.status === 'confirmed').length} reservas activas</span> este mes.
+                        Bienvenido de nuevo. Tienes <span className="font-semibold text-emerald-600 dark:text-emerald-400">{activeBookingsCount} reservas activas</span> este mes.
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -97,7 +97,10 @@ function AdminContent() {
                         Descargar Reporte
                     </Button>
                     <Button
-                        onClick={() => setIsCreateModalOpen(true)}
+                        onClick={() => {
+                            setCreateModalInitialValues(null)
+                            setIsCreateModalOpen(true)
+                        }}
                         className="bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900"
                     >
                         <CalendarDays className="w-4 h-4 mr-2" />
@@ -111,10 +114,8 @@ function AdminContent() {
                 {/* Left Column (Stats & Grid) takes 2/3 */}
                 <StaggerReveal className="lg:col-span-2 space-y-8">
                     <DashboardStats />
-                    <RoomStatusGrid onSelectBooking={handleBookingClick} />
+                    <RoomStatusGrid onSelectBooking={handleBookingClick} onNewBooking={handleNewBookingFromGrid} />
                 </StaggerReveal>
-
-
 
                 {/* Right Column (Calendar & Operations) takes 1/3 */}
                 <div className="lg:col-span-1 space-y-8">
@@ -123,95 +124,95 @@ function AdminContent() {
                             <MiniCalendarWidget />
                         </div>
 
-                        {/* Daily Operations Feed */}
-                        <div className="bg-white dark:bg-stone-900 p-6 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm h-fit">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="font-bold font-heading text-lg text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                        {/* Daily Operations Feed - Elite Timeline */}
+                        <div className="bg-stone-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-xl h-fit relative overflow-hidden">
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-8 relative z-10">
+                                <h3 className="font-bold font-heading text-lg text-white flex items-center gap-2">
                                     <Activity className="w-5 h-5 text-emerald-500" />
-                                    Operaciones del Día
+                                    Operaciones
                                 </h3>
-                                <span className="text-xs font-mono text-stone-400 bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">
+                                <span className="text-[10px] font-mono text-stone-400 bg-stone-800/50 px-2 py-1 rounded border border-white/5">
                                     {format(new Date(), 'dd MMM', { locale: es })}
                                 </span>
                             </div>
 
-                            <div className="space-y-8">
-                                {/* Check-ins */}
-                                <div>
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-4 flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                                        Llegadas (Check-in)
-                                    </h4>
-                                    <div className="space-y-3">
-                                        {bookings.filter(b => isSameDay(parseISO(b.checkIn), new Date()) && b.status !== 'cancelled').length === 0 ? (
-                                            <div className="flex flex-col items-center justify-center p-6 border border-dashed border-stone-200 dark:border-stone-800 rounded-xl bg-stone-50/50 dark:bg-stone-900/50">
-                                                <p className="text-xs text-stone-400 italic">No hay llegadas programadas para hoy.</p>
-                                            </div>
-                                        ) : (
-                                            bookings.filter(b => isSameDay(parseISO(b.checkIn), new Date()) && b.status !== 'cancelled').map(b => (
-                                                <div
-                                                    key={b.id}
-                                                    onClick={() => handleBookingClick(b as Booking)}
-                                                    className="flex items-center justify-between gap-3 p-4 rounded-xl bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-md transition-all duration-300 group cursor-pointer hover:border-emerald-200 dark:hover:border-emerald-900"
-                                                >
-                                                    <div className="min-w-0 flex-1">
-                                                        <p className="font-bold text-sm text-stone-800 dark:text-stone-200 truncate group-hover:text-amber-600 transition-colors">{b.guestName}</p>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-normal border-stone-200 text-stone-500 rounded-md bg-stone-50 dark:bg-stone-800 dark:border-stone-700">
-                                                                {b.roomType.replace(/_/g, ' ')}
-                                                            </Badge>
-                                                            <span className="text-[10px] text-stone-400 uppercase tracking-wide">• {b.guests} pax</span>
+                            <div className="space-y-0 relative pl-4">
+                                {/* Timeline Line */}
+                                <div className="absolute left-[19px] top-2 bottom-4 w-px bg-gradient-to-b from-stone-700 via-stone-800 to-transparent" />
+
+                                {/* Check-ins Section */}
+                                <div className="relative pb-8">
+                                    <div className="absolute left-[-5px] top-0 w-12 h-12 flex items-center justify-center">
+                                        <div className="w-3 h-3 rounded-full bg-emerald-500 border-4 border-stone-900 shadow-[0_0_10px_rgba(16,185,129,0.5)] z-20 relative" />
+                                    </div>
+                                    <div className="pl-8">
+                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-4 pt-1">
+                                            Llegadas (Check-in)
+                                        </h4>
+                                        <div className="space-y-3">
+                                            {checkInsToday.length === 0 ? (
+                                                <div className="p-4 border border-dashed border-stone-800 rounded-xl bg-stone-900/30">
+                                                    <p className="text-xs text-stone-500 italic">Todo tranquilo por ahora.</p>
+                                                </div>
+                                            ) : (
+                                                checkInsToday.map(b => (
+                                                    <div
+                                                        key={b.id}
+                                                        onClick={() => handleBookingClick(b as Booking)}
+                                                        className="group relative flex items-center justify-between gap-3 p-3 rounded-xl bg-stone-800/40 border border-white/5 hover:bg-stone-800 hover:border-emerald-500/30 transition-all duration-300 cursor-pointer overflow-hidden"
+                                                    >
+                                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="font-bold text-sm text-stone-200 group-hover:text-white transition-colors truncate">{b.guestName}</p>
+                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                <span className="text-[10px] text-stone-400 uppercase tracking-wider">{b.roomType.replace(/_/g, ' ')}</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <div className="flex flex-col items-end gap-1">
-                                                        <Badge className={b.status === 'confirmed'
-                                                            ? "bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
-                                                            : "bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100"
+                                                        <Badge className={
+                                                            b.status === 'confirmed' ? "bg-emerald-500/10 text-emerald-400 border-none" : "bg-amber-500/10 text-amber-400 border-none"
                                                         }>
                                                             {b.status === 'confirmed' ? 'Conf.' : 'Pend.'}
                                                         </Badge>
-                                                        {b.paymentStatus === 'pending' && (
-                                                            <span className="text-[9px] font-bold text-rose-500 uppercase tracking-widest bg-rose-50 px-1.5 py-0.5 rounded">
-                                                                Pago Pend.
-                                                            </span>
-                                                        )}
                                                     </div>
-                                                </div>
-                                            ))
-                                        )}
+                                                ))
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="h-px bg-stone-100 dark:bg-stone-800 w-full" />
-
-                                {/* Check-outs */}
-                                <div>
-                                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-4 flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-stone-300 dark:bg-stone-600" />
-                                        Salidas (Check-out)
-                                    </h4>
-                                    <div className="space-y-3">
-                                        {bookings.filter(b => isSameDay(parseISO(b.checkOut), new Date()) && b.status !== 'cancelled').length === 0 ? (
-                                            <div className="flex flex-col items-center justify-center p-6 border border-dashed border-stone-200 dark:border-stone-800 rounded-xl bg-stone-50/50 dark:bg-stone-900/50">
-                                                <p className="text-xs text-stone-400 italic">No hay salidas programadas para hoy.</p>
-                                            </div>
-                                        ) : (
-                                            bookings.filter(b => isSameDay(parseISO(b.checkOut), new Date()) && b.status !== 'cancelled').map(b => (
-                                                <div
-                                                    key={b.id}
-                                                    onClick={() => handleBookingClick(b as Booking)}
-                                                    className="flex items-center justify-between gap-3 p-4 rounded-xl bg-stone-50/50 dark:bg-stone-900/50 border border-stone-100 dark:border-stone-800 opacity-80 hover:opacity-100 transition-all duration-300 cursor-pointer hover:bg-white dark:hover:bg-stone-900 group"
-                                                >
-                                                    <div className="min-w-0 flex-1">
-                                                        <p className="font-medium text-sm text-stone-600 dark:text-stone-300 line-through decoration-stone-300 truncate group-hover:no-underline group-hover:text-stone-900 dark:group-hover:text-stone-100 transition-colors">{b.guestName}</p>
-                                                        <p className="text-[10px] text-stone-400 uppercase tracking-wide truncate mt-0.5">{b.location}</p>
-                                                    </div>
-                                                    <div className="text-[10px] font-mono text-stone-400 shrink-0 bg-white dark:bg-stone-800 px-2 py-1 rounded border border-stone-100 dark:border-stone-700">
-                                                        #{b.id.substring(0, 4)}
-                                                    </div>
+                                {/* Check-outs Section */}
+                                <div className="relative">
+                                    <div className="absolute left-[-5px] top-0 w-12 h-12 flex items-center justify-center">
+                                        <div className="w-3 h-3 rounded-full bg-stone-500 border-4 border-stone-900 z-20 relative" />
+                                    </div>
+                                    <div className="pl-8">
+                                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-stone-500 mb-4 pt-1">
+                                            Salidas (Check-out)
+                                        </h4>
+                                        <div className="space-y-3">
+                                            {checkOutsToday.length === 0 ? (
+                                                <div className="p-4 border border-dashed border-stone-800 rounded-xl bg-stone-900/30">
+                                                    <p className="text-xs text-stone-500 italic">No hay salidas hoy.</p>
                                                 </div>
-                                            ))
-                                        )}
+                                            ) : (
+                                                checkOutsToday.map(b => (
+                                                    <div
+                                                        key={b.id}
+                                                        onClick={() => handleBookingClick(b as Booking)}
+                                                        className="group flex items-center justify-between gap-3 p-3 rounded-xl bg-stone-900/30 border border-white/5 opacity-60 hover:opacity-100 hover:bg-stone-800 transition-all duration-300 cursor-pointer"
+                                                    >
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="font-medium text-sm text-stone-400 line-through decoration-stone-600 group-hover:no-underline group-hover:text-stone-200 transition-colors truncate">{b.guestName}</p>
+                                                        </div>
+                                                        <div className="text-[10px] font-mono text-stone-600">
+                                                            #{b.id.substring(0, 4)}
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -220,14 +221,17 @@ function AdminContent() {
                 </div>
             </div>
 
-            {/* Recent Reservations Table (Moved below) */}
-            <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm overflow-hidden">
-                <div className="p-6 flex items-center justify-between border-b border-stone-100 dark:border-stone-800">
+            {/* Recent Reservations Table - Elite Data Grid */}
+            <div className="bg-white/60 dark:bg-stone-900/60 backdrop-blur-xl rounded-3xl border border-stone-200/50 dark:border-white/5 shadow-2xl overflow-hidden relative">
+                {/* Decorative Glow */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 blur-[100px] rounded-full pointer-events-none" />
+
+                <div className="p-8 flex items-center justify-between border-b border-stone-100 dark:border-white/5 relative z-10">
                     <div>
-                        <h3 className="font-bold font-heading text-lg text-stone-900 dark:text-stone-100">Reservas Recientes</h3>
-                        <p className="text-sm text-stone-500">Últimos movimientos registrados</p>
+                        <h3 className="font-bold font-heading text-xl text-stone-900 dark:text-white tracking-tight">Reservas Recientes</h3>
+                        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">Últimos movimientos registrados en el sistema</p>
                     </div>
-                    <Button variant="ghost" size="sm" asChild>
+                    <Button variant="outline" size="sm" asChild className="rounded-full px-6 border-stone-200 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all duration-300">
                         <Link href="/admin/reservations">
                             Ver todas <ArrowRight className="w-4 h-4 ml-2" />
                         </Link>
@@ -237,15 +241,15 @@ function AdminContent() {
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
-                            <TableRow className="hover:bg-transparent border-stone-100 dark:border-stone-800">
-                                <TableHead className="pl-6">Huésped / Habitación</TableHead>
-                                <TableHead>
+                            <TableRow className="hover:bg-transparent border-stone-100 dark:border-white/5 bg-stone-50/50 dark:bg-white/[0.02]">
+                                <TableHead className="pl-8 py-5 text-xs font-bold uppercase tracking-widest text-stone-400">Huésped / Habitación</TableHead>
+                                <TableHead className="py-5 text-xs font-bold uppercase tracking-widest text-stone-400">
                                     <div className="flex items-center gap-2">
-                                        <CalendarDays className="w-4 h-4" /> Fechas
+                                        <CalendarDays className="w-3 h-3" /> Fechas
                                     </div>
                                 </TableHead>
-                                <TableHead>Estado</TableHead>
-                                <TableHead className="text-right pr-6">Total</TableHead>
+                                <TableHead className="py-5 text-xs font-bold uppercase tracking-widest text-stone-400">Estado</TableHead>
+                                <TableHead className="text-right pr-8 py-5 text-xs font-bold uppercase tracking-widest text-stone-400">Total</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -253,39 +257,43 @@ function AdminContent() {
                                 <TableRow
                                     key={booking.id}
                                     onClick={() => handleBookingClick(booking as Booking)}
-                                    className="hover:bg-stone-50/50 dark:hover:bg-stone-800/50 transition-colors border-stone-100 dark:border-stone-800 cursor-pointer group"
+                                    className="group transition-all duration-300 hover:bg-amber-500/[0.03] dark:hover:bg-amber-500/[0.05] border-stone-50 dark:border-white/5 cursor-pointer"
                                 >
-                                    <TableCell className="font-medium pl-6 py-4">
+                                    <TableCell className="font-medium pl-8 py-5">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-10 rounded bg-stone-100 dark:bg-stone-800 overflow-hidden shadow-sm shrink-0">
-                                                {/* Placeholder for room image */}
-                                                <div className={`w-full h-full ${booking.location === 'pueblo' ? 'bg-amber-100 dark:bg-amber-900/20' : 'bg-emerald-100 dark:bg-emerald-900/20'}`} />
+                                            <div className={cn(
+                                                "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform duration-500 group-hover:scale-110",
+                                                booking.location === 'pueblo'
+                                                    ? 'bg-amber-100/50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-500'
+                                                    : 'bg-emerald-100/50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-500'
+                                            )}>
+                                                <span className="font-heading font-bold text-lg">{booking.guestName.charAt(0)}</span>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-stone-700 dark:text-stone-200">{booking.guestName}</p>
-                                                <p className="text-xs text-stone-400 capitalize">{booking.roomType} • {booking.location}</p>
+                                                <p className="font-bold text-stone-800 dark:text-stone-200 text-base group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors">{booking.guestName}</p>
+                                                <p className="text-xs text-stone-400 font-medium uppercase tracking-wide mt-0.5">{booking.roomType.replace(/_/g, ' ')}</p>
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="py-5">
                                         <div className="text-sm">
                                             <p className="font-medium text-stone-600 dark:text-stone-300">
                                                 {format(new Date(booking.checkIn), 'dd MMM', { locale: es })} - {format(new Date(booking.checkOut), 'dd MMM', { locale: es })}
                                             </p>
-                                            <p className="text-xs text-stone-400">{booking.guests} Adultos</p>
+                                            <p className="text-xs text-stone-400 mt-0.5">{booking.guests} Adultos</p>
                                         </div>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="py-5">
                                         <Badge className={
-                                            booking.status === 'confirmed' ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
-                                                booking.status === 'pending' ? "bg-amber-100 text-amber-700 border-amber-200" :
-                                                    "bg-stone-100 text-stone-700 border-stone-200"
+                                            booking.status === 'confirmed' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/20 hover:bg-emerald-500/20" :
+                                                booking.status === 'pending' ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/20 hover:bg-amber-500/20" :
+                                                    "bg-stone-100 text-stone-500 border-stone-200 dark:bg-stone-800 dark:border-stone-700 dark:text-stone-400"
                                         }>
                                             {booking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="text-right font-mono font-medium pr-6">
-                                        ${booking.totalPrice}
+                                    <TableCell className="text-right font-heading font-light text-lg pr-8 py-5 text-stone-900 dark:text-white">
+                                        ${booking.totalPrice.toLocaleString()}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -297,6 +305,7 @@ function AdminContent() {
             <CreateReservationModal
                 open={isCreateModalOpen}
                 onOpenChange={setIsCreateModalOpen}
+                initialValues={createModalInitialValues}
             />
 
             <ReservationDetailsModal
@@ -304,7 +313,7 @@ function AdminContent() {
                 onOpenChange={setIsDetailsModalOpen}
                 booking={selectedBooking}
             />
-        </div >
+        </div>
     )
 }
 

@@ -5,16 +5,32 @@ import { useAppStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { format, isSameDay, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
-import { LayoutGrid, BedDouble, User, Brush, Hammer, CheckCircle2 } from "lucide-react"
+import { LayoutGrid, BedDouble, User, Brush, Hammer, CheckCircle2, Sparkles, SprayCan, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuLabel,
+    DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+
+import { Plus, Ban, Trash2 } from "lucide-react"
 
 import { Booking, RoomConfig } from "@/lib/store"
 
 interface RoomStatusGridProps {
     onSelectBooking?: (booking: Booking) => void
+    onNewBooking?: (room: RoomConfig, unitId: string) => void
 }
 
-export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
+export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGridProps) {
     const { rooms, bookings, blockUnit, unblockUnit, updateRoomStatus } = useAppStore()
     const [isHousekeepingMode, setIsHousekeepingMode] = useState(false)
 
@@ -63,7 +79,7 @@ export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
                 guestName: '',
                 label,
                 booking: undefined as Booking | undefined,
-                housekeeping: roomConfig.housekeeping_status || 'clean'
+                housekeeping: roomConfig.units_housekeeping?.[(i + 1).toString()] || roomConfig.housekeeping_status || 'clean'
             }
         })
 
@@ -133,9 +149,27 @@ export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
         }
 
         if (unit.status === 'available') {
-            // Block specific unit (e.g. "1", "2")
-            blockUnit(room.id, room.location, unit.unitId)
+            // INSTEAD OF BLOCKING, TRIGGER NEW RESERVATION
+            if (onNewBooking) {
+                onNewBooking(room, unit.unitId)
+            }
         } else if (unit.status === 'maintenance' && unit.booking) {
+            // Keep unblock logic for now, or maybe make it cleaner?
+            // If it's maintenance, maybe open details too?
+            // For now, let's leave unblock or remove it if user says so.
+            // User complained about "New Reservation" on click.
+            // Blocking was the issue. Unblocking is probably fine or should be via context.
+            // Let's keep unblock for convenience but maybe add confirmation? 
+            // Ideally maintenance management should be in Housekeeping Mode.
+            // Let's disable instant unblock too to be consistent?
+            // ACTUALLY, if I remove instant block, instant unblock is less dangerous but still weird.
+            // Let's rely on Housekeeping mode for status changes.
+            // But 'Maintenance' booking is a REAL booking in DB.
+            // If I remove unblock here, how do they unblock?
+            // Via 'Reservations' list (cancelling the maintenance booking).
+            // Let's keep it consistent: Click -> Open Modal (even for maintenance?)
+            // No, maintenance booking details.
+            // Let's just focus on the 'available' case first.
             unblockUnit(unit.booking.id)
         } else if (unit.booking && onSelectBooking) {
             onSelectBooking(unit.booking)
@@ -151,64 +185,177 @@ export function RoomStatusGrid({ onSelectBooking }: RoomStatusGridProps) {
                 </h5>
                 <div className="flex flex-wrap gap-2">
                     {roomsList.map(room => (
-                        getRoomUnits(room).map((unit, idx) => (
-                            <div
-                                key={unit.id}
-                                onClick={() => handleUnitClick(room, unit)}
-                                title={unit.status === 'maintenance' ? 'Mantenimiento (Click para Habilitar)' : (unit.guestName ? `${unit.guestName} (${room.label})` : room.label)}
-                                className={cn(
-                                    "w-10 h-10 md:w-12 md:h-12 rounded-lg border flex flex-col items-center justify-center p-1 transition-all hover:scale-105 relative overflow-hidden group shadow-sm",
-                                    isHousekeepingMode && "ring-2 ring-primary ring-offset-2 cursor-pointer",
-                                    // Status Colors
-                                    unit.booking ? "cursor-pointer" : "cursor-default",
-                                    unit.status === 'available' && "bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-300",
-                                    unit.status === 'occupied' && "bg-rose-50 border-rose-100 text-rose-500 dark:bg-rose-900/20 dark:border-rose-900/30",
-                                    unit.status === 'checkout' && "bg-amber-50 border-amber-100 text-amber-500 dark:bg-amber-900/20 dark:border-amber-900/30",
-                                    unit.status === 'checkin' && "bg-blue-50 border-blue-100 text-blue-500 dark:bg-blue-900/20 dark:border-blue-900/30",
-                                    unit.status === 'pending' && "bg-orange-50 border-orange-100 text-orange-500 dark:bg-orange-900/20 dark:border-orange-900/30 border-dashed",
-                                    unit.status === 'maintenance' && "bg-stone-200 border-stone-300 text-stone-500 dark:bg-stone-800 dark:border-stone-700",
+                        getRoomUnits(room).map((unit, idx) => {
+                            // Determine interaction wrapper
+                            // @ts-ignore - dynamic components
+                            const Container = isHousekeepingMode ? Popover : DropdownMenu
+                            // @ts-ignore
+                            const Trigger = isHousekeepingMode ? PopoverTrigger : DropdownMenuTrigger
+                            // @ts-ignore
+                            const Content = isHousekeepingMode ? PopoverContent : DropdownMenuContent
 
-                                    // Housekeeping Overrides
-                                    room.housekeeping_status === 'dirty' && "border-rose-300 bg-rose-50/50 dark:border-rose-800/50",
-                                    room.housekeeping_status === 'maintenance' && "border-stone-400 bg-stone-100 dark:border-stone-600"
-                                )
-                                }
-                            >
-                                <span className="text-[9px] font-bold uppercase opacity-60">
-                                    {unit.label}
-                                </span>
-                                {unit.status !== 'available' ? (
-                                    <User className="w-4 h-4" />
-                                ) : (
-                                    <>
-                                        {room.housekeeping_status === 'dirty' ? (
-                                            <Brush className="w-4 h-4 text-rose-400 animate-pulse" />
-                                        ) : room.housekeeping_status === 'maintenance' ? (
-                                            <Hammer className="w-4 h-4 text-stone-500" />
-                                        ) : (
-                                            <div className={`w-1.5 h-1.5 rounded-full ${colorClass}`} />
-                                        )}
-                                    </>
-                                )}
+                            return (
+                                // @ts-ignore
+                                <Container key={unit.id}>
+                                    <Trigger asChild>
+                                        <div
+                                            onClick={(e) => {
+                                                if (!isHousekeepingMode && unit.status !== "available") {
+                                                    handleUnitClick(room, unit)
+                                                }
+                                            }}
+                                            title={unit.status === "maintenance" ? "Mantenimiento (Click para Habilitar)" : (unit.guestName ? `${unit.guestName} (${room.label})` : room.label)}
+                                            className={cn(
+                                                "w-10 h-10 md:w-16 md:h-16 rounded-xl border flex flex-col items-center justify-center p-1 transition-all duration-300 relative overflow-hidden group shadow-sm z-0",
+                                                isHousekeepingMode
+                                                    ? "scale-[1.05] shadow-xl ring-0 cursor-pointer"
+                                                    : "hover:scale-105",
 
-                                {unit.status !== 'available' && (
-                                    <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                        <span className="text-[8px] text-white font-bold text-center px-1 truncate w-full">
-                                            {unit.guestName.split(' ')[0]}
-                                        </span>
-                                    </div>
-                                )}
+                                                // Status Colors (Standard Mode)
+                                                !isHousekeepingMode && unit.status === "available" && "bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-300 hover:border-stone-400",
+                                                !isHousekeepingMode && unit.status === "occupied" && "bg-rose-50 border-rose-100 text-rose-500 dark:bg-rose-900/20 dark:border-rose-900/30",
+                                                !isHousekeepingMode && unit.status === "checkout" && "bg-amber-50 border-amber-100 text-amber-500 dark:bg-amber-900/20 dark:border-amber-900/30",
+                                                !isHousekeepingMode && unit.status === "checkin" && "bg-blue-50 border-blue-100 text-blue-500 dark:bg-blue-900/20 dark:border-blue-900/30",
+                                                !isHousekeepingMode && unit.status === "pending" && "bg-orange-50 border-orange-100 text-orange-500 dark:bg-orange-900/20 dark:border-orange-900/30 border-dashed",
+                                                !isHousekeepingMode && unit.status === "maintenance" && "bg-stone-200 border-stone-300 text-stone-500 dark:bg-stone-800 dark:border-stone-700",
 
-                                {/* Housekeeping Badge Overlay */}
-                                {isHousekeepingMode && (
-                                    <div className="absolute top-0 right-0 p-0.5">
-                                        {room.housekeeping_status === 'dirty' && <div className="w-2 h-2 bg-rose-500 rounded-full" />}
-                                        {room.housekeeping_status === 'clean' && <div className="w-2 h-2 bg-emerald-500 rounded-full" />}
-                                        {room.housekeeping_status === 'maintenance' && <div className="w-2 h-2 bg-stone-500 rounded-full" />}
-                                    </div>
-                                )}
-                            </div>
-                        ))
+                                                // Housekeeping Overrides (The Visual Layer)
+                                                isHousekeepingMode && unit.housekeeping === "clean" && "border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-800",
+                                                isHousekeepingMode && unit.housekeeping === "dirty" && "border-rose-300 bg-rose-50 dark:bg-rose-900/20 dark:border-rose-800",
+                                                isHousekeepingMode && unit.housekeeping === "maintenance" && "border-stone-400 bg-stone-100 dark:border-stone-600 dark:bg-stone-800"
+                                            )
+                                            }
+                                        >
+                                            {/* HOUSEKEEPING VISUAL LAYER */}
+                                            {isHousekeepingMode ? (
+                                                <div className="flex flex-col items-center justify-center animate-in fade-in zoom-in duration-300">
+                                                    {unit.housekeeping === "clean" && (
+                                                        <>
+                                                            <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-emerald-500 mb-0.5 md:mb-1" />
+                                                            <span className="text-[6px] md:text-[8px] font-bold uppercase text-emerald-600 tracking-wider">Limpia</span>
+                                                        </>
+                                                    )}
+                                                    {unit.housekeeping === "dirty" && (
+                                                        <>
+                                                            <SprayCan className="w-5 h-5 md:w-6 md:h-6 text-rose-500 mb-0.5 md:mb-1 animate-pulse" />
+                                                            <span className="text-[6px] md:text-[8px] font-bold uppercase text-rose-600 tracking-wider">Sucia</span>
+                                                        </>
+                                                    )}
+                                                    {unit.housekeeping === "maintenance" && (
+                                                        <>
+                                                            <Wrench className="w-5 h-5 md:w-6 md:h-6 text-stone-500 mb-0.5 md:mb-1" />
+                                                            <span className="text-[6px] md:text-[8px] font-bold uppercase text-stone-600 tracking-wider">Mant.</span>
+                                                        </>
+                                                    )}
+                                                    {/* Label overlay */}
+                                                    <div className="absolute top-0.5 right-1 opacity-50">
+                                                        <span className="text-[6px] md:text-[8px] font-mono text-stone-400">{unit.label.replace("Cama ", "C")}</span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                // STANDARD MODE (Guest View)
+                                                <>
+                                                    <span className="text-[9px] font-bold uppercase opacity-60">
+                                                        {unit.label.replace("Cama ", "C")}
+                                                    </span>
+                                                    {unit.status !== "available" ? (
+                                                        <User className="w-4 h-4" />
+                                                    ) : (
+                                                        <div className={`w-1.5 h-1.5 rounded-full ${colorClass}`} />
+                                                    )}
+
+                                                    {unit.status !== "available" && (
+                                                        <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                                                            <span className="text-[8px] text-white font-bold text-center px-1 truncate w-full">
+                                                                {unit.guestName.split(" ")[0]}
+                                                            </span>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Tiny Status Dot for housekeeping issues in normal mode */}
+                                                    {unit.housekeeping === "dirty" && (
+                                                        <div className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full animate-pulse shadow-sm" title="Sucia" />
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                    </Trigger>
+
+                                    {isHousekeepingMode ? (
+                                        <PopoverContent className="w-48 p-2" align="center">
+                                            <div className="grid gap-2">
+                                                <div className="space-y-1">
+                                                    <h4 className="font-medium leading-none text-xs uppercase tracking-widest text-stone-500">Estado de Habitación</h4>
+                                                    <p className="text-[10px] text-muted-foreground">{room.label}</p>
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <Button
+                                                        variant={unit.housekeeping === "clean" ? "default" : "outline"}
+                                                        size="sm"
+                                                        className={cn("justify-start", unit.housekeeping === "clean" && "bg-emerald-600 hover:bg-emerald-700")}
+                                                        onClick={() => updateRoomStatus(room.id, "clean", unit.unitId)}
+                                                    >
+                                                        <Sparkles className="mr-2 h-4 w-4" /> Limpia
+                                                    </Button>
+                                                    <Button
+                                                        variant={unit.housekeeping === "dirty" ? "default" : "outline"}
+                                                        size="sm"
+                                                        className={cn("justify-start", unit.housekeeping === "dirty" && "bg-rose-600 hover:bg-rose-700")}
+                                                        onClick={() => updateRoomStatus(room.id, "dirty", unit.unitId)}
+                                                    >
+                                                        <SprayCan className="mr-2 h-4 w-4" /> Sucia
+                                                    </Button>
+                                                    <Button
+                                                        variant={unit.housekeeping === "maintenance" ? "default" : "outline"}
+                                                        size="sm"
+                                                        className={cn("justify-start", unit.housekeeping === "maintenance" && "bg-stone-600 hover:bg-stone-700")}
+                                                        onClick={() => updateRoomStatus(room.id, "maintenance", unit.unitId)}
+                                                    >
+                                                        <Wrench className="mr-2 h-4 w-4" /> Mantenimiento
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </PopoverContent>
+                                    ) : (
+                                        <DropdownMenuContent align="center" className="w-48 z-50">
+                                            <DropdownMenuLabel className="text-[10px] uppercase font-bold text-stone-400">
+                                                {unit.label} • {unit.status === "available" ? "Disponible" : "Ocupada"}
+                                            </DropdownMenuLabel>
+
+                                            {unit.status === "available" && (
+                                                <>
+                                                    <DropdownMenuItem onClick={() => onNewBooking && onNewBooking(room, unit.unitId)}>
+                                                        <Plus className="w-4 h-4 mr-2" /> Nueva Reserva
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        className="text-stone-500 focus:text-stone-700"
+                                                        onClick={() => blockUnit(room.id, room.location, unit.unitId)}
+                                                    >
+                                                        <Ban className="w-4 h-4 mr-2" /> Bloquear (Mantenimiento)
+                                                    </DropdownMenuItem>
+                                                </>
+                                            )}
+
+                                            {unit.status === "maintenance" && unit.booking && (
+                                                <DropdownMenuItem
+                                                    className="text-emerald-600 focus:text-emerald-700"
+                                                    onClick={() => unblockUnit(unit.booking!.id)}
+                                                >
+                                                    <CheckCircle2 className="w-4 h-4 mr-2" /> Habilitar Cama
+                                                </DropdownMenuItem>
+                                            )}
+
+                                            {unit.booking && unit.status !== "maintenance" && (
+                                                <DropdownMenuItem onClick={() => onSelectBooking && onSelectBooking(unit.booking!)}>
+                                                    <User className="w-4 h-4 mr-2" /> Ver Detalles Reserva
+                                                </DropdownMenuItem>
+                                            )}
+                                        </DropdownMenuContent>
+                                    )}
+                                </Container>
+                            )
+                        })
                     ))}
                 </div>
             </div>

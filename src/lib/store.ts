@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 
 // --- Types ---
 
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'checked_out' | 'maintenance';
+export type BookingStatus = 'pending' | 'confirmed' | 'checked_in' | 'checked_out' | 'maintenance' | 'cancelled' | 'no_show';
 
 export interface Booking {
     id: string;
@@ -24,10 +24,17 @@ export interface Booking {
     // Cancellation Metadata
     cancellationReason?: string;
     refundStatus?: 'none' | 'partial' | 'full';
+    refundAmount?: number;
     cancelledAt?: string;
     // Check-Out Metadata
     actualCheckOut?: string;
     paymentStatus?: 'pending' | 'paid';
+    // Elite Identity
+    guestIdType?: 'passport' | 'dni' | 'license' | 'other';
+    guestIdNumber?: string;
+    // Payment Details
+    paymentMethod?: 'card' | 'cash' | 'transfer' | 'other';
+    paymentReference?: string;
 }
 
 export interface AppEvent {
@@ -50,6 +57,7 @@ export interface RoomConfig {
     description?: string;
     image?: string;
     housekeeping_status?: 'clean' | 'dirty' | 'maintenance';
+    units_housekeeping?: Record<string, 'clean' | 'dirty' | 'maintenance'>; // UnitID -> Status
     // iCal Sync
     icalImportUrl?: string;
     icalExportToken?: string;
@@ -72,10 +80,15 @@ interface BookingRow {
     created_at: string;
     cancellation_reason?: string;
     refund_status?: 'none' | 'partial' | 'full';
+    refund_amount?: number;
     cancelled_at?: string;
     actual_check_out?: string;
     payment_status?: 'pending' | 'paid';
     unit_id?: string;
+    guest_id_type?: 'passport' | 'dni' | 'license' | 'other';
+    guest_id_number?: string;
+    payment_method?: 'card' | 'cash' | 'transfer' | 'other';
+    payment_reference?: string;
 }
 
 interface RoomRow {
@@ -101,7 +114,7 @@ interface AppState {
     // Actions
     fetchBookings: () => Promise<void>;
     addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'totalPrice' | 'status'> & { totalPrice?: number, status?: BookingStatus }, totalPrice?: number) => Promise<void>;
-    updateBookingStatus: (id: string, status: 'confirmed' | 'pending' | 'cancelled' | 'checked_out') => Promise<void>;
+    updateBookingStatus: (id: string, status: BookingStatus) => Promise<void>;
     updateBooking: (id: string, data: Partial<Omit<Booking, 'id' | 'createdAt'>>) => Promise<void>;
     checkOutBooking: (id: string, paymentStatus: 'paid' | 'pending') => Promise<void>;
     deleteBooking: (id: string) => Promise<void>;
@@ -109,7 +122,7 @@ interface AppState {
     // Maintenance
     blockUnit: (roomId: string, location: 'pueblo' | 'hideout', unitId?: string) => Promise<void>;
     unblockUnit: (bookingId: string) => Promise<void>;
-    updateRoomStatus: (roomId: string, status: 'clean' | 'dirty' | 'maintenance') => Promise<void>; // New Action
+    updateRoomStatus: (roomId: string, status: 'clean' | 'dirty' | 'maintenance', unitId?: string) => Promise<void>; // New Action
 
     // Events
     fetchEvents: () => Promise<void>;
@@ -123,7 +136,7 @@ interface AppState {
     updateRoomMaxGuests: (roomId: string, maxGuests: number) => Promise<void>;
 
     // Logic
-    checkAvailability: (location: string, roomType: string, startDate: string, endDate: string, requestedGuests?: number) => boolean;
+    checkAvailability: (location: string, roomType: string, startDate: string, endDate: string, requestedGuests?: number, excludeBookingId?: string) => boolean;
     getRemainingCapacity: (location: string, roomType: string, startDate: string, endDate: string) => number;
     fetchRooms: () => Promise<void>;
 }
@@ -260,10 +273,15 @@ export const useAppStore = create<AppState>()(
                             createdAt: new Date(row.created_at),
                             cancellationReason: row.cancellation_reason,
                             refundStatus: row.refund_status,
+                            refundAmount: row.refund_amount,
                             cancelledAt: row.cancelled_at,
                             actualCheckOut: row.actual_check_out,
                             paymentStatus: row.payment_status || 'pending',
-                            unitId: row.unit_id // Map DB column
+                            unitId: row.unit_id, // Map DB column
+                            guestIdType: row.guest_id_type,
+                            guestIdNumber: row.guest_id_number,
+                            paymentMethod: row.payment_method,
+                            paymentReference: row.payment_reference
                         }
                     })
                     set({ bookings: mappedBookings, isLoading: false })
@@ -324,15 +342,95 @@ export const useAppStore = create<AppState>()(
                 }
             },
 
-            updateRoomStatus: async (roomId, status) => {
+            updateRoomStatus: async (roomId, status, unitId) => {
+                // 1. Update State & DB
                 set((state) => ({
-                    rooms: state.rooms.map(room =>
-                        room.id === roomId ? { ...room, housekeeping_status: status } : room
-                    )
+                    rooms: state.rooms.map(room => {
+                        if (room.id === roomId) {
+                            if (unitId) {
+                                // Unit-Level Update
+                                const currentMap = room.units_housekeeping || {}
+                                return { ...room, units_housekeeping: { ...currentMap, [unitId]: status } }
+                            } else {
+                                // Room-Level Update
+                                return { ...room, housekeeping_status: status }
+                            }
+                        }
+                        return room
+                    })
                 }))
-                // Persist to DB
-                await supabase.from('rooms').update({ housekeeping_status: status }).eq('id', roomId);
-                toast.success(`Habitación marquée como ${status === 'clean' ? 'Limpia' : status === 'dirty' ? 'Sucia' : 'Mantenimiento'}`)
+
+                try {
+                    if (unitId) {
+                        const room = get().rooms.find(r => r.id === roomId)
+                        const unitsMap = room?.units_housekeeping || {}
+                        // @ts-ignore
+                        await supabase.from('rooms').update({ units_housekeeping: unitsMap }).eq('id', roomId);
+                    } else {
+                        await supabase.from('rooms').update({ housekeeping_status: status }).eq('id', roomId);
+                    }
+                } catch (e) {
+                    console.error("Failed to persist status", e)
+                }
+
+                // 2. Handle Calendar Blocking
+                const state = get()
+                const room = state.rooms.find(r => r.id === roomId)
+
+                if (status === 'maintenance') {
+                    // BLOCK: Create a maintenance blocking booking
+                    if (room) {
+                        const today = new Date()
+                        const nextYear = new Date(today)
+                        nextYear.setFullYear(today.getFullYear() + 1) // Block for 1 year by default
+
+                        const payload = {
+                            guest_name: "MANTENIMIENTO",
+                            email: "admin@mandalas.com",
+                            location: room.location,
+                            room_type: roomId,
+                            guests: String(room.capacity), // Block FULL capacity
+                            check_in: format(today, 'yyyy-MM-dd'),
+                            check_out: format(nextYear, 'yyyy-MM-dd'),
+                            status: 'confirmed',
+                            total_price: 0
+                        }
+
+                        // Check if already blocked to avoid duplicates
+                        const isBlocked = state.bookings.some(b =>
+                            b.roomType === roomId &&
+                            b.guestName === 'MANTENIMIENTO' &&
+                            b.status !== 'cancelled' &&
+                            new Date(b.checkOut) > new Date()
+                        )
+
+                        if (!isBlocked) {
+                            const { error } = await supabase.from('bookings').insert([payload])
+                            if (!error) {
+                                await get().fetchBookings()
+                                toast.success(`Bloqueo de calendario creado`)
+                            }
+                        }
+                    }
+                } else {
+                    // UNBLOCK: Remove maintenance bookings if switching to Clean/Dirty
+                    const maintenanceBookings = state.bookings.filter(b =>
+                        b.roomType === roomId &&
+                        b.guestName === 'MANTENIMIENTO' &&
+                        b.status !== 'cancelled'
+                    )
+
+                    if (maintenanceBookings.length > 0) {
+                        const ids = maintenanceBookings.map(b => b.id)
+                        const { error } = await supabase.from('bookings').delete().in('id', ids)
+                        if (!error) {
+                            await get().fetchBookings()
+                            toast.success(`Bloqueo de calendario eliminado`)
+                        }
+                    }
+                }
+
+                toast.success(`Estado actualizado: ${status === 'clean' ? 'Limpia' : status === 'dirty' ? 'Sucia' : 'Mantenimiento'}`)
             },
 
             updateRoomPrice: async (roomId, price) => {
@@ -389,7 +487,8 @@ export const useAppStore = create<AppState>()(
                     check_out: bookingData.checkOut,
                     total_price: computedTotal,
                     status: status,
-                    unit_id: bookingData.unitId // ENABLED: Specific bed assignment
+                    unit_id: bookingData.unitId,
+                    payment_method: bookingData.paymentMethod // New: Persist preference
                 }
 
                 const { error } = await supabase.from('bookings').insert([payload])
@@ -404,6 +503,26 @@ export const useAppStore = create<AppState>()(
             },
 
             updateBookingStatus: async (id, status) => {
+                // GUARD RAIL 1: Availability Check
+                if (status === 'confirmed') {
+                    const booking = get().bookings.find(b => b.id === id)
+                    if (booking) {
+                        const isAvailable = get().checkAvailability(
+                            booking.location,
+                            booking.roomType,
+                            booking.checkIn,
+                            booking.checkOut,
+                            Number(booking.guests),
+                            booking.id // excludeBookingId: Ignore self
+                        )
+
+                        if (!isAvailable) {
+                            toast.error('❌ NO SE PUEDE CONFIRMAR: Fechas no disponibles (Overbooking)')
+                            return
+                        }
+                    }
+                }
+
                 const { error } = await supabase.from('bookings').update({ status }).eq('id', id)
                 if (error) {
                     console.error('Error updating status:', error)
@@ -418,6 +537,16 @@ export const useAppStore = create<AppState>()(
                 if (data.status) payload.status = data.status
                 if (data.cancellationReason) payload.cancellation_reason = data.cancellationReason
                 if (data.refundStatus) payload.refund_status = data.refundStatus
+                if (data.refundStatus) payload.refund_status = data.refundStatus
+                if (data.refundAmount !== undefined) payload.refund_amount = data.refundAmount
+
+                // Identity Updates
+                if (data.guestIdType) payload.guest_id_type = data.guestIdType
+                if (data.guestIdNumber) payload.guest_id_number = data.guestIdNumber
+
+                // Payment Updates
+                if (data.paymentMethod) payload.payment_method = data.paymentMethod
+                if (data.paymentReference) payload.payment_reference = data.paymentReference
 
                 // ENABLED: Cancellation timestamp behavior (Schema updated)
                 if (data.status === 'cancelled') {
@@ -438,9 +567,11 @@ export const useAppStore = create<AppState>()(
             },
 
             checkOutBooking: async (id, paymentStatus) => {
+                const now = new Date()
                 const payload = {
                     status: 'checked_out',
-                    actual_check_out: new Date().toISOString(),
+                    actual_check_out: now.toISOString(),
+                    check_out: now.toISOString(), // RELEASE INVENTORY: Shorten booking to now
                     payment_status: paymentStatus
                 }
                 const { error } = await supabase.from('bookings').update(payload).eq('id', id)
@@ -449,6 +580,17 @@ export const useAppStore = create<AppState>()(
                     toast.error('Error al realizar check-out')
                     return
                 }
+
+                // Automation: Mark room as Dirty automatically
+                const booking = get().bookings.find(b => b.id === id)
+                if (booking) {
+                    // Start async update but don't block UI
+                    get().updateRoomStatus(booking.roomType, 'dirty').catch(err =>
+                        console.error("Auto-dirty failed", err)
+                    )
+                    toast.success('Check-out realizado y cama liberada para venta')
+                }
+
                 await get().fetchBookings()
             },
 
@@ -520,7 +662,7 @@ export const useAppStore = create<AppState>()(
 
             resetData: () => set({ bookings: [], events: initialEvents }),
 
-            checkAvailability: (location, roomId, startDate, endDate, requestedGuests = 1) => {
+            checkAvailability: (location, roomId, startDate, endDate, requestedGuests = 1, excludeBookingId?: string) => {
                 const state = get();
                 const start = new Date(startDate);
                 const end = new Date(endDate);
@@ -533,6 +675,9 @@ export const useAppStore = create<AppState>()(
 
                 const overlappingBookings = state.bookings.filter(booking => {
                     if (booking.status === 'cancelled') return false;
+                    // Exclude currently processed booking (e.g. valid when updating existing booking)
+                    if (excludeBookingId && booking.id === excludeBookingId) return false;
+
                     // Double check location just in case
                     if (booking.location && booking.location !== location) return false;
 

@@ -31,7 +31,8 @@ import {
     BedDouble,
     ArrowRight,
     Sparkles,
-    Check
+    Check,
+    Calendar as CalendarIcon
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -39,6 +40,11 @@ import { cn } from "@/lib/utils"
 interface CreateReservationModalProps {
     open: boolean
     onOpenChange: (open: boolean) => void
+    initialValues?: {
+        location?: "pueblo" | "hideout"
+        roomType?: string
+        unitId?: string
+    } | null
 }
 
 const ROOM_DETAILS: Record<string, string[]> = {
@@ -72,7 +78,7 @@ import {
 
 import { BedSelector } from "@/components/shared/bed-selector"
 
-export function CreateReservationModal({ open, onOpenChange }: CreateReservationModalProps) {
+export function CreateReservationModal({ open, onOpenChange, initialValues }: CreateReservationModalProps) {
     const { addBooking, checkAvailability, rooms } = useAppStore()
 
     // Steps: 1 = Search, 2 = Select Room, 3 = Guest Details
@@ -93,22 +99,73 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
     const [guestName, setGuestName] = useState("")
     const [email, setEmail] = useState("")
     const [phone, setPhone] = useState("")
+    const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "transfer">("cash")
+
     const [status, setStatus] = useState<"confirmed" | "pending">("confirmed")
 
     // Confirmation State
     const [showConfirmation, setShowConfirmation] = useState(false)
 
+    // Handle Initial Values
+    React.useEffect(() => {
+        if (open && initialValues) {
+            // 1. Set Location
+            if (initialValues.location) setLocation(initialValues.location)
+
+            // 2. Set Default Dates (Today + 1 Night)
+            const today = new Date()
+            const tomorrow = new Date(today)
+            tomorrow.setDate(tomorrow.getDate() + 1)
+            setDateRange({ from: today, to: tomorrow })
+
+            // 3. Find and Select Room
+            if (initialValues.roomType) {
+                const room = rooms.find(r => r.id === initialValues.roomType)
+                if (room) {
+                    setSelectedRoom({
+                        id: room.id,
+                        label: room.label,
+                        price: room.basePrice,
+                        maxGuests: room.maxGuests,
+                        capacity: room.capacity,
+                        type: room.type
+                    })
+
+                    // 4. Set Unit if provided
+                    if (initialValues.unitId) {
+                        setSelectedUnitIds([initialValues.unitId])
+                    }
+
+                    // 5. Jump to appropriate step
+                    // If unit is already selected, we can go to Guest Details (Step 4)
+                    // If just room, we can go to Unit Selection (Step 3) or Details (Step 4 if Private)
+                    if (initialValues.unitId) {
+                        setGuests("1") // Default to 1 guest for single unit selection
+                        setStep(4)
+                    } else if (room.type === 'dorm') {
+                        setStep(3)
+                    } else {
+                        setStep(4)
+                    }
+                }
+            }
+        }
+    }, [open, initialValues, rooms])
+
     const resetForm = () => {
-        setStep(1)
-        setLocation("pueblo")
-        setDateRange({ from: undefined, to: undefined })
-        setGuests("1")
-        setSelectedRoom(null)
-        setSelectedUnitIds([])
+        if (!initialValues) { // Only reset completely if no initial values context
+            setStep(1)
+            setLocation("pueblo")
+            setDateRange({ from: undefined, to: undefined })
+            setGuests("1")
+            setSelectedRoom(null)
+            setSelectedUnitIds([])
+        }
         setGuestName("")
         setEmail("")
         setPhone("")
         setStatus("confirmed")
+        setPaymentMethod("cash")
         setShowConfirmation(false)
     }
 
@@ -270,7 +327,8 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                         status: status === 'confirmed' ? 'confirmed' : 'pending',
                         cancellationReason: undefined,
                         refundStatus: undefined,
-                        unitId: unitId
+                        unitId: unitId,
+                        paymentMethod: status === 'confirmed' ? paymentMethod : undefined
                     }, pricePerBooking)
                 })
 
@@ -292,7 +350,8 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                     status: status === 'confirmed' ? 'confirmed' : 'pending',
                     cancellationReason: undefined,
                     refundStatus: undefined,
-                    unitId: undefined
+                    unitId: undefined,
+                    paymentMethod: status === 'confirmed' ? paymentMethod : undefined
                 }, pricePerBooking * totalGuests) // Full price
             }
 
@@ -314,24 +373,33 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
             if (!val) resetForm()
             onOpenChange(val)
         }}>
-            <DialogContent className="sm:max-w-[650px] max-h-[90vh] flex flex-col p-0 gap-0 bg-stone-50/80 dark:bg-stone-950/90 backdrop-blur-2xl border-stone-200/50 dark:border-stone-800/50 transition-all duration-300 overflow-hidden shadow-2xl rounded-3xl">
-                <DialogHeader className="p-8 pb-4 border-b-0 bg-transparent z-10 sticky top-0">
+            {/* ELITE ADMIN MODAL */}
+            <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col p-0 gap-0 bg-stone-50/90 dark:bg-stone-950/90 backdrop-blur-2xl border-white/20 dark:border-stone-800/50 transition-all duration-300 overflow-hidden shadow-[0_0_50px_-10px_rgba(0,0,0,0.2)] rounded-3xl ring-1 ring-white/20">
+                <DialogHeader className="p-8 pb-4 border-b border-stone-200/50 dark:border-stone-800/50 bg-white/40 dark:bg-black/20 z-10 sticky top-0 backdrop-blur-md">
                     <div className="flex items-center justify-between mb-6">
-                        <DialogTitle className="text-xl font-light font-heading uppercase tracking-[0.2em] text-stone-800 dark:text-stone-200">
+                        <DialogTitle className="text-xl font-light font-heading uppercase tracking-[0.2em] text-stone-800 dark:text-stone-200 flex items-center gap-3">
+                            <span className="p-2 bg-stone-200/50 dark:bg-stone-800/50 rounded-lg">
+                                {step === 1 && <CalendarIcon className="w-4 h-4" />}
+                                {step === 2 && <BedDouble className="w-4 h-4" />}
+                                {step === 3 && <BedDouble className="w-4 h-4" />}
+                                {step === 4 && <CheckCircle className="w-4 h-4" />}
+                            </span>
                             {step === 1 && "Disponibilidad"}
                             {step === 2 && "Selección"}
                             {step === 3 && "Camas"}
                             {step === 4 && "Confirmación"}
                         </DialogTitle>
                         <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Paso {step} de {selectedRoom?.type === 'dorm' ? 4 : 4}</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400 bg-stone-100 dark:bg-stone-900 px-3 py-1 rounded-full border border-stone-200 dark:border-stone-800">
+                                Paso {step} <span className="opacity-50">/ {selectedRoom?.type === 'dorm' ? 4 : 4}</span>
+                            </span>
                         </div>
                     </div>
 
-                    {/* Elite Progress Bar */}
-                    <div className="relative h-0.5 bg-stone-200 dark:bg-stone-800 w-full overflow-hidden">
+                    {/* Elite Progress Scroll */}
+                    <div className="relative h-1 bg-stone-200/50 dark:bg-stone-800/50 w-full overflow-hidden rounded-full">
                         <div
-                            className="absolute top-0 left-0 h-full bg-stone-900 dark:bg-stone-100 transition-all duration-700 ease-in-out"
+                            className="absolute top-0 left-0 h-full bg-stone-900 dark:bg-stone-100 transition-all duration-700 ease-in-out shadow-[0_0_10px_rgba(0,0,0,0.2)]"
                             style={{ width: `${(step / 4) * 100}%` }}
                         />
                     </div>
@@ -362,8 +430,18 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                                 </div>
                                 <div className="space-y-3">
                                     <Label className="text-xs font-bold uppercase tracking-widest text-stone-400">Huéspedes</Label>
-                                    <div className="h-12 bg-stone-100 dark:bg-stone-900/50 rounded-xl flex items-center justify-center text-sm text-stone-400 border border-transparent">
-                                        Se define en Paso 3
+                                    <div className="relative">
+                                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+                                        <Input
+                                            type="number"
+                                            min="1"
+                                            value={guests}
+                                            onChange={(e) => {
+                                                const val = parseInt(e.target.value)
+                                                if (val > 0) setGuests(e.target.value)
+                                            }}
+                                            className="pl-10 h-12 bg-stone-100 dark:bg-stone-900 border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all font-heading font-bold text-lg"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -406,10 +484,8 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                                 {availableRooms.map((room) => {
                                     const isSelected = selectedRoom?.id === room.id
 
-                                    // Define image source: Use store image if available, else fallback
+                                    // Define image source
                                     let roomImage = room.image || "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300";
-
-                                    // Fallbacks if no image in store (legacy safety)
                                     if (!room.image) {
                                         if (room.id.includes('private')) roomImage = "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=300";
                                         if (room.id.includes('suite')) roomImage = "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&q=80&w=300";
@@ -420,52 +496,59 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                                             key={room.id}
                                             onClick={() => handleSelectRoom(room)}
                                             className={cn(
-                                                "group relative flex flex-col sm:flex-row gap-6 p-4 rounded-2xl cursor-pointer transition-all duration-500 border bg-white dark:bg-stone-900",
+                                                "group relative flex flex-col sm:flex-row gap-6 p-4 rounded-3xl cursor-pointer transition-all duration-500 border overflow-hidden",
                                                 isSelected
-                                                    ? "border-stone-800 dark:border-stone-100 ring-1 ring-stone-800 dark:ring-stone-100 shadow-xl scale-[1.01]"
-                                                    : "border-stone-100 dark:border-stone-800 shadow-sm hover:shadow-lg hover:border-stone-300 dark:hover:border-stone-700 hover:-translate-y-1",
+                                                    ? "bg-white dark:bg-stone-900 border-stone-800 dark:border-stone-100 ring-2 ring-stone-900 dark:ring-stone-100 shadow-2xl scale-[1.01] z-10"
+                                                    : "bg-white/60 dark:bg-stone-900/40 border-stone-200/50 dark:border-stone-800/50 shadow-sm hover:shadow-xl hover:border-stone-300 dark:hover:border-stone-700 hover:-translate-y-1 backdrop-blur-sm",
                                                 !room.available && "opacity-40 pointer-events-none grayscale"
                                             )}
                                         >
-                                            {/* Thumbnail */}
-                                            <div className="w-full sm:w-32 h-24 rounded-xl bg-stone-100 shrink-0 overflow-hidden relative">
+                                            {/* Glowing Background for Selected */}
+                                            {isSelected && <div className="absolute inset-0 bg-gradient-to-r from-stone-100/50 to-transparent dark:from-stone-800/20 pointer-events-none" />}
+
+                                            {/* Thumbnail with Parallax Scale */}
+                                            <div className="w-full sm:w-36 h-28 rounded-2xl bg-stone-100 shrink-0 overflow-hidden relative shadow-inner">
                                                 <img
                                                     src={roomImage}
                                                     alt={room.label}
                                                     className={cn(
-                                                        "w-full h-full object-cover transition-transform duration-700",
-                                                        isSelected ? "scale-110" : "group-hover:scale-105"
+                                                        "w-full h-full object-cover transition-transform duration-700 ease-out",
+                                                        isSelected ? "scale-110" : "group-hover:scale-110"
                                                     )}
                                                 />
+                                                {/* Price Badge Overlay */}
+                                                <div className="absolute bottom-2 right-2 bg-stone-900/90 dark:bg-white/90 backdrop-blur text-white dark:text-stone-900 text-xs font-bold px-2 py-1 rounded-lg shadow-lg">
+                                                    ${room.price}
+                                                </div>
                                             </div>
 
                                             {/* Info */}
-                                            <div className="flex-1 flex flex-col justify-center">
+                                            <div className="flex-1 flex flex-col justify-center relative">
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div>
                                                         <div className="flex items-center gap-2 mb-1">
-                                                            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                                                            <span className={cn(
+                                                                "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border",
+                                                                room.type === 'dorm' ? "bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-950/30 dark:border-orange-900/50 dark:text-orange-400" :
+                                                                    room.type === 'suite' ? "bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-950/30 dark:border-purple-900/50 dark:text-purple-400" :
+                                                                        "bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/30 dark:border-blue-900/50 dark:text-blue-400"
+                                                            )}>
                                                                 {room.type === 'dorm' ? 'Dormitorio' : room.type === 'private' ? 'Privada' : 'Suite'}
                                                             </span>
                                                         </div>
-                                                        <h4 className="font-heading font-medium text-lg text-stone-800 dark:text-stone-100 leading-tight">
+                                                        <h4 className="font-heading font-bold text-lg text-stone-900 dark:text-stone-100 leading-tight">
                                                             {room.label}
                                                         </h4>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <div className="font-heading font-light text-2xl text-stone-900 dark:text-white flex items-center justify-end gap-1">
-                                                            ${room.price}
-                                                        </div>
-                                                    </div>
                                                 </div>
 
-                                                <div className="flex items-center gap-4 text-xs text-stone-500">
-                                                    <div className="flex items-center gap-1.5 bg-stone-50 dark:bg-stone-800 px-2 py-1 rounded-md">
+                                                <div className="flex items-center gap-4 text-xs text-stone-500 mt-1">
+                                                    <div className="flex items-center gap-1.5 bg-stone-100/50 dark:bg-stone-800/50 px-2 py-1 rounded-md border border-stone-200 dark:border-stone-800">
                                                         <Users className="w-3.5 h-3.5" />
                                                         <span>Máx. {room.maxGuests}</span>
                                                     </div>
                                                     {isSelected && (
-                                                        <span className="text-emerald-600 font-medium animate-in fade-in flex items-center gap-1">
+                                                        <span className="text-emerald-600 dark:text-emerald-400 font-bold animate-in fade-in flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded-md border border-emerald-100 dark:border-emerald-900/50">
                                                             <CheckCircle className="w-3.5 h-3.5" /> Seleccionada
                                                         </span>
                                                     )}
@@ -481,31 +564,39 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                     {/* STEP 3: BED SELECTION (DORMS ONLY) */}
                     {step === 3 && selectedRoom?.type === 'dorm' && (
                         <div className="py-2">
+                            <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 p-4 rounded-xl flex items-center gap-3 border border-blue-100 dark:border-blue-900/30">
+                                <Sparkles className="w-5 h-5 flex-shrink-0" />
+                                <p className="text-sm">
+                                    Selecciona las camas que desees. El número de huéspedes se actualizará automáticamente.
+                                </p>
+                            </div>
                             <BedSelector
                                 room={rooms.find(r => r.id === selectedRoom.id)!} // Pass full config
                                 dateRange={dateRange}
                                 selectedUnits={selectedUnitIds}
-                                maxSelections={parseInt(guests) || 1}
+                                maxSelections={99} // Unlimited selection
                                 onToggleUnit={(unitId) => {
                                     // Toggle logic
+                                    let newSelection = []
                                     if (selectedUnitIds.includes(unitId)) {
-                                        setSelectedUnitIds(ids => ids.filter(id => id !== unitId))
+                                        newSelection = selectedUnitIds.filter(id => id !== unitId)
                                     } else {
-                                        const max = parseInt(guests) || 1
-                                        if (selectedUnitIds.length < max) {
-                                            setSelectedUnitIds(ids => [...ids, unitId])
-                                        } else {
-                                            if (max === 1) {
-                                                setSelectedUnitIds([unitId])
-                                            } else {
-                                                toast.info(`Ya seleccionaste tus ${max} camas`)
-                                            }
-                                        }
+                                        newSelection = [...selectedUnitIds, unitId]
+                                    }
+
+                                    setSelectedUnitIds(newSelection)
+
+                                    // Auto-sync guests count
+                                    // If selection is 0, keep guests as 1 (minimum) or let it be 0? 
+                                    // Lets keep it at least 1 for the form sake, but specific beds count is what matters.
+                                    // Ideally, match selection count. If 0 selected, user needs to select.
+                                    if (newSelection.length > 0) {
+                                        setGuests(newSelection.length.toString())
                                     }
                                 }}
                             />
-                            <div className="flex items-center justify-center gap-2 mt-4 text-xs bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 py-2 px-4 rounded-full border border-amber-100 dark:border-amber-900/30 w-fit mx-auto">
-                                <span className="font-bold">{selectedUnitIds.length}</span> seleccionadas de <span className="font-bold">{guests}</span> requeridas
+                            <div className="flex items-center justify-center gap-2 mt-4 text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-200 py-2 px-4 rounded-full border border-emerald-100 dark:border-emerald-900/30 w-fit mx-auto transition-all duration-300">
+                                <span className="font-bold text-lg">{selectedUnitIds.length}</span> Camas seleccionadas = <span className="font-bold text-lg">{guests}</span> Huéspedes
                             </div>
                         </div>
                     )}
@@ -519,7 +610,14 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                                     <Sparkles className="h-6 w-6" />
                                 </div>
                                 <div className="flex-1">
-                                    <p className="font-heading font-medium text-lg text-stone-900 dark:text-stone-100 tracking-wide">{selectedRoom?.label}</p>
+                                    <p className="font-heading font-medium text-lg text-stone-900 dark:text-stone-100 tracking-wide">
+                                        {selectedRoom?.label}
+                                        {selectedUnitIds.length > 0 && selectedRoom?.type === 'dorm' && (
+                                            <span className="ml-2 font-normal text-stone-500 text-sm">
+                                                (Cama{selectedUnitIds.length > 1 ? 's' : ''}: {selectedUnitIds.join(', ')})
+                                            </span>
+                                        )}
+                                    </p>
                                     <p className="text-xs font-medium uppercase tracking-wider text-stone-500 mt-1">
                                         {format(dateRange.from!, "d MMM", { locale: es })} - {format(dateRange.to!, "d MMM", { locale: es })} • {differenceInDays(dateRange.to!, dateRange.from!)} noches
                                     </p>
@@ -590,15 +688,34 @@ export function CreateReservationModal({ open, onOpenChange }: CreateReservation
                                     </div>
                                     <div className="space-y-3">
                                         <Label className="text-xs font-bold uppercase tracking-widest text-stone-500 ml-1">Estado de Pago</Label>
-                                        <Select value={status} onValueChange={(v: "confirmed" | "pending") => setStatus(v)}>
-                                            <SelectTrigger className="h-12 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-xl px-4">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="confirmed">Confirmada (Pagada)</SelectItem>
-                                                <SelectItem value="pending">Pendiente (Por Pagar)</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <Select value={status} onValueChange={(v: "confirmed" | "pending") => setStatus(v)}>
+                                                <SelectTrigger className="h-12 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-xl px-4">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="confirmed">Confirmada (Pagada)</SelectItem>
+                                                    <SelectItem value="pending">Pendiente (Por Pagar)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+
+                                            {/* New: Payment Method (Only if confirmed) */}
+                                            {status === 'confirmed' && (
+                                                <Select
+                                                    value={paymentMethod}
+                                                    onValueChange={(v: "cash" | "card" | "transfer") => setPaymentMethod(v)}
+                                                >
+                                                    <SelectTrigger className="h-12 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 rounded-xl px-4">
+                                                        <SelectValue placeholder="Método de Pago" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="cash">Efectivo (Cash)</SelectItem>
+                                                        <SelectItem value="card">Tarjeta (Card)</SelectItem>
+                                                        <SelectItem value="transfer">Transferencia</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
