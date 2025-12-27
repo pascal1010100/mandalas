@@ -322,6 +322,34 @@ export function BookingModal({
 
     const availableRooms = rooms.filter(r => r.location === location)
 
+    // Confetti Effect
+    useEffect(() => {
+        if (step === 5) {
+            import('canvas-confetti').then((module) => {
+                const confetti = module.default
+                if (typeof confetti !== 'function') return
+
+                const duration = 3000;
+                const animationEnd = Date.now() + duration;
+                const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 50 };
+
+                const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+                const interval = setInterval(function () {
+                    const timeLeft = animationEnd - Date.now();
+
+                    if (timeLeft <= 0) {
+                        return clearInterval(interval);
+                    }
+
+                    const particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+            })
+        }
+    }, [step])
+
     return (
         <Dialog onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
@@ -338,6 +366,7 @@ export function BookingModal({
                     "p-6 pb-4 flex-shrink-0 z-20 backdrop-blur-md border-b bg-white/40 dark:bg-black/20",
                     theme.border
                 )}>
+                    {/* ... (Header remains mostly same, just ensuring correct close button visibility which DialogHeader handles) ... */}
                     <div className="flex items-center justify-between">
                         <DialogTitle className="text-2xl font-bold font-heading text-stone-900 dark:text-stone-100 flex items-center gap-2 drop-shadow-sm">
                             {step === 5 ? (
@@ -390,8 +419,8 @@ export function BookingModal({
                                     className="w-full"
                                 >
                                     <TabsList className="grid w-full grid-cols-2 bg-stone-200/50 dark:bg-stone-800/50 p-1 rounded-xl">
-                                        <TabsTrigger value="pueblo" className="rounded-lg">Mandalas Pueblo</TabsTrigger>
-                                        <TabsTrigger value="hideout" className="rounded-lg">Mandalas Hideout</TabsTrigger>
+                                        <TabsTrigger value="pueblo" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-amber-600 dark:data-[state=active]:text-amber-400">Mandalas Pueblo</TabsTrigger>
+                                        <TabsTrigger value="hideout" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-lime-600 dark:data-[state=active]:text-lime-400">Mandalas Hideout</TabsTrigger>
                                     </TabsList>
                                 </Tabs>
 
@@ -449,8 +478,8 @@ export function BookingModal({
                                                     className={cn(
                                                         "relative overflow-hidden rounded-xl border cursor-pointer transition-all duration-300 group",
                                                         isSelected
-                                                            ? "border-amber-500 ring-2 ring-amber-500/20 shadow-lg scale-[1.02]"
-                                                            : "border-stone-200 dark:border-stone-800 hover:border-amber-300 hover:shadow-md"
+                                                            ? cn("ring-2 shadow-lg scale-[1.02]", location === 'pueblo' ? "border-amber-500 ring-amber-500/20" : "border-lime-500 ring-lime-500/20")
+                                                            : "border-stone-200 dark:border-stone-800 hover:border-stone-300 hover:shadow-md"
                                                     )}
                                                 >
                                                     <div className="h-28 w-full relative">
@@ -459,12 +488,12 @@ export function BookingModal({
                                                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                                         <img src={(room as any).image || "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300"} alt={room.label} className="w-full h-full object-cover" />
                                                         {isSelected && (
-                                                            <div className="absolute top-2 right-2 z-30 bg-amber-500 text-white rounded-full p-0.5 shadow-sm">
+                                                            <div className={cn("absolute top-2 right-2 z-30 text-white rounded-full p-0.5 shadow-sm", location === 'pueblo' ? "bg-amber-500" : "bg-lime-600")}>
                                                                 <CheckCircle className="w-3 h-3" />
                                                             </div>
                                                         )}
                                                         <div className="absolute bottom-2 left-3 right-3 z-30">
-                                                            <h4 className={cn("font-bold text-sm leading-tight", isSelected ? "text-amber-400" : "text-white")}>
+                                                            <h4 className={cn("font-bold text-sm leading-tight", isSelected ? (location === 'pueblo' ? "text-amber-400" : "text-lime-400") : "text-white")}>
                                                                 {room.label}
                                                             </h4>
                                                             <p className="text-[10px] text-stone-300 line-clamp-1">{room.description || "Confort & Estilo"}</p>
@@ -495,7 +524,7 @@ export function BookingModal({
                                 exit="exit"
                                 className="p-6 space-y-4"
                             >
-                                <Card className="p-4 border-amber-200 bg-amber-50/50 dark:bg-amber-950/20">
+                                <Card className={cn("p-4 border", location === 'pueblo' ? "border-amber-200 bg-amber-50/50 dark:bg-amber-950/20" : "border-lime-200 bg-lime-50/50 dark:bg-lime-950/20")}>
                                     <BedSelector
                                         room={selectedRoomConfig}
                                         dateRange={{ from: date?.from, to: date?.to }}
@@ -513,7 +542,8 @@ export function BookingModal({
                                                 return newSelection
                                             })
                                         }}
-                                        maxSelections={selectedRoomConfig.capacity} // Allow selecting multiple beds!
+                                        maxSelections={selectedRoomConfig.capacity}
+                                        activeColorClass={theme.button}
                                     />
                                     <div className="mt-4 text-xs text-center text-stone-500">
                                         Has seleccionado {selectedUnitIds.length} cama{selectedUnitIds.length !== 1 ? 's' : ''}
@@ -543,7 +573,7 @@ export function BookingModal({
                                         </div>
                                         <div className="text-right">
                                             <Badge variant="outline" className="bg-white dark:bg-stone-900 text-stone-500 border-stone-200 dark:border-stone-700">
-                                                {Math.ceil((date?.to?.getTime()! - date?.from?.getTime()!) / (1000 * 60 * 60 * 24))} Noches
+                                                {Math.ceil(((date?.to?.getTime() ?? 0) - (date?.from?.getTime() ?? 0)) / (1000 * 60 * 60 * 24))} Noches
                                             </Badge>
                                         </div>
                                     </div>
@@ -561,8 +591,8 @@ export function BookingModal({
                                         )}
                                         <div className="flex justify-between items-center pt-2 mt-2 border-t border-stone-200/50 dark:border-stone-700/50">
                                             <span className="font-bold text-stone-900 dark:text-stone-100 text-sm">Total Estimado</span>
-                                            <span className="font-heading font-bold text-xl text-emerald-600 dark:text-emerald-400">
-                                                ${(currentPrice * Math.ceil((date?.to?.getTime()! - date?.from?.getTime()!) / (1000 * 60 * 60 * 24)) * (isDorm ? (parseInt(guests) || 1) : 1)).toLocaleString()}
+                                            <span className={cn("font-heading font-bold text-xl", theme.accentText)}>
+                                                ${(currentPrice * Math.ceil(((date?.to?.getTime() ?? 0) - (date?.from?.getTime() ?? 0)) / (1000 * 60 * 60 * 24)) * (isDorm ? (parseInt(guests) || 1) : 1)).toLocaleString()}
                                             </span>
                                         </div>
                                     </div>
@@ -581,7 +611,7 @@ export function BookingModal({
                                                 value={guestName}
                                                 onChange={(e) => setGuestName(e.target.value)}
                                                 placeholder="Ej. Juan Pérez"
-                                                className="bg-stone-50/50 dark:bg-stone-800/50 h-9 text-sm"
+                                                className="bg-stone-50/50 dark:bg-stone-800/50 h-9 text-sm focus-visible:ring-1 focus-visible:ring-stone-400"
                                             />
                                         </div>
 
@@ -594,7 +624,7 @@ export function BookingModal({
                                                     value={email}
                                                     onChange={(e) => setEmail(e.target.value)}
                                                     placeholder="juan@mail.com"
-                                                    className="bg-stone-50/50 dark:bg-stone-800/50 h-9 text-sm"
+                                                    className="bg-stone-50/50 dark:bg-stone-800/50 h-9 text-sm focus-visible:ring-1 focus-visible:ring-stone-400"
                                                 />
                                             </div>
                                             <div className="space-y-1">
@@ -605,7 +635,7 @@ export function BookingModal({
                                                     value={phone}
                                                     onChange={(e) => setPhone(e.target.value)}
                                                     placeholder="+502..."
-                                                    className="bg-stone-50/50 dark:bg-stone-800/50 h-9 text-sm"
+                                                    className="bg-stone-50/50 dark:bg-stone-800/50 h-9 text-sm focus-visible:ring-1 focus-visible:ring-stone-400"
                                                 />
                                             </div>
                                         </div>
@@ -634,12 +664,14 @@ export function BookingModal({
                                         </Label>
                                         <div className="grid grid-cols-2 gap-4">
                                             {/* Pay at Hotel Option */}
-                                            <div
+                                            <motion.div
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
                                                 onClick={() => setPaymentPreference('card')}
                                                 className={cn(
-                                                    "cursor-pointer relative overflow-hidden rounded-xl border p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 group",
+                                                    "cursor-pointer relative overflow-hidden rounded-xl border p-4 flex flex-col items-center justify-center gap-3 transition-colors duration-300",
                                                     paymentPreference === 'card'
-                                                        ? cn("bg-white dark:bg-stone-800 ring-2 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 shadow-md", theme.icon.split(" ")[5]) // extraction specific ring color
+                                                        ? cn("bg-white dark:bg-stone-800 ring-2 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 shadow-md", theme.icon.split(" ")[5])
                                                         : "bg-white/50 dark:bg-stone-900/50 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-md"
                                                 )}
                                             >
@@ -660,13 +692,15 @@ export function BookingModal({
                                                         Efectivo o Tarjeta al llegar
                                                     </span>
                                                 </div>
-                                            </div>
+                                            </motion.div>
 
                                             {/* Transfer Option */}
-                                            <div
+                                            <motion.div
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
                                                 onClick={() => setPaymentPreference('transfer')}
                                                 className={cn(
-                                                    "cursor-pointer relative overflow-hidden rounded-xl border p-4 flex flex-col items-center justify-center gap-3 transition-all duration-300 group",
+                                                    "cursor-pointer relative overflow-hidden rounded-xl border p-4 flex flex-col items-center justify-center gap-3 transition-colors duration-300",
                                                     paymentPreference === 'transfer'
                                                         ? cn("bg-white dark:bg-stone-800 ring-2 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 shadow-md", theme.icon.split(" ")[5])
                                                         : "bg-white/50 dark:bg-stone-900/50 border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700 hover:shadow-md"
@@ -689,7 +723,7 @@ export function BookingModal({
                                                         Adelanta tu pago ahora
                                                     </span>
                                                 </div>
-                                            </div>
+                                            </motion.div>
                                         </div>
                                     </div>
                                 </div>
@@ -769,10 +803,12 @@ export function BookingModal({
                     ) : <div />}
 
                     {step < 5 ? (
-                        <Button
+                        <MButton
                             onClick={handleNext}
                             className={cn("w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300 px-8 rounded-full font-semibold", theme.button)}
                             disabled={(step === 1 && !date) || isSubmitting}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                         >
                             {isSubmitting ? (
                                 <span className="flex items-center gap-2">
@@ -782,7 +818,7 @@ export function BookingModal({
                             ) : (
                                 step === 1 ? "Buscar" : step === 4 ? "Confirmar Reserva" : "Continuar"
                             )}
-                        </Button>
+                        </MButton>
                     ) : (
                         <DialogTrigger asChild>
                             <Button className="w-full bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200 text-white font-semibold rounded-full shadow-lg">
@@ -795,4 +831,7 @@ export function BookingModal({
         </Dialog >
     )
 }
+
+// Convert Button to Motion Button for animation
+const MButton = motion(Button)
 

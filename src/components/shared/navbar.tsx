@@ -126,17 +126,17 @@ export function Navbar() {
                         )}
                     </Link>
                     <Link
-                        href="/mi-reserva"
+                        href="/my-booking"
                         className={cn(
                             "relative px-4 py-2 rounded-lg transition-all duration-300",
                             "hover:bg-stone-100 hover:text-stone-900",
-                            pathname === "/mi-reserva"
+                            pathname === "/my-booking"
                                 ? "text-stone-900 bg-stone-100"
                                 : scrolled || !isHome ? "text-stone-700 dark:text-stone-300" : "text-white/90"
                         )}
                     >
                         Mi Reserva
-                        {pathname === "/mi-reserva" && (
+                        {pathname === "/my-booking" && (
                             <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-stone-600" />
                         )}
                     </Link>
@@ -173,7 +173,7 @@ export function Navbar() {
 
                 <Sheet>
                     <SheetTrigger asChild className="md:hidden">
-                        <Button variant="ghost" size="icon" className={cn("transition-colors", !scrolled && isHome ? "text-white hover:text-white/80" : "text-stone-800 dark:text-stone-100")}>
+                        <Button variant="ghost" size="icon" className={cn("transition-colors", !scrolled && isHome ? "text-white hover:text-white/80" : "text-stone-800 dark:text-stone-100")} suppressHydrationWarning>
                             <Menu className="h-6 w-6" />
                         </Button>
                     </SheetTrigger>
@@ -234,6 +234,19 @@ export function Navbar() {
                                             )}
                                         >
                                             Contacto
+                                        </Link>
+                                    </SheetClose>
+                                </StaggerItem>
+                                <StaggerItem>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/my-booking"
+                                            className={cn(
+                                                "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-stone-200 dark:hover:border-stone-800 group",
+                                                pathname === "/my-booking" ? "text-stone-900 pl-4 border-stone-200" : "text-stone-500 dark:text-stone-400 hover:pl-4 hover:text-stone-900 dark:hover:text-white"
+                                            )}
+                                        >
+                                            Mi Reserva
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>

@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import ical from 'ical-generator'
 import { parseISO } from 'date-fns'
 
 // Initialize Supabase Client (Admin context for reading all bookings)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! // Ideally Service Role, but Anon is okay if RLS allows public read or we are careful. 
+// Initialize Supabase Client (Admin context for reading all bookings)
 // Note: For a public feed, we might need Service Role if RLS locks down bookings. 
 // However, since this is a specific secure token access, we effectively authorise it.
 // Let's use the env vars available.
-const supabase = createClient(supabaseUrl, supabaseKey)
+import { supabase } from "@/lib/supabase"
 
 export async function GET(
     request: NextRequest,
@@ -55,7 +53,8 @@ export async function GET(
         })
 
         if (bookings) {
-            bookings.forEach((booking) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            bookings.forEach((booking: any) => {
                 const checkIn = parseISO(booking.check_in)
                 const checkOut = parseISO(booking.check_out)
 

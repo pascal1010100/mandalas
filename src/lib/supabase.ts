@@ -30,6 +30,11 @@ const getSupabaseClient = () => {
             getSession: () => Promise.resolve({ data: { session: null }, error: null }),
             signInWithPassword: () => Promise.resolve({ data: {}, error: { message: 'Mock Error' } }),
         },
+        channel: () => ({
+            on: () => ({ subscribe: () => { } }),
+            subscribe: () => { }
+        }),
+        removeChannel: () => { },
         // Add other methods as needed to prevent runtime crashes during build
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any

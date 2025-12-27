@@ -9,9 +9,10 @@ interface BedSelectorProps {
     selectedUnits: string[] // List of selected unit IDs (e.g. ["1", "3"])
     onToggleUnit: (unitId: string) => void
     maxSelections: number
+    activeColorClass?: string // Optional override for selected state
 }
 
-export function BedSelector({ room, dateRange, selectedUnits, onToggleUnit, maxSelections }: BedSelectorProps) {
+export function BedSelector({ room, dateRange, selectedUnits, onToggleUnit, maxSelections, activeColorClass }: BedSelectorProps) {
     const { bookings } = useAppStore()
 
     // Helper: Determine if a specific unit (e.g., "1", "2") is occupied for the dates
@@ -88,7 +89,7 @@ export function BedSelector({ room, dateRange, selectedUnits, onToggleUnit, maxS
                                     ? "bg-stone-50/50 border border-stone-100 opacity-40 cursor-not-allowed"
                                     : "cursor-pointer",
                                 isSelected
-                                    ? "bg-stone-800 text-white shadow-xl scale-[1.02]"
+                                    ? cn("text-white shadow-xl scale-[1.02]", activeColorClass || "bg-stone-800")
                                     : !isDisabled && "bg-white border border-stone-200 hover:border-stone-400 hover:shadow-md hover:-translate-y-1",
                                 status === 'maintenance' && "bg-stone-100 border-dashed border-stone-300 opacity-60"
                             )}

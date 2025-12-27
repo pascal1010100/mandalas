@@ -5,7 +5,7 @@ import { useAppStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { format, isSameDay, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
-import { LayoutGrid, BedDouble, User, Brush, Hammer, CheckCircle2, Sparkles, SprayCan, Wrench } from "lucide-react"
+import { LayoutGrid, BedDouble, User, Brush, Hammer, CheckCircle2, Sparkles, SprayCan, Wrench, Clock, Wallet } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -126,6 +126,9 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
 
             if (booking.status === 'pending') status = 'pending'
 
+            // PRIORITY: Verifying Payment (Visible regardless of checkin status if pending)
+            if (booking.paymentStatus === 'verifying') status = 'verifying'
+
             if (booking.status === 'maintenance') {
                 status = 'maintenance'
                 guestName = 'M'
@@ -187,15 +190,12 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
                     {roomsList.map(room => (
                         getRoomUnits(room).map((unit, idx) => {
                             // Determine interaction wrapper
-                            // @ts-ignore - dynamic components
+                            // dynamic components
                             const Container = isHousekeepingMode ? Popover : DropdownMenu
-                            // @ts-ignore
                             const Trigger = isHousekeepingMode ? PopoverTrigger : DropdownMenuTrigger
-                            // @ts-ignore
                             const Content = isHousekeepingMode ? PopoverContent : DropdownMenuContent
 
                             return (
-                                // @ts-ignore
                                 <Container key={unit.id}>
                                     <Trigger asChild>
                                         <div
@@ -218,6 +218,9 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
                                                 !isHousekeepingMode && unit.status === "checkin" && "bg-blue-50 border-blue-100 text-blue-500 dark:bg-blue-900/20 dark:border-blue-900/30",
                                                 !isHousekeepingMode && unit.status === "pending" && "bg-orange-50 border-orange-100 text-orange-500 dark:bg-orange-900/20 dark:border-orange-900/30 border-dashed",
                                                 !isHousekeepingMode && unit.status === "maintenance" && "bg-stone-200 border-stone-300 text-stone-500 dark:bg-stone-800 dark:border-stone-700",
+
+                                                // VERIFYING STATUS (Blue + Pulse)
+                                                !isHousekeepingMode && unit.status === "verifying" && "bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-900/20 dark:border-indigo-800 animate-pulse border-2 shadow-[0_0_10px_rgba(79,70,229,0.2)]",
 
                                                 // Housekeeping Overrides (The Visual Layer)
                                                 isHousekeepingMode && unit.housekeeping === "clean" && "border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-800",
@@ -258,7 +261,9 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
                                                     <span className="text-[9px] font-bold uppercase opacity-60">
                                                         {unit.label.replace("Cama ", "C")}
                                                     </span>
-                                                    {unit.status !== "available" ? (
+                                                    {unit.status === 'verifying' ? (
+                                                        <Wallet className="w-4 h-4 animate-pulse" />
+                                                    ) : unit.status !== "available" ? (
                                                         <User className="w-4 h-4" />
                                                     ) : (
                                                         <div className={`w-1.5 h-1.5 rounded-full ${colorClass}`} />
@@ -267,7 +272,7 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
                                                     {unit.status !== "available" && (
                                                         <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
                                                             <span className="text-[8px] text-white font-bold text-center px-1 truncate w-full">
-                                                                {unit.guestName.split(" ")[0]}
+                                                                {unit.status === 'verifying' ? 'Verificar' : unit.guestName.split(" ")[0]}
                                                             </span>
                                                         </div>
                                                     )}

@@ -8,7 +8,7 @@ const SYNC_INTERVAL_MS = 1000 * 60 * 15 // 15 Minutes
 const LAST_SYNC_KEY = 'mandalas_last_autoupdate'
 
 export function AutoSyncHandler() {
-    const { rooms } = useAppStore()
+    const { rooms, subscribeToBookings } = useAppStore()
     const isSyncing = useRef(false)
 
     useEffect(() => {
@@ -71,6 +71,17 @@ export function AutoSyncHandler() {
         return () => clearInterval(interval)
 
     }, [rooms])
+
+    // Real-time Database Sync (Supabase)
+    useEffect(() => {
+        console.log("AutoSync: Initializing Realtime Connection...")
+        const unsubscribe = subscribeToBookings()
+
+        return () => {
+            console.log("AutoSync: Cleaning up Realtime Connection...")
+            if (unsubscribe) unsubscribe()
+        }
+    }, []) // Run once on mount
 
     return null // Invisible component
 }

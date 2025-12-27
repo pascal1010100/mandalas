@@ -81,17 +81,17 @@ export function MiniCalendarWidget() {
                         ).length
 
                         // Heatmap logic (Max capacity approx 24)
-                        let intensityClass = "bg-transparent text-stone-500"
-                        if (dayOccupancy > 0) intensityClass = "bg-emerald-50 text-emerald-700 font-medium"
-                        if (dayOccupancy > 5) intensityClass = "bg-emerald-100 text-emerald-800 font-semibold"
-                        if (dayOccupancy > 12) intensityClass = "bg-emerald-200 text-emerald-900 font-bold"
-                        if (dayOccupancy > 18) intensityClass = "bg-emerald-300 text-emerald-950 font-bold"
+                        let intensityClass = "bg-transparent text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800"
+                        if (dayOccupancy > 0) intensityClass = "bg-emerald-50 text-emerald-700 font-medium dark:bg-emerald-900/20 dark:text-emerald-400"
+                        if (dayOccupancy > 5) intensityClass = "bg-emerald-100 text-emerald-800 font-semibold dark:bg-emerald-900/40 dark:text-emerald-300"
+                        if (dayOccupancy > 12) intensityClass = "bg-emerald-200 text-emerald-900 font-bold dark:bg-emerald-900/60 dark:text-emerald-200"
+                        if (dayOccupancy > 18) intensityClass = "bg-emerald-300 text-emerald-950 font-bold dark:bg-emerald-900/80 dark:text-emerald-100"
 
                         return (
                             <div
                                 key={day.toString()}
                                 className={cn(
-                                    "aspect-square flex items-center justify-center text-[10px] rounded-md transition-colors",
+                                    "h-8 md:h-9 flex items-center justify-center text-xs rounded-md transition-colors cursor-default",
                                     !isCurrentMonth && "opacity-20",
                                     intensityClass,
                                     isSameDay(day, new Date()) && "ring-2 ring-stone-900 dark:ring-stone-100 z-10"

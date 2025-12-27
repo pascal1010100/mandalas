@@ -71,6 +71,7 @@ import {
 import { Booking, useAppStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { supabase } from "@/lib/supabase"
 
 interface ReservationDetailsModalProps {
     booking: Booking | null
@@ -139,6 +140,28 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
 
     const groupBookings = React.useMemo(() => booking ? [booking, ...relatedBookings] : [], [booking, relatedBookings])
     const isGroup = relatedBookings.length > 0
+
+    // Honesty Bar / Extras Logic
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [extraCharges, setExtraCharges] = React.useState<any[]>([])
+    const [loadingCharges, setLoadingCharges] = React.useState(false)
+
+    const fetchCharges = React.useCallback(async () => {
+        if (!booking) return
+        setLoadingCharges(true)
+        const { data } = await supabase.from('charges').select('*').eq('booking_id', booking.id).order('created_at', { ascending: false })
+        if (data) setExtraCharges(data)
+        setLoadingCharges(false)
+    }, [booking])
+
+    const handleDeleteCharge = async (id: string) => {
+        if (!confirm("¿Eliminar este cargo?")) return
+        const { error } = await supabase.from('charges').delete().eq('id', id)
+        if (!error) {
+            setExtraCharges(prev => prev.filter(c => c.id !== id))
+            toast.success("Cargo eliminado")
+        }
+    }
 
     // Master Totals
     const groupTotal = groupBookings.reduce((sum, b) => sum + b.totalPrice, 0)
@@ -238,12 +261,15 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
             // Reset Audit
             setCheckOutAudit({ keysReturned: false, towelReturned: false, noDamage: false })
             setCheckInWarnings([])
-            setCheckInWarnings([])
+            setCheckInWarnings([]) // Keeping duplicate as observed in original file safely
             setCheckOutWarnings([])
 
             // Payment Defaults
             setPaymentMethod(booking.paymentMethod || "cash")
             setPaymentReference(booking.paymentReference || "")
+
+            // Fetch Extras
+            fetchCharges()
         }
     }, [booking, open, defaultOpenCancellation])
 
@@ -256,6 +282,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
         toast.success("Reserva actualizada")
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sendEmail = async (type: 'confirmation' | 'cancellation', extraData: any = {}) => {
         const roomConfig = rooms.find(r => r.id === booking.roomType)
         const roomName = roomConfig ? roomConfig.label : booking.roomType
@@ -518,46 +545,98 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                 <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{booking.guestName}</p>
                                 <p className="text-xs text-stone-500">ID: {booking.id.slice(0, 8)}...</p>
                             </div>
-                            <Badge variant="outline" className={cn("capitalize shadow-sm", getStatusColor(booking.status))}>
-                                {booking.status === 'confirmed' ? 'Confirmada' : booking.status}
-                            </Badge>
-                        </div>
-
-                        {/* Payment Status Card - Visual Indication */}
-                        <div
-                            className={cn(
-                                "flex items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm transition-colors duration-300",
-                                isPaymentSettled
-                                    ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800"
-                                    : "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800"
-                            )}
-                        >
-                            <Checkbox
-                                id="payment_settled"
-                                checked={isPaymentSettled}
-                                onCheckedChange={(c) => togglePaymentStatus(!!c)}
-                                className={isPaymentSettled ? "data-[state=checked]:bg-emerald-600 border-emerald-600" : "border-amber-600"}
-                            />
-                            <div className="space-y-1 leading-none">
-                                <Label htmlFor="payment_settled" className={cn("font-semibold cursor-pointer", isPaymentSettled ? "text-emerald-700" : "text-amber-700")}>
-                                    {isPaymentSettled ? "Cuenta Liquidada (Pagado)" : "Pago Pendiente"}
-                                </Label>
-                                <p className={cn("text-sm", isPaymentSettled ? "text-emerald-600/80" : "text-amber-600/80")}>
-                                    {isPaymentSettled
-                                        ? "Listo para salida. Todo en orden."
-                                        : `El huésped aún debe $${booking.totalPrice}. ¿Confirmar deuda?`
-                                    }
-                                </p>
-                                {booking.paymentStatus === 'paid' && booking.paymentMethod && (
-                                    <p className="text-xs text-stone-500 mt-1 flex gap-2">
-                                        <Badge variant="secondary" className="text-[10px] capitalize h-5 px-1.5 font-normal">
-                                            {booking.paymentMethod === 'card' ? '💳 Tarjeta' : booking.paymentMethod === 'cash' ? '💵 Efectivo' : '🏦 Transf.'}
-                                        </Badge>
-                                        {booking.paymentReference && <span className="opacity-80 font-mono">#{booking.paymentReference}</span>}
-                                    </p>
+                            <div className="flex gap-2">
+                                {booking.guestIdNumber ? (
+                                    <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 border-indigo-200 flex items-center gap-1">
+                                        <Shield className="w-3 h-3" /> Pre-Checkin OK
+                                    </Badge>
+                                ) : (
+                                    <Badge variant="outline" className="text-stone-400 border-stone-200 border-dashed">
+                                        Sin Documento
+                                    </Badge>
                                 )}
+                                <Badge variant="outline" className={cn("capitalize shadow-sm", getStatusColor(booking.status))}>
+                                    {booking.status === 'confirmed' ? 'Confirmada' : booking.status}
+                                </Badge>
                             </div>
                         </div>
+
+                        {/* Payment Status Card - HANDSHAKE & Visual Indication */}
+                        {booking.paymentStatus === 'verifying' ? (
+                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4 animate-in fade-in slide-in-from-bottom-2">
+                                <div className="flex justify-between items-start mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <Badge className="bg-blue-600 hover:bg-blue-700 animate-pulse">
+                                            <Clock className="w-3 h-3 mr-1" /> Verificando
+                                        </Badge>
+                                        <p className="text-sm font-bold text-blue-900 dark:text-blue-100">Pago Reportado</p>
+                                    </div>
+                                    <p className="text-xs font-mono text-blue-700 dark:text-blue-300">
+                                        Total: Q{booking.totalPrice}
+                                    </p>
+                                </div>
+
+                                <div className="text-xs text-blue-800 dark:text-blue-200 mb-4 bg-blue-100/50 dark:bg-blue-800/30 p-2 rounded">
+                                    <p><strong>Referencia:</strong> {booking.paymentReference || "N/A"}</p>
+                                    <p><strong>Método:</strong> {booking.paymentMethod === 'transfer' ? 'Transferencia' : booking.paymentMethod}</p>
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => {
+                                        updateBooking(booking.id, { paymentStatus: 'paid', status: 'confirmed' })
+                                        setIsPaymentSettled(true)
+                                        toast.success("Pago confirmado y Reserva Confirmada")
+                                        sendEmail('confirmation')
+                                    }}>
+                                        <CheckCircle className="w-3.5 h-3.5 mr-1" /> Confirmar Pago & Reserva
+                                    </Button>
+                                    <Button size="sm" variant="outline" className="w-full border-blue-200 text-blue-700 hover:bg-blue-100" onClick={() => {
+                                        if (window.confirm("¿Rechazar este pago? Volverá a estado pendiente.")) {
+                                            updateBooking(booking.id, { paymentStatus: 'pending', paymentReference: null })
+                                            setIsPaymentSettled(false)
+                                            toast.info("Pago rechazado / devuelto a pendiente")
+                                        }
+                                    }}>
+                                        <X className="w-3.5 h-3.5 mr-1" /> Rechazar
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div
+                                className={cn(
+                                    "flex items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm transition-colors duration-300",
+                                    isPaymentSettled
+                                        ? "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800"
+                                        : "bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800"
+                                )}
+                            >
+                                <Checkbox
+                                    id="payment_settled"
+                                    checked={isPaymentSettled}
+                                    onCheckedChange={(c) => togglePaymentStatus(!!c)}
+                                    className={isPaymentSettled ? "data-[state=checked]:bg-emerald-600 border-emerald-600" : "border-amber-600"}
+                                />
+                                <div className="space-y-1 leading-none">
+                                    <Label htmlFor="payment_settled" className={cn("font-semibold cursor-pointer", isPaymentSettled ? "text-emerald-700" : "text-amber-700")}>
+                                        {isPaymentSettled ? "Cuenta Liquidada (Pagado)" : "Pago Pendiente"}
+                                    </Label>
+                                    <p className={cn("text-sm", isPaymentSettled ? "text-emerald-600/80" : "text-amber-600/80")}>
+                                        {isPaymentSettled
+                                            ? "Listo para salida. Todo en orden."
+                                            : `El huésped aún debe Q${booking.totalPrice}. ¿Confirmar deuda?`
+                                        }
+                                    </p>
+                                    {booking.paymentStatus === 'paid' && booking.paymentMethod && (
+                                        <p className="text-xs text-stone-500 mt-1 flex gap-2">
+                                            <Badge variant="secondary" className="text-[10px] capitalize h-5 px-1.5 font-normal">
+                                                {booking.paymentMethod === 'card' ? '💳 Tarjeta' : booking.paymentMethod === 'cash' ? '💵 Efectivo' : '🏦 Transf.'}
+                                            </Badge>
+                                            {booking.paymentReference && <span className="opacity-80 font-mono">#{booking.paymentReference}</span>}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     <DialogFooter className="gap-2 sm:gap-0">
@@ -678,7 +757,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
 
                         <div className="space-y-2">
                             <Label>Método de Pago</Label>
-                            <Select value={paymentMethod} onValueChange={(v: any) => setPaymentMethod(v)}>
+                            <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as "card" | "cash" | "transfer" | "other")}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
@@ -756,7 +835,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                             <Label className="text-xs uppercase font-bold text-stone-500">Documento de Identidad (Obligatorio)</Label>
 
                             <div className="flex gap-2">
-                                <Select value={idType} onValueChange={(v: any) => setIdType(v)}>
+                                <Select value={idType} onValueChange={(v) => setIdType(v as "passport" | "dni" | "license" | "other")}>
                                     <SelectTrigger className="w-[110px]">
                                         <SelectValue />
                                     </SelectTrigger>
@@ -1173,7 +1252,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                             {!isEditing && booking.guestIdNumber && (
                                 <div className="space-y-1.5 col-span-2 md:col-span-1">
                                     <Label className="text-xs text-stone-500">Identificación ({booking.guestIdType})</Label>
-                                    <p className="font-medium text-stone-900 dark:text-stone-100 flex items-center gap-2 bg-stone-50 px-2 py-1 rounded w-fit border border-stone-200">
+                                    <p className="font-medium text-stone-900 dark:text-stone-100 flex items-center gap-2 bg-stone-50 dark:bg-stone-800 px-2 py-1 rounded w-fit border border-stone-200 dark:border-stone-700">
                                         <Shield className="w-3 h-3 text-emerald-500" /> {booking.guestIdNumber}
                                     </p>
                                 </div>
@@ -1320,14 +1399,58 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                     </div>
 
 
+                    {/* DIGITIAL HONESTY BAR / EXTRAS */}
+                    {extraCharges.length > 0 && (
+                        <div className="space-y-4">
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-stone-500 border-b border-stone-100 dark:border-stone-800 pb-2 flex items-center gap-2">
+                                <DollarSign className="w-4 h-4" /> Minibar & Extras
+                            </h4>
+                            <div className="bg-stone-50 dark:bg-stone-900/50 rounded-lg overflow-hidden border border-stone-100 dark:border-stone-800">
+                                {extraCharges.map(charge => (
+                                    <div key={charge.id} className="flex justify-between items-center p-3 border-b border-stone-100 dark:border-stone-800 last:border-0 hover:bg-stone-100 dark:hover:bg-stone-800/50 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-lg">
+                                                {charge.item_name.includes('Cerveza') ? '🍺' : charge.item_name.includes('Cola') ? '🥤' : '⚡'}
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-stone-900 dark:text-stone-100 text-sm">{charge.item_name}</p>
+                                                <p className="text-[10px] text-stone-500">{format(new Date(charge.created_at), 'd MMM, HH:mm')}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <span className="font-mono font-bold text-stone-700 dark:text-stone-300">Q{charge.amount}</span>
+                                            {isEditing && (
+                                                <Button variant="ghost" size="icon" className="h-6 w-6 text-rose-400 hover:text-rose-600 hover:bg-rose-50" onClick={() => handleDeleteCharge(charge.id)}>
+                                                    <X className="w-3 h-3" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                                <div className="p-3 bg-stone-100 dark:bg-stone-800 flex justify-between items-center text-xs font-bold uppercase text-stone-500">
+                                    <span>Total Extras</span>
+                                    <span>Q{extraCharges.reduce((acc, curr) => acc + Number(curr.amount), 0)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="flex items-center gap-4">
                         <div className="flex-1 bg-stone-50 dark:bg-stone-800/30 p-4 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col justify-center gap-3">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-[10px] uppercase font-bold text-stone-400 mb-1">Total a Pagar</p>
-                                    <span className="text-2xl font-bold font-heading text-stone-900 dark:text-stone-100 flex items-center gap-1">
-                                        <DollarSign className="w-5 h-5 text-emerald-500" /> {booking.totalPrice}
-                                    </span>
+                                    <div className="flex flex-col">
+                                        <span className="text-2xl font-bold font-heading text-stone-900 dark:text-stone-100 flex items-center gap-1">
+                                            <DollarSign className="w-5 h-5 text-emerald-500" />
+                                            {booking.totalPrice + extraCharges.reduce((acc, curr) => acc + Number(curr.amount), 0)}
+                                        </span>
+                                        {extraCharges.length > 0 && (
+                                            <span className="text-[10px] text-stone-500 font-mono">
+                                                (Q{booking.totalPrice} Hab + Q{extraCharges.reduce((acc, curr) => acc + Number(curr.amount), 0)} Extras)
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div
                                     className={cn(
@@ -1389,7 +1512,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                     } else {
                                         // GUARD RAIL 3: Payment Check
                                         // If strictly unpaid, show Alert Dialog to force conscious decision
-                                        if (booking.paymentStatus !== 'paid') {
+                                        if (booking.paymentStatus !== 'paid' && booking.paymentStatus !== 'verifying') {
                                             setShowPaymentAlert(true)
                                         } else {
                                             updateBookingStatus(booking.id, 'confirmed')

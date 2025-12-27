@@ -1,5 +1,4 @@
 import ical from 'node-ical'
-import { createClient } from '@supabase/supabase-js'
 import { isBefore, startOfDay } from 'date-fns'
 
 // Use admin context or service role if possible, but for MVP client context with RLS policies (or public if admin)
@@ -7,9 +6,9 @@ import { isBefore, startOfDay } from 'date-fns'
 // We will use the standard env vars for now. If we need Admin privileges to write bookings, we need SERVICE_ROLE_KEY.
 // Check if we have it? Usually NEXT_PUBLIC_SUPABASE_ANON_KEY is for client.
 // We should check process.env.SUPABASE_SERVICE_ROLE_KEY.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseKey)
+import { supabaseAdmin } from "@/lib/supabase-admin"
+
+const supabase = supabaseAdmin
 
 export async function syncRoomImport(roomId: string, importUrl: string) {
     if (!importUrl) return { success: false, error: 'No URL provided' }

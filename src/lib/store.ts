@@ -28,13 +28,13 @@ export interface Booking {
     cancelledAt?: string;
     // Check-Out Metadata
     actualCheckOut?: string;
-    paymentStatus?: 'pending' | 'paid';
+    paymentStatus?: 'pending' | 'verifying' | 'paid' | 'refunded';
     // Elite Identity
     guestIdType?: 'passport' | 'dni' | 'license' | 'other';
     guestIdNumber?: string;
     // Payment Details
     paymentMethod?: 'card' | 'cash' | 'transfer' | 'other';
-    paymentReference?: string;
+    paymentReference?: string | null;
 }
 
 export interface AppEvent {
@@ -83,7 +83,7 @@ interface BookingRow {
     refund_amount?: number;
     cancelled_at?: string;
     actual_check_out?: string;
-    payment_status?: 'pending' | 'paid';
+    payment_status?: 'pending' | 'verifying' | 'paid' | 'refunded';
     unit_id?: string;
     guest_id_type?: 'passport' | 'dni' | 'license' | 'other';
     guest_id_number?: string;
@@ -139,6 +139,7 @@ interface AppState {
     checkAvailability: (location: string, roomType: string, startDate: string, endDate: string, requestedGuests?: number, excludeBookingId?: string) => boolean;
     getRemainingCapacity: (location: string, roomType: string, startDate: string, endDate: string) => number;
     fetchRooms: () => Promise<void>;
+    subscribeToBookings: () => () => void;
 }
 
 // --- Initial Data ---
@@ -235,6 +236,105 @@ export const useAppStore = create<AppState>()(
             events: [],
             rooms: initialRooms,
             isLoading: false,
+
+            subscribeToBookings: () => {
+                console.log("Subscribing to realtime bookings...")
+                const subscription = supabase
+                    .channel('bookings-realtime')
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, (payload: any) => {
+                        console.log('Realtime Change:', payload)
+                        const state = get()
+
+                        if (payload.eventType === 'INSERT') {
+                            const row = payload.new as BookingRow
+                            const isMaintenance = row.guest_name === 'MANTENIMIENTO' || row.status === 'maintenance';
+                            const newBooking: Booking = {
+                                id: row.id,
+                                guestName: row.guest_name,
+                                email: row.email,
+                                phone: row.phone,
+                                location: row.location,
+                                roomType: row.room_type,
+                                guests: row.guests,
+                                checkIn: row.check_in,
+                                checkOut: row.check_out,
+                                status: isMaintenance ? 'maintenance' : row.status,
+                                totalPrice: row.total_price,
+                                createdAt: new Date(row.created_at),
+                                cancellationReason: row.cancellation_reason,
+                                refundStatus: row.refund_status,
+                                refundAmount: row.refund_amount,
+                                cancelledAt: row.cancelled_at,
+                                actualCheckOut: row.actual_check_out,
+                                paymentStatus: row.payment_status || 'pending',
+                                unitId: row.unit_id,
+                                guestIdType: row.guest_id_type,
+                                guestIdNumber: row.guest_id_number,
+                                paymentMethod: row.payment_method,
+                                paymentReference: row.payment_reference
+                            }
+                            // Prepend new booking
+                            set({ bookings: [newBooking, ...state.bookings] })
+                            toast.info(`Nueva reserva recibida: ${row.guest_name}`)
+                        } else if (payload.eventType === 'UPDATE') {
+                            const row = payload.new as BookingRow
+                            console.log('Realtime UPDATE Payload:', row) // Debug
+
+                            set({
+                                bookings: state.bookings.map(b => {
+                                    if (b.id === row.id) {
+                                        // Safe Merge Helper
+                                        const val = <T>(newVal: T | undefined, currVal: T) => newVal !== undefined ? newVal : currVal
+
+                                        const isMaintenance = (row.guest_name === 'MANTENIMIENTO') || (row.status === 'maintenance') || (b.status === 'maintenance'); // Persist maintenance if not overridden
+
+                                        return {
+                                            ...b,
+                                            guestName: val(row.guest_name, b.guestName),
+                                            email: val(row.email, b.email),
+                                            phone: val(row.phone, b.phone),
+                                            location: val(row.location, b.location),
+                                            roomType: val(row.room_type, b.roomType),
+                                            guests: val(row.guests, b.guests),
+                                            checkIn: val(row.check_in, b.checkIn),
+                                            checkOut: val(row.check_out, b.checkOut),
+                                            // Status needs special handling for maintenance logic, but simple merge is safer for now unless status is explicit
+                                            status: row.status !== undefined ? (isMaintenance ? 'maintenance' : row.status) : b.status,
+
+                                            totalPrice: val(row.total_price, b.totalPrice),
+                                            cancellationReason: val(row.cancellation_reason, b.cancellationReason),
+                                            refundStatus: val(row.refund_status, b.refundStatus),
+                                            refundAmount: val(row.refund_amount, b.refundAmount),
+                                            cancelledAt: val(row.cancelled_at, b.cancelledAt),
+                                            actualCheckOut: val(row.actual_check_out, b.actualCheckOut),
+                                            paymentStatus: val(row.payment_status, b.paymentStatus),
+                                            unitId: val(row.unit_id, b.unitId),
+                                            guestIdType: val(row.guest_id_type, b.guestIdType),
+                                            guestIdNumber: val(row.guest_id_number, b.guestIdNumber), // CRITICAL FIX
+                                            paymentMethod: val(row.payment_method, b.paymentMethod),
+                                            paymentReference: val(row.payment_reference, b.paymentReference)
+                                        }
+                                    }
+                                    return b
+                                })
+                            })
+                            toast.success("Reserva actualizada")
+                        }
+                        // Silent update usually better for edits, but maybe notify for status changes?
+                        // toast.info("Reserva actualizada en tiempo real")
+                        else if (payload.eventType === 'DELETE') {
+                            const row = payload.old as { id: string }
+                            set({
+                                bookings: state.bookings.filter(b => b.id !== row.id)
+                            })
+                        }
+                    })
+                    .subscribe()
+
+                // Optional: return unsubscribe function if needed, but for global store rarely used
+                return () => supabase.removeChannel(subscription)
+            },
 
             fetchBookings: async () => {
                 set({ isLoading: true })

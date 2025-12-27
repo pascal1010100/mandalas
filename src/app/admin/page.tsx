@@ -13,6 +13,12 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StaggerReveal } from "@/components/animations/stagger-reveal"
@@ -108,6 +114,57 @@ function AdminContent() {
                     </Button>
                 </div>
             </div>
+
+            {/* ACTION CENTER: PENDING PAYMENTS */}
+            {bookings.some(b => b.paymentStatus === 'verifying') && (
+                <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                            <Activity className="w-5 h-5 animate-pulse" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-indigo-900 dark:text-indigo-100">Pagos por Verificar</h3>
+                            <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                                Hay {bookings.filter(b => b.paymentStatus === 'verifying').length} pagos reportados que requieren tu aprobación.
+                            </p>
+                        </div>
+                    </div>
+
+                    {bookings.filter(b => b.paymentStatus === 'verifying').length > 1 ? (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    size="sm"
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-md shadow-indigo-900/20 whitespace-nowrap"
+                                >
+                                    Revisar {bookings.filter(b => b.paymentStatus === 'verifying').length} Pagos
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                {bookings.filter(b => b.paymentStatus === 'verifying').map(b => (
+                                    <DropdownMenuItem key={b.id} onClick={() => handleBookingClick(b)}>
+                                        <div className="flex flex-col">
+                                            <span className="font-bold">{b.guestName}</span>
+                                            <span className="text-xs opacity-70">Ref: {b.paymentReference || 'N/A'} - Q{b.totalPrice}</span>
+                                        </div>
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    ) : (
+                        <Button
+                            size="sm"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-md shadow-indigo-900/20 whitespace-nowrap"
+                            onClick={() => {
+                                const firstVerifying = bookings.find(b => b.paymentStatus === 'verifying')
+                                if (firstVerifying) handleBookingClick(firstVerifying)
+                            }}
+                        >
+                            Revisar Pago
+                        </Button>
+                    )}
+                </div>
+            )}
 
             {/* Main Content Grid: Stats, Room Grid, Operations */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
