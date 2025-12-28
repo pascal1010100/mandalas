@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Loader2, ArrowRight, ArrowLeft, ShieldCheck, Calendar, Users, BedDouble, MapPin, Copy, ExternalLink, MessageCircle, CheckCircle2, Clock, Wallet, Wifi, Info, Save, X, Utensils, Music, Sparkles, Bus, Waves, Shirt, QrCode, Smartphone, PartyPopper, Beer, ShoppingBag } from "lucide-react"
+import { Search, Loader2, ArrowRight, ArrowLeft, ShieldCheck, Calendar, Users, BedDouble, MapPin, Copy, ExternalLink, MessageCircle, CheckCircle2, Clock, Wallet, Wifi, Info, Save, X, Utensils, Music, Sparkles, Bus, Waves, Shirt, QrCode, Smartphone, PartyPopper, Beer, ShoppingBag, Plus } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { format, differenceInDays } from "date-fns"
 import { es } from "date-fns/locale"
@@ -15,9 +15,21 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 // import { ParticlesBackground } from "@/components/ui/particles-background"
 import { cn } from "@/lib/utils"
-import { useAppStore } from "@/lib/store"
+import { useAppStore, BookingRow, Charge, Product } from "@/lib/store"
 
 import { supabase } from "@/lib/supabase"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 // Elite Assets & Config
 const LOCATION_ASSETS = {
@@ -45,19 +57,20 @@ const LOCATION_ASSETS = {
 
 export default function MyBookingPage() {
     // Search State
+    // Search State
     const [searchQuery, setSearchQuery] = useState("")
     const [loading, setLoading] = useState(false)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [booking, setBooking] = useState<any | null>(null)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [allBookings, setAllBookings] = useState<any[]>([])
+    const [booking, setBooking] = useState<BookingRow | null>(null)
+    const [allBookings, setAllBookings] = useState<BookingRow[]>([])
     const [viewMode, setViewMode] = useState<'search' | 'list' | 'details'>('search')
 
     // Honesty Bar State
     const [showHonestyModal, setShowHonestyModal] = useState(false)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [products, setProducts] = useState<any[]>([])
+    const [products, setProducts] = useState<Product[]>([])
     const [loadingProducts, setLoadingProducts] = useState(false)
+    const [confirmProduct, setConfirmProduct] = useState<Product | null>(null)
+    // Account / Charges State
+    const [myCharges, setMyCharges] = useState<Charge[]>([])
 
     // Realtime Sync for Guest
     useEffect(() => {
@@ -90,11 +103,25 @@ export default function MyBookingPage() {
         } catch (e) { console.error(e) } finally { setLoading(false) }
     }
 
+    // Realtime Sync for Guest (Booking & Charges)
     useEffect(() => {
         if (!booking?.id) return
 
+        // 1. Fetch initial charges
+        const fetchCharges = async () => {
+            const { data } = await supabase
+                .from('charges')
+                .select('*')
+                .eq('booking_id', booking.id)
+                .order('created_at', { ascending: false })
+            if (data) setMyCharges(data)
+        }
+        fetchCharges()
+
         console.log("Subscribing to realtime updates for booking:", booking.id)
-        const channel = supabase
+
+        // 2. Subscribe to Booking Updates
+        const bookingChannel = supabase
             .channel(`guest-booking-${booking.id}`)
             .on(
                 'postgres_changes',
@@ -106,9 +133,6 @@ export default function MyBookingPage() {
                 },
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (payload: any) => {
-                    console.log("Realtime Update Received (Guest):", payload)
-                    // Merge new data carefully
-                     
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     setBooking((prev: any) => {
                         if (!prev) return null
@@ -120,8 +144,27 @@ export default function MyBookingPage() {
             )
             .subscribe()
 
+        // 3. Subscribe to Charges Updates (New Items)
+        const chargesChannel = supabase
+            .channel(`guest-charges-${booking.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'charges',
+                    filter: `booking_id=eq.${booking.id}`
+                },
+                () => {
+                    fetchCharges()
+                    toast.info("Nueva actualización en tu cuenta")
+                }
+            )
+            .subscribe()
+
         return () => {
-            supabase.removeChannel(channel)
+            supabase.removeChannel(bookingChannel)
+            supabase.removeChannel(chargesChannel)
         }
     }, [booking?.id])
 
@@ -304,7 +347,8 @@ export default function MyBookingPage() {
     const [showCheckInModal, setShowCheckInModal] = useState(false)
 
     const handleUpsell = (service: string, price: string) => {
-        const text = `Hola, soy ${booking.guest_name}. Me gustaría reservar el servicio: ${service} (${price}). Mi reserva es: ${booking.id.slice(0, 6)}...`
+        if (!booking) return
+        const text = `Hola, soy ${booking.guest_name}. Me gustaría reservar el servicio: ${service} (${service}). Mi reserva es: ${booking.id.slice(0, 6)}...`
         window.open(`https://wa.me/50212345678?text=${encodeURIComponent(text)}`, '_blank')
     }
 
@@ -329,8 +373,9 @@ export default function MyBookingPage() {
 
             toast.success("¡Bienvenido a Casa! Check-in exitoso.")
             setShowCheckInModal(false)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setBooking((prev: any) => prev ? ({ ...prev, status: 'checked_in' }) : null)
+            toast.success("¡Bienvenido a Casa! Check-in exitoso.")
+            setShowCheckInModal(false)
+            setBooking(prev => prev ? ({ ...prev, status: 'checked_in' }) : null)
 
             // Trigger Confetti
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -394,12 +439,12 @@ export default function MyBookingPage() {
     // 2. BOOKING SELECTION LIST (New Lobby)
     if (viewMode === 'list') {
         return (
-            <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+            <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-colors duration-500">
                 {/* <ParticlesBackground /> */}
                 <div className="relative z-10 w-full max-w-2xl space-y-6">
                     <div className="text-center space-y-2">
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Tus Reservas</h1>
-                        <p className="text-stone-400">Hemos encontrado múltiples estancias. Selecciona una para continuar.</p>
+                        <h1 className="text-3xl font-bold text-stone-900 dark:text-white tracking-tight">Tus Reservas</h1>
+                        <p className="text-stone-500 dark:text-stone-400">Hemos encontrado múltiples estancias. Selecciona una para continuar.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -414,30 +459,30 @@ export default function MyBookingPage() {
                                     setIdNumber(b.guest_id_number || "")
                                     setViewMode('details')
                                 }}
-                                className="cursor-pointer bg-stone-900/80 backdrop-blur-md border border-white/10 p-6 rounded-xl hover:border-emerald-500/50 hover:bg-stone-900 transition-all group"
+                                className="cursor-pointer bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border border-stone-200 dark:border-white/10 p-6 rounded-xl hover:border-emerald-500/50 hover:bg-white dark:hover:bg-stone-900 transition-all group shadow-sm dark:shadow-none"
                             >
                                 <div className="flex justify-between items-start mb-4">
-                                    <Badge variant="outline" className={cn("capitalize", b.location === 'hideout' ? "bg-lime-900 text-lime-100 border-lime-800" : "bg-amber-900 text-amber-100 border-amber-800")}>
+                                    <Badge variant="outline" className={cn("capitalize", b.location === 'hideout' ? "bg-lime-100 text-lime-800 border-lime-200 dark:bg-lime-900 dark:text-lime-100 dark:border-lime-800" : "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900 dark:text-amber-100 dark:border-amber-800")}>
                                         {b.location}
                                     </Badge>
-                                    <Badge variant="outline" className="border-white/20 text-stone-300">
+                                    <Badge variant="outline" className="border-stone-200 dark:border-white/20 text-stone-600 dark:text-stone-300">
                                         {b.status === 'confirmed' ? 'Confirmada' : b.status}
                                     </Badge>
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-1 group-hover:text-emerald-400 transition-colors">
+                                <h3 className="text-xl font-bold text-stone-900 dark:text-white mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                                     {b.room_type}
                                 </h3>
-                                <p className="text-sm text-stone-400 mb-4 font-mono">
+                                <p className="text-sm text-stone-500 dark:text-stone-400 mb-4 font-mono">
                                     {format(new Date(b.check_in), 'dd MMM')} - {format(new Date(b.check_out), 'dd MMM')}
                                 </p>
-                                <div className="flex items-center text-xs text-stone-500 gap-2">
+                                <div className="flex items-center text-xs text-stone-400 dark:text-stone-500 gap-2 group-hover:text-stone-600 dark:group-hover:text-stone-300 transition-colors">
                                     Click para gestionar <ArrowRight className="w-3 h-3" />
                                 </div>
                             </motion.div>
                         ))}
                     </div>
 
-                    <Button variant="ghost" className="w-full text-stone-500 hover:text-white" onClick={() => {
+                    <Button variant="ghost" className="w-full text-stone-500 hover:text-stone-900 dark:hover:text-white" onClick={() => {
                         setViewMode('search')
                         setBooking(null)
                     }}>
@@ -446,10 +491,15 @@ export default function MyBookingPage() {
                 </div>
             </div>
         )
+
     }
 
+    // Calculated Totals
+    const totalConsumed = Number(booking?.total_price || 0) + myCharges.reduce((acc, c) => acc + (Number(c.amount) || 0), 0)
+    const totalPending = (booking?.payment_status === 'paid' ? 0 : Number(booking?.total_price || 0)) + myCharges.filter(c => c.status !== 'paid').reduce((acc, c) => acc + Number(c.amount), 0)
+
     return (
-        <div className="min-h-screen relative overflow-x-hidden flex flex-col items-center justify-start bg-stone-950 font-sans text-stone-100 selection:bg-amber-500/30">
+        <div className="min-h-screen relative overflow-x-hidden flex flex-col items-center justify-start bg-stone-50 dark:bg-stone-950 font-sans text-stone-900 dark:text-stone-100 selection:bg-amber-500/30 transition-colors duration-500">
 
             {/* Dynamic Background with Overlay */}
             <div className="fixed inset-0 z-0">
@@ -464,12 +514,13 @@ export default function MyBookingPage() {
                     >
                         <img
                             src={booking ? backgroundImage : theme.bg}
-                            className="w-full h-full object-cover brightness-[0.3] blur-sm scale-105"
+                            className="w-full h-full object-cover brightness-[0.8] dark:brightness-[0.3] blur-sm scale-105 transition-all duration-700"
                             alt="Background"
                         />
                     </motion.div>
                 </AnimatePresence>
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/80 to-stone-900/40" />
+                {/* Light Mode Overlay (White/Transparent) vs Dark Mode Overlay (Black) */}
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-50/90 via-stone-50/60 to-white/30 dark:from-stone-950 dark:via-stone-950/80 dark:to-stone-900/40" />
             </div>
 
             {/* MAIN CONTAINER - Increased Padding for Navbar */}
@@ -484,15 +535,15 @@ export default function MyBookingPage() {
                     <div className="space-y-2">
                         <div className="flex items-center gap-3">
                             {booking && (
-                                <Badge variant="outline" className={cn("uppercase tracking-widest text-[10px] bg-white/5 border-white/20 text-white backdrop-blur-md")}>
+                                <Badge variant="outline" className={cn("uppercase tracking-widest text-[10px] bg-white/40 dark:bg-white/5 border-stone-200 dark:border-white/20 text-stone-800 dark:text-white backdrop-blur-md shadow-sm dark:shadow-none")}>
                                     {booking.location === 'hideout' ? 'The Hideout' : 'Pueblo'}
                                 </Badge>
                             )}
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-black font-heading text-white drop-shadow-2xl tracking-tight">
+                        <h1 className="text-4xl md:text-6xl font-black font-heading text-stone-900 dark:text-white drop-shadow-sm dark:drop-shadow-2xl tracking-tight">
                             {booking ? `Hola, ${booking.guest_name.split(' ')[0]}` : "Bienvenido"}
                         </h1>
-                        <p className="text-lg text-stone-300 font-light max-w-lg">
+                        <p className="text-lg text-stone-600 dark:text-stone-300 font-light max-w-lg">
                             {booking
                                 ? "Aquí tienes todo lo necesario para tu aventura. Disfruta tu estancia."
                                 : "Ingresa tus datos para acceder a tu panel de viaje exclusivo."}
@@ -501,18 +552,18 @@ export default function MyBookingPage() {
 
                     {/* Search Bar */}
                     <div className={cn("transition-all duration-700 w-full md:w-auto", booking ? "w-full md:w-96" : "w-full md:w-[500px]")}>
-                        <Card className="border-white/10 shadow-2xl bg-white/5 backdrop-blur-xl hover:bg-white/10 transition-colors">
+                        <Card className="border-stone-200 dark:border-white/10 shadow-xl dark:shadow-2xl bg-white/60 dark:bg-white/5 backdrop-blur-xl hover:bg-white/80 dark:hover:bg-white/10 transition-colors">
                             <CardContent className="p-2 flex gap-2">
                                 <Input
                                     placeholder="Email o ID de Reserva..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="bg-transparent border-none text-white placeholder:text-white/40 h-10 md:h-12 focus-visible:ring-0 text-base md:text-lg"
+                                    className="bg-transparent border-none text-stone-800 dark:text-white placeholder:text-stone-500 dark:placeholder:text-white/40 h-10 md:h-12 focus-visible:ring-0 text-base md:text-lg"
                                 />
                                 <Button
                                     onClick={handleSearch}
                                     disabled={loading}
-                                    className="bg-white text-black hover:bg-stone-200 h-10 md:h-12 w-12 md:w-auto px-4"
+                                    className="bg-stone-900 dark:bg-white text-white dark:text-black hover:bg-stone-800 dark:hover:bg-stone-200 h-10 md:h-12 w-12 md:w-auto px-4 shadow-lg shadow-stone-900/10 dark:shadow-none"
                                 >
                                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
                                 </Button>
@@ -520,6 +571,7 @@ export default function MyBookingPage() {
                         </Card>
                     </div>
                 </motion.div>
+
 
                 {/* DASHBOARD GRID */}
                 <AnimatePresence mode="wait">
@@ -535,35 +587,35 @@ export default function MyBookingPage() {
                             {/* --- COL 1: TRIP DETAILS & IDENTITY --- */}
                             <div className="md:col-span-1 space-y-6">
                                 {/* Room Card */}
-                                <Card className="bg-black/20 border-white/10 backdrop-blur-md overflow-hidden">
+                                <Card className="bg-white/70 dark:bg-black/20 border-stone-200 dark:border-white/10 backdrop-blur-md overflow-hidden shadow-sm dark:shadow-none">
                                     <div className={cn("h-1 w-full bg-gradient-to-r", theme.gradient)} />
                                     <CardContent className="p-5 space-y-4">
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">Alojamiento</p>
-                                                <p className="text-lg font-bold text-white mt-1 leading-tight">{roomConfig?.label || booking.room_type}</p>
+                                                <p className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-widest font-bold">Alojamiento</p>
+                                                <p className="text-lg font-bold text-stone-900 dark:text-white mt-1 leading-tight">{roomConfig?.label || booking.room_type}</p>
                                             </div>
                                             {booking.room_type.includes('dorm') ? <BedDouble className="text-stone-400" /> : <ShieldCheck className="text-stone-400" />}
                                         </div>
-                                        <div className="space-y-2 text-sm text-stone-300">
+                                        <div className="space-y-2 text-sm text-stone-600 dark:text-stone-300">
                                             <div className="flex justify-between">
                                                 <span>Entrada</span>
-                                                <span className="text-white">{format(new Date(booking.check_in), 'd MMM')}</span>
+                                                <span className="text-stone-900 dark:text-white">{format(new Date(booking.check_in), 'd MMM')}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>Salida</span>
-                                                <span className="text-white">{format(new Date(booking.check_out), 'd MMM')}</span>
+                                                <span className="text-stone-900 dark:text-white">{format(new Date(booking.check_out), 'd MMM')}</span>
                                             </div>
                                             <div className="flex justify-between">
                                                 <span>Estancia</span>
-                                                <span className="text-white">{differenceInDays(new Date(booking.check_out), new Date(booking.check_in))} noches</span>
+                                                <span className="text-stone-900 dark:text-white">{differenceInDays(new Date(booking.check_out), new Date(booking.check_in))} noches</span>
                                             </div>
                                         </div>
                                     </CardContent>
                                 </Card>
 
                                 {/* Guest Identity */}
-                                <Card className="bg-stone-900/40 border-white/5 backdrop-blur-md">
+                                <Card className="bg-white/40 dark:bg-stone-900/40 border-stone-200 dark:border-white/5 backdrop-blur-md shadow-sm dark:shadow-none">
                                     <CardHeader className="pb-2 pt-4 px-4">
                                         <CardTitle className="text-xs uppercase tracking-widest text-stone-500 flex items-center gap-2">
                                             <Users className="w-3 h-3" /> Pre-Checkin
@@ -572,10 +624,10 @@ export default function MyBookingPage() {
                                     <CardContent className="px-4 pb-4">
                                         {!isEditingIdentity ? (
                                             <div className="space-y-3">
-                                                <div className="p-3 rounded-lg bg-white/5 border border-white/5 flex justify-between items-center group cursor-pointer hover:bg-white/10 transition-colors" onClick={() => setIsEditingIdentity(true)}>
+                                                <div className="p-3 rounded-lg bg-white/40 dark:bg-white/5 border border-stone-200 dark:border-white/5 flex justify-between items-center group cursor-pointer hover:bg-white/60 dark:hover:bg-white/10 transition-colors" onClick={() => setIsEditingIdentity(true)}>
                                                     <div>
-                                                        <p className="text-[10px] text-stone-400">Documento</p>
-                                                        <p className="font-mono text-stone-200">{booking.guest_id_number || "Pendiente"}</p>
+                                                        <p className="text-[10px] text-stone-500 dark:text-stone-400">Documento</p>
+                                                        <p className="font-mono text-stone-800 dark:text-stone-200">{booking.guest_id_number || "Pendiente"}</p>
                                                     </div>
                                                     <Badge variant={booking.guest_id_number ? "secondary" : "destructive"} className="text-[10px] h-5">
                                                         {booking.guest_id_number ? "OK" : "!"}
@@ -587,19 +639,19 @@ export default function MyBookingPage() {
                                                 <div className="space-y-1">
                                                     <Label className="text-[10px] uppercase text-stone-500">Tipo</Label>
                                                     <Select value={idType} onValueChange={setIdType}>
-                                                        <SelectTrigger className="h-8 text-xs bg-black/20 border-white/10"><SelectValue /></SelectTrigger>
+                                                        <SelectTrigger className="h-8 text-xs bg-white dark:bg-black/20 border-stone-200 dark:border-white/10 text-stone-800 dark:text-stone-200"><SelectValue /></SelectTrigger>
                                                         <SelectContent><SelectItem value="passport">Pasaporte</SelectItem><SelectItem value="dni">DNI</SelectItem></SelectContent>
                                                     </Select>
                                                 </div>
                                                 <div className="space-y-1">
                                                     <Label className="text-[10px] uppercase text-stone-500">Número</Label>
-                                                    <Input value={idNumber} onChange={e => setIdNumber(e.target.value)} className="h-8 bg-black/20 border-white/10 font-mono text-xs" />
+                                                    <Input value={idNumber} onChange={e => setIdNumber(e.target.value)} className="h-8 bg-white dark:bg-black/20 border-stone-200 dark:border-white/10 font-mono text-xs text-stone-800 dark:text-stone-200" />
                                                 </div>
                                                 <div className="flex gap-2 pt-2">
-                                                    <Button variant="outline" size="sm" className="flex-1 bg-transparent border-white/10 text-stone-400 hover:text-white hover:bg-white/5 h-8" onClick={() => setIsEditingIdentity(false)}>
+                                                    <Button variant="outline" size="sm" className="flex-1 bg-transparent border-stone-200 dark:border-white/10 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 h-8" onClick={() => setIsEditingIdentity(false)}>
                                                         Cancelar
                                                     </Button>
-                                                    <Button size="sm" className="flex-1 bg-white text-stone-900 hover:bg-stone-200 font-bold h-8" onClick={handleUpdateIdentity} disabled={savingIdentity}>
+                                                    <Button size="sm" className="flex-1 bg-stone-900 dark:bg-white text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-200 font-bold h-8" onClick={handleUpdateIdentity} disabled={savingIdentity}>
                                                         {savingIdentity ? <Loader2 className="w-3 h-3 animate-spin" /> : "Guardar"}
                                                     </Button>
                                                 </div>
@@ -613,7 +665,7 @@ export default function MyBookingPage() {
                             <div className="md:col-span-2 space-y-6">
 
                                 {/* Countdown / Status Hero */}
-                                <Card className="border-0 bg-gradient-to-br from-white/10 to-white/5 overflow-hidden relative min-h-[160px] flex items-center">
+                                <Card className="border-0 bg-gradient-to-br from-white/40 to-white/20 dark:from-white/10 dark:to-white/5 overflow-hidden relative min-h-[160px] flex items-center shadow-lg dark:shadow-none">
                                     <div className={cn("absolute right-0 top-0 bottom-0 w-1/3 opacity-20 bg-gradient-to-l", theme.gradient)} />
                                     <CardContent className="p-8 w-full flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
                                         <div className="text-center md:text-left">
@@ -623,7 +675,7 @@ export default function MyBookingPage() {
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="bg-white/10 border-white/20 text-white backdrop-blur-md hover:bg-white/20"
+                                                        className="bg-white/40 dark:bg-white/10 border-white/20 text-stone-800 dark:text-white backdrop-blur-md hover:bg-white/50 dark:hover:bg-white/20"
                                                         onClick={() => setViewMode('list')}
                                                     >
                                                         <ArrowLeft className="w-3 h-3 mr-2" /> Mis Reservas ({allBookings.length})
@@ -631,17 +683,18 @@ export default function MyBookingPage() {
                                                 </div>
                                             )}
 
-                                            <p className="text-sm text-stone-300 uppercase tracking-widest font-medium mb-1">
+                                            <p className="text-sm text-stone-600 dark:text-stone-300 uppercase tracking-widest font-medium mb-1">
                                                 {daysUntil > 0 ? "Tu viaje comienza en" : "¡Bienvenido!"}
                                             </p>
 
                                             {daysUntil > 0 ? (
-                                                <div className="text-6xl md:text-7xl font-light tracking-tighter text-white drop-shadow-lg leading-none">
-                                                    {daysUntil} <span className="text-2xl text-stone-400 align-baseline ml-[-10px]">días</span>
+                                                <div className="text-6xl md:text-7xl font-light tracking-tighter text-stone-900 dark:text-white drop-shadow-md dark:drop-shadow-lg leading-none">
+                                                    {daysUntil} <span className="text-2xl text-stone-500 dark:text-stone-400 align-baseline ml-[-10px]">días</span>
                                                 </div>
+
                                             ) : (
                                                 <>
-                                                    <h1 className="text-3xl font-bold text-white mb-1 drop-shadow-lg">
+                                                    <h1 className="text-3xl font-bold text-stone-900 dark:text-white mb-1 drop-shadow-md dark:drop-shadow-lg">
                                                         Hola, {booking.guest_name.split(" ")[0]}
                                                     </h1>
 
@@ -674,7 +727,7 @@ export default function MyBookingPage() {
                                                         : "border-amber-500 text-amber-500 bg-amber-500/10 shadow-amber-500/20 group-hover:border-amber-400"
                                             )}>
                                                 {booking.payment_status === 'paid' && <CheckCircle2 className="w-8 h-8" />}
-                                                {booking.paymentStatus === 'verifying' && <Loader2 className="w-8 h-8 animate-spin" />}
+                                                {booking.payment_status === 'verifying' && <Loader2 className="w-8 h-8 animate-spin" />}
                                                 {booking.payment_status === 'pending' && <Clock className="w-8 h-8 group-hover:animate-pulse" />}
                                                 {/* Fallback for verifying if TS issue in switch */}
                                                 {booking.payment_status === 'verifying' && <Loader2 className="w-8 h-8 animate-spin" />}
@@ -695,7 +748,7 @@ export default function MyBookingPage() {
                                 {/* Visual Timeline & Action Center */}
                                 <div className="space-y-6">
                                     <div className="grid grid-cols-4 gap-2 relative">
-                                        <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-white/10 -z-10" />
+                                        <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-stone-200 dark:bg-white/10 -z-10" />
                                         {[
                                             { label: "Reserva", icon: Calendar, done: true, action: null },
                                             { label: "Pago", icon: Wallet, done: booking.payment_status === 'paid', action: () => setShowPaymentModal(true) },
@@ -719,19 +772,19 @@ export default function MyBookingPage() {
                                                     }
                                                 }}
                                             >
-                                                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 bg-stone-950 z-10",
-                                                    step.done ? "border-emerald-500 text-emerald-500" :
+                                                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-500 z-10",
+                                                    step.done ? "border-emerald-500 text-emerald-500 bg-white dark:bg-stone-950" :
                                                         (!step.done && step.action && (
                                                             (step.label === 'Pago' && booking.payment_status !== 'paid') ||
                                                             (step.label === 'Check-in' && canCheckIn && booking.status !== 'checked_in' && booking.status !== 'checked_out') ||
                                                             (step.label === 'Check-out' && booking.status === 'checked_in')
-                                                        )) ? "border-amber-500 text-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)]" : "border-stone-700 text-stone-700"
+                                                        )) ? "border-amber-500 text-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.5)] bg-white dark:bg-stone-950" : "border-stone-300 dark:border-stone-700 text-stone-400 dark:text-stone-700 bg-stone-100 dark:bg-stone-950"
                                                 )}>
                                                     <step.icon className="w-3.5 h-3.5" />
                                                 </div>
                                                 <p className={cn("text-[10px] uppercase font-bold tracking-wider transition-colors",
-                                                    step.done ? "text-stone-300" :
-                                                        (!step.done && step.action && (step.label === 'Pago' || (step.label === 'Check-in' && canCheckIn))) ? "text-amber-400" : "text-stone-600"
+                                                    step.done ? "text-stone-400 dark:text-stone-300" :
+                                                        (!step.done && step.action && (step.label === 'Pago' || (step.label === 'Check-in' && canCheckIn))) ? "text-amber-600 dark:text-amber-400" : "text-stone-400 dark:text-stone-600"
                                                 )}>{step.label}</p>
 
                                                 {/* Tooltip for Action */}
@@ -742,6 +795,95 @@ export default function MyBookingPage() {
                                                 )}
                                             </div>
                                         ))}
+                                    </div>
+
+                                    {/* ACCOUNT SUMMARY (BILLING) */}
+                                    <div className="bg-stone-50 dark:bg-stone-900/50 rounded-xl border border-stone-200 dark:border-white/10 p-4 mb-6 space-y-3">
+                                        <div className="flex justify-between items-center pb-2 border-b border-stone-200 dark:border-white/5">
+                                            <span className="text-sm font-bold text-stone-700 dark:text-stone-300 flex items-center gap-2">
+                                                <ShoppingBag className="w-4 h-4" /> Estado de Cuenta
+                                            </span>
+                                            <Badge variant={booking.payment_status === 'paid' ? 'default' : 'outline'} className={cn(booking.payment_status === 'paid' ? "bg-emerald-500 hover:bg-emerald-600" : "text-stone-500 border-stone-200 dark:border-stone-700")}>
+                                                {booking.payment_status === 'paid' ? "Pagado" : booking.payment_status === 'verifying' ? "Verificando" : "Pendiente"}
+                                            </Badge>
+                                        </div>
+
+                                        {/* Base Rate */}
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-stone-500 dark:text-stone-400 flex items-center gap-2">
+                                                <BedDouble className="w-3 h-3" /> Alojamiento ({differenceInDays(new Date(booking.check_out), new Date(booking.check_in))} noches)
+                                            </span>
+                                            <span className="font-mono text-stone-900 dark:text-stone-100 font-bold">Q{booking.total_price}</span>
+                                        </div>
+
+                                        {/* Extras List */}
+                                        {myCharges.length > 0 && (
+                                            <div className="space-y-2 pt-2">
+                                                <div className="flex justify-between items-center">
+                                                    <p className="text-[10px] uppercase font-bold text-stone-400">Extras / Minibar</p>
+                                                    {myCharges.some(c => c.status !== 'paid') && (
+                                                        <Badge variant="outline" className="text-[10px] h-5 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-500">
+                                                            Por pagar: Q{myCharges.filter(c => c.status !== 'paid').reduce((acc, c) => acc + Number(c.amount), 0)}
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                {myCharges.map(charge => (
+                                                    <div key={charge.id} className="flex justify-between items-start text-sm pl-2 border-l-2 border-stone-200 dark:border-stone-800">
+                                                        <span className="text-stone-500 dark:text-stone-400 flex flex-col">
+                                                            <span className="flex items-center gap-2 font-medium">
+                                                                {charge.item_name}
+                                                                {charge.status === 'paid' ? (
+                                                                    <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 px-1.5 py-0.5 rounded-sm flex items-center leading-none">
+                                                                        <CheckCircle2 className="w-2.5 h-2.5 mr-1" /> Pagado
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-1.5 py-0.5 rounded-sm leading-none">Pendiente</span>
+                                                                )}
+                                                            </span>
+                                                            <span className="text-[10px] opacity-50">
+                                                                {format(new Date(charge.created_at), "d MMM, HH:mm", { locale: es })}
+                                                            </span>
+                                                        </span>
+                                                        <span className={cn(
+                                                            "font-mono transition-all",
+                                                            charge.status === 'paid'
+                                                                ? "text-stone-400 line-through decoration-stone-300 text-xs"
+                                                                : "text-stone-900 dark:text-stone-100 font-bold"
+                                                        )}>
+                                                            Q{charge.amount}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Grand Total */}
+                                        <div className="pt-4 border-t border-stone-200 dark:border-white/5 mt-2 space-y-1">
+                                            <div className="flex justify-between items-center text-xs text-stone-400">
+                                                <span>Total Consumido</span>
+                                                <span className="font-mono">
+                                                    Q{totalConsumed.toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between items-end">
+                                                <span className="text-sm font-bold text-stone-500 dark:text-stone-300">Total Pendiente</span>
+                                                <div className="text-right">
+                                                    <span className={cn(
+                                                        "text-2xl font-bold font-heading",
+                                                        totalPending > 0
+                                                            ? "text-amber-600 dark:text-amber-500"
+                                                            : "text-emerald-600 dark:text-emerald-500"
+                                                    )}>
+                                                        Q{totalPending.toFixed(2)}
+                                                    </span>
+                                                    {totalPending > 0 && (
+                                                        <p className="text-[10px] text-amber-600 dark:text-amber-500 font-bold animate-pulse">
+                                                            Pagar en Recepción
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* Primary Action Button - Dynamic based on state */}
@@ -780,27 +922,27 @@ export default function MyBookingPage() {
                                 {/* Digital Guidebook Grid */}
                                 <div className="grid grid-cols-2 gap-4">
                                     {/* WiFi Card */}
-                                    <div className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group"
+                                    <div className="p-4 rounded-xl bg-white/40 dark:bg-white/5 border border-stone-200 dark:border-white/5 hover:bg-white/60 dark:hover:bg-white/10 transition-colors cursor-pointer group shadow-sm dark:shadow-none"
                                         onClick={() => { navigator.clipboard.writeText(theme.wifiPass); toast.success("Contraseña WiFi copiada") }}>
-                                        <Wifi className="w-5 h-5 text-stone-400 mb-3 group-hover:text-white transition-colors" />
-                                        <p className="font-bold text-stone-200">WiFi</p>
-                                        <p className="text-xs text-stone-500 font-mono mt-1 group-hover:text-amber-400 transition-colors">{theme.wifiSSID}</p>
+                                        <Wifi className="w-5 h-5 text-stone-400 dark:text-stone-400 mb-3 group-hover:text-stone-800 dark:group-hover:text-white transition-colors" />
+                                        <p className="font-bold text-stone-800 dark:text-stone-200">WiFi</p>
+                                        <p className="text-xs text-stone-500 font-mono mt-1 group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors">{theme.wifiSSID}</p>
                                     </div>
 
                                     {/* Location Card */}
-                                    <div className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group"
+                                    <div className="p-4 rounded-xl bg-white/40 dark:bg-white/5 border border-stone-200 dark:border-white/5 hover:bg-white/60 dark:hover:bg-white/10 transition-colors cursor-pointer group shadow-sm dark:shadow-none"
                                         onClick={() => window.open(theme.mapUrl, "_blank")}>
-                                        <MapPin className="w-5 h-5 text-stone-400 mb-3 group-hover:text-white transition-colors" />
-                                        <p className="font-bold text-stone-200">Ubicación</p>
+                                        <MapPin className="w-5 h-5 text-stone-400 dark:text-stone-400 mb-3 group-hover:text-stone-800 dark:group-hover:text-white transition-colors" />
+                                        <p className="font-bold text-stone-800 dark:text-stone-200">Ubicación</p>
                                         <p className="text-xs text-stone-500 mt-1">Ver en Mapa</p>
                                     </div>
 
                                     {/* Breakfast Info */}
-                                    <div className="col-span-2 p-4 rounded-xl bg-white/5 border border-white/5 flex items-center gap-4">
-                                        <div className="p-2 rounded-full bg-stone-800"><Utensils className="w-4 h-4 text-stone-300" /></div>
+                                    <div className="col-span-2 p-4 rounded-xl bg-white/40 dark:bg-white/5 border border-stone-200 dark:border-white/5 flex items-center gap-4 shadow-sm dark:shadow-none">
+                                        <div className="p-2 rounded-full bg-stone-100 dark:bg-stone-800"><Utensils className="w-4 h-4 text-stone-500 dark:text-stone-300" /></div>
                                         <div>
-                                            <p className="font-bold text-stone-200 text-sm">Desayuno</p>
-                                            <p className="text-xs text-stone-400">{theme.breakfastTime} • {theme.breakfastLoc}</p>
+                                            <p className="font-bold text-stone-800 dark:text-stone-200 text-sm">Desayuno</p>
+                                            <p className="text-xs text-stone-500 dark:text-stone-400">{theme.breakfastTime} • {theme.breakfastLoc}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -810,23 +952,23 @@ export default function MyBookingPage() {
                             <div className="md:col-span-1 space-y-6">
 
                                 {/* Events Feed */}
-                                <Card className="bg-transparent border-0">
+                                <Card className="bg-transparent border-0 shadow-none">
                                     <CardHeader className="px-0 pt-0 pb-3">
-                                        <CardTitle className="text-xs uppercase tracking-widest text-stone-400 flex items-center gap-2">
+                                        <CardTitle className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 flex items-center gap-2">
                                             <Music className="w-3 h-3" /> Agenda Semanal
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent className="px-0 space-y-3">
                                         {relevantEvents.length > 0 ? relevantEvents.map(evt => (
-                                            <div key={evt.id} className="p-3 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all cursor-pointer">
+                                            <div key={evt.id} className="p-3 rounded-lg bg-white/40 dark:bg-white/5 border border-stone-200 dark:border-white/5 hover:border-stone-300 dark:hover:border-white/20 transition-all cursor-pointer shadow-sm dark:shadow-none">
                                                 <div className="flex justify-between items-start mb-1">
-                                                    <Badge variant="secondary" className="text-[9px] h-4 px-1.5 bg-white/10 text-stone-300">{format(new Date(evt.date), 'EEE d, HH:mm')}</Badge>
+                                                    <Badge variant="secondary" className="text-[9px] h-4 px-1.5 bg-white/60 dark:bg-white/10 text-stone-600 dark:text-stone-300 shadow-none">{format(new Date(evt.date), 'EEE d, HH:mm')}</Badge>
                                                 </div>
-                                                <p className="font-bold text-sm text-stone-200 leading-tight mb-1">{evt.title}</p>
+                                                <p className="font-bold text-sm text-stone-800 dark:text-stone-200 leading-tight mb-1">{evt.title}</p>
                                                 <p className="text-xs text-stone-500 line-clamp-2">{evt.description}</p>
                                             </div>
                                         )) : (
-                                            <div className="text-center py-6 border border-dashed border-white/10 rounded-lg">
+                                            <div className="text-center py-6 border border-dashed border-stone-300 dark:border-white/10 rounded-lg">
                                                 <p className="text-xs text-stone-500">No hay eventos programados</p>
                                             </div>
                                         )}
@@ -840,15 +982,15 @@ export default function MyBookingPage() {
                                     <div className="absolute inset-0 bg-amber-500/5 group-hover:bg-amber-500/10 transition-colors" />
                                     <CardContent className="p-4 flex items-center justify-between relative z-10">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-amber-500 text-stone-900 flex items-center justify-center shadow-lg">
+                                            <div className="w-10 h-10 rounded-full bg-amber-500 text-white dark:text-stone-900 flex items-center justify-center shadow-lg">
                                                 <Beer className="w-5 h-5 fill-current" />
                                             </div>
                                             <div>
-                                                <h3 className="font-bold text-white leading-tight">Minibar Digital</h3>
-                                                <p className="text-[10px] text-stone-400">¿Tomaste algo? Anótalo aquí.</p>
+                                                <h3 className="font-bold text-stone-900 dark:text-white leading-tight">Minibar Digital</h3>
+                                                <p className="text-[10px] text-stone-500 dark:text-stone-400">¿Tomaste algo? Anótalo aquí.</p>
                                             </div>
                                         </div>
-                                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 rounded-full text-amber-500 hover:text-amber-400 hover:bg-amber-500/10">
+                                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 rounded-full text-amber-600 dark:text-amber-500 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-amber-500/10">
                                             <ArrowRight className="w-4 h-4" />
                                         </Button>
                                     </CardContent>
@@ -857,34 +999,34 @@ export default function MyBookingPage() {
                                 </Card>
 
                                 <div className="space-y-3">
-                                    <p className="text-xs uppercase tracking-widest text-stone-400 px-1">Mejora tu viaje</p>
+                                    <p className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 px-1">Mejora tu viaje</p>
 
-                                    <Button variant="outline" className="w-full justify-start h-auto py-3 px-4 border-white/5 bg-white/5 hover:bg-white/10 hover:border-amber-500/30 group text-left block" onClick={() => handleUpsell("Shuttle Privado", "$35")}>
+                                    <Button variant="outline" className="w-full justify-start h-auto py-3 px-4 border-stone-200 dark:border-white/5 bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 hover:border-amber-500/30 group text-left block shadow-sm dark:shadow-none" onClick={() => handleUpsell("Shuttle Privado", "$35")}>
                                         <div className="flex items-center gap-3 mb-1">
-                                            <Bus className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform" />
-                                            <span className="font-bold text-stone-200">Shuttle Privado</span>
+                                            <Bus className="w-4 h-4 text-amber-600 dark:text-amber-500 group-hover:scale-110 transition-transform" />
+                                            <span className="font-bold text-stone-800 dark:text-stone-200">Shuttle Privado</span>
                                         </div>
-                                        <p className="text-[10px] text-stone-500 pl-7 group-hover:text-stone-400">Transporte seguro desde el aeropuerto.</p>
+                                        <p className="text-[10px] text-stone-500 pl-7 group-hover:text-stone-600 dark:group-hover:text-stone-400">Transporte seguro desde el aeropuerto.</p>
                                     </Button>
 
-                                    <Button variant="outline" className="w-full justify-start h-auto py-3 px-4 border-white/5 bg-white/5 hover:bg-white/10 hover:border-lime-500/30 group text-left block" onClick={() => handleUpsell("Lake Tour", "$25")}>
+                                    <Button variant="outline" className="w-full justify-start h-auto py-3 px-4 border-stone-200 dark:border-white/5 bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 hover:border-lime-500/30 group text-left block shadow-sm dark:shadow-none" onClick={() => handleUpsell("Lake Tour", "$25")}>
                                         <div className="flex items-center gap-3 mb-1">
-                                            <Waves className="w-4 h-4 text-lime-500 group-hover:scale-110 transition-transform" />
-                                            <span className="font-bold text-stone-200">Lake Tour</span>
+                                            <Waves className="w-4 h-4 text-lime-600 dark:text-lime-500 group-hover:scale-110 transition-transform" />
+                                            <span className="font-bold text-stone-800 dark:text-stone-200">Lake Tour</span>
                                         </div>
-                                        <p className="text-[10px] text-stone-500 pl-7 group-hover:text-stone-400">Visita los pueblos del lago en lancha.</p>
+                                        <p className="text-[10px] text-stone-500 pl-7 group-hover:text-stone-600 dark:group-hover:text-stone-400">Visita los pueblos del lago en lancha.</p>
                                     </Button>
 
-                                    <Button variant="outline" className="w-full justify-start h-auto py-3 px-4 border-white/5 bg-white/5 hover:bg-white/10 hover:border-cyan-500/30 group text-left block" onClick={() => handleUpsell("Lavandería", "$5")}>
+                                    <Button variant="outline" className="w-full justify-start h-auto py-3 px-4 border-stone-200 dark:border-white/5 bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 hover:border-cyan-500/30 group text-left block shadow-sm dark:shadow-none" onClick={() => handleUpsell("Lavandería", "$5")}>
                                         <div className="flex items-center gap-3 mb-1">
-                                            <Shirt className="w-4 h-4 text-cyan-500 group-hover:scale-110 transition-transform" />
-                                            <span className="font-bold text-stone-200">Lavandería</span>
+                                            <Shirt className="w-4 h-4 text-cyan-600 dark:text-cyan-500 group-hover:scale-110 transition-transform" />
+                                            <span className="font-bold text-stone-800 dark:text-stone-200">Lavandería</span>
                                         </div>
-                                        <p className="text-[10px] text-stone-500 pl-7 group-hover:text-stone-400">Recogida y entrega en tu habitación.</p>
+                                        <p className="text-[10px] text-stone-500 pl-7 group-hover:text-stone-600 dark:group-hover:text-stone-400">Recogida y entrega en tu habitación.</p>
                                     </Button>
                                 </div>
 
-                                <div className="pt-4 border-t border-white/5">
+                                <div className="pt-4 border-t border-stone-200 dark:border-white/5">
                                     <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-900/20" onClick={() => window.open("https://wa.me/50212345678", "_blank")}>
                                         <MessageCircle className="w-4 h-4 mr-2" /> Chat Concierge
                                     </Button>
@@ -903,17 +1045,18 @@ export default function MyBookingPage() {
             <AnimatePresence>
                 {/* Payment Modal */}
                 {/* Payment Modal - Report Payment Flow */}
-                {showPaymentModal && (
+                {/* Payment Modal - Report Payment Flow */}
+                {showPaymentModal && booking && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-stone-900 border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
                             <div className="p-6 text-center space-y-4">
-                                <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto text-emerald-500"><QrCode /></div>
-                                <h3 className="text-xl font-bold text-white">Reportar Pago</h3>
-                                <p className="text-sm text-stone-400">
+                                <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-500"><QrCode /></div>
+                                <h3 className="text-xl font-bold text-stone-900 dark:text-white">Reportar Pago</h3>
+                                <p className="text-sm text-stone-500 dark:text-stone-400">
                                     Realiza tu transferencia y repórtala aquí para que validemos tu reserva.
                                 </p>
 
-                                <div className="bg-white p-4 rounded-xl inline-block w-full">
+                                <div className="bg-stone-50 dark:bg-white p-4 rounded-xl inline-block w-full">
                                     {/* Bank Details */}
                                     <div className="bg-stone-50 p-3 rounded border border-stone-200 text-left space-y-2 mb-4">
                                         <p className="text-xs text-stone-500 font-bold uppercase">Datos Bancarios</p>
@@ -944,6 +1087,7 @@ export default function MyBookingPage() {
 
                                 <div className="flex flex-col gap-2">
                                     <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={async () => {
+                                        if (!booking) return
                                         const refInput = document.getElementById('paymentRef') as HTMLInputElement
                                         const ref = refInput?.value || "Sin referencia"
 
@@ -987,34 +1131,34 @@ export default function MyBookingPage() {
                 )}
 
                 {/* Self Check-in Modal */}
-                {showCheckInModal && (
+                {showCheckInModal && booking && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-stone-900 border border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
                             <div className="p-6 text-center space-y-4">
-                                <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center mx-auto text-indigo-500">
+                                <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mx-auto text-indigo-600 dark:text-indigo-500">
                                     <Smartphone className="w-6 h-6 animate-pulse" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white">¿Estás en la Recepción?</h3>
-                                <p className="text-stone-400 text-sm">
+                                <h3 className="text-xl font-bold text-stone-900 dark:text-white">¿Estás en la Recepción?</h3>
+                                <p className="text-stone-500 dark:text-stone-400 text-sm">
                                     Confirma que has llegado al hostal. Esto notificará a nuestro staff y activará tu estadía.
                                 </p>
 
                                 <div className="space-y-4 pt-2">
-                                    <div className="flex items-center justify-between gap-3 bg-white/5 p-3 rounded-lg border border-white/5">
+                                    <div className="flex items-center justify-between gap-3 bg-stone-50 dark:bg-white/5 p-3 rounded-lg border border-stone-200 dark:border-white/5">
                                         <div className="flex items-center gap-3">
-                                            <div className="bg-emerald-500/10 p-1.5 rounded-full text-emerald-500"><CheckCircle2 className="w-4 h-4" /></div>
+                                            <div className="bg-emerald-100 dark:bg-emerald-500/10 p-1.5 rounded-full text-emerald-600 dark:text-emerald-500"><CheckCircle2 className="w-4 h-4" /></div>
                                             <div>
-                                                <p className="text-xs text-stone-400 uppercase tracking-wider font-bold">Identidad</p>
-                                                <p className="text-sm text-stone-200 font-mono">{booking.guest_id_type?.toUpperCase()} • {booking.guest_id_number}</p>
+                                                <p className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wider font-bold">Identidad</p>
+                                                <p className="text-sm text-stone-800 dark:text-stone-200 font-mono">{booking.guest_id_type?.toUpperCase()} • {booking.guest_id_number}</p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3 bg-white/5 p-3 rounded-lg border border-white/5">
+                                    <div className="flex items-center justify-between gap-3 bg-stone-50 dark:bg-white/5 p-3 rounded-lg border border-stone-200 dark:border-white/5">
                                         <div className="flex items-center gap-3">
-                                            <div className="bg-emerald-500/10 p-1.5 rounded-full text-emerald-500"><CheckCircle2 className="w-4 h-4" /></div>
+                                            <div className="bg-emerald-100 dark:bg-emerald-500/10 p-1.5 rounded-full text-emerald-600 dark:text-emerald-500"><CheckCircle2 className="w-4 h-4" /></div>
                                             <div>
-                                                <p className="text-xs text-stone-400 uppercase tracking-wider font-bold">Pago</p>
-                                                <p className="text-sm text-stone-200 font-mono">Q{booking.total_price} • {booking.payment_reference || 'Pagado'}</p>
+                                                <p className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wider font-bold">Pago</p>
+                                                <p className="text-sm text-stone-800 dark:text-stone-200 font-mono">Q{booking.total_price} • {booking.payment_reference || 'Pagado'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1032,69 +1176,113 @@ export default function MyBookingPage() {
                 )}
 
                 {/* Honesty Bar Modal */}
-                {showHonestyModal && (
+                {showHonestyModal && booking && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end md:items-center justify-center sm:p-4 bg-black/60 backdrop-blur-sm">
                         <motion.div
                             initial={{ y: "100%" }}
                             animate={{ y: 0 }}
                             exit={{ y: "100%" }}
                             transition={{ type: "spring", bounce: 0, duration: 0.5 }}
-                            className="bg-stone-900 border-t md:border border-white/10 rounded-t-3xl md:rounded-2xl w-full max-w-lg h-[80vh] md:h-auto md:max-h-[80vh] shadow-2xl flex flex-col"
+                            className="bg-white dark:bg-stone-900 border-t md:border border-stone-200 dark:border-white/10 rounded-t-3xl md:rounded-2xl w-full max-w-lg h-[85vh] md:h-[800px] md:max-h-[85vh] shadow-xl flex flex-col"
                         >
-                            <div className="p-4 border-b border-white/5 flex justify-between items-center bg-stone-900/50 backdrop-blur-xl sticky top-0 z-10 rounded-t-3xl md:rounded-t-2xl">
+                            <div className="p-4 border-b border-stone-200 dark:border-white/5 flex justify-between items-center bg-white/90 dark:bg-stone-900/50 backdrop-blur-xl sticky top-0 z-10 rounded-t-3xl md:rounded-t-2xl shrink-0">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-amber-500/10 rounded-full text-amber-500"><Beer className="w-5 h-5" /></div>
+                                    <div className="p-2 bg-amber-100 dark:bg-amber-500/10 rounded-full text-amber-600 dark:text-amber-500"><Beer className="w-5 h-5" /></div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-white">Minibar Digital</h3>
-                                        <p className="text-xs text-stone-400">Confianza total. Anota lo que tomes.</p>
+                                        <h3 className="text-lg font-bold text-stone-900 dark:text-white">Minibar Digital</h3>
+                                        <p className="text-xs text-stone-500 dark:text-stone-400">Confianza total.</p>
                                     </div>
                                 </div>
                                 <Button variant="ghost" size="icon" onClick={() => setShowHonestyModal(false)}><X className="w-5 h-5" /></Button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                            <div className="flex-1 overflow-hidden flex flex-col">
                                 {loadingProducts ? (
-                                    <div className="flex justify-center py-10"><Loader2 className="animate-spin text-amber-500" /></div>
+                                    <div className="flex justify-center py-20"><Loader2 className="animate-spin text-amber-500 w-8 h-8" /></div>
                                 ) : (
-                                    <>
-                                        {['beer', 'soda', 'water', 'snack'].map(category => {
-                                            const items = products.filter(p => p.category === category)
-                                            if (items.length === 0) return null
-                                            return (
-                                                <div key={category} className="space-y-3">
-                                                    <h4 className="text-xs font-bold uppercase tracking-widest text-stone-500 pl-1">
-                                                        {category === 'beer' ? 'Cervezas' : category === 'soda' ? 'Refrescos' : category === 'water' ? 'Agua' : 'Snacks'}
-                                                    </h4>
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        {items.map(item => (
-                                                            <div key={item.id} className="relative group bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl p-3 transition-colors flex items-center justify-between"
-                                                                onClick={() => {
-                                                                    if (window.confirm(`¿Agregar ${item.name} (Q${item.price}) a tu cuenta?`)) {
-                                                                        handleAddCharge(item)
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <span className="text-2xl">{item.icon || '🥤'}</span>
-                                                                    <div>
-                                                                        <p className="font-bold text-stone-200 text-sm">{item.name}</p>
-                                                                        <p className="text-xs text-amber-500 font-mono">Q{item.price}</p>
-                                                                    </div>
-                                                                </div>
-                                                                <Button size="sm" variant="ghost" className="rounded-full w-8 h-8 p-0 bg-white/5 hover:bg-emerald-500 hover:text-white text-stone-400">
-                                                                    +
-                                                                </Button>
+                                    <Tabs defaultValue="beer" className="flex-1 flex flex-col h-full">
+                                        {/* Horizontal Scrollable Tabs */}
+                                        <div className="px-4 pt-2 pb-2">
+                                            <ScrollArea className="w-full whitespace-nowrap">
+                                                <TabsList className="bg-stone-100 dark:bg-stone-800/50 p-1 h-auto inline-flex w-auto rounded-xl">
+                                                    <TabsTrigger value="beer" className="data-[state=active]:bg-white dark:data-[state=active]:bg-stone-700 data-[state=active]:text-amber-600 dark:data-[state=active]:text-amber-500 data-[state=active]:shadow-sm rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wide">Cervezas</TabsTrigger>
+                                                    <TabsTrigger value="soda" className="data-[state=active]:bg-white dark:data-[state=active]:bg-stone-700 data-[state=active]:text-amber-600 dark:data-[state=active]:text-amber-500 data-[state=active]:shadow-sm rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wide">Refrescos</TabsTrigger>
+                                                    <TabsTrigger value="water" className="data-[state=active]:bg-white dark:data-[state=active]:bg-stone-700 data-[state=active]:text-amber-600 dark:data-[state=active]:text-amber-500 data-[state=active]:shadow-sm rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wide">Agua</TabsTrigger>
+                                                    <TabsTrigger value="snack" className="data-[state=active]:bg-white dark:data-[state=active]:bg-stone-700 data-[state=active]:text-amber-600 dark:data-[state=active]:text-amber-500 data-[state=active]:shadow-sm rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wide">Snacks</TabsTrigger>
+                                                </TabsList>
+                                            </ScrollArea>
+                                        </div>
+
+                                        {/* Content Areas */}
+                                        {['beer', 'soda', 'water', 'snack'].map(category => (
+                                            <TabsContent key={category} value={category} className="flex-1 overflow-y-auto p-4 pt-2 m-0 h-full max-h-full">
+                                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                                    {products.filter(p => p.category === category).map((item, idx) => (
+                                                        <motion.button
+                                                            key={item.id}
+                                                            initial={{ opacity: 0, scale: 0.9 }}
+                                                            animate={{ opacity: 1, scale: 1 }}
+                                                            transition={{ delay: idx * 0.05 }}
+                                                            className="relative group bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 border border-stone-200 dark:border-white/5 rounded-2xl p-4 flex flex-col items-center justify-between gap-3 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/10 active:scale-95 text-center"
+                                                            onClick={() => setConfirmProduct(item)}
+                                                        >
+                                                            <div className="text-4xl filter drop-shadow-sm mb-1 group-hover:scale-110 transition-transform text-center w-full">{item.icon}</div>
+                                                            <div className="w-full">
+                                                                <h4 className="font-bold text-stone-800 dark:text-stone-100 text-sm leading-tight text-center">{item.name}</h4>
+                                                                <p className="text-stone-500 text-[10px] mt-1 text-center">Disponible</p>
                                                             </div>
-                                                        ))}
-                                                    </div>
+                                                            <div className="w-full pt-2 border-t border-stone-100 dark:border-white/5 flex items-center justify-between">
+                                                                <span className="font-mono font-bold text-amber-600 dark:text-amber-500 text-sm">Q{item.price}</span>
+                                                                <div className="w-6 h-6 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                                                                    <Plus className="w-3.5 h-3.5" />
+                                                                </div>
+                                                            </div>
+                                                        </motion.button>
+                                                    ))}
+                                                    {products.filter(p => p.category === category).length === 0 && (
+                                                        <div className="col-span-2 py-10 text-center text-stone-400">
+                                                            <p className="text-sm">No hay productos en esta categoría</p>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )
-                                        })}
-                                    </>
+                                            </TabsContent>
+                                        ))}
+                                    </Tabs>
                                 )}
                             </div>
 
-                            <div className="p-4 border-t border-white/5 bg-stone-900/90 text-center">
+                            {/* Custom Confirmation Modal */}
+                            <AlertDialog open={!!confirmProduct} onOpenChange={(open) => !open && setConfirmProduct(null)}>
+                                <AlertDialogContent className="bg-white dark:bg-stone-900 border-stone-200 dark:border-white/10 rounded-2xl max-w-xs md:max-w-md">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle className="text-stone-900 dark:text-white flex items-center gap-2">
+                                            <div className="p-2 bg-amber-100 dark:bg-amber-500/10 rounded-full text-amber-600 dark:text-amber-500">
+                                                <Beer className="w-4 h-4" />
+                                            </div>
+                                            Confirmar Compra
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription className="text-stone-600 dark:text-stone-400 pt-2">
+                                            ¿Deseas agregar <b className="text-stone-900 dark:text-stone-200">{confirmProduct?.name}</b> a tu cuenta por <span className="font-mono font-bold text-stone-900 dark:text-stone-200">Q{confirmProduct?.price}</span>?
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel className="rounded-xl border-stone-200 dark:border-white/10" onClick={() => setConfirmProduct(null)}>
+                                            Cancelar
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                            className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl"
+                                            onClick={() => {
+                                                if (confirmProduct) handleAddCharge(confirmProduct)
+                                                setConfirmProduct(null)
+                                            }}
+                                        >
+                                            Confirmar +1
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+
+                            <div className="p-4 border-t border-stone-200 dark:border-white/5 bg-white dark:bg-stone-900/90 text-center">
                                 <p className="text-xs text-stone-500">
                                     Los cargos se sumarán a tu cuenta final. <br /> Puedes pagar todo al hacer Check-out.
                                 </p>

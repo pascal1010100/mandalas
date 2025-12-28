@@ -69,7 +69,7 @@ export function DashboardStats() {
     const adr = totalNightsSold > 0 ? projectedRevenue / totalNightsSold : 0
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
             {/* 1. Cash Flow (Real Money) - Emerald Glass */}
             <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-emerald-950/20 backdrop-blur-xl shadow-2xl group transition-all duration-300 hover:scale-[1.02] hover:bg-emerald-950/30">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-50 pointer-events-none" />
@@ -81,7 +81,7 @@ export function DashboardStats() {
                             <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2 mb-2">
                                 <DollarSign className="w-3 h-3" /> Caja Real
                             </p>
-                            <h3 className="text-3xl font-light text-white font-heading tracking-tight">
+                            <h3 className="text-2xl xl:text-3xl font-light text-white font-heading tracking-tight">
                                 ${collectedRevenue.toLocaleString('es-MX')}
                             </h3>
                         </div>
@@ -120,7 +120,7 @@ export function DashboardStats() {
                             <p className={cn("text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 mb-2", totalDebt > 0 ? "text-rose-400" : "text-stone-400")}>
                                 <AlertCircle className="w-3 h-3" /> Por Cobrar
                             </p>
-                            <h3 className={cn("text-3xl font-light font-heading tracking-tight", totalDebt > 0 ? "text-white" : "text-stone-400")}>
+                            <h3 className={cn("text-2xl xl:text-3xl font-light font-heading tracking-tight", totalDebt > 0 ? "text-white" : "text-stone-400")}>
                                 ${totalDebt.toLocaleString('es-MX')}
                             </h3>
                         </div>
@@ -148,7 +148,7 @@ export function DashboardStats() {
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest mb-2">Ocupación</p>
-                            <h3 className="text-3xl font-light text-white mt-1 font-heading">
+                            <h3 className="text-2xl xl:text-3xl font-light text-white mt-1 font-heading">
                                 {displayOccupancy}%
                             </h3>
                         </div>
@@ -182,7 +182,7 @@ export function DashboardStats() {
                             <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Pricing Power</p>
                             <div className="space-y-1">
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-3xl font-light text-white font-heading">${adr.toFixed(0)}</span>
+                                    <span className="text-2xl xl:text-3xl font-light text-white font-heading">${adr.toFixed(0)}</span>
                                     <span className="text-[10px] text-stone-500 font-mono uppercase">ADR</span>
                                 </div>
                             </div>

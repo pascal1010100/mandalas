@@ -65,7 +65,7 @@ export interface RoomConfig {
 
 // --- Database Interfaces (Snake Case) ---
 
-interface BookingRow {
+export interface BookingRow {
     id: string;
     guest_name: string;
     email: string;
@@ -89,6 +89,27 @@ interface BookingRow {
     guest_id_number?: string;
     payment_method?: 'card' | 'cash' | 'transfer' | 'other';
     payment_reference?: string;
+}
+
+export interface Charge {
+    id: string;
+    booking_id: string;
+    product_id: string | null;
+    item_name: string;
+    amount: number;
+    quantity: number;
+    status: 'pending' | 'paid';
+    created_at: string;
+}
+
+export interface Product {
+    id: string;
+    name: string;
+    price: number;
+    category: 'beer' | 'soda' | 'water' | 'snack';
+    icon: string;
+    active: boolean;
+    created_at: string;
 }
 
 interface RoomRow {

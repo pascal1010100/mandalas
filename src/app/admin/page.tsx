@@ -177,7 +177,7 @@ function AdminContent() {
                 {/* Right Column (Calendar & Operations) takes 1/3 */}
                 <div className="lg:col-span-1 space-y-8">
                     <StaggerReveal delay={0.2} className="h-full flex flex-col gap-8">
-                        <div className="h-[300px]">
+                        <div className="h-auto">
                             <MiniCalendarWidget />
                         </div>
 

@@ -23,9 +23,11 @@ import {
     Shield,
     Key,
     ClipboardCheck,
+    Loader2,
     Ghost,
     AlertTriangle,
     Users,
+    Plus,
 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 
@@ -144,22 +146,105 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
     // Honesty Bar / Extras Logic
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [extraCharges, setExtraCharges] = React.useState<any[]>([])
-    const [loadingCharges, setLoadingCharges] = React.useState(false)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [products, setProducts] = React.useState<any[]>([])
+    const [showAddCharge, setShowAddCharge] = React.useState(false)
+    const [newCharge, setNewCharge] = React.useState({ productId: "", quantity: 1 })
+
+    const fetchProducts = React.useCallback(async () => {
+        const { data } = await supabase.from('products').select('*').eq('active', true).order('name')
+        if (data) setProducts(data)
+    }, [])
+
 
     const fetchCharges = React.useCallback(async () => {
         if (!booking) return
-        setLoadingCharges(true)
         const { data } = await supabase.from('charges').select('*').eq('booking_id', booking.id).order('created_at', { ascending: false })
         if (data) setExtraCharges(data)
-        setLoadingCharges(false)
     }, [booking])
+
+    // Realtime Sync for Admin (Charges)
+    React.useEffect(() => {
+        if (!booking?.id) return
+
+        const channel = supabase
+            .channel(`admin-charges-${booking.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'charges',
+                    filter: `booking_id=eq.${booking.id}`
+                },
+                () => {
+                    fetchCharges()
+                    toast.info("Cargos actualizados")
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [booking?.id, fetchCharges])
 
     const handleDeleteCharge = async (id: string) => {
         if (!confirm("¿Eliminar este cargo?")) return
         const { error } = await supabase.from('charges').delete().eq('id', id)
         if (!error) {
-            setExtraCharges(prev => prev.filter(c => c.id !== id))
             toast.success("Cargo eliminado")
+            fetchCharges()
+        }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleToggleChargeStatus = async (charge: any) => {
+        const newStatus = charge.status === 'paid' ? 'pending' : 'paid'
+        const { error } = await supabase.from('charges').update({ status: newStatus }).eq('id', charge.id)
+        if (error) {
+            toast.error("Error al actualizar estado")
+        } else {
+            toast.success(`Cargo marcado como ${newStatus === 'paid' ? 'PAGADO' : 'PENDIENTE'}`)
+            fetchCharges()
+        }
+    }
+
+    const handleSettleAllCharges = async () => {
+        if (!booking) return
+        if (!confirm("¿Marcar TODOS los cargos extra como PAGADOS?")) return
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await supabase.from('charges').update({ status: 'paid' }).eq('booking_id', booking.id).eq('status', 'pending')
+        if (error) {
+            toast.error("Error al procesar")
+        } else {
+            toast.success("Todos los cargos han sido saldados")
+            fetchCharges()
+        }
+    }
+
+    const handleAddCharge = async () => {
+        if (!newCharge.productId) return
+
+        const product = products.find(p => p.id === newCharge.productId)
+        if (!product) return
+
+        const { error } = await supabase.from('charges').insert({
+            booking_id: booking?.id,
+            product_id: product.id,
+            item_name: product.name,
+            amount: product.price * newCharge.quantity,
+            quantity: newCharge.quantity,
+            status: 'pending' // Usually pending until paid with room
+        })
+
+        if (error) {
+            toast.error("Error al agregar cargo")
+        } else {
+            toast.success("Cargo agregado")
+            setNewCharge({ productId: "", quantity: 1 })
+            setShowAddCharge(false)
+            fetchCharges() // Refresh list
         }
     }
 
@@ -270,6 +355,8 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
 
             // Fetch Extras
             fetchCharges()
+            fetchProducts()
+
         }
     }, [booking, open, defaultOpenCancellation])
 
@@ -397,6 +484,20 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
             return
         }
 
+        // Payment Guard (Strict Checkout)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pendingExtras = extraCharges.some((c: any) => c.status !== 'paid')
+        const pendingRoom = booking.paymentStatus !== 'paid'
+
+        if (pendingRoom || pendingExtras) {
+            toast.error("Bloqueo de Salida: Saldos Pendientes", {
+                description: pendingRoom
+                    ? "La habitación no ha sido pagada."
+                    : "Hay extras consumidos sin pagar (Minibar)."
+            })
+            return
+        }
+
         await checkOutBooking(booking.id, isPaymentSettled ? 'paid' : 'pending')
         toast.success("Check-out realizado exitosamente", {
             description: isPaymentSettled ? "La cuenta ha sido marcada como pagada." : "El pago quedó pendiente."
@@ -429,6 +530,14 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
         // Identity Guard
         if (!idNumber || idNumber.length < 3) {
             toast.error("Identificación requerida para Check-in")
+            return
+        }
+
+        // Payment Guard (Strict Check-in)
+        if (booking.paymentStatus !== 'paid') {
+            toast.error("Pago Requerido", {
+                description: "Se debe pagar la estancia antes de ingresar (Check-in)."
+            })
             return
         }
 
@@ -1361,7 +1470,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                             value={formData.unitId || booking.unitId}
                                             onValueChange={(val) => setFormData({ ...formData, unitId: val })}
                                         >
-                                            <SelectTrigger className="h-9 bg-white dark:bg-stone-950 border-stone-300">
+                                            <SelectTrigger className="h-9 bg-white dark:bg-stone-950 border-stone-300 dark:border-stone-700">
                                                 <SelectValue placeholder="Selecciona una cama..." />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -1400,17 +1509,37 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
 
 
                     {/* DIGITIAL HONESTY BAR / EXTRAS */}
-                    {extraCharges.length > 0 && (
-                        <div className="space-y-4">
-                            <h4 className="text-sm font-bold uppercase tracking-wider text-stone-500 border-b border-stone-100 dark:border-stone-800 pb-2 flex items-center gap-2">
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800 pb-2">
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-stone-500 flex items-center gap-2">
                                 <DollarSign className="w-4 h-4" /> Minibar & Extras
                             </h4>
+                            {isEditing && (
+                                <div className="flex gap-2">
+                                    <Button size="sm" variant="ghost" className="h-6 text-xs text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30" onClick={() => setShowAddCharge(true)}>
+                                        <Plus className="w-3 h-3 mr-1" /> Agregar
+                                    </Button>
+                                    {extraCharges.some((c: any) => c.status !== 'paid') && (
+                                        <Button size="sm" variant="ghost" className="h-6 text-xs text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30" onClick={handleSettleAllCharges}>
+                                            <CheckCircle className="w-3 h-3 mr-1" /> Cobrar Todo
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {extraCharges.length > 0 ? (
                             <div className="bg-stone-50 dark:bg-stone-900/50 rounded-lg overflow-hidden border border-stone-100 dark:border-stone-800">
                                 {extraCharges.map(charge => (
                                     <div key={charge.id} className="flex justify-between items-center p-3 border-b border-stone-100 dark:border-stone-800 last:border-0 hover:bg-stone-100 dark:hover:bg-stone-800/50 transition-colors">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-lg">
+                                            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-lg relative">
                                                 {charge.item_name.includes('Cerveza') ? '🍺' : charge.item_name.includes('Cola') ? '🥤' : '⚡'}
+                                                {charge.status === 'paid' && (
+                                                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5 border border-white dark:border-stone-900">
+                                                        <CheckCircle className="w-2 h-2" />
+                                                    </div>
+                                                )}
                                             </div>
                                             <div>
                                                 <p className="font-medium text-stone-900 dark:text-stone-100 text-sm">{charge.item_name}</p>
@@ -1418,6 +1547,17 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-4">
+                                            <div
+                                                onClick={() => handleToggleChargeStatus(charge)}
+                                                className={cn(
+                                                    "text-[10px] font-bold px-2 py-0.5 rounded cursor-pointer select-none transition-colors border",
+                                                    charge.status === 'paid'
+                                                        ? "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800"
+                                                        : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800"
+                                                )}
+                                            >
+                                                {charge.status === 'paid' ? 'PAGADO' : 'PENDIENTE'}
+                                            </div>
                                             <span className="font-mono font-bold text-stone-700 dark:text-stone-300">Q{charge.amount}</span>
                                             {isEditing && (
                                                 <Button variant="ghost" size="icon" className="h-6 w-6 text-rose-400 hover:text-rose-600 hover:bg-rose-50" onClick={() => handleDeleteCharge(charge.id)}>
@@ -1432,8 +1572,12 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                     <span>Q{extraCharges.reduce((acc, curr) => acc + Number(curr.amount), 0)}</span>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="text-center py-4 bg-stone-50 dark:bg-stone-900/30 rounded-lg border border-dashed border-stone-200 dark:border-stone-800">
+                                <p className="text-xs text-stone-400">Sin cargos extra registrados</p>
+                            </div>
+                        )}
+                    </div>
 
                     <div className="flex items-center gap-4">
                         <div className="flex-1 bg-stone-50 dark:bg-stone-800/30 p-4 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col justify-center gap-3">
@@ -1454,18 +1598,22 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                 </div>
                                 <div
                                     className={cn(
-                                        "px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer transition-all select-none hover:opacity-80 active:scale-95",
+                                        "px-3 py-1.5 rounded-lg border text-xs font-bold uppercase cursor-pointer transition-all select-none hover:opacity-80 active:scale-95 flex items-center gap-2",
                                         booking.paymentStatus === 'paid'
                                             ? "bg-emerald-100 border-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-800 dark:text-emerald-400"
-                                            : "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-400"
+                                            : booking.paymentStatus === 'verifying'
+                                                ? "bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-400 animate-pulse"
+                                                : "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-400"
                                     )}
                                     onClick={() => {
+                                        // Toggle Logic: Paid -> Pending | Verifying/Pending -> Paid
                                         const newStatus = booking.paymentStatus === 'paid' ? 'pending' : 'paid'
                                         updateBooking(booking.id, { paymentStatus: newStatus })
-                                        toast.success(`Pago marcado como: ${newStatus === 'paid' ? 'PAGADO' : 'PENDIENTE'}`)
+                                        toast.success(newStatus === 'paid' ? "Pago CONFIRMADO" : "Pago marcado como PENDIENTE")
                                     }}
                                 >
-                                    {booking.paymentStatus === 'paid' ? "Pagado" : "Pendiente"}
+                                    {booking.paymentStatus === 'verifying' && <Loader2 className="w-3 h-3 animate-spin" />}
+                                    {booking.paymentStatus === 'paid' ? "Pagado" : booking.paymentStatus === 'verifying' ? "Verificar Pago" : "Pendiente"}
                                 </div>
                             </div>
 
@@ -1608,6 +1756,52 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                     )
                 }
             </DialogContent >
+
+            {/* ADD CHARGE DIALOG */}
+            <Dialog open={showAddCharge} onOpenChange={setShowAddCharge}>
+                <DialogContent className="sm:max-w-[400px]">
+                    <DialogHeader>
+                        <DialogTitle>Agregar Cargo Extra</DialogTitle>
+                        <DialogDescription>Selecciona un producto del minibar o servicio extra.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <Label>Producto</Label>
+                            <Select
+                                value={newCharge.productId}
+                                onValueChange={(val) => setNewCharge({ ...newCharge, productId: val })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar item..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {products.map(p => (
+                                        <SelectItem key={p.id} value={p.id}>
+                                            <span className="flex items-center gap-2">
+                                                <span>{p.icon}</span>
+                                                <span>{p.name}</span>
+                                                <Badge variant="secondary" className="ml-auto text-xs">Q{p.price}</Badge>
+                                            </span>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label>Cantidad</Label>
+                            <div className="flex items-center gap-2">
+                                <Button variant="outline" size="icon" onClick={() => setNewCharge(prev => ({ ...prev, quantity: Math.max(1, prev.quantity - 1) }))}>-</Button>
+                                <span className="w-12 text-center font-bold">{newCharge.quantity}</span>
+                                <Button variant="outline" size="icon" onClick={() => setNewCharge(prev => ({ ...prev, quantity: prev.quantity + 1 }))}>+</Button>
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowAddCharge(false)}>Cancelar</Button>
+                        <Button onClick={handleAddCharge} disabled={!newCharge.productId} className="bg-indigo-600 text-white hover:bg-indigo-700">Agregar Cargo</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </Dialog >
     )
 }
