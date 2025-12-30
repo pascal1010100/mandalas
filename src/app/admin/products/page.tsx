@@ -33,7 +33,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { toast } from "sonner"
-import { Plus, Search, Pencil, Trash2, Package, Beer, Coffee, Cookie, Zap } from "lucide-react"
+import { Plus, Search, Pencil, Trash2, Package, Beer, Coffee, Cookie, Zap, X } from "lucide-react"
 
 // Types
 interface Product {
@@ -273,6 +273,13 @@ export default function ProductsPage() {
             {/* Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
+                    {/* Manual Close Button for consistency */}
+                    <button
+                        onClick={() => setIsDialogOpen(false)}
+                        className="absolute top-4 right-4 p-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 rounded-full transition-all z-50 text-stone-500"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
                     <DialogHeader>
                         <DialogTitle>{editingProduct ? "Editar Producto" : "Nuevo Producto"}</DialogTitle>
                         <DialogDescription>

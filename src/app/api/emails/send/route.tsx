@@ -11,12 +11,6 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { type, to, data } = body;
 
-        // Validation
-        if (!process.env.RESEND_API_KEY) {
-            console.error("Resend API Key invalid");
-            return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
-        }
-
         if (!to) {
             return NextResponse.json({ error: "Missing recipient" }, { status: 400 });
         }
@@ -54,11 +48,18 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Invalid email type" }, { status: 400 });
         }
 
-        // Send Email
+        // MOCK SENDING FOR DEV/DEMO
+        // If no real key is set, we simulate per protocol
+        if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_123') {
+            console.log(`[MOCK EMAIL] To: ${to} | Subject: ${subject}`)
+            return NextResponse.json({ message: "Mock Email sent successfully", id: "mock_id_123" });
+        }
+
+        // Real Send
         const { data: result, error } = await resend.emails.send({
-            from: 'Mandalas <reservas@mandalashostel.com>', // User needs to verify this domain eventually
+            from: 'Mandalas <reservas@mandalashostel.com>',
             to: [to],
-            // bcc: ['admin@mandalashostel.com'], // Optional copy for admin
+            // bcc: ['admin@mandalashostel.com'],
             subject: subject,
             react: emailComponent,
         });

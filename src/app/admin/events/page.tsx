@@ -13,7 +13,8 @@ import {
     Clock,
     Music,
     Utensils,
-    Users
+    Users,
+    X
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -46,7 +47,7 @@ import { Suspense } from "react"
 // ... imports
 
 function EventsContent() {
-    const { events, addEvent, removeEvent, fetchEvents } = useAppStore()
+    const { events, addEvent, deleteEvent, fetchEvents } = useAppStore()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const searchParams = useSearchParams()
 
@@ -117,6 +118,13 @@ function EventsContent() {
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[500px] bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100">
+                        {/* Manual Close Button */}
+                        <button
+                            onClick={() => setIsDialogOpen(false)}
+                            className="absolute top-4 right-4 p-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 rounded-full transition-all z-50 text-stone-500"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
                         <DialogHeader>
                             <DialogTitle>Crear Nuevo Evento</DialogTitle>
                             <DialogDescription className="text-stone-500 dark:text-stone-400">
@@ -230,7 +238,7 @@ function EventsContent() {
                                             {event.category}
                                         </span>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="text-stone-300 dark:text-stone-600 hover:text-red-500 dark:hover:text-red-400 -mt-2 -mr-2" onClick={() => removeEvent(event.id)}>
+                                    <Button variant="ghost" size="icon" className="text-stone-300 dark:text-stone-600 hover:text-red-500 dark:hover:text-red-400 -mt-2 -mr-2" onClick={() => deleteEvent(event.id)}>
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
                                 </div>

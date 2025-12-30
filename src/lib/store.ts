@@ -112,6 +112,16 @@ export interface Product {
     created_at: string;
 }
 
+export interface ServiceRequest {
+    id: string;
+    booking_id: string;
+    type: 'cleaning' | 'maintenance' | 'amenity' | 'other';
+    status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+    description?: string;
+    created_at: string;
+    completed_at?: string;
+}
+
 interface RoomRow {
     id: string;
     location: 'pueblo' | 'hideout';
@@ -137,6 +147,7 @@ interface AppState {
     addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'totalPrice' | 'status'> & { totalPrice?: number, status?: BookingStatus }, totalPrice?: number) => Promise<void>;
     updateBookingStatus: (id: string, status: BookingStatus) => Promise<void>;
     updateBooking: (id: string, data: Partial<Omit<Booking, 'id' | 'createdAt'>>) => Promise<void>;
+    confirmGroupBookings: (email: string) => Promise<void>;
     checkOutBooking: (id: string, paymentStatus: 'paid' | 'pending') => Promise<void>;
     deleteBooking: (id: string) => Promise<void>;
 
@@ -148,7 +159,14 @@ interface AppState {
     // Events
     fetchEvents: () => Promise<void>;
     addEvent: (event: Omit<AppEvent, 'id'>) => Promise<void>;
-    removeEvent: (id: string) => Promise<void>;
+    deleteEvent: (id: string) => Promise<void>;
+
+    // Service Requests (Elite Integration)
+    serviceRequests: ServiceRequest[];
+    fetchServiceRequests: () => Promise<void>;
+    createServiceRequest: (bookingId: string, type: ServiceRequest['type'], description?: string) => Promise<void>;
+    updateServiceRequestStatus: (id: string, status: ServiceRequest['status']) => Promise<void>;
+    subscribeToServiceRequests: () => () => void;
 
     // Room & Price Management
     updateRoomPrice: (roomId: string, price: number) => Promise<void>;
@@ -157,7 +175,7 @@ interface AppState {
     updateRoomMaxGuests: (roomId: string, maxGuests: number) => Promise<void>;
 
     // Logic
-    checkAvailability: (location: string, roomType: string, startDate: string, endDate: string, requestedGuests?: number, excludeBookingId?: string) => boolean;
+    checkAvailability: (location: string, roomType: string, startDate: string, endDate: string, requestedGuests?: number, excludeBookingId?: string, checkUnitId?: string) => boolean;
     getRemainingCapacity: (location: string, roomType: string, startDate: string, endDate: string) => number;
     fetchRooms: () => Promise<void>;
     subscribeToBookings: () => () => void;
@@ -255,6 +273,7 @@ export const useAppStore = create<AppState>()(
         (set, get) => ({
             bookings: [],
             events: [],
+            serviceRequests: [],
             rooms: initialRooms,
             isLoading: false,
 
@@ -310,6 +329,18 @@ export const useAppStore = create<AppState>()(
 
                                         const isMaintenance = (row.guest_name === 'MANTENIMIENTO') || (row.status === 'maintenance') || (b.status === 'maintenance'); // Persist maintenance if not overridden
 
+                                        // ELITE NOTIFICATIONS: Check for State Changes
+                                        if (row.status === 'checked_in' && b.status !== 'checked_in') {
+                                            toast.success(`¡Check-in Realizado!`, { description: `${b.guestName} ha ingresado al hostal.` })
+                                            // Play sound? (Optional, maybe too intrusive)
+                                        }
+                                        if (row.payment_status === 'verifying' && b.paymentStatus !== 'verifying') {
+                                            toast.warning(`Pago por Verificar`, { description: `${b.guestName} ha reportado un pago.` })
+                                        }
+                                        if (row.status === 'checked_out' && b.status !== 'checked_out') {
+                                            toast.info(`Check-out Completado`, { description: `${b.guestName} ha dejado el hostal.` })
+                                        }
+
                                         return {
                                             ...b,
                                             guestName: val(row.guest_name, b.guestName),
@@ -340,7 +371,12 @@ export const useAppStore = create<AppState>()(
                                     return b
                                 })
                             })
-                            toast.success("Reserva actualizada")
+                            // Generic update toast removed in favor of specfic ones, or kept silent for background details updates
+                            if (window.location.pathname.includes('/admin')) {
+                                // Only show generic toast if no specific one triggered? 
+                                // Actually, let's keep it silent for generic updates (like typo fixes) to avoid noise.
+                                // The specific alerts above handle the important stuff.
+                            }
                         }
                         // Silent update usually better for edits, but maybe notify for status changes?
                         // toast.info("Reserva actualizada en tiempo real")
@@ -460,6 +496,76 @@ export const useAppStore = create<AppState>()(
                     console.log("Loaded rooms from DB:", mappedRooms.length);
                 } else {
                     console.log("Using local/fallback rooms (DB empty or error)");
+                }
+            },
+
+            // --- Service Requests (Elite Integration) ---
+            fetchServiceRequests: async () => {
+                const { data, error } = await supabase
+                    .from('service_requests')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+
+                if (error) {
+                    console.error("Error fetching requests:", error)
+                } else if (data) {
+                    set({ serviceRequests: data as ServiceRequest[] })
+                }
+            },
+
+            createServiceRequest: async (bookingId, type, description) => {
+                const payload = {
+                    booking_id: bookingId,
+                    type,
+                    description,
+                    status: 'pending'
+                }
+
+                const { error } = await supabase.from('service_requests').insert([payload])
+
+                if (error) {
+                    console.error("Error creating request:", error)
+                    toast.error("Error al enviar solicitud")
+                    throw error
+                } else {
+                    toast.success("Solicitud enviada al equipo")
+                    await get().fetchServiceRequests()
+                }
+            },
+
+            updateServiceRequestStatus: async (id, status) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const payload: any = { status }
+                if (status === 'completed') {
+                    payload.completed_at = new Date().toISOString()
+                }
+
+                const { error } = await supabase
+                    .from('service_requests')
+                    .update(payload)
+                    .eq('id', id)
+
+                if (error) {
+                    console.error("Error updating request:", error)
+                    toast.error("Error al actualizar estado")
+                } else {
+                    toast.success("Estado actualizado")
+                    await get().fetchServiceRequests()
+                }
+            },
+
+            subscribeToServiceRequests: () => {
+                console.log("Subscribing to Service Requests...")
+                const channel = supabase
+                    .channel('service-requests-channel')
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, () => {
+                        get().fetchServiceRequests()
+                    })
+                    .subscribe()
+
+                return () => {
+                    supabase.removeChannel(channel)
                 }
             },
 
@@ -673,13 +779,97 @@ export const useAppStore = create<AppState>()(
                     }
                 }
 
-                const { error } = await supabase.from('bookings').update({ status }).eq('id', id)
+
+
+                // Prepare Payload
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const payload: any = { status };
+
+                if (status === 'cancelled') {
+                    payload.cancelled_at = new Date().toISOString();
+                }
+
+                const { error } = await supabase.from('bookings').update(payload).eq('id', id)
                 if (error) {
                     console.error('Error updating status:', error)
                     toast.error('Error al actualizar estado')
                     return
                 }
+
+                // Refresh local state first
                 await get().fetchBookings()
+
+                // AUTOMATED EMAIL SYSTEM (Elite Feature)
+                // Trigger email in background after successful update
+                try {
+                    const updatedBooking = get().bookings.find(b => b.id === id);
+                    if (updatedBooking && updatedBooking.email) {
+                        let emailType = '';
+                        if (status === 'confirmed') emailType = 'confirmation';
+                        if (status === 'cancelled') emailType = 'cancellation';
+
+                        if (emailType) {
+                            const emailData = {
+                                type: emailType,
+                                to: updatedBooking.email,
+                                data: {
+                                    guestName: updatedBooking.guestName,
+                                    bookingId: updatedBooking.id.slice(0, 8).toUpperCase(),
+                                    checkIn: updatedBooking.checkIn,
+                                    checkOut: updatedBooking.checkOut,
+                                    roomName: get().rooms.find(r => r.id === updatedBooking.roomType)?.label || updatedBooking.roomType,
+                                    totalPrice: updatedBooking.totalPrice,
+                                    location: updatedBooking.location,
+                                    refundStatus: updatedBooking.refundStatus,
+                                    refundAmount: updatedBooking.refundAmount
+                                }
+                            };
+
+                            // Non-blocking call
+                            fetch('/api/emails/send', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(emailData)
+                            }).then(res => {
+                                if (res.ok) toast.success(`📧 Email de ${emailType === 'confirmation' ? 'Confirmación' : 'Cancelación'} enviado`);
+                                else console.error("Email send failed");
+                            }).catch(err => console.error("Email fetch error:", err));
+                        }
+                    }
+                } catch (e) {
+                    console.error("Email trigger error:", e);
+                }
+            },
+
+            confirmGroupBookings: async (email: string) => {
+                const state = get()
+                const groupBookings = state.bookings.filter(b => b.email === email && b.status === 'pending')
+
+                if (groupBookings.length === 0) return
+
+                const ids = groupBookings.map(b => b.id)
+
+                // 1. Update Local
+                set({
+                    bookings: state.bookings.map(b =>
+                        ids.includes(b.id) ? { ...b, status: 'confirmed', paymentStatus: 'paid' } : b
+                    )
+                })
+
+                // 2. Update DB
+                const { error } = await supabase
+                    .from('bookings')
+                    .update({ status: 'confirmed', payment_status: 'paid' })
+                    .in('id', ids)
+
+                if (error) {
+                    console.error("Error batch confirming:", error)
+                    toast.error("Error al confirmar grupo")
+                    // Revert? Complex, let's assume success or refresh.
+                    await get().fetchBookings()
+                } else {
+                    toast.success(`Grupo confirmado (${ids.length} reservas)`)
+                }
             },
 
             updateBooking: async (id, data) => {
@@ -735,7 +925,8 @@ export const useAppStore = create<AppState>()(
                 const booking = get().bookings.find(b => b.id === id)
                 if (booking) {
                     // Start async update but don't block UI
-                    get().updateRoomStatus(booking.roomType, 'dirty').catch(err =>
+                    // FIX: Pass unitId to only dirtify the specific bed, not the whole room
+                    get().updateRoomStatus(booking.roomType, 'dirty', booking.unitId).catch(err =>
                         console.error("Auto-dirty failed", err)
                     )
                     toast.success('Check-out realizado y cama liberada para venta')
@@ -800,7 +991,7 @@ export const useAppStore = create<AppState>()(
                 await get().fetchEvents()
             },
 
-            removeEvent: async (id) => {
+            deleteEvent: async (id) => {
                 const { error } = await supabase.from('events').delete().eq('id', id)
                 if (error) {
                     console.error('Error deleting event:', error)
@@ -812,7 +1003,7 @@ export const useAppStore = create<AppState>()(
 
             resetData: () => set({ bookings: [], events: initialEvents }),
 
-            checkAvailability: (location, roomId, startDate, endDate, requestedGuests = 1, excludeBookingId?: string) => {
+            checkAvailability: (location, roomId, startDate, endDate, requestedGuests = 1, excludeBookingId?: string, checkUnitId?: string) => {
                 const state = get();
                 const start = new Date(startDate);
                 const end = new Date(endDate);
@@ -841,16 +1032,22 @@ export const useAppStore = create<AppState>()(
                 });
 
                 if (isDorm) {
+                    // 1. Specific Unit Collision Check
+                    if (checkUnitId) {
+                        const isUnitTaken = overlappingBookings.some(b => b.unitId === checkUnitId);
+                        if (isUnitTaken) {
+                            console.warn(`[Availability] Unit ${checkUnitId} in ${roomId} is ALREADY BOOKED.`);
+                            return false;
+                        }
+                    }
+
+                    // 2. Global Capacity Check
                     const currentOccupancy = overlappingBookings.reduce((sum, booking) => {
                         const g = parseInt(booking.guests) || 1;
                         return sum + g;
                     }, 0);
 
                     const blocked = (currentOccupancy + requestedGuests) > capacity;
-
-                    if (blocked || currentOccupancy > 0) {
-                        console.log(`[Availability] Dorm Check: ${roomId} (${currentOccupancy}/${capacity}) + Req: ${requestedGuests} -> Blocked: ${blocked}`);
-                    }
                     return !blocked;
 
                 } else {

@@ -30,12 +30,27 @@ import { MiniCalendarWidget } from "@/components/admin/dashboard/mini-calendar"
 import { useState, Suspense } from "react"
 import { cn } from "@/lib/utils"
 
+import { useEffect } from "react" // Add useEffect import
+
 function AdminContent() {
-    const { bookings } = useAppStore()
+    const {
+        bookings,
+        serviceRequests,
+        fetchServiceRequests,
+        updateServiceRequestStatus,
+        subscribeToServiceRequests
+    } = useAppStore()
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const [createModalInitialValues, setCreateModalInitialValues] = useState<{ location: "pueblo" | "hideout", roomType: string, unitId: string } | null>(null)
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+
+    // Service Requests: Realtime Sync
+    useEffect(() => {
+        fetchServiceRequests()
+        const unsubscribe = subscribeToServiceRequests()
+        return () => unsubscribe()
+    }, [])
 
     const handleBookingClick = (booking: Booking) => {
         setSelectedBooking(booking)
@@ -81,9 +96,14 @@ function AdminContent() {
         document.body.removeChild(link)
     }
 
-    const activeBookingsCount = bookings.filter(b => b.status === 'confirmed').length
-    const checkInsToday = bookings.filter(b => isSameDay(parseISO(b.checkIn), new Date()) && b.status !== 'cancelled')
-    const checkOutsToday = bookings.filter(b => isSameDay(parseISO(b.checkOut), new Date()) && b.status !== 'cancelled')
+    const activeBookingsCount = bookings.filter(b =>
+        b.status === 'confirmed' || b.status === 'checked_in'
+    ).length
+
+    // Robust local date comparison (avoids timezone vs UTC shifts)
+    const todayStr = format(new Date(), 'yyyy-MM-dd')
+    const checkInsToday = bookings.filter(b => b.checkIn.startsWith(todayStr) && b.status !== 'cancelled')
+    const checkOutsToday = bookings.filter(b => b.checkOut.startsWith(todayStr) && b.status !== 'cancelled')
 
     return (
         <div className="space-y-10">
@@ -115,56 +135,140 @@ function AdminContent() {
                 </div>
             </div>
 
-            {/* ACTION CENTER: PENDING PAYMENTS */}
-            {bookings.some(b => b.paymentStatus === 'verifying') && (
-                <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                            <Activity className="w-5 h-5 animate-pulse" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-indigo-900 dark:text-indigo-100">Pagos por Verificar</h3>
-                            <p className="text-sm text-indigo-700 dark:text-indigo-300">
-                                Hay {bookings.filter(b => b.paymentStatus === 'verifying').length} pagos reportados que requieren tu aprobación.
-                            </p>
+            {/* ACTION CENTER: SERVICE REQUESTS & PAYMENTS */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {serviceRequests.filter(r => r.status === 'pending').length > 0 && (
+                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl p-4 flex flex-col justify-between gap-4 animate-in fade-in slide-in-from-top-4 shadow-sm">
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                                <Activity className="w-5 h-5 animate-pulse" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-bold text-amber-900 dark:text-amber-100 flex items-center justify-between">
+                                    Solicitudes de Huéspedes
+                                    <Badge variant="secondary" className="bg-amber-200 text-amber-900">{serviceRequests.filter(r => r.status === 'pending').length}</Badge>
+                                </h3>
+                                <div className="mt-2 space-y-2 max-h-40 overflow-y-auto pr-1">
+                                    {serviceRequests.filter(r => r.status === 'pending').map(req => {
+                                        const guestName = bookings.find(b => b.id === req.booking_id)?.guestName || "Huésped"
+                                        const roomName = bookings.find(b => b.id === req.booking_id)?.roomType || "Habitación"
+                                        return (
+                                            <div key={req.id} className="text-sm bg-white/50 dark:bg-black/20 p-2 rounded border border-amber-200/50 flex justify-between items-center">
+                                                <div>
+                                                    <span className="font-bold text-amber-900 dark:text-amber-200 block text-xs">{req.type === 'cleaning' ? '✨ Limpieza' : '🔧 Mantenimiento'}</span>
+                                                    <span className="text-xs text-stone-600 dark:text-stone-400">{guestName} ({roomName})</span>
+                                                </div>
+                                                <Button size="sm" variant="ghost" className="h-6 w-6 p-0 hover:bg-emerald-200 text-emerald-700" onClick={() => updateServiceRequestStatus(req.id, 'completed')}>
+                                                    ✅
+                                                </Button>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
                         </div>
                     </div>
+                )}
 
-                    {bookings.filter(b => b.paymentStatus === 'verifying').length > 1 ? (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    size="sm"
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-md shadow-indigo-900/20 whitespace-nowrap"
-                                >
-                                    Revisar {bookings.filter(b => b.paymentStatus === 'verifying').length} Pagos
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                {bookings.filter(b => b.paymentStatus === 'verifying').map(b => (
-                                    <DropdownMenuItem key={b.id} onClick={() => handleBookingClick(b)}>
-                                        <div className="flex flex-col">
-                                            <span className="font-bold">{b.guestName}</span>
-                                            <span className="text-xs opacity-70">Ref: {b.paymentReference || 'N/A'} - Q{b.totalPrice}</span>
-                                        </div>
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    ) : (
-                        <Button
-                            size="sm"
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-md shadow-indigo-900/20 whitespace-nowrap"
-                            onClick={() => {
-                                const firstVerifying = bookings.find(b => b.paymentStatus === 'verifying')
-                                if (firstVerifying) handleBookingClick(firstVerifying)
-                            }}
-                        >
-                            Revisar Pago
-                        </Button>
-                    )}
-                </div>
-            )}
+                {/* PENDING RESERVATIONS (e.g. Pay at Hotel / Manual) */}
+                {bookings.some(b => b.status === 'pending' && b.paymentStatus !== 'verifying') && (
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl p-4 flex flex-col justify-between gap-4 animate-in fade-in slide-in-from-top-4 shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                <Activity className="w-5 h-5 animate-pulse" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-emerald-900 dark:text-emerald-100">Reservas Pendientes</h3>
+                                <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                                    Hay {bookings.filter(b => b.status === 'pending' && b.paymentStatus !== 'verifying').length} reservas por confirmar.
+                                </p>
+                            </div>
+                        </div>
+
+                        {bookings.filter(b => b.status === 'pending' && b.paymentStatus !== 'verifying').length > 1 ? (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        className="bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-md shadow-emerald-900/20 whitespace-nowrap"
+                                    >
+                                        Gestionar {bookings.filter(b => b.status === 'pending' && b.paymentStatus !== 'verifying').length} Reservas
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    {bookings.filter(b => b.status === 'pending' && b.paymentStatus !== 'verifying').map(b => (
+                                        <DropdownMenuItem key={b.id} onClick={() => handleBookingClick(b)}>
+                                            <div className="flex flex-col">
+                                                <span className="font-bold">{b.guestName}</span>
+                                                <span className="text-xs opacity-70">{new Date(b.checkIn).toLocaleDateString()} - {b.roomType}</span>
+                                            </div>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : (
+                            <Button
+                                size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white border-none shadow-md shadow-emerald-900/20 whitespace-nowrap"
+                                onClick={() => handleBookingClick(bookings.find(b => b.status === 'pending' && b.paymentStatus !== 'verifying')!)}
+                            >
+                                Ver Reserva Pendiente
+                            </Button>
+                        )}
+                    </div>
+                )}
+
+
+                {bookings.some(b => b.paymentStatus === 'verifying') && (
+                    <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-xl p-4 flex flex-col justify-between gap-4 animate-in fade-in slide-in-from-top-4 shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                <Activity className="w-5 h-5 animate-pulse" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-indigo-900 dark:text-indigo-100">Pagos por Verificar</h3>
+                                <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                                    Hay {bookings.filter(b => b.paymentStatus === 'verifying').length} pagos reportados.
+                                </p>
+                            </div>
+                        </div>
+
+                        {bookings.filter(b => b.paymentStatus === 'verifying').length > 1 ? (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        className="bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-md shadow-indigo-900/20 whitespace-nowrap"
+                                    >
+                                        Revisar {bookings.filter(b => b.paymentStatus === 'verifying').length} Pagos
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    {bookings.filter(b => b.paymentStatus === 'verifying').map(b => (
+                                        <DropdownMenuItem key={b.id} onClick={() => handleBookingClick(b)}>
+                                            <div className="flex flex-col">
+                                                <span className="font-bold">{b.guestName}</span>
+                                                <span className="text-xs opacity-70">Ref: {b.paymentReference || 'N/A'} - Q{b.totalPrice}</span>
+                                            </div>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : (
+                            <Button
+                                size="sm"
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-md shadow-indigo-900/20 whitespace-nowrap"
+                                onClick={() => {
+                                    const firstVerifying = bookings.find(b => b.paymentStatus === 'verifying')
+                                    if (firstVerifying) handleBookingClick(firstVerifying)
+                                }}
+                            >
+                                Revisar Pago
+                            </Button>
+                        )}
+                    </div>
+                )}
+            </div>
 
             {/* Main Content Grid: Stats, Room Grid, Operations */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -228,9 +332,11 @@ function AdminContent() {
                                                             </div>
                                                         </div>
                                                         <Badge className={
-                                                            b.status === 'confirmed' ? "bg-emerald-500/10 text-emerald-400 border-none" : "bg-amber-500/10 text-amber-400 border-none"
+                                                            b.status === 'confirmed' ? "bg-emerald-500/10 text-emerald-400 border-none" :
+                                                                b.status === 'checked_in' ? "bg-blue-500/10 text-blue-400 border-none" :
+                                                                    "bg-amber-500/10 text-amber-400 border-none"
                                                         }>
-                                                            {b.status === 'confirmed' ? 'Conf.' : 'Pend.'}
+                                                            {b.status === 'confirmed' ? 'Conf.' : b.status === 'checked_in' ? 'En Casa' : 'Pend.'}
                                                         </Badge>
                                                     </div>
                                                 ))

@@ -70,7 +70,7 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 
-import { Booking, useAppStore } from "@/lib/store"
+import { Booking, Charge, useAppStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
@@ -129,7 +129,9 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
     const [paymentMethod, setPaymentMethod] = React.useState<"cash" | "card" | "transfer" | "other">("cash")
     const [paymentReference, setPaymentReference] = React.useState("")
 
-    // GROUP LOGIC (Elite) - Moved to top to avoid Hook Rule Violation
+    // GROUP LOGIC (Elite)
+    const { confirmGroupBookings } = useAppStore() // Destructure new action
+
     const relatedBookings = React.useMemo(() => {
         if (!booking) return []
         return bookings.filter(b =>
@@ -140,12 +142,18 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
         )
     }, [booking, bookings])
 
+    // Calculate pending group count for UI
+    const pendingGroupCount = React.useMemo(() => {
+        if (!booking || booking.status !== 'pending') return 0
+        return relatedBookings.filter(b => b.status === 'pending').length
+    }, [booking, relatedBookings])
+
     const groupBookings = React.useMemo(() => booking ? [booking, ...relatedBookings] : [], [booking, relatedBookings])
     const isGroup = relatedBookings.length > 0
 
     // Honesty Bar / Extras Logic
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [extraCharges, setExtraCharges] = React.useState<any[]>([])
+    const [extraCharges, setExtraCharges] = React.useState<Charge[]>([])
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [products, setProducts] = React.useState<any[]>([])
     const [showAddCharge, setShowAddCharge] = React.useState(false)
@@ -485,8 +493,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
         }
 
         // Payment Guard (Strict Checkout)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pendingExtras = extraCharges.some((c: any) => c.status !== 'paid')
+        const pendingExtras = extraCharges.some(c => c.status !== 'paid')
         const pendingRoom = booking.paymentStatus !== 'paid'
 
         if (pendingRoom || pendingExtras) {
@@ -601,6 +608,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                 onOpenChange(val)
             }}>
                 <DialogContent className="sm:max-w-[425px] bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
+                    <button onClick={() => setShowCheckOut(false)} className="absolute top-4 right-4 p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors z-[60]"><X className="w-4 h-4" /></button>
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                             <LogOut className="w-5 h-5 text-indigo-500" /> Realizar Check-Out
@@ -690,24 +698,43 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                     <p><strong>Método:</strong> {booking.paymentMethod === 'transfer' ? 'Transferencia' : booking.paymentMethod}</p>
                                 </div>
 
-                                <div className="flex gap-2">
-                                    <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => {
-                                        updateBooking(booking.id, { paymentStatus: 'paid', status: 'confirmed' })
-                                        setIsPaymentSettled(true)
-                                        toast.success("Pago confirmado y Reserva Confirmada")
-                                        sendEmail('confirmation')
-                                    }}>
-                                        <CheckCircle className="w-3.5 h-3.5 mr-1" /> Confirmar Pago & Reserva
-                                    </Button>
-                                    <Button size="sm" variant="outline" className="w-full border-blue-200 text-blue-700 hover:bg-blue-100" onClick={() => {
-                                        if (window.confirm("¿Rechazar este pago? Volverá a estado pendiente.")) {
-                                            updateBooking(booking.id, { paymentStatus: 'pending', paymentReference: null })
-                                            setIsPaymentSettled(false)
-                                            toast.info("Pago rechazado / devuelto a pendiente")
-                                        }
-                                    }}>
-                                        <X className="w-3.5 h-3.5 mr-1" /> Rechazar
-                                    </Button>
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex gap-2">
+                                        <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => {
+                                            updateBooking(booking.id, { paymentStatus: 'paid', status: 'confirmed' })
+                                            setIsPaymentSettled(true)
+                                            toast.success("Pago confirmado y Reserva Confirmada")
+                                            sendEmail('confirmation')
+                                        }}>
+                                            <CheckCircle className="w-3.5 h-3.5 mr-1" /> Confirmar Pago & Reserva
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="w-full border-blue-200 text-blue-700 hover:bg-blue-100" onClick={() => {
+                                            if (window.confirm("¿Rechazar este pago? Volverá a estado pendiente.")) {
+                                                updateBooking(booking.id, { paymentStatus: 'pending', paymentReference: null })
+                                                setIsPaymentSettled(false)
+                                                toast.info("Pago rechazado / devuelto a pendiente")
+                                            }
+                                        }}>
+                                            <X className="w-3.5 h-3.5 mr-1" /> Rechazar
+                                        </Button>
+                                    </div>
+
+                                    {/* GROUP CONFIRMATION BUTTON */}
+                                    {pendingGroupCount > 0 && (
+                                        <Button
+                                            size="sm"
+                                            className="w-full bg-stone-800 hover:bg-stone-900 text-white mt-2 border-t border-white/20"
+                                            onClick={async () => {
+                                                if (confirm(`¿Confirmar TODAS las ${pendingGroupCount + 1} reservas de este grupo como PAGADAS?`)) {
+                                                    await confirmGroupBookings(booking.email)
+                                                    onOpenChange(false)
+                                                }
+                                            }}
+                                        >
+                                            <Users className="w-3.5 h-3.5 mr-2" />
+                                            Confirmar Grupo Completo ({pendingGroupCount + 1})
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         ) : (
@@ -797,6 +824,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                 onOpenChange(val)
             }}>
                 <DialogContent className="sm:max-w-[425px] bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
+                    <button onClick={() => setShowDeleteConfirmation(false)} className="absolute top-4 right-4 p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors z-[60]"><X className="w-4 h-4" /></button>
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-rose-600 flex items-center gap-2">
                             <Trash2 className="w-5 h-5" /> Eliminar Reserva
@@ -840,6 +868,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                 onOpenChange(val)
             }}>
                 <DialogContent className="sm:max-w-[425px] bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
+                    <button onClick={() => setShowPaymentCollectionDialog(false)} className="absolute top-4 right-4 p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors z-[60]"><X className="w-4 h-4" /></button>
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-emerald-600 flex items-center gap-2">
                             <DollarSign className="w-5 h-5" /> Registrar Pago
@@ -917,6 +946,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                 onOpenChange(val)
             }}>
                 <DialogContent className="sm:max-w-[425px] bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
+                    <button onClick={() => setShowCheckInDialog(false)} className="absolute top-4 right-4 p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors z-[60]"><X className="w-4 h-4" /></button>
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-emerald-600 flex items-center gap-2">
                             <Shield className="w-5 h-5" /> Check-in de Seguridad
@@ -991,6 +1021,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                 onOpenChange(val)
             }}>
                 <DialogContent className="sm:max-w-[425px] bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
+                    <button onClick={() => setShowCancellation(false)} className="absolute top-4 right-4 p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors z-[60]"><X className="w-4 h-4" /></button>
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold text-rose-600 flex items-center gap-2">
                             <XCircle className="w-5 h-5" />
@@ -1115,6 +1146,14 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent" />
                     </div>
+
+                    {/* Manual Close Button (Fix for "X doesn't work/is hidden") */}
+                    <button
+                        onClick={() => onOpenChange(false)}
+                        className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-all z-50"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
 
                     {/* Content Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-6 flex justify-between items-end">
@@ -1519,7 +1558,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                     <Button size="sm" variant="ghost" className="h-6 text-xs text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30" onClick={() => setShowAddCharge(true)}>
                                         <Plus className="w-3 h-3 mr-1" /> Agregar
                                     </Button>
-                                    {extraCharges.some((c: any) => c.status !== 'paid') && (
+                                    {extraCharges.some((c: Charge) => c.status !== 'paid') && (
                                         <Button size="sm" variant="ghost" className="h-6 text-xs text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30" onClick={handleSettleAllCharges}>
                                             <CheckCircle className="w-3 h-3 mr-1" /> Cobrar Todo
                                         </Button>
@@ -1643,7 +1682,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                         {/* 1. CONFIRMATION Button (For Pending Bookings) */}
                         {booking.status === 'pending' && !isEditing && (
                             <Button
-                                onClick={() => {
+                                onClick={async () => {
                                     // GUARD RAIL 1: Contact Info Check
                                     if (!booking.email && !booking.phone) {
                                         setIsEditing(true)
@@ -1663,10 +1702,10 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                         if (booking.paymentStatus !== 'paid' && booking.paymentStatus !== 'verifying') {
                                             setShowPaymentAlert(true)
                                         } else {
-                                            updateBookingStatus(booking.id, 'confirmed')
+                                            await updateBookingStatus(booking.id, 'confirmed')
                                             toast.success("Reserva Confirmada")
                                             // Send Confirmation Email automatically
-                                            sendEmail('confirmation')
+                                            sendEmail('confirmation').catch(e => console.error(e))
                                             onOpenChange(false)
                                         }
                                     }
@@ -1696,10 +1735,12 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                     <AlertDialogAction
                                         className="bg-amber-600 hover:bg-amber-700 text-white"
-                                        onClick={() => {
+                                        onClick={async () => {
                                             if (booking.id) {
-                                                updateBookingStatus(booking.id, 'confirmed')
-                                                toast.success("Reserva Confirmada (Sin Pago)")
+                                                await updateBookingStatus(booking.id, 'confirmed')
+                                                toast.success("Reserva Confirmada (Pago Pendiente)")
+                                                sendEmail('confirmation')
+                                                setShowPaymentAlert(false)
                                                 onOpenChange(false)
                                             }
                                         }}
@@ -1760,6 +1801,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
             {/* ADD CHARGE DIALOG */}
             <Dialog open={showAddCharge} onOpenChange={setShowAddCharge}>
                 <DialogContent className="sm:max-w-[400px]">
+                    <button onClick={() => setShowAddCharge(false)} className="absolute top-4 right-4 p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors z-[60]"><X className="w-4 h-4" /></button>
                     <DialogHeader>
                         <DialogTitle>Agregar Cargo Extra</DialogTitle>
                         <DialogDescription>Selecciona un producto del minibar o servicio extra.</DialogDescription>

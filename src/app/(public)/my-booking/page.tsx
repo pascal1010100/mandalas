@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Loader2, ArrowRight, ArrowLeft, ShieldCheck, Calendar, Users, BedDouble, MapPin, Copy, ExternalLink, MessageCircle, CheckCircle2, Clock, Wallet, Wifi, Info, Save, X, Utensils, Music, Sparkles, Bus, Waves, Shirt, QrCode, Smartphone, PartyPopper, Beer, ShoppingBag, Plus } from "lucide-react"
+import { Search, Loader2, ArrowRight, ArrowLeft, ShieldCheck, Calendar, Users, BedDouble, MapPin, Copy, ExternalLink, MessageCircle, CheckCircle2, Clock, Wallet, Wifi, Info, Save, X, Utensils, Music, Sparkles, Bus, Waves, Shirt, QrCode, Smartphone, PartyPopper, Beer, ShoppingBag, Plus, CreditCard, Wrench } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { format, differenceInDays } from "date-fns"
 import { es } from "date-fns/locale"
@@ -55,6 +55,8 @@ const LOCATION_ASSETS = {
     }
 }
 
+import { APP_CONFIG } from "@/lib/config"
+
 export default function MyBookingPage() {
     // Search State
     // Search State
@@ -93,9 +95,14 @@ export default function MyBookingPage() {
 
             if (data && data.length > 0) {
                 setAllBookings(data)
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const active = data.find((b: any) => new Date(b.check_out) >= new Date()) || data[0]
-                if (active) {
+
+                // Logic: Multi-booking -> Dashboard/List. Single -> Details.
+                if (data.length > 1) {
+                    setViewMode('list')
+                    setBooking(null)
+                } else {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const active = data.find((b: any) => new Date(b.check_out) >= new Date()) || data[0]
                     setBooking(active)
                     setViewMode('details')
                 }
@@ -245,22 +252,29 @@ export default function MyBookingPage() {
 
             setAllBookings(finalBookings)
 
-            // Auto-select latest active booking
-            const active = finalBookings.find(b => new Date(b.check_out) >= new Date()) || finalBookings[0]
-            if (active) {
-                setBooking(active)
+            // 3. Logic: If multiple bookings, SHOW LIST (Dashboard). If single, SHOW DETAILS.
+            if (finalBookings.length > 1) {
+                // User has a group or multiple trips -> Show Dashboard
+                setViewMode('list')
+                setBooking(null)
+                toast.success(`Hola de nuevo! Tienes ${finalBookings.length} reservas activas.`)
+            } else if (finalBookings.length === 1) {
+                // Single booking -> Go straight to details
+                setBooking(finalBookings[0])
                 setViewMode('details')
             } else {
-                toast.error("No encontramos reservas activas con esos datos")
+                toast.error("No encontramos reservas con ese dato")
             }
-
-        } catch (error) {
-            console.error(error)
+        } catch (e) {
+            console.error(e)
             toast.error("Error al buscar reserva")
         } finally {
             setLoading(false)
         }
     }
+
+    // Handlers for "Tu Grupo" navigation
+    // ...
 
     // Auto-Restore Session
     useEffect(() => {
@@ -346,10 +360,26 @@ export default function MyBookingPage() {
     const [showPaymentModal, setShowPaymentModal] = useState(false)
     const [showCheckInModal, setShowCheckInModal] = useState(false)
 
+    const [loadingRequest, setLoadingRequest] = useState(false)
+    const { createServiceRequest } = useAppStore()
+
     const handleUpsell = (service: string, price: string) => {
         if (!booking) return
         const text = `Hola, soy ${booking.guest_name}. Me gustaría reservar el servicio: ${service} (${service}). Mi reserva es: ${booking.id.slice(0, 6)}...`
         window.open(`https://wa.me/50212345678?text=${encodeURIComponent(text)}`, '_blank')
+    }
+
+    const handleServiceRequest = async (type: 'cleaning' | 'maintenance', desc: string) => {
+        if (!booking) return
+        setLoadingRequest(true)
+        try {
+            await createServiceRequest(booking.id, type, desc)
+            toast.success("Solicitud recibida. Staff notificado.")
+        } catch (e) {
+            toast.error("Error al enviar solicitud.")
+        } finally {
+            setLoadingRequest(false)
+        }
     }
 
     const handleSelfCheckIn = async () => {
@@ -398,14 +428,17 @@ export default function MyBookingPage() {
         if (!booking) return
         try {
             toast.loading("Agregando a tu cuenta...", { id: "add-charge" })
-            const { error } = await supabase.from('charges').insert({
+            const { data, error } = await supabase.from('charges').insert({
                 booking_id: booking.id,
                 product_id: product.id,
                 item_name: product.name,
                 amount: product.price,
                 status: 'pending'
-            })
+            }).select().single()
             if (error) throw error
+
+            // Instant UI Update
+            if (data) setMyCharges(prev => [data, ...prev])
             toast.success(`+ ${product.name} agregado`, { id: "add-charge" })
 
             // Optional: Update booking total locally if we were tracking it, 
@@ -418,6 +451,38 @@ export default function MyBookingPage() {
 
     const handleCheckout = async () => {
         if (!booking) return
+
+        // GUARD 1: Room Payment
+        if (booking.payment_status !== 'paid') {
+            toast.error("Salida Bloqueada", {
+                description: "Debes liquidar el pago de la habitación antes de salir."
+            })
+            return
+        }
+
+        // GUARD 2: Minibar Charges (DB Verification)
+        // We query the DB directly to ensure client state isn't stale
+        const { count, error: countError } = await supabase
+            .from('charges')
+            .select('*', { count: 'exact', head: true })
+            .eq('booking_id', booking.id)
+            .eq('status', 'pending')
+
+        if (countError) {
+            toast.error("Error verificando cuenta. Intenta de nuevo.")
+            return
+        }
+
+        if (count && count > 0) {
+            toast.error("Salida Bloqueada", {
+                description: `Tienes ${count} consumos sin pagar en el Minibar (Verificado).`
+            })
+            // Force refresh local state just in case
+            const { data: latestCharges } = await supabase.from('charges').select('*').eq('booking_id', booking.id)
+            if (latestCharges) setMyCharges(latestCharges)
+            return
+        }
+
         try {
             // In a real scenario, this might trigger a 'checkout_pending' status for staff review
             // For this flow, we mark it as checked_out to close the loop
@@ -425,8 +490,7 @@ export default function MyBookingPage() {
             if (error) throw error
 
             toast.success("¡Gracias por tu visita! Esperamos verte pronto.")
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setBooking((prev: any) => prev ? ({ ...prev, status: 'checked_out' }) : null)
+            setBooking((prev: BookingRow | null) => prev ? ({ ...prev, status: 'checked_out' }) : null)
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const jsConfetti = (window as any).confetti
@@ -437,21 +501,48 @@ export default function MyBookingPage() {
     }
 
     // 2. BOOKING SELECTION LIST (New Lobby)
+    // 2. BOOKING SELECTION LIST (New Lobby)
     if (viewMode === 'list') {
+        const lobbyBg = LOCATION_ASSETS.pueblo.bg // Default to Pueblo for Lobby
+
         return (
-            <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-colors duration-500">
-                {/* <ParticlesBackground /> */}
-                <div className="relative z-10 w-full max-w-2xl space-y-6">
-                    <div className="text-center space-y-2">
-                        <h1 className="text-3xl font-bold text-stone-900 dark:text-white tracking-tight">Tus Reservas</h1>
-                        <p className="text-stone-500 dark:text-stone-400">Hemos encontrado múltiples estancias. Selecciona una para continuar.</p>
+            <div className="min-h-screen relative flex flex-col items-center justify-center p-6 overflow-hidden">
+                {/* Dynamic Background */}
+                <div className="fixed inset-0 z-0">
+                    <img
+                        src={lobbyBg}
+                        className="w-full h-full object-cover brightness-[0.4] blur-sm scale-110"
+                        alt="Lobby Background"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/60 to-stone-950/80" />
+                </div>
+
+                {/* Dashboard Container */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative z-10 w-full max-w-4xl bg-stone-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl space-y-8"
+                >
+                    <div className="text-center space-y-4">
+                        <Badge variant="outline" className="uppercase tracking-[0.3em] text-[10px] py-1.5 px-3 bg-white/5 border-white/10 text-stone-300">
+                            Portal de Huésped
+                        </Badge>
+                        <h1 className="text-4xl md:text-5xl font-black font-heading text-white tracking-tight drop-shadow-xl">
+                            Tus Aventuras
+                        </h1>
+                        <p className="text-lg text-stone-300 font-light max-w-xl mx-auto">
+                            Hemos encontrado múltiples reservas asociadas a tu cuenta. <br className="hidden md:block" /> Selecciona una para acceder a tu concierge digital.
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {allBookings.map((b) => (
-                            <motion.div
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {allBookings.map((b, idx) => (
+                            <motion.button
                                 key={b.id}
-                                whileHover={{ scale: 1.02 }}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.1 }}
+                                whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.08)" }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => {
                                     setBooking(b)
@@ -459,39 +550,59 @@ export default function MyBookingPage() {
                                     setIdNumber(b.guest_id_number || "")
                                     setViewMode('details')
                                 }}
-                                className="cursor-pointer bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border border-stone-200 dark:border-white/10 p-6 rounded-xl hover:border-emerald-500/50 hover:bg-white dark:hover:bg-stone-900 transition-all group shadow-sm dark:shadow-none"
+                                className="group relative text-left bg-white/5 border border-white/10 p-6 rounded-2xl hover:border-emerald-500/50 transition-all w-full flex flex-col justify-between h-48 overflow-hidden"
                             >
-                                <div className="flex justify-between items-start mb-4">
-                                    <Badge variant="outline" className={cn("capitalize", b.location === 'hideout' ? "bg-lime-100 text-lime-800 border-lime-200 dark:bg-lime-900 dark:text-lime-100 dark:border-lime-800" : "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900 dark:text-amber-100 dark:border-amber-800")}>
-                                        {b.location}
-                                    </Badge>
-                                    <Badge variant="outline" className="border-stone-200 dark:border-white/20 text-stone-600 dark:text-stone-300">
-                                        {b.status === 'confirmed' ? 'Confirmada' : b.status}
-                                    </Badge>
+                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/0 group-hover:to-emerald-500/10 transition-colors duration-500" />
+
+                                <div className="relative z-10 flex justify-between items-start">
+                                    <div className="space-y-1">
+                                        <Badge variant="outline" className={cn("text-[10px] uppercase tracking-wider py-1 border-none", b.location === 'hideout' ? "bg-lime-500/20 text-lime-400" : "bg-amber-500/20 text-amber-400")}>
+                                            {b.location === 'hideout' ? 'The Hideout' : 'Pueblo'}
+                                        </Badge>
+                                        <h3 className="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors mt-2">
+                                            {b.room_type.replace(/_/g, ' ')}
+                                        </h3>
+                                        <p className="text-xs text-stone-400 uppercase tracking-widest font-bold">
+                                            {format(new Date(b.check_in), 'd MMM', { locale: es })} - {format(new Date(b.check_out), 'd MMM', { locale: es })}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <Badge variant="outline" className={cn(
+                                            "capitalize border-none text-[10px] px-2 py-0.5",
+                                            b.status === 'confirmed' ? "bg-emerald-500/20 text-emerald-400" :
+                                                b.payment_status === 'pending' ? "bg-amber-500/20 text-amber-400" : "bg-stone-500/20 text-stone-400"
+                                        )}>
+                                            {b.status === 'confirmed' ? 'Confirmada' : b.status}
+                                        </Badge>
+                                    </div>
                                 </div>
-                                <h3 className="text-xl font-bold text-stone-900 dark:text-white mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                                    {b.room_type}
-                                </h3>
-                                <p className="text-sm text-stone-500 dark:text-stone-400 mb-4 font-mono">
-                                    {format(new Date(b.check_in), 'dd MMM')} - {format(new Date(b.check_out), 'dd MMM')}
-                                </p>
-                                <div className="flex items-center text-xs text-stone-400 dark:text-stone-500 gap-2 group-hover:text-stone-600 dark:group-hover:text-stone-300 transition-colors">
-                                    Click para gestionar <ArrowRight className="w-3 h-3" />
+
+                                <div className="relative z-10 flex items-center justify-between pt-4 border-t border-white/5">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-stone-300">
+                                            <Users className="w-3 h-3" />
+                                        </div>
+                                        <span className="text-xs text-stone-400">{b.guests} Huésped{b.guests > 1 ? 'es' : ''}</span>
+                                    </div>
+                                    <div className="text-xs text-emerald-400 font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
+                                        Gestionar <ArrowRight className="w-3 h-3" />
+                                    </div>
                                 </div>
-                            </motion.div>
+                            </motion.button>
                         ))}
                     </div>
 
-                    <Button variant="ghost" className="w-full text-stone-500 hover:text-stone-900 dark:hover:text-white" onClick={() => {
-                        setViewMode('search')
-                        setBooking(null)
-                    }}>
-                        <span className="mr-2">←</span> Volver al inicio
-                    </Button>
-                </div>
+                    <div className="pt-4 border-t border-white/5 text-center">
+                        <Button variant="ghost" className="text-stone-500 hover:text-white hover:bg-white/5" onClick={() => {
+                            setViewMode('search')
+                            setBooking(null)
+                        }}>
+                            <span className="mr-2">←</span> Buscar otra reserva
+                        </Button>
+                    </div>
+                </motion.div>
             </div>
         )
-
     }
 
     // Calculated Totals
@@ -532,20 +643,25 @@ export default function MyBookingPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col md:flex-row justify-between items-end gap-8 mb-12"
                 >
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-3">
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-4 duration-700 delay-100">
                             {booking && (
-                                <Badge variant="outline" className={cn("uppercase tracking-widest text-[10px] bg-white/40 dark:bg-white/5 border-stone-200 dark:border-white/20 text-stone-800 dark:text-white backdrop-blur-md shadow-sm dark:shadow-none")}>
+                                <Badge variant="outline" className={cn("uppercase tracking-[0.2em] text-[10px] py-1.5 px-3 bg-white/40 dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-900 dark:text-white backdrop-blur-md shadow-sm")}>
                                     {booking.location === 'hideout' ? 'The Hideout' : 'Pueblo'}
                                 </Badge>
                             )}
+                            {booking && booking.status === 'confirmed' && (
+                                <Badge variant="outline" className="uppercase tracking-[0.2em] text-[10px] py-1.5 px-3 bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 backdrop-blur-md animate-pulse">
+                                    Reserva Confirmada
+                                </Badge>
+                            )}
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-black font-heading text-stone-900 dark:text-white drop-shadow-sm dark:drop-shadow-2xl tracking-tight">
+                        <h1 className="text-5xl md:text-7xl font-black font-heading text-stone-900 dark:text-white drop-shadow-sm dark:drop-shadow-2xl tracking-tighter leading-none animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
                             {booking ? `Hola, ${booking.guest_name.split(' ')[0]}` : "Bienvenido"}
                         </h1>
-                        <p className="text-lg text-stone-600 dark:text-stone-300 font-light max-w-lg">
+                        <p className="text-lg md:text-xl text-stone-600 dark:text-stone-300 font-light max-w-lg leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
                             {booking
-                                ? "Aquí tienes todo lo necesario para tu aventura. Disfruta tu estancia."
+                                ? "Tu refugio está listo. Aquí tienes todo lo necesario para tu aventura."
                                 : "Ingresa tus datos para acceder a tu panel de viaje exclusivo."}
                         </p>
                     </div>
@@ -720,23 +836,30 @@ export default function MyBookingPage() {
                                         >
                                             {/* BADGE LOGIC */}
                                             <div className={cn("w-16 h-16 rounded-full flex items-center justify-center border-4 shadow-xl translation-all duration-300",
-                                                booking.payment_status === 'paid'
+                                                booking.status === 'checked_in'
                                                     ? "border-emerald-500 text-emerald-400 bg-emerald-500/10 shadow-emerald-500/20"
-                                                    : booking.payment_status === 'verifying'
-                                                        ? "border-indigo-500 text-indigo-400 bg-indigo-500/10 shadow-indigo-500/20 animate-pulse"
-                                                        : "border-amber-500 text-amber-500 bg-amber-500/10 shadow-amber-500/20 group-hover:border-amber-400"
+                                                    : booking.payment_status === 'paid'
+                                                        ? "border-emerald-500 text-emerald-400 bg-emerald-500/10 shadow-emerald-500/20"
+                                                        : booking.payment_status === 'verifying'
+                                                            ? "border-indigo-500 text-indigo-400 bg-indigo-500/10 shadow-indigo-500/20 animate-pulse"
+                                                            : "border-amber-500 text-amber-500 bg-amber-500/10 shadow-amber-500/20 group-hover:border-amber-400"
                                             )}>
-                                                {booking.payment_status === 'paid' && <CheckCircle2 className="w-8 h-8" />}
-                                                {booking.payment_status === 'verifying' && <Loader2 className="w-8 h-8 animate-spin" />}
-                                                {booking.payment_status === 'pending' && <Clock className="w-8 h-8 group-hover:animate-pulse" />}
-                                                {/* Fallback for verifying if TS issue in switch */}
-                                                {booking.payment_status === 'verifying' && <Loader2 className="w-8 h-8 animate-spin" />}
+                                                {booking.status === 'checked_in' ? <BedDouble className="w-8 h-8" /> : (
+                                                    <>
+                                                        {booking.payment_status === 'paid' && <CheckCircle2 className="w-8 h-8" />}
+                                                        {booking.payment_status === 'verifying' && <Loader2 className="w-8 h-8 animate-spin" />}
+                                                        {booking.payment_status === 'pending' && <Clock className="w-8 h-8 group-hover:animate-pulse" />}
+                                                    </>
+                                                )}
                                             </div>
 
                                             <p className="text-xs font-bold uppercase tracking-widest flex items-center gap-1 text-center">
-                                                {booking.payment_status === 'paid' && "Confirmada"}
-                                                {booking.payment_status === 'verifying' && "Verificando"}
-                                                {booking.payment_status === 'pending' && "Abono Pendiente"}
+                                                {booking.status === 'checked_in'
+                                                    ? "En Estadía"
+                                                    : booking.payment_status === 'paid' ? "Confirmada"
+                                                        : booking.payment_status === 'verifying' ? "Verificando"
+                                                            : (booking.payment_method === 'transfer' ? "Abono Pendiente" : "Pago en Recepción")
+                                                }
 
                                                 {booking.payment_status === 'pending' && <ExternalLink className="w-3 h-3 opacity-50" />}
                                             </p>
@@ -857,39 +980,70 @@ export default function MyBookingPage() {
                                             </div>
                                         )}
 
-                                        {/* Grand Total */}
-                                        <div className="pt-4 border-t border-stone-200 dark:border-white/5 mt-2 space-y-1">
-                                            <div className="flex justify-between items-center text-xs text-stone-400">
-                                                <span>Total Consumido</span>
-                                                <span className="font-mono">
-                                                    Q{totalConsumed.toFixed(2)}
-                                                </span>
+                                        {/* Grand Total Breakdown */}
+                                        <div className="pt-4 border-t border-stone-200 dark:border-white/5 mt-2 space-y-3">
+                                            {/* Summary Rows */}
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between items-center text-xs">
+                                                    <span className="text-stone-500">Alojamiento</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-bold uppercase",
+                                                            booking.payment_status === 'paid' ? "bg-emerald-100 text-emerald-700" :
+                                                                booking.payment_status === 'verifying' ? "bg-indigo-100 text-indigo-700" :
+                                                                    "bg-amber-100 text-amber-700"
+                                                        )}>
+                                                            {booking.payment_status === 'paid' ? 'Pagado' : booking.payment_status === 'verifying' ? 'Verificando' : 'Pendiente'}
+                                                        </span>
+                                                        <span className="font-mono text-stone-900 dark:text-stone-300">Q{booking.total_price}</span>
+                                                    </div>
+                                                </div>
+                                                {myCharges.length > 0 && (
+                                                    <div className="flex justify-between items-center text-xs">
+                                                        <span className="text-stone-500">Extras</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-mono text-stone-900 dark:text-stone-300">Q{myCharges.reduce((acc, c) => acc + Number(c.amount), 0)}</span>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div className="flex justify-between items-end">
-                                                <span className="text-sm font-bold text-stone-500 dark:text-stone-300">Total Pendiente</span>
-                                                <div className="text-right">
-                                                    <span className={cn(
-                                                        "text-2xl font-bold font-heading",
-                                                        totalPending > 0
-                                                            ? "text-amber-600 dark:text-amber-500"
-                                                            : "text-emerald-600 dark:text-emerald-500"
-                                                    )}>
-                                                        Q{totalPending.toFixed(2)}
-                                                    </span>
+
+                                            {/* Final Result */}
+                                            <div className="flex justify-between items-end bg-stone-100 dark:bg-white/5 p-3 rounded-xl">
+                                                <div className="flex flex-col">
+                                                    <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">Total Pendiente</span>
                                                     {totalPending > 0 && (
-                                                        <p className="text-[10px] text-amber-600 dark:text-amber-500 font-bold animate-pulse">
-                                                            Pagar en Recepción
-                                                        </p>
+                                                        <span className="text-[10px] text-amber-600 dark:text-amber-500 animate-pulse font-medium">
+                                                            {booking.payment_method === 'transfer' ? "Requiere Abono" : "Pagar en Recepción"}
+                                                        </span>
                                                     )}
                                                 </div>
+                                                <span className={cn(
+                                                    "text-2xl font-bold font-heading",
+                                                    totalPending > 0
+                                                        ? "text-amber-600 dark:text-amber-500"
+                                                        : "text-emerald-600 dark:text-emerald-500"
+                                                )}>
+                                                    Q{totalPending.toFixed(2)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Primary Action Button - Dynamic based on state */}
                                     {booking.payment_status === 'pending' && (
-                                        <Button className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold h-12 shadow-lg shadow-amber-900/20" onClick={() => setShowPaymentModal(true)}>
-                                            <Wallet className="w-4 h-4 mr-2" /> Confirmar Reserva (Pagar)
+                                        <Button
+                                            className={cn("w-full font-bold h-12 shadow-lg",
+                                                booking.payment_method === 'transfer'
+                                                    ? "bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 shadow-amber-900/20 text-white"
+                                                    : "bg-stone-900 hover:bg-stone-800 dark:bg-white dark:text-stone-900 border border-stone-200 dark:border-white/10"
+                                            )}
+                                            onClick={() => setShowPaymentModal(true)}
+                                        >
+                                            {booking.payment_method === 'transfer' ? (
+                                                <><Wallet className="w-4 h-4 mr-2" /> Confirmar Reserva (Pagar)</>
+                                            ) : (
+                                                <><CreditCard className="w-4 h-4 mr-2" /> Ver Detalles de Pago</>
+                                            )}
                                         </Button>
                                     )}
 
@@ -999,31 +1153,82 @@ export default function MyBookingPage() {
                                 </Card>
 
                                 <div className="space-y-3">
+                                    <p className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 px-1">Servicios de Habitación</p>
+
+                                    {/* Cleaning Request */}
+                                    {/* Cleaning Request - Elite Motion */}
+                                    <motion.button
+                                        whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.6)" }}
+                                        whileTap={{ scale: 0.98 }}
+                                        disabled={loadingRequest}
+                                        className="w-full text-left p-4 rounded-xl border border-white/20 dark:border-white/5 bg-white/40 dark:bg-white/5 shadow-sm backdrop-blur-md transition-all group relative overflow-hidden"
+                                        onClick={() => handleServiceRequest('cleaning', 'Solicitud de limpieza estándar')}
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                        <div className="flex items-center gap-3 mb-1 relative z-10">
+                                            {loadingRequest ? <Loader2 className="w-5 h-5 animate-spin text-emerald-600" /> : <div className="p-2 bg-emerald-100 dark:bg-emerald-500/20 rounded-full text-emerald-600 dark:text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors"><Sparkles className="w-4 h-4" /></div>}
+                                            <span className="font-bold text-stone-800 dark:text-stone-200">Solicitar Limpieza</span>
+                                        </div>
+                                        <p className="text-[10px] text-stone-500 pl-11 group-hover:text-stone-600 dark:group-hover:text-stone-400">Nuestro equipo pasará en breve.</p>
+                                    </motion.button>
+
+                                    {/* Report Issue - Elite Motion */}
+                                    <motion.button
+                                        whileHover={{ scale: 1.02, backgroundColor: "rgba(255,255,255,0.6)" }}
+                                        whileTap={{ scale: 0.98 }}
+                                        disabled={loadingRequest}
+                                        className="w-full text-left p-4 rounded-xl border border-white/20 dark:border-white/5 bg-white/40 dark:bg-white/5 shadow-sm backdrop-blur-md transition-all group relative overflow-hidden"
+                                        onClick={() => handleServiceRequest('maintenance', 'Reporte de problema en habitación')}
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/5 to-red-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                        <div className="flex items-center gap-3 mb-1 relative z-10">
+                                            {loadingRequest ? <Loader2 className="w-5 h-5 animate-spin text-red-600" /> : <div className="p-2 bg-red-100 dark:bg-red-500/20 rounded-full text-red-600 dark:text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors"><Wrench className="w-4 h-4" /></div>}
+                                            <span className="font-bold text-stone-800 dark:text-stone-200">Reportar Problema</span>
+                                        </div>
+                                        <p className="text-[10px] text-stone-500 pl-11 group-hover:text-stone-600 dark:group-hover:text-stone-400">¿Algo no funciona? Avísanos.</p>
+                                    </motion.button>
+
+                                    <div className="h-4" /> {/* Spacer */}
                                     <p className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 px-1">Mejora tu viaje</p>
 
-                                    <Button variant="outline" className="w-full justify-start h-auto py-3 px-4 border-stone-200 dark:border-white/5 bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 hover:border-amber-500/30 group text-left block shadow-sm dark:shadow-none" onClick={() => handleUpsell("Shuttle Privado", "$35")}>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="w-full text-left p-3 rounded-xl border border-white/20 dark:border-white/5 bg-white/40 dark:bg-white/5 hover:border-amber-500/30 backdrop-blur-md transition-all group"
+                                        onClick={() => handleUpsell("Shuttle Privado", "$35")}
+                                    >
                                         <div className="flex items-center gap-3 mb-1">
-                                            <Bus className="w-4 h-4 text-amber-600 dark:text-amber-500 group-hover:scale-110 transition-transform" />
-                                            <span className="font-bold text-stone-800 dark:text-stone-200">Shuttle Privado</span>
+                                            <div className="p-1.5 bg-amber-100 dark:bg-amber-500/20 rounded-lg text-amber-600 dark:text-amber-500 group-hover:scale-110 transition-transform"><Bus className="w-4 h-4" /></div>
+                                            <span className="font-bold text-stone-800 dark:text-stone-200 text-sm">Shuttle Privado</span>
                                         </div>
-                                        <p className="text-[10px] text-stone-500 pl-7 group-hover:text-stone-600 dark:group-hover:text-stone-400">Transporte seguro desde el aeropuerto.</p>
-                                    </Button>
+                                        <p className="text-[10px] text-stone-500 pl-9">Transporte seguro desde el aeropuerto.</p>
+                                    </motion.button>
 
-                                    <Button variant="outline" className="w-full justify-start h-auto py-3 px-4 border-stone-200 dark:border-white/5 bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 hover:border-lime-500/30 group text-left block shadow-sm dark:shadow-none" onClick={() => handleUpsell("Lake Tour", "$25")}>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="w-full text-left p-3 rounded-xl border border-white/20 dark:border-white/5 bg-white/40 dark:bg-white/5 hover:border-lime-500/30 backdrop-blur-md transition-all group"
+                                        onClick={() => handleUpsell("Lake Tour", "$25")}
+                                    >
                                         <div className="flex items-center gap-3 mb-1">
-                                            <Waves className="w-4 h-4 text-lime-600 dark:text-lime-500 group-hover:scale-110 transition-transform" />
-                                            <span className="font-bold text-stone-800 dark:text-stone-200">Lake Tour</span>
+                                            <div className="p-1.5 bg-lime-100 dark:bg-lime-500/20 rounded-lg text-lime-600 dark:text-lime-500 group-hover:scale-110 transition-transform"><Waves className="w-4 h-4" /></div>
+                                            <span className="font-bold text-stone-800 dark:text-stone-200 text-sm">Lake Tour</span>
                                         </div>
-                                        <p className="text-[10px] text-stone-500 pl-7 group-hover:text-stone-600 dark:group-hover:text-stone-400">Visita los pueblos del lago en lancha.</p>
-                                    </Button>
+                                        <p className="text-[10px] text-stone-500 pl-9">Visita los pueblos del lago en lancha.</p>
+                                    </motion.button>
 
-                                    <Button variant="outline" className="w-full justify-start h-auto py-3 px-4 border-stone-200 dark:border-white/5 bg-white/40 dark:bg-white/5 hover:bg-white/60 dark:hover:bg-white/10 hover:border-cyan-500/30 group text-left block shadow-sm dark:shadow-none" onClick={() => handleUpsell("Lavandería", "$5")}>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="w-full text-left p-3 rounded-xl border border-white/20 dark:border-white/5 bg-white/40 dark:bg-white/5 hover:border-cyan-500/30 backdrop-blur-md transition-all group"
+                                        onClick={() => handleUpsell("Lavandería", "$5")}
+                                    >
                                         <div className="flex items-center gap-3 mb-1">
-                                            <Shirt className="w-4 h-4 text-cyan-600 dark:text-cyan-500 group-hover:scale-110 transition-transform" />
-                                            <span className="font-bold text-stone-800 dark:text-stone-200">Lavandería</span>
+                                            <div className="p-1.5 bg-cyan-100 dark:bg-cyan-500/20 rounded-lg text-cyan-600 dark:text-cyan-500 group-hover:scale-110 transition-transform"><Shirt className="w-4 h-4" /></div>
+                                            <span className="font-bold text-stone-800 dark:text-stone-200 text-sm">Lavandería</span>
                                         </div>
-                                        <p className="text-[10px] text-stone-500 pl-7 group-hover:text-stone-600 dark:group-hover:text-stone-400">Recogida y entrega en tu habitación.</p>
-                                    </Button>
+                                        <p className="text-[10px] text-stone-500 pl-9">Servicio rápido y confiable.</p>
+                                    </motion.button>
                                 </div>
 
                                 <div className="pt-4 border-t border-stone-200 dark:border-white/5">
@@ -1048,83 +1253,116 @@ export default function MyBookingPage() {
                 {/* Payment Modal - Report Payment Flow */}
                 {showPaymentModal && booking && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative">
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setShowPaymentModal(false)}
+                                className="absolute top-4 right-4 p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 rounded-full text-stone-500 transition-colors z-10"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                             <div className="p-6 text-center space-y-4">
                                 <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-500"><QrCode /></div>
-                                <h3 className="text-xl font-bold text-stone-900 dark:text-white">Reportar Pago</h3>
+                                <h3 className="text-xl font-bold text-stone-900 dark:text-white">
+                                    {booking.payment_method === 'transfer' ? "Reportar Pago" : "Información de Pago"}
+                                </h3>
                                 <p className="text-sm text-stone-500 dark:text-stone-400">
-                                    Realiza tu transferencia y repórtala aquí para que validemos tu reserva.
+                                    {booking.payment_method === 'transfer'
+                                        ? "Realiza tu transferencia y repórtala aquí para que validemos tu reserva."
+                                        : "Detalles sobre tu método de pago seleccionado."}
                                 </p>
 
-                                <div className="bg-stone-50 dark:bg-white p-4 rounded-xl inline-block w-full">
-                                    {/* Bank Details */}
-                                    <div className="bg-stone-50 p-3 rounded border border-stone-200 text-left space-y-2 mb-4">
-                                        <p className="text-xs text-stone-500 font-bold uppercase">Datos Bancarios</p>
-                                        <p className="text-sm text-stone-800 font-mono">Banco Industrial</p>
-                                        <div className="flex justify-between items-center">
-                                            <p className="text-sm text-stone-800 font-mono font-bold">123-456-789</p>
-                                            <Copy className="w-3 h-3 text-stone-400 cursor-pointer hover:text-stone-600" onClick={() => { navigator.clipboard.writeText("123456789"); toast.success("Cuenta copiada") }} />
+                                {booking.payment_method === 'transfer' ? (
+                                    <>
+                                        <div className="bg-stone-50 dark:bg-white p-4 rounded-xl inline-block w-full">
+                                            {/* Bank Details */}
+                                            <div className="bg-stone-50 p-3 rounded border border-stone-200 text-left space-y-2 mb-4">
+                                                <p className="text-xs text-stone-500 font-bold uppercase">Datos Bancarios</p>
+                                                <p className="text-sm text-stone-800 font-mono">{APP_CONFIG.payment.bankName}</p>
+                                                <div className="flex justify-between items-center">
+                                                    <p className="text-sm text-stone-800 font-mono font-bold">{APP_CONFIG.payment.accountNumber}</p>
+                                                    <Copy className="w-3 h-3 text-stone-400 cursor-pointer hover:text-stone-600" onClick={() => { navigator.clipboard.writeText(APP_CONFIG.payment.accountNumber); toast.success("Cuenta copiada") }} />
+                                                </div>
+                                                <p className="text-xs text-stone-600">{APP_CONFIG.business.name} S.A.</p>
+                                            </div>
+
+                                            {/* Input Fields */}
+                                            <div className="space-y-3 text-left">
+                                                <div>
+                                                    <Label className="text-xs text-stone-500">Monto Total</Label>
+                                                    <div className="text-xl font-bold text-emerald-600">Q{booking.total_price}</div>
+                                                </div>
+                                                <div>
+                                                    <Label className="text-xs text-stone-500">No. de Boleta / Referencia</Label>
+                                                    <Input
+                                                        id="paymentRef"
+                                                        placeholder="Ej. 883210..."
+                                                        className="bg-stone-100 border-stone-200 text-stone-900 h-9"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <p className="text-xs text-stone-600">Mandalas Hostal S.A.</p>
-                                    </div>
 
-                                    {/* Input Fields */}
-                                    <div className="space-y-3 text-left">
-                                        <div>
-                                            <Label className="text-xs text-stone-500">Monto Total</Label>
-                                            <div className="text-xl font-bold text-emerald-600">Q{booking.total_price}</div>
-                                        </div>
-                                        <div>
-                                            <Label className="text-xs text-stone-500">No. de Boleta / Referencia</Label>
-                                            <Input
-                                                id="paymentRef"
-                                                placeholder="Ej. 883210..."
-                                                className="bg-stone-100 border-stone-200 text-stone-900 h-9"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                        <div className="flex flex-col gap-2">
+                                            <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={async () => {
+                                                if (!booking) return
+                                                const refInput = document.getElementById('paymentRef') as HTMLInputElement
+                                                const ref = refInput?.value || "Sin referencia"
 
-                                <div className="flex flex-col gap-2">
-                                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={async () => {
-                                        if (!booking) return
-                                        const refInput = document.getElementById('paymentRef') as HTMLInputElement
-                                        const ref = refInput?.value || "Sin referencia"
+                                                try {
+                                                    const { error } = await supabase.from('bookings').update({
+                                                        payment_status: 'verifying',
+                                                        payment_method: 'transfer',
+                                                        payment_reference: ref
+                                                    }).eq('id', booking.id)
 
-                                        try {
-                                            const { error } = await supabase.from('bookings').update({
-                                                payment_status: 'verifying',
-                                                payment_method: 'transfer',
-                                                payment_reference: ref
-                                            }).eq('id', booking.id)
+                                                    if (error) throw error
 
-                                            if (error) throw error
+                                                    toast.success("Pago reportado. Estamos verificando.")
+                                                    setBooking((prev: BookingRow | null) => prev ? ({ ...prev, payment_status: 'verifying', payment_reference: ref }) : null)
+                                                    setShowPaymentModal(false)
 
-                                            toast.success("Pago reportado. Estamos verificando.")
-                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                            setBooking((prev: any) => ({ ...prev, payment_status: 'verifying', payment_reference: ref }))
-                                            setShowPaymentModal(false)
+                                                    // Hybrid Flow: Offer WhatsApp Proof
+                                                    setTimeout(() => {
+                                                        const wantProof = window.confirm("¿Deseas enviar foto del comprobante por WhatsApp para agilizar?")
+                                                        if (wantProof) {
+                                                            const phone = APP_CONFIG.business.phone.replace(/\D/g, '')
+                                                            window.open(`https://wa.me/${phone}?text=Hola, reporté mi pago de Q${booking.total_price} (Ref: ${ref}) para reserva ${booking.id}. Adjunto foto.`, '_blank')
+                                                        }
+                                                    }, 500)
 
-                                            // Hybrid Flow: Offer WhatsApp Proof
-                                            setTimeout(() => {
-                                                const wantProof = window.confirm("¿Deseas enviar foto del comprobante por WhatsApp para agilizar?")
-                                                if (wantProof) {
-                                                    window.open(`https://wa.me/50212345678?text=Hola, reporté mi pago de Q${booking.total_price} (Ref: ${ref}) para reserva ${booking.id}. Adjunto foto.`, '_blank')
+                                                } catch (e) {
+                                                    toast.error("Error al reportar pago")
                                                 }
-                                            }, 500)
+                                            }}>
+                                                <CheckCircle2 className="w-4 h-4 mr-2" /> Reportar Pago Realizado
+                                            </Button>
+                                            <Button variant="ghost" onClick={() => setShowPaymentModal(false)}>Cancelar</Button>
 
-                                        } catch (e) {
-                                            toast.error("Error al reportar pago")
-                                        }
-                                    }}>
-                                        <CheckCircle2 className="w-4 h-4 mr-2" /> Reportar Pago Realizado
-                                    </Button>
-                                    <Button variant="ghost" onClick={() => setShowPaymentModal(false)}>Cancelar</Button>
-
-                                    <p className="text-[10px] text-stone-500 mt-2">
-                                        * Tu reserva cambiará a estado &quot;Verificando&quot; hasta que confirmemos la transacción.
-                                    </p>
-                                </div>
+                                            <p className="text-[10px] text-stone-500 mt-2">
+                                                * Tu reserva cambiará a estado &quot;Verificando&quot; hasta que confirmemos la transacción.
+                                            </p>
+                                        </div>
+                                    </>
+                                ) : (
+                                    // "Pay at Hotel" View
+                                    <div className="space-y-6">
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/30">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-full text-blue-600 dark:text-blue-300">
+                                                    <CreditCard className="w-4 h-4" />
+                                                </div>
+                                                <p className="font-bold text-blue-900 dark:text-blue-200 text-sm">Pago en Recepción</p>
+                                            </div>
+                                            <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                                                Tu reserva está confirmada con pago al llegar. Aceptamos efectivo y tarjetas.
+                                            </p>
+                                        </div>
+                                        <Button className="w-full bg-stone-900 hover:bg-stone-800 dark:bg-white dark:text-stone-900" onClick={() => setShowPaymentModal(false)}>
+                                            Entendido
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </motion.div>
                     </motion.div>
@@ -1133,7 +1371,13 @@ export default function MyBookingPage() {
                 {/* Self Check-in Modal */}
                 {showCheckInModal && booking && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+                        <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-white/10 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative">
+                            <button
+                                onClick={() => setShowCheckInModal(false)}
+                                className="absolute top-4 right-4 p-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 rounded-full text-stone-500 transition-colors z-10"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
                             <div className="p-6 text-center space-y-4">
                                 <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center mx-auto text-indigo-600 dark:text-indigo-500">
                                     <Smartphone className="w-6 h-6 animate-pulse" />
@@ -1291,6 +1535,68 @@ export default function MyBookingPage() {
                     </motion.div>
                 )}
             </AnimatePresence>
+            {/* GROUP BOOKINGS (Elite Feature - Glass Card Style) */}
+            {/* GROUP BOOKINGS (Elite Feature - Glass Card Style) */}
+            {allBookings.length > 1 && (
+                <div className="max-w-4xl mx-auto mt-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500 pb-20 px-6">
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-300 dark:via-white/10 to-transparent" />
+                        <div className="flex items-center gap-2 text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-900/50 px-4 py-1 rounded-full border border-stone-200 dark:border-white/5">
+                            <Users className="w-3 h-3" />
+                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em]">Tu Grupo ({allBookings.length})</h3>
+                        </div>
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-300 dark:via-white/10 to-transparent" />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {allBookings.filter(b => b.id !== booking?.id).map((otherBooking) => (
+                            <motion.button
+                                key={otherBooking.id}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="w-full bg-white/60 dark:bg-stone-900/40 backdrop-blur-xl p-4 rounded-xl border border-white/40 dark:border-white/5 shadow-lg dark:shadow-none flex items-center justify-between cursor-pointer transition-all group hover:bg-white/80 dark:hover:bg-stone-800/60 hover:border-emerald-500/30 text-left relative overflow-hidden"
+                                onClick={() => {
+                                    setBooking(otherBooking)
+                                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                                }}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/0 group-hover:to-emerald-500/5 transition-colors duration-500" />
+
+                                <div className="flex items-center gap-4 relative z-10">
+                                    <div className={cn(
+                                        "w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold font-heading border shadow-sm transition-transform group-hover:scale-110",
+                                        otherBooking.location === 'pueblo'
+                                            ? "bg-amber-100/80 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800"
+                                            : "bg-lime-100/80 text-lime-700 border-lime-200 dark:bg-lime-900/30 dark:text-lime-400 dark:border-lime-800"
+                                    )}>
+                                        {otherBooking.location === 'pueblo' ? 'P' : 'H'}
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-stone-800 dark:text-stone-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-tight">
+                                            {otherBooking.guest_name}
+                                        </p>
+                                        <p className="text-[10px] text-stone-500 uppercase tracking-wide mt-0.5">
+                                            {otherBooking.room_type.replace(/_/g, ' ')}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="text-right relative z-10">
+                                    <Badge variant="outline" className={cn(
+                                        "capitalize border-none text-[10px] px-2 py-0.5",
+                                        otherBooking.status === 'confirmed' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
+                                            otherBooking.payment_status === 'pending' ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 animate-pulse" : "bg-stone-500/10 text-stone-500"
+                                    )}>
+                                        {otherBooking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                                    </Badge>
+                                    <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-stone-400 flex justify-end items-center gap-1">
+                                        Ver <ArrowRight className="w-2 h-2" />
+                                    </div>
+                                </div>
+                            </motion.button>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

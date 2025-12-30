@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useEffect, useRef, ReactNode } from "react"
-import { Check, CheckCircle, Users, BedDouble, Calendar as CalendarIcon, Loader2, PartyPopper, Copy, CreditCard, Banknote, ShieldCheck } from "lucide-react"
+import { Check, CheckCircle, Users, BedDouble, Calendar as CalendarIcon, Loader2, PartyPopper, Copy, CreditCard, Banknote, ShieldCheck, X } from "lucide-react"
 import { DateRange } from "react-day-picker"
-import { subDays } from "date-fns"
+import { format, addDays, subDays, differenceInDays, differenceInCalendarDays } from "date-fns"
 import { AnimatePresence, motion } from "framer-motion"
 import { toast } from "sonner"
 
@@ -36,6 +36,13 @@ import { Badge } from "@/components/ui/badge"
 import { BedSelector } from "@/components/shared/bed-selector"
 
 // ... imports remain the same ...
+
+const APP_CONFIG = {
+    payment: {
+        bankName: "Banco Industrial",
+        accountNumber: "000-000000-0"
+    }
+}
 
 interface BookingModalProps {
     children: ReactNode
@@ -361,6 +368,13 @@ export function BookingModal({
                 theme.glass,
                 theme.glow
             )}>
+                {/* Manual Close Button (Fixed) */}
+                <button
+                    onClick={() => onOpenChange(false)}
+                    className="absolute top-4 right-4 p-2 bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-stone-500 dark:text-stone-400 rounded-full transition-all z-[60]"
+                >
+                    <X className="w-5 h-5" />
+                </button>
                 {/* Header with Glass Effect */}
                 <DialogHeader className={cn(
                     "p-6 pb-4 flex-shrink-0 z-20 backdrop-blur-md border-b bg-white/40 dark:bg-black/20",
@@ -573,7 +587,7 @@ export function BookingModal({
                                         </div>
                                         <div className="text-right">
                                             <Badge variant="outline" className="bg-white dark:bg-stone-900 text-stone-500 border-stone-200 dark:border-stone-700">
-                                                {Math.ceil(((date?.to?.getTime() ?? 0) - (date?.from?.getTime() ?? 0)) / (1000 * 60 * 60 * 24))} Noches
+                                                {differenceInCalendarDays(date?.to || new Date(), date?.from || new Date())} Noches
                                             </Badge>
                                         </div>
                                     </div>
@@ -592,7 +606,7 @@ export function BookingModal({
                                         <div className="flex justify-between items-center pt-2 mt-2 border-t border-stone-200/50 dark:border-stone-700/50">
                                             <span className="font-bold text-stone-900 dark:text-stone-100 text-sm">Total Estimado</span>
                                             <span className={cn("font-heading font-bold text-xl", theme.accentText)}>
-                                                ${(currentPrice * Math.ceil(((date?.to?.getTime() ?? 0) - (date?.from?.getTime() ?? 0)) / (1000 * 60 * 60 * 24)) * (isDorm ? (parseInt(guests) || 1) : 1)).toLocaleString()}
+                                                ${(currentPrice * differenceInCalendarDays(date?.to || new Date(), date?.from || new Date()) * (isDorm ? (parseInt(guests) || 1) : 1)).toLocaleString()}
                                             </span>
                                         </div>
                                     </div>
@@ -767,12 +781,16 @@ export function BookingModal({
                                     </p>
                                 </div>
 
-                                {/* Bank Details Mock (Only for Transfer) */}
-                                {paymentPreference === 'transfer' && (
+                                {paymentPreference === 'transfer' ? (
                                     <div className="w-full bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-lg p-3 text-xs text-center text-amber-800 dark:text-amber-400">
-                                        <p className="font-bold mb-1">Cuenta BANRURAL</p>
-                                        <p className="font-mono">3400055228</p>
+                                        <p className="font-bold mb-1">Cuenta {APP_CONFIG.payment.bankName}</p>
+                                        <p className="font-mono">{APP_CONFIG.payment.accountNumber}</p>
                                         <p className="opacity-70 text-[10px] mt-1">Envía comprobante a WhatsApp</p>
+                                    </div>
+                                ) : (
+                                    <div className="w-full bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800/30 rounded-lg p-3 text-xs text-center text-emerald-800 dark:text-emerald-400">
+                                        <p className="font-bold mb-1">Pago en Recepción</p>
+                                        <p className="opacity-70 text-[10px]">Presenta tu ID #{bookingId} al llegar.</p>
                                     </div>
                                 )}
 

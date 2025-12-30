@@ -32,7 +32,8 @@ import {
     ArrowRight,
     Sparkles,
     Check,
-    Calendar as CalendarIcon
+    Calendar as CalendarIcon,
+    X
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -321,7 +322,7 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
                         phone: phone,
                         location: location,
                         roomType: selectedRoom.id,
-                        guests: "1", // Each unit has 1 guest capacity consumed
+                        guests: selectedRoom.type === 'dorm' ? "1" : guests, // For Dorms, 1 guest per bed. For Private, use total guests.
                         checkIn: checkInDate,
                         checkOut: checkOutDate,
                         status: status === 'confirmed' ? 'confirmed' : 'pending',
@@ -375,6 +376,13 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
         }}>
             {/* ELITE ADMIN MODAL */}
             <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col p-0 gap-0 bg-stone-50/90 dark:bg-stone-950/90 backdrop-blur-2xl border-white/20 dark:border-stone-800/50 transition-all duration-300 overflow-hidden shadow-[0_0_50px_-10px_rgba(0,0,0,0.2)] rounded-3xl ring-1 ring-white/20">
+                {/* Manual Close Button */}
+                <button
+                    onClick={() => onOpenChange(false)}
+                    className="absolute top-4 right-4 p-2 bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-stone-500 dark:text-stone-400 rounded-full transition-all z-[60]"
+                >
+                    <X className="w-5 h-5" />
+                </button>
                 <DialogHeader className="p-8 pb-4 border-b border-stone-200/50 dark:border-stone-800/50 bg-white/40 dark:bg-black/20 z-10 sticky top-0 backdrop-blur-md">
                     <div className="flex items-center justify-between mb-6">
                         <DialogTitle className="text-xl font-light font-heading uppercase tracking-[0.2em] text-stone-800 dark:text-stone-200 flex items-center gap-3">

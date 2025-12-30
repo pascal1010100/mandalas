@@ -30,46 +30,91 @@ export async function syncRoomImport(roomId: string, importUrl: string) {
         const now = startOfDay(new Date())
         const importedBookings = []
 
+        const currentExternalIds = new Set<string>();
+
+        const { error: deleteError } = await supabase
+            .from('bookings')
+            .update({ status: 'cancelled', cancellation_reason: 'Removed from external calendar' })
+            .eq('source', 'ical')
+            .eq('room_type', roomId)
+            .neq('status', 'cancelled'); // Don't re-cancel
+
+        // This logic is tricky with UPSERT below. 
+        // We should first UPSERT all valid events, then find any 'ical' booking for this room NOT in the new list.
+
+        // BETTER APPROACH:
+        // 1. Process all events from feed.
         for (const event of validEvents) {
-            // Skip old events (optional, but good for performance)
             if (isBefore(new Date(event.end), now)) continue;
 
-            // Map to Booking Structure
-            // iCal UIDs are weird. We use them as external_id.
-            const externalId = event.uid
-            const start = event.start
-            const end = event.end
-            const summary = event.summary || 'Reserva Externa'
-
-            // Check if this booking deals with "Cancelled"?
-            // iCal usually just removes the event. If it removes it, we might need to "clean up" orphaned external bookings.
-            // Complex. For MVP, we just UPSERT content. Deletion is harder (requires fetching all external, diffing).
-            // Let's stick to UPSERT for now.
+            const externalId = event.uid;
+            currentExternalIds.add(externalId);
 
             const payload = {
-                guest_name: `Import: ${summary}`,
-                email: 'ota@sync.com', // Placeholder
-                location: roomId.includes('pueblo') ? 'pueblo' : 'hideout', // Derive from room ID?
-                room_type: roomId,
-                guests: '1', // Assumption
-                check_in: start.toISOString(),
-                check_out: end.toISOString(),
+                guest_name: `Import: ${event.summary || 'Reserva Externa'}`,
+                email: 'ota@sync.com',
+                location: roomId.includes('pueblo') ? 'pueblo' : 'hideout',
+                room_type: roomId, // This assumes 1-to-1 mapping. For dorms, we need Bed Logic? iCal usually blocks WHOLE dorm or specific unit. Assuming Room Level for now.
+                guests: '1',
+                check_in: event.start.toISOString(),
+                check_out: event.end.toISOString(),
                 status: 'confirmed',
-                total_price: 0, // External bookings don't track our price usually
+                total_price: 0,
                 external_id: externalId,
                 source: 'ical'
-            }
+            };
 
-            // Upsert based on external_id
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('bookings')
-                .upsert(payload, { onConflict: 'external_id' })
-                .select()
+                .upsert(payload, { onConflict: 'external_id' });
 
-            if (error) {
-                console.error(`Error syncing event ${externalId}:`, error)
-            } else {
-                if (data) importedBookings.push(data[0])
+            if (error) console.error(`Error Upserting ${externalId}:`, error);
+        }
+
+        // 2. Cancel bookings NOT in feed
+        // Convert Set to Array for NOT IN query
+        // Supabase limit might be an issue if 1000s events. For a hostel room, usually < 100 active.
+        const activeIds = Array.from(currentExternalIds);
+
+        if (activeIds.length > 0) {
+            const { error: cancelError } = await supabase
+                .from('bookings')
+                .update({ status: 'cancelled', cancellation_reason: 'Sync: Removed from Source' })
+                .eq('source', 'ical')
+                .eq('room_type', roomId)
+                .neq('status', 'cancelled')
+                .not('external_id', 'in', `(${activeIds.join(',')})`);
+            // NOTE: 'in' syntax with array might need adjustment or use separate query logic.
+            // Supabase .in() takes an array.
+
+            await supabase
+                .from('bookings')
+                .update({ status: 'cancelled', cancellation_reason: 'Sync: Removed from Source' })
+                .eq('source', 'ical')
+                .eq('room_type', roomId)
+                .neq('status', 'cancelled')
+                .filter('external_id', 'not.in', `(${activeIds.map(id => `"${id}"`).join(',')})`) // Hacky syntax check
+        }
+
+        // Correct Supabase usage for NOT IN:
+        // .not('external_id', 'in', activeIds) -- this creates a huge query URL.
+        // Alternative: Fetch ALL ical bookings for this room, iterate and cancel.
+
+        const { data: existingBookings } = await supabase
+            .from('bookings')
+            .select('id, external_id')
+            .eq('source', 'ical')
+            .eq('room_type', roomId)
+            .neq('status', 'cancelled');
+
+        if (existingBookings) {
+            const toCancel = existingBookings.filter(b => !currentExternalIds.has(b.external_id));
+            if (toCancel.length > 0) {
+                console.log(`Cancelling ${toCancel.length} orphaned bookings`);
+                await supabase
+                    .from('bookings')
+                    .update({ status: 'cancelled', cancellation_reason: 'Sync: Removed from Source' })
+                    .in('id', toCancel.map(b => b.id));
             }
         }
 

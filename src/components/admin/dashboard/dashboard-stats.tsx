@@ -16,7 +16,8 @@ import {
     startOfMonth,
     endOfMonth,
     differenceInDays,
-    parseISO
+    parseISO,
+    format
 } from "date-fns"
 
 import { getBusinessDate, isStayNight } from '@/lib/business-date'
@@ -26,17 +27,19 @@ export function DashboardStats() {
     const { bookings, rooms } = useAppStore()
     const businessDate = getBusinessDate()
 
-    const monthStart = startOfMonth(businessDate)
-    const monthEnd = endOfMonth(businessDate)
+    // Robust String Comparison (UTC-safe)
+    const monthStartStr = format(startOfMonth(businessDate), 'yyyy-MM-dd')
+    const monthEndStr = format(endOfMonth(businessDate), 'yyyy-MM-dd')
+    const todayStr = format(businessDate, 'yyyy-MM-dd')
 
     // --- Financial Logic (Elite) ---
 
-    const monthlyBookings = bookings.filter(b =>
-        b.status !== 'cancelled' &&
-        new Date(b.checkIn) >= monthStart && new Date(b.checkIn) <= monthEnd
-    )
+    // 1. Revenue (Cash Flow vs Projected) - Filter by Check-In Date matching the Month
+    const monthlyBookings = bookings.filter(b => {
+        const checkInStr = b.checkIn.split('T')[0]
+        return checkInStr >= monthStartStr && checkInStr <= monthEndStr && b.status !== 'cancelled'
+    })
 
-    // 1. Revenue (Cash Flow vs Projected)
     const collectedRevenue = monthlyBookings
         .filter(b => b.paymentStatus === 'paid')
         .reduce((sum, b) => sum + (b.totalPrice || 0), 0)
@@ -45,25 +48,34 @@ export function DashboardStats() {
         .reduce((sum, b) => sum + (b.totalPrice || 0), 0)
 
     // 2. Outstanding Debt (Global, not just this month)
-    // Critical: Money on the table from ACTIVE or PAST DUE bookings
     const debtBookings = bookings.filter(b =>
         (b.status === 'confirmed' || b.status === 'checked_in' || b.status === 'checked_out') &&
         b.paymentStatus !== 'paid'
     )
     const totalDebt = debtBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0)
 
-    // 3. Occupancy (Efficiency)
-    const activeBookings = bookings.filter(b =>
-        (b.status === 'confirmed' || b.status === 'checked_in' || b.status === 'pending' || b.status === 'maintenance') &&
-        isStayNight(businessDate, b.checkIn, b.checkOut)
-    )
+    // 3. Occupancy (Efficiency) - Active Stay Night
+    const activeBookings = bookings.filter(b => {
+        // EQUAL LOGIC TO GRID: Checked In = Occupying (always)
+        if (b.status === 'checked_in') return true
+
+        const isActiveStatus = b.status === 'confirmed' || b.status === 'pending' || b.status === 'maintenance'
+        if (!isActiveStatus) return false
+
+        // Is stay night? checkIn <= Today < checkOut
+        const checkInStr = b.checkIn.split('T')[0]
+        const checkOutStr = b.checkOut.split('T')[0]
+
+        return checkInStr <= todayStr && checkOutStr > todayStr
+    })
+
     const totalUnits = rooms.reduce((sum, room) => sum + room.capacity, 0)
     const occupancyRate = totalUnits > 0 ? Math.round((activeBookings.length / totalUnits) * 100) : 0
     const displayOccupancy = Math.min(occupancyRate, 100)
 
     // 4. ADR (Average Daily Rate) - Efficiency of Pricing
     const totalNightsSold = monthlyBookings.reduce((sum, b) => {
-        const nights = differenceInDays(new Date(b.checkOut), new Date(b.checkIn))
+        const nights = differenceInDays(parseISO(b.checkOut), parseISO(b.checkIn))
         return sum + Math.max(1, nights)
     }, 0)
     const adr = totalNightsSold > 0 ? projectedRevenue / totalNightsSold : 0
