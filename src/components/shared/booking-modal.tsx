@@ -61,7 +61,9 @@ export function BookingModal({
     // roomName, // Removed unused prop to fix lint
     pricePerNight = 25
 }: BookingModalProps) {
+    const [isOpen, setIsOpen] = useState(false)
     const [date, setDate] = useState<DateRange | undefined>()
+    // ... rest of state ...
     const [step, setStep] = useState(1)
     const [location, setLocation] = useState(defaultLocation)
 
@@ -297,8 +299,10 @@ export function BookingModal({
     }
 
     const handleOpenChange = (open: boolean) => {
+        setIsOpen(open)
         if (!open) {
-            // Optional: Reset?
+            // Optional: Reset steps if needed when closing
+            // setStep(1) 
         }
     }
 
@@ -358,7 +362,7 @@ export function BookingModal({
     }, [step])
 
     return (
-        <Dialog onOpenChange={handleOpenChange}>
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 <div className={className} suppressHydrationWarning>{children}</div>
             </DialogTrigger>
@@ -370,7 +374,7 @@ export function BookingModal({
             )}>
                 {/* Manual Close Button (Fixed) */}
                 <button
-                    onClick={() => onOpenChange(false)}
+                    onClick={() => handleOpenChange(false)}
                     className="absolute top-4 right-4 p-2 bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-stone-500 dark:text-stone-400 rounded-full transition-all z-[60]"
                 >
                     <X className="w-5 h-5" />
