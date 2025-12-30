@@ -33,20 +33,24 @@ import {
     LayoutGrid,
     Plus
 } from "lucide-react"
-import { format, isSameDay, parseISO } from "date-fns"
+import { format, isSameDay, parseISO, isWithinInterval, areIntervalsOverlapping } from "date-fns"
 import { es } from "date-fns/locale"
+import { DateRange } from "react-day-picker"
 
 import { ReservationCalendar } from "@/components/admin/reservations/reservation-calendar"
 import { TimelineView } from "@/components/admin/reservations/timeline-view"
 import { ReservationDetailsModal } from "@/components/admin/reservations/reservation-details-modal"
 import { CreateReservationModal } from "@/components/admin/reservations/create-reservation-modal"
 import { DashboardStats } from "@/components/admin/dashboard/dashboard-stats"
+import { ReservationFilters } from "@/components/admin/reservations/reservation-filters"
+import { BedDouble, DoorOpen, CalendarClock, Users } from "lucide-react"
 
 
 export default function ReservationsPage() {
     const { bookings, updateBookingStatus } = useAppStore()
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState<"ALL" | "confirmed" | "pending" | "cancelled">("ALL")
+    const [dateRange, setDateRange] = useState<DateRange | undefined>()
 
     // View State
     const [viewMode, setViewMode] = useState<"list" | "calendar" | "timeline">("list")
@@ -59,9 +63,27 @@ export default function ReservationsPage() {
 
     const filteredBookings = bookings.filter(booking => {
         const matchesSearch = booking.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (booking.email?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false)
+            (booking.email?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+            booking.id.toLowerCase().includes(searchTerm.toLowerCase())
+
         const matchesStatus = statusFilter === "ALL" || booking.status === statusFilter
-        return matchesSearch && matchesStatus
+
+        let matchesDate = true
+        if (dateRange?.from && dateRange?.to) {
+            const bookingStart = parseISO(booking.checkIn)
+            const bookingEnd = parseISO(booking.checkOut)
+            // Check for Overlap (Inclusive)
+            matchesDate = areIntervalsOverlapping(
+                { start: bookingStart, end: bookingEnd },
+                { start: dateRange.from, end: dateRange.to },
+                { inclusive: true }
+            )
+        } else if (dateRange?.from) {
+            const bookingStart = parseISO(booking.checkIn)
+            matchesDate = isSameDay(bookingStart, dateRange.from)
+        }
+
+        return matchesSearch && matchesStatus && matchesDate
     })
 
     const handleSelectBooking = (booking: Booking, cancelMode = false) => {
@@ -144,51 +166,14 @@ export default function ReservationsPage() {
             <DashboardStats />
 
             {/* Filters Toolbar */}
-            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white dark:bg-stone-900/50 p-4 rounded-2xl shadow-sm border border-stone-100 dark:border-stone-800 backdrop-blur-sm transition-colors duration-300">
-                <div className="relative w-full md:w-96">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
-                    <Input
-                        placeholder="Buscar por nombre o email..."
-                        className="pl-11 bg-white dark:bg-stone-900/50 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 focus-visible:ring-amber-500/50 rounded-full h-10 text-sm shadow-sm transition-all hover:shadow-md"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-                    <Button
-                        variant={statusFilter === "ALL" ? "default" : "outline"}
-                        onClick={() => setStatusFilter("ALL")}
-                        className={statusFilter === "ALL" ? "bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-full shadow-lg" : "text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-800 rounded-full hover:bg-stone-50 dark:hover:bg-stone-800"}
-                        size="sm"
-                    >
-                        Todas
-                    </Button>
-                    <Button
-                        variant={statusFilter === "pending" ? "default" : "outline"}
-                        onClick={() => setStatusFilter("pending")}
-                        className={statusFilter === "pending" ? "bg-amber-500 hover:bg-amber-600 border-none text-white rounded-full shadow-md shadow-amber-900/10" : "text-amber-600 dark:text-amber-500 border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-900/10 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/20"}
-                        size="sm"
-                    >
-                        Pendientes
-                    </Button>
-                    <Button
-                        variant={statusFilter === "confirmed" ? "default" : "outline"}
-                        onClick={() => setStatusFilter("confirmed")}
-                        className={statusFilter === "confirmed" ? "bg-emerald-600 hover:bg-emerald-700 border-none text-white rounded-full shadow-md shadow-emerald-900/10" : "text-emerald-600 dark:text-emerald-500 border-emerald-200 dark:border-emerald-900/30 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-full hover:bg-emerald-100 dark:hover:bg-emerald-900/20"}
-                        size="sm"
-                    >
-                        Confirmadas
-                    </Button>
-                    <Button
-                        variant={statusFilter === "cancelled" ? "default" : "outline"}
-                        onClick={() => setStatusFilter("cancelled")}
-                        className={statusFilter === "cancelled" ? "bg-rose-600 hover:bg-rose-700 border-none text-white rounded-full shadow-md shadow-rose-900/10" : "text-rose-600 dark:text-rose-500 border-rose-200 dark:border-rose-900/30 bg-rose-50/50 dark:bg-rose-900/10 rounded-full hover:bg-rose-100 dark:hover:bg-rose-900/20"}
-                        size="sm"
-                    >
-                        Canceladas
-                    </Button>
-                </div>
-            </div>
+            <ReservationFilters
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                statusFilter={statusFilter}
+                onStatusChange={setStatusFilter}
+                dateRange={dateRange}
+                onDateRangeChange={setDateRange}
+            />
 
             {/* Content Area */}
             {viewMode === 'list' ? (
@@ -241,70 +226,59 @@ export default function ReservationsPage() {
                                             onClick={() => handleSelectBooking(booking)}
                                         >
                                             <TableCell className="font-medium pl-6 py-4">
-                                                <div className="flex items-center gap-4">
-                                                    {/* Room Image Thumbnail */}
-                                                    <div className="w-16 h-12 rounded-lg bg-stone-100 dark:bg-stone-800 overflow-hidden shadow-sm relative group-hover:scale-105 transition-transform duration-300 ring-1 ring-black/5 dark:ring-white/10">
-                                                        <img
-                                                            src={roomImage}
-                                                            alt="Room"
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                        {booking.unitId && (
-                                                            <div className="absolute bottom-0 right-0 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded-tl-md font-mono backdrop-blur-md">
-                                                                #{booking.unitId}
-                                                            </div>
-                                                        )}
+                                                {/* Clean Avatar Only */}
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 flex items-center justify-center font-bold border border-stone-200 dark:border-stone-700 shadow-sm">
+                                                        {booking.guestName.charAt(0)}
                                                     </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 flex items-center justify-center font-bold border border-stone-200 dark:border-stone-700 group-hover:border-amber-500/50 group-hover:text-amber-600 transition-colors">
-                                                            {booking.guestName.charAt(0)}
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-medium text-stone-900 dark:text-stone-100 font-heading leading-tight">{booking.guestName}</div>
-                                                            <div className="text-[10px] text-stone-400 dark:text-stone-500 font-mono mt-0.5 flex items-center gap-1">
-                                                                ID: <span className="text-stone-500 dark:text-stone-400">{booking.id.slice(0, 8)}</span>
-                                                            </div>
-                                                        </div>
+                                                    <div>
+                                                        <div className="font-bold text-stone-900 dark:text-stone-100 font-heading text-sm">{booking.guestName}</div>
+                                                        <div className="text-[10px] text-stone-500 dark:text-stone-400 font-medium truncate max-w-[140px]">{booking.email}</div>
                                                     </div>
                                                 </div>
+
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex flex-col gap-1.5">
-                                                    <span className="text-xs font-bold text-stone-700 dark:text-stone-300 line-clamp-1" title={roomLabel}>
+                                                    <span className="text-xs font-semibold text-stone-700 dark:text-stone-300 flex items-center gap-2">
+                                                        {booking.roomType.includes('private') ? <DoorOpen className="w-3.5 h-3.5 text-amber-500" /> : <BedDouble className="w-3.5 h-3.5 text-stone-400" />}
                                                         {roomLabel}
                                                     </span>
-                                                    <div className="flex items-center gap-2">
-                                                        <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-5 border-stone-200 text-stone-500 font-normal bg-stone-50 dark:bg-stone-800 dark:border-stone-700 dark:text-stone-400 uppercase tracking-widest">
-                                                            {booking.location}
-                                                        </Badge>
-                                                        {booking.unitId && (
-                                                            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-5 bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 dark:bg-amber-900/30 dark:text-amber-500 dark:border-amber-900/50">
-                                                                Cama {booking.unitId}
+                                                    <div className="flex items-center gap-2 pl-5">
+                                                        {booking.unitId ? (
+                                                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 font-mono">
+                                                                #{booking.unitId}
                                                             </Badge>
+                                                        ) : (
+                                                            <span className="text-[9px] text-stone-400 italic">Sin asignar</span>
                                                         )}
                                                     </div>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex flex-col text-sm text-stone-600 dark:text-stone-400 gap-0.5">
-                                                    <span className="flex items-center gap-2 font-medium text-stone-900 dark:text-stone-200">
-                                                        <CalendarIcon className="w-3.5 h-3.5 text-stone-400" />
+                                                    <div className="flex items-center gap-1.5 font-medium text-stone-900 dark:text-stone-200 text-xs">
                                                         {booking.checkIn && !isNaN(new Date(booking.checkIn).getTime())
                                                             ? format(new Date(booking.checkIn), "d MMM", { locale: es })
                                                             : "--"}
-                                                    </span>
-                                                    <span className="text-xs text-stone-400 pl-5 flex items-center gap-1">
-                                                        <Clock className="w-3 h-3" />
+                                                        <span className="text-stone-400">→</span>
                                                         {booking.checkOut && !isNaN(new Date(booking.checkOut).getTime())
                                                             ? format(new Date(booking.checkOut), "d MMM", { locale: es })
                                                             : "--"}
-                                                    </span>
+                                                    </div>
+                                                    {booking.checkIn && booking.checkOut && (
+                                                        <span className="text-[10px] text-stone-400 font-mono">
+                                                            {((new Date(booking.checkOut).getTime() - new Date(booking.checkIn).getTime()) / (1000 * 60 * 60 * 24))} Noches
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </TableCell>
                                             <TableCell>
                                                 <div className="text-sm text-stone-600 dark:text-stone-400">
-                                                    <div className="truncate max-w-[120px]" title={booking.email}>{booking.email || "-"}</div>
-                                                    <div className="text-stone-400 dark:text-stone-500 text-xs mt-0.5">{booking.guests} persona{parseInt(booking.guests) > 1 ? 's' : ''}</div>
+                                                    <a href={`tel:${booking.phone || ''}`} className="text-xs hover:text-stone-900 dark:hover:text-stone-100 block">{booking.phone || "-"}</a>
+                                                    <div className="text-stone-400 dark:text-stone-500 text-[10px] mt-0.5 flex items-center gap-1">
+                                                        <Users className="w-3 h-3" /> {booking.guests} Pax
+                                                    </div>
                                                 </div>
                                             </TableCell>
                                             <TableCell>
@@ -378,7 +352,8 @@ export default function ReservationsPage() {
                     bookings={filteredBookings}
                     onSelectBooking={(b) => handleSelectBooking(b)}
                 />
-            )}
+            )
+            }
 
             <ReservationDetailsModal
                 booking={selectedBooking}
@@ -391,6 +366,6 @@ export default function ReservationsPage() {
                 open={isCreateModalOpen}
                 onOpenChange={setIsCreateModalOpen}
             />
-        </div>
+        </div >
     )
 }
