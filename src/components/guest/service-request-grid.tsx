@@ -154,7 +154,7 @@ export function ServiceRequestGrid({ bookingId, guestName }: ServiceRequestGridP
                                         <div className="text-amber-500 animate-pulse"><CloudFog className="w-4 h-4" /></div>
                                     )}
                                     <div>
-                                        <p className="text-sm font-medium text-stone-900 dark:text-stone-200 capitalize">{req.type === 'amenity' ? 'Amenidades' : req.type === 'cleaning' ? 'Limpieza' : req.label || req.type}</p>
+                                        <p className="text-sm font-medium text-stone-900 dark:text-stone-200 capitalize">{req.type === 'amenity' ? 'Amenidades' : req.type === 'cleaning' ? 'Limpieza' : req.type}</p>
                                         <p className="text-xs text-stone-500 truncate max-w-[200px]">{req.description}</p>
                                     </div>
                                 </div>

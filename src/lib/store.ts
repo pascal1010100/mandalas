@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
+import { format, differenceInDays } from 'date-fns'
 
 // --- Types ---
 
@@ -58,6 +58,8 @@ export interface RoomConfig {
     image?: string;
     housekeeping_status?: 'clean' | 'dirty' | 'maintenance';
     units_housekeeping?: Record<string, 'clean' | 'dirty' | 'maintenance'>; // UnitID -> Status
+    last_cleaned_at?: string; // ISO Timestamp
+    maintenance_note?: string;
     // iCal Sync
     icalImportUrl?: string;
     icalExportToken?: string;
@@ -150,11 +152,12 @@ interface AppState {
     confirmGroupBookings: (email: string) => Promise<void>;
     checkOutBooking: (id: string, paymentStatus: 'paid' | 'pending') => Promise<void>;
     deleteBooking: (id: string) => Promise<void>;
+    extendBooking: (bookingId: string, newCheckOutDate: string) => Promise<void>; // New Action
 
     // Maintenance
     blockUnit: (roomId: string, location: 'pueblo' | 'hideout', unitId?: string) => Promise<void>;
     unblockUnit: (bookingId: string) => Promise<void>;
-    updateRoomStatus: (roomId: string, status: 'clean' | 'dirty' | 'maintenance', unitId?: string) => Promise<void>; // New Action
+    updateRoomStatus: (roomId: string, status: 'clean' | 'dirty' | 'maintenance', unitId?: string, note?: string) => Promise<void>; // New Action
 
     // Events
     fetchEvents: () => Promise<void>;
@@ -558,7 +561,6 @@ export const useAppStore = create<AppState>()(
                 console.log("Subscribing to Service Requests...")
                 const channel = supabase
                     .channel('service-requests-channel')
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, () => {
                         get().fetchServiceRequests()
                     })
@@ -569,19 +571,43 @@ export const useAppStore = create<AppState>()(
                 }
             },
 
-            updateRoomStatus: async (roomId, status, unitId) => {
+            updateRoomStatus: async (roomId, status, unitId, note) => {
                 const state = get()
                 const roomIndex = state.rooms.findIndex(r => r.id === roomId)
                 if (roomIndex === -1) return
 
                 const room = state.rooms[roomIndex]
                 const currentMap = room.units_housekeeping || {}
-
                 const newMap = { ...currentMap }
                 let newGlobalStatus = room.housekeeping_status
 
+                // Metadata Updates
+                let lastCleanedAt = room.last_cleaned_at
+                let maintenanceNote = room.maintenance_note
+
+                if (status === 'clean' && !unitId) {
+                    // Only update timestamp if globally cleaning
+                    lastCleanedAt = new Date().toISOString()
+                    maintenanceNote = undefined // Clear note on clean
+                }
+
+                if (status === 'maintenance' && note) {
+                    maintenanceNote = note
+                }
+
+                // HYDRATION FIX: If we are updating a specific unit, we must ensure ALL units 
+                // have an explicit status in the map. Otherwise, untracked units will fallback 
+                // to the valid (but potentially changed) global housekeeping_status.
                 if (unitId) {
-                    // Update Unit
+                    const previousGlobal = room.housekeeping_status || 'clean'
+                    for (let i = 1; i <= room.capacity; i++) {
+                        const uid = i.toString()
+                        if (!newMap[uid]) {
+                            newMap[uid] = previousGlobal
+                        }
+                    }
+
+                    // Now safe to update the specific unit
                     newMap[unitId] = status
 
                     // Sync: If single unit, force global update
@@ -589,13 +615,9 @@ export const useAppStore = create<AppState>()(
                         newGlobalStatus = status
                     } else {
                         // Dorm/Multi-Unit Aggregation Logic (Elite)
-                        // Rule: Room is "Maintenance" if any unit is maintenance
-                        // Rule: Room is "Dirty" if any unit is dirty (and no maintenance)
-                        // Rule: Room is "Clean" only if ALL units are clean
-
                         const allUnits = Array.from({ length: room.capacity }, (_, i) => (i + 1).toString())
-                        // Helper to get effective status of a unit (newly updated or existing)
-                        const getUnitStatus = (uid: string) => uid === unitId ? status : (newMap[uid] || 'clean')
+                        const getUnitStatus = (uid: string) => newMap[uid] // Safe now as we hydrated all
+
 
                         const anyMaintenance = allUnits.some(uid => getUnitStatus(uid) === 'maintenance')
                         const anyDirty = allUnits.some(uid => getUnitStatus(uid) === 'dirty')
@@ -618,14 +640,22 @@ export const useAppStore = create<AppState>()(
 
                 // Update Local
                 const updatedRooms = [...state.rooms]
-                updatedRooms[roomIndex] = { ...room, housekeeping_status: newGlobalStatus, units_housekeeping: newMap }
+                updatedRooms[roomIndex] = {
+                    ...room,
+                    housekeeping_status: newGlobalStatus,
+                    units_housekeeping: newMap,
+                    last_cleaned_at: lastCleanedAt,
+                    maintenance_note: maintenanceNote
+                }
                 set({ rooms: updatedRooms })
 
                 // Persist
                 try {
                     await supabase.from('rooms').update({
                         housekeeping_status: newGlobalStatus,
-                        units_housekeeping: newMap
+                        units_housekeeping: newMap,
+                        last_cleaned_at: lastCleanedAt,
+                        maintenance_note: maintenanceNote
                     }).eq('id', roomId);
                 } catch (e) {
                     console.error("Failed to persist status", e)
@@ -1002,6 +1032,86 @@ export const useAppStore = create<AppState>()(
             },
 
             resetData: () => set({ bookings: [], events: initialEvents }),
+
+            extendBooking: async (bookingId, newCheckOutDate) => {
+                const getStore = get();
+                const booking = getStore.bookings.find(b => b.id === bookingId);
+
+                if (!booking) {
+                    toast.error("Reserva no encontrada");
+                    return;
+                }
+
+                // 1. Availability Check
+                // Note: We check from old checkOut to newCheckOut
+                // However, checkAvailability takes full range. 
+                // We should check the EXTENSION period mostly, but easier to check full new range excluding self.
+                // Actually, checking full range (Start -> NewEnd) excluding self is the safest logic.
+
+                const isAvailable = getStore.checkAvailability(
+                    booking.location,
+                    booking.roomType,
+                    booking.checkIn,
+                    newCheckOutDate,
+                    Number(booking.guests),
+                    bookingId, // Exclude self to allow overlap with old self
+                    booking.unitId // Check specific bed if applicable
+                );
+
+                if (!isAvailable) {
+                    toast.error("Fecha no disponible (Sin cupo)", {
+                        description: "Intenta con otra habitación o fecha."
+                    });
+                    throw new Error("Unavailable");
+                }
+
+                // 2. Pricing Calculation
+                const roomConfig = getStore.rooms.find(r => r.id === booking.roomType);
+                if (!roomConfig) return;
+
+                const oldCheckOutDate = new Date(booking.checkOut);
+                const newCheckOutDateObj = new Date(newCheckOutDate);
+                const extraDays = differenceInDays(newCheckOutDateObj, oldCheckOutDate);
+
+                if (extraDays <= 0) {
+                    toast.error("La nueva fecha debe ser posterior a la salida actual");
+                    return;
+                }
+
+                const extraCost = extraDays * roomConfig.basePrice;
+                const newTotalPrice = booking.totalPrice + extraCost;
+
+                // 3. Update DB
+                const { error } = await supabase
+                    .from('bookings')
+                    .update({
+                        check_out: newCheckOutDate,
+                        total_price: newTotalPrice
+                        // We keep status as is (confirmed/checked_in covers it)
+                        // Should we set payment status to 'pending' if it was paid?
+                        // Yes, because now they owe money.
+                        // payment_status: 'pending' (Wait, if they already paid, partial payment logic applies. 
+                        // Let's set to 'pending' if the extra cost > 0)
+                        , payment_status: 'pending'
+                    })
+                    .eq('id', bookingId);
+
+                if (error) {
+                    console.error("Error extending booking:", error);
+                    toast.error("Error al extender reserva");
+                    throw error;
+                }
+
+                // 4. Update Charge (Optional: Add 'Extension' charge to bill? No, we updated total_price)
+                // However, updated total_price makes it confusing what was paid.
+                // Better approach for Elite Traceability: Add a CHARGE for the extension.
+                // But simplified mvp: Update Total Price. 
+                // The payment logic subtracts payments from total price. 
+                // So if we increase total price, pending amount increases. Correct.
+
+                toast.success(`Estadía extendida (+${extraDays} noches)`);
+                await getStore.fetchBookings();
+            },
 
             checkAvailability: (location, roomId, startDate, endDate, requestedGuests = 1, excludeBookingId?: string, checkUnitId?: string) => {
                 const state = get();

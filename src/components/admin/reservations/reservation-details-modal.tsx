@@ -4,7 +4,7 @@ import * as React from "react"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 import {
-    Calendar,
+    Calendar as CalendarIcon,
     User,
     Mail,
     Phone,
@@ -29,6 +29,7 @@ import {
     Users,
     Plus,
 } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
 
 import { Button } from "@/components/ui/button"
@@ -98,6 +99,8 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
     const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false)
     const [showCheckOut, setShowCheckOut] = React.useState(false)
     const [showPaymentAlert, setShowPaymentAlert] = React.useState(false)
+    const [showExtensionDialog, setShowExtensionDialog] = React.useState(false)
+    const [extensionDate, setExtensionDate] = React.useState<Date | undefined>(undefined)
     const [cancellationNote, setCancellationNote] = React.useState("")
     const [refundAmount, setRefundAmount] = React.useState("") // New state for amount
     const [notifyGuest, setNotifyGuest] = React.useState(true)
@@ -152,7 +155,6 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
     const isGroup = relatedBookings.length > 0
 
     // Honesty Bar / Extras Logic
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [extraCharges, setExtraCharges] = React.useState<Charge[]>([])
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [products, setProducts] = React.useState<any[]>([])
@@ -221,7 +223,6 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
     const handleSettleAllCharges = async () => {
         if (!booking) return
         if (!confirm("¿Marcar TODOS los cargos extra como PAGADOS?")) return
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { error } = await supabase.from('charges').update({ status: 'paid' }).eq('booking_id', booking.id).eq('status', 'pending')
         if (error) {
             toast.error("Error al procesar")
@@ -366,7 +367,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
             fetchProducts()
 
         }
-    }, [booking, open, defaultOpenCancellation])
+    }, [booking, open, defaultOpenCancellation, fetchCharges, fetchProducts])
 
     if (!booking) return null
 
@@ -1205,6 +1206,10 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                             <DropdownMenuItem onClick={() => setIsEditing(!isEditing)}>
                                                 <Edit2 className="w-4 h-4 mr-2" /> {isEditing ? "Cancelar Edición" : "Editar"}
                                             </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => setShowExtensionDialog(true)}>
+                                                <CalendarIcon className="w-4 h-4 mr-2" /> Extender Estadía
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
                                             <DropdownMenuSeparator />
                                             {isGroup && (
                                                 <DropdownMenuItem className="text-rose-600 focus:text-rose-700 font-bold" onClick={() => {
@@ -1340,7 +1345,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                     <div className="flex items-center justify-between bg-stone-50 dark:bg-stone-800/50 p-4 rounded-xl border border-stone-100 dark:border-stone-800">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-white dark:bg-stone-800 flex items-center justify-center shadow-sm border border-stone-100 dark:border-stone-700">
-                                <Calendar className="w-5 h-5 text-stone-600 dark:text-stone-400" />
+                                <CalendarIcon className="w-5 h-5 text-stone-600 dark:text-stone-400" />
                             </div>
                             <div>
                                 <p className="text-[10px] uppercase font-bold text-stone-400">Check-in</p>
@@ -1797,6 +1802,56 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                     )
                 }
             </DialogContent >
+
+            {/* EXTENSION DIALOG (Admin) */}
+            <Dialog open={showExtensionDialog} onOpenChange={setShowExtensionDialog}>
+                <DialogContent className="sm:max-w-[400px]">
+                    <DialogHeader>
+                        <DialogTitle>Extender Reserva</DialogTitle>
+                        <DialogDescription>
+                            Selecciona la nueva fecha de salida. El sistema calculará el costo adicional basado en la tarifa actual de la habitación.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 flex flex-col items-center gap-4">
+                        <div className="bg-stone-50 dark:bg-stone-800/50 p-2 rounded-lg border border-stone-100 dark:border-stone-800">
+                            <Calendar
+                                mode="single"
+                                selected={extensionDate}
+                                onSelect={(date) => setExtensionDate(date)}
+                                disabled={(date) => date <= new Date(booking.checkOut)}
+                                initialFocus
+                            />
+                        </div>
+                        {extensionDate && (
+                            <div className="w-full bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-100 dark:border-emerald-800 text-sm">
+                                <p className="font-bold text-emerald-700 dark:text-emerald-400 text-center">
+                                    Nueva Salida: {format(extensionDate, "dd MMM yyyy", { locale: es })}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setShowExtensionDialog(false)}>Cancelar</Button>
+                        <Button
+                            onClick={async () => {
+                                if (!extensionDate) return
+                                const { extendBooking } = useAppStore.getState()
+                                try {
+                                    await extendBooking(booking.id, format(extensionDate, 'yyyy-MM-dd'))
+                                    setShowExtensionDialog(false)
+                                    setExtensionDate(undefined)
+                                } catch (e) {
+                                    console.error(e)
+                                }
+                            }}
+                            disabled={!extensionDate}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        >
+                            Confirmar Extensión
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* ADD CHARGE DIALOG */}
             <Dialog open={showAddCharge} onOpenChange={setShowAddCharge}>

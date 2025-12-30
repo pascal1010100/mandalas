@@ -57,6 +57,7 @@ const LOCATION_ASSETS = {
 
 import { APP_CONFIG } from "@/lib/config"
 import { ServiceRequestGrid } from "@/components/guest/service-request-grid"
+import { ExtendStayDialog } from "@/components/guest/extend-stay-dialog"
 
 export default function MyBookingPage() {
     // Search State
@@ -111,7 +112,7 @@ export default function MyBookingPage() {
         } catch (e) { console.error(e) } finally { setLoading(false) }
     }
 
-    // Realtime Sync for Guest (Booking & Charges)
+    // Realtime Sync for Guest (Booking & Charges & Service Requests)
     useEffect(() => {
         if (!booking?.id) return
 
@@ -126,7 +127,7 @@ export default function MyBookingPage() {
         }
         fetchCharges()
 
-        console.log("Subscribing to realtime updates for booking:", booking.id)
+
 
         // 2. Subscribe to Booking Updates
         const bookingChannel = supabase
@@ -141,18 +142,21 @@ export default function MyBookingPage() {
                 },
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (payload: any) => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    setBooking((prev: any) => {
-                        if (!prev) return null
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        return { ...prev, ...(payload.new as any) }
-                    })
-                    toast.info("Tu reserva ha sido actualizada")
+                    const newRow = payload.new as BookingRow
+
+                    setBooking(prev => ({ ...prev, ...newRow }))
+                    if (newRow.status === 'checked_in') toast.success("¡Bienvenido! Has realizado el check-in.")
+                    if (newRow.payment_status === 'paid') toast.success("¡Pago Confirmado!")
                 }
             )
             .subscribe()
 
-        // 3. Subscribe to Charges Updates (New Items)
+        // 3. Service Requests Sync (NEW)
+        const { fetchServiceRequests, subscribeToServiceRequests } = useAppStore.getState()
+        fetchServiceRequests() // Fetch immediately to populate store
+        const unsubscribeRequests = subscribeToServiceRequests() // Listen for updates
+
+        // 4. Subscribe to Charges Updates
         const chargesChannel = supabase
             .channel(`guest-charges-${booking.id}`)
             .on(
@@ -173,6 +177,7 @@ export default function MyBookingPage() {
         return () => {
             supabase.removeChannel(bookingChannel)
             supabase.removeChannel(chargesChannel)
+            unsubscribeRequests()
         }
     }, [booking?.id])
 
@@ -354,7 +359,69 @@ export default function MyBookingPage() {
         if (booking.payment_status === 'paid') return 2
         return 1
     }
+
+    // UX: Dynamic Greeting
+    const getGreeting = () => {
+        const hour = new Date().getHours()
+        if (hour < 12) return "Buenos días"
+        if (hour < 18) return "Buenas tardes"
+        return "Buenas noches"
+    }
+
+    // UX: meaningful "Smart Tip" based on time/status
+    const getSmartTip = () => {
+        if (!booking) return null
+        const hour = new Date().getHours()
+
+        // 1. Checkout Day
+        if (booking.status === 'checked_in' && daysUntil === 0) {
+            return {
+                icon: Clock,
+                title: "Check-out: 11:00 AM",
+                text: "Esperamos que hayas disfrutado. ¿Listos para la próxima aventura?",
+                actionLabel: "Ver Cuenta Final",
+                action: () => setShowPaymentModal(true) // or scrollTo billing
+            }
+        }
+
+        // 2. Morning Routine (Breakfast)
+        if (booking.status === 'checked_in' && hour >= 6 && hour <= 11) {
+            return {
+                icon: Utensils,
+                title: "Hora del Desayuno",
+                text: `${theme.breakfastTime} en ${theme.breakfastLoc}. ¡Buen provecho!`,
+                actionLabel: null,
+                action: null
+            }
+        }
+
+        // 3. Arrival / Check-in
+        if (booking.status === 'confirmed' && daysUntil <= 0) {
+            return {
+                icon: MapPin,
+                title: "¿Vienes en camino?",
+                text: "Usa el mapa para llegar sin problemas. Te esperamos.",
+                actionLabel: "Abrir Waze/Maps",
+                action: () => window.open(theme.mapUrl, '_blank')
+            }
+        }
+
+        // 4. Default: Wi-Fi Focus (Most asked q)
+        if (booking.status === 'checked_in') {
+            return {
+                icon: Wifi,
+                title: "¿Necesitas Internet?",
+                text: `Red: ${theme.wifiSSID} | Clave: ${theme.wifiPass}`,
+                actionLabel: "Copiar Clave",
+                action: () => { navigator.clipboard.writeText(theme.wifiPass); toast.success("Clave copiada") }
+            }
+        }
+
+        return null
+    }
+
     const currentStep = getProgressStep()
+    const smartTip = getSmartTip()
     const canCheckIn = booking && booking.payment_status === 'paid' && booking.guest_id_number && daysUntil <= 0 && booking.status === 'confirmed'
 
     // Interactive Handlers
@@ -583,7 +650,7 @@ export default function MyBookingPage() {
                                         <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-stone-300">
                                             <Users className="w-3 h-3" />
                                         </div>
-                                        <span className="text-xs text-stone-400">{b.guests} Huésped{b.guests > 1 ? 'es' : ''}</span>
+                                        <span className="text-xs text-stone-400">{b.guests} Huésped{Number(b.guests) > 1 ? 'es' : ''}</span>
                                     </div>
                                     <div className="text-xs text-emerald-400 font-bold flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-300">
                                         Gestionar <ArrowRight className="w-3 h-3" />
@@ -644,26 +711,31 @@ export default function MyBookingPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col md:flex-row justify-between items-end gap-8 mb-12"
                 >
-                    <div className="space-y-4">
+                    <div className="space-y-6 max-w-2xl">
                         <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-4 duration-700 delay-100">
                             {booking && (
-                                <Badge variant="outline" className={cn("uppercase tracking-[0.2em] text-[10px] py-1.5 px-3 bg-white/40 dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-900 dark:text-white backdrop-blur-md shadow-sm")}>
+                                <Badge variant="outline" className={cn("uppercase tracking-[0.2em] text-[10px] py-1.5 px-4 bg-white/50 dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-900 dark:text-white backdrop-blur-md shadow-sm")}>
                                     {booking.location === 'hideout' ? 'The Hideout' : 'Pueblo'}
                                 </Badge>
                             )}
                             {booking && booking.status === 'confirmed' && (
-                                <Badge variant="outline" className="uppercase tracking-[0.2em] text-[10px] py-1.5 px-3 bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 backdrop-blur-md animate-pulse">
-                                    Reserva Confirmada
+                                <Badge variant="default" className="uppercase tracking-[0.2em] text-[10px] py-1 px-3 bg-emerald-500/90 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 animate-in zoom-in duration-500">
+                                    Confirmada
                                 </Badge>
                             )}
                         </div>
-                        <h1 className="text-5xl md:text-7xl font-black font-heading text-stone-900 dark:text-white drop-shadow-sm dark:drop-shadow-2xl tracking-tighter leading-none animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-                            {booking ? `Hola, ${booking.guest_name.split(' ')[0]}` : "Bienvenido"}
+                        <h1 className="text-5xl md:text-7xl font-bold font-heading text-stone-900 dark:text-white drop-shadow-sm leading-tight animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+                            {booking ? (
+                                <>
+                                    <span className="block text-2xl md:text-3xl font-light text-stone-500 dark:text-stone-400 mb-2">{getGreeting()},</span>
+                                    {booking.guest_name.split(' ')[0]}
+                                </>
+                            ) : "Bienvenido"}
                         </h1>
-                        <p className="text-lg md:text-xl text-stone-600 dark:text-stone-300 font-light max-w-lg leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+                        <p className="text-lg text-stone-600 dark:text-stone-300 font-light leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 border-l-2 border-amber-500/50 pl-4">
                             {booking
-                                ? "Tu refugio está listo. Aquí tienes todo lo necesario para tu aventura."
-                                : "Ingresa tus datos para acceder a tu panel de viaje exclusivo."}
+                                ? "Tu refugio está preparado. Disfruta de la experiencia Mandalas con total libertad y confort."
+                                : "Ingresa tus datos para acceder a tu concierge digital personal."}
                         </p>
                     </div>
 
@@ -801,7 +873,7 @@ export default function MyBookingPage() {
                                             )}
 
                                             <p className="text-sm text-stone-600 dark:text-stone-300 uppercase tracking-widest font-medium mb-1">
-                                                {daysUntil > 0 ? "Tu viaje comienza en" : "¡Bienvenido!"}
+                                                {daysUntil > 0 ? "Tu viaje comienza en" : smartTip ? "Sugerencia del momento" : "Disfruta tu estadía"}
                                             </p>
 
                                             {daysUntil > 0 ? (
@@ -809,6 +881,18 @@ export default function MyBookingPage() {
                                                     {daysUntil} <span className="text-2xl text-stone-500 dark:text-stone-400 align-baseline ml-[-10px]">días</span>
                                                 </div>
 
+                                            ) : smartTip ? (
+                                                <div className="animate-in fade-in slide-in-from-bottom-2">
+                                                    <h1 className="text-2xl font-bold text-stone-900 dark:text-white mb-2 drop-shadow-md dark:drop-shadow-lg flex items-center gap-2">
+                                                        {smartTip.title}
+                                                    </h1>
+                                                    <p className="text-stone-600 dark:text-stone-300 text-sm mb-3 leading-tight max-w-xs">{smartTip.text}</p>
+                                                    {smartTip.actionLabel && (
+                                                        <Button size="sm" variant="outline" className="h-8 text-xs border-stone-300 bg-white/50" onClick={smartTip.action}>
+                                                            {smartTip.actionLabel}
+                                                        </Button>
+                                                    )}
+                                                </div>
                                             ) : (
                                                 <>
                                                     <h1 className="text-3xl font-bold text-stone-900 dark:text-white mb-1 drop-shadow-md dark:drop-shadow-lg">
@@ -922,111 +1006,84 @@ export default function MyBookingPage() {
                                     </div>
 
                                     {/* ACCOUNT SUMMARY (BILLING) */}
-                                    <div className="bg-stone-50 dark:bg-stone-900/50 rounded-xl border border-stone-200 dark:border-white/10 p-4 mb-6 space-y-3">
-                                        <div className="flex justify-between items-center pb-2 border-b border-stone-200 dark:border-white/5">
-                                            <span className="text-sm font-bold text-stone-700 dark:text-stone-300 flex items-center gap-2">
-                                                <ShoppingBag className="w-4 h-4" /> Estado de Cuenta
+                                    <div className="bg-stone-50 dark:bg-stone-900/50 rounded-xl border border-stone-200 dark:border-white/10 p-5 mb-6 space-y-4 shadow-sm">
+                                        <div className="flex justify-between items-center pb-3 border-b border-stone-200 dark:border-white/5">
+                                            <span className="text-sm font-bold text-stone-800 dark:text-stone-200 flex items-center gap-2 uppercase tracking-wider">
+                                                <Wallet className="w-4 h-4 text-stone-400" /> Tu Cuenta
                                             </span>
-                                            <Badge variant={booking.payment_status === 'paid' ? 'default' : 'outline'} className={cn(booking.payment_status === 'paid' ? "bg-emerald-500 hover:bg-emerald-600" : "text-stone-500 border-stone-200 dark:border-stone-700")}>
+                                            <Badge variant={booking.payment_status === 'paid' ? 'default' : 'outline'} className={cn("px-2.5", booking.payment_status === 'paid' ? "bg-emerald-500 hover:bg-emerald-600" : "text-stone-500 border-stone-200 dark:border-stone-700")}>
                                                 {booking.payment_status === 'paid' ? "Pagado" : booking.payment_status === 'verifying' ? "Verificando" : "Pendiente"}
                                             </Badge>
                                         </div>
 
                                         {/* Base Rate */}
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-stone-500 dark:text-stone-400 flex items-center gap-2">
-                                                <BedDouble className="w-3 h-3" /> Alojamiento ({differenceInDays(new Date(booking.check_out), new Date(booking.check_in))} noches)
+                                        <div className="flex justify-between text-sm py-1">
+                                            <span className="text-stone-600 dark:text-stone-400 flex items-center gap-2">
+                                                <BedDouble className="w-3.5 h-3.5" /> Alojamiento <span className="text-xs opacity-50">({differenceInDays(new Date(booking.check_out), new Date(booking.check_in))} noches)</span>
                                             </span>
                                             <span className="font-mono text-stone-900 dark:text-stone-100 font-bold">Q{booking.total_price}</span>
                                         </div>
 
                                         {/* Extras List */}
                                         {myCharges.length > 0 && (
-                                            <div className="space-y-2 pt-2">
+                                            <div className="space-y-3 pt-2">
                                                 <div className="flex justify-between items-center">
-                                                    <p className="text-[10px] uppercase font-bold text-stone-400">Extras / Minibar</p>
+                                                    <p className="text-[10px] uppercase font-bold text-stone-400 tracking-wider">Consumos Extra</p>
                                                     {myCharges.some(c => c.status !== 'paid') && (
-                                                        <Badge variant="outline" className="text-[10px] h-5 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-500">
-                                                            Por pagar: Q{myCharges.filter(c => c.status !== 'paid').reduce((acc, c) => acc + Number(c.amount), 0)}
+                                                        <Badge variant="outline" className="text-[9px] h-5 border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-500">
+                                                            Pagar: Q{myCharges.filter(c => c.status !== 'paid').reduce((acc, c) => acc + Number(c.amount), 0)}
                                                         </Badge>
                                                     )}
                                                 </div>
-                                                {myCharges.map(charge => (
-                                                    <div key={charge.id} className="flex justify-between items-start text-sm pl-2 border-l-2 border-stone-200 dark:border-stone-800">
-                                                        <span className="text-stone-500 dark:text-stone-400 flex flex-col">
-                                                            <span className="flex items-center gap-2 font-medium">
-                                                                {charge.item_name}
-                                                                {charge.status === 'paid' ? (
-                                                                    <span className="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 px-1.5 py-0.5 rounded-sm flex items-center leading-none">
-                                                                        <CheckCircle2 className="w-2.5 h-2.5 mr-1" /> Pagado
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-600 px-1.5 py-0.5 rounded-sm leading-none">Pendiente</span>
-                                                                )}
+                                                <div className="bg-white dark:bg-black/20 rounded-lg p-3 space-y-2 border border-stone-100 dark:border-white/5">
+                                                    {myCharges.map(charge => (
+                                                        <div key={charge.id} className="flex justify-between items-center text-sm">
+                                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                                <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", charge.status === 'paid' ? "bg-emerald-400" : "bg-amber-400")} />
+                                                                <span className={cn("truncate font-medium", charge.status === 'paid' ? "text-stone-400 line-through" : "text-stone-700 dark:text-stone-300")}>
+                                                                    {charge.item_name}
+                                                                </span>
+                                                            </div>
+                                                            <span className={cn(
+                                                                "font-mono text-xs whitespace-nowrap ml-2",
+                                                                charge.status === 'paid' ? "text-stone-300" : "text-stone-900 dark:text-stone-100 font-bold"
+                                                            )}>
+                                                                Q{charge.amount}
                                                             </span>
-                                                            <span className="text-[10px] opacity-50">
-                                                                {format(new Date(charge.created_at), "d MMM, HH:mm", { locale: es })}
-                                                            </span>
-                                                        </span>
-                                                        <span className={cn(
-                                                            "font-mono transition-all",
-                                                            charge.status === 'paid'
-                                                                ? "text-stone-400 line-through decoration-stone-300 text-xs"
-                                                                : "text-stone-900 dark:text-stone-100 font-bold"
-                                                        )}>
-                                                            Q{charge.amount}
-                                                        </span>
-                                                    </div>
-                                                ))}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         )}
 
-                                        {/* Grand Total Breakdown */}
-                                        <div className="pt-4 border-t border-stone-200 dark:border-white/5 mt-2 space-y-3">
-                                            {/* Summary Rows */}
-                                            <div className="space-y-1">
-                                                <div className="flex justify-between items-center text-xs">
-                                                    <span className="text-stone-500">Alojamiento</span>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-bold uppercase",
-                                                            booking.payment_status === 'paid' ? "bg-emerald-100 text-emerald-700" :
-                                                                booking.payment_status === 'verifying' ? "bg-indigo-100 text-indigo-700" :
-                                                                    "bg-amber-100 text-amber-700"
-                                                        )}>
-                                                            {booking.payment_status === 'paid' ? 'Pagado' : booking.payment_status === 'verifying' ? 'Verificando' : 'Pendiente'}
-                                                        </span>
-                                                        <span className="font-mono text-stone-900 dark:text-stone-300">Q{booking.total_price}</span>
-                                                    </div>
-                                                </div>
-                                                {myCharges.length > 0 && (
-                                                    <div className="flex justify-between items-center text-xs">
-                                                        <span className="text-stone-500">Extras</span>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="font-mono text-stone-900 dark:text-stone-300">Q{myCharges.reduce((acc, c) => acc + Number(c.amount), 0)}</span>
-                                                        </div>
-                                                    </div>
+                                        {/* Final Result */}
+                                        <div className={cn(
+                                            "flex justify-between items-end p-4 rounded-xl border transition-colors duration-500",
+                                            totalPending > 0
+                                                ? "bg-amber-50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-800/30"
+                                                : "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800/30"
+                                        )}>
+                                            <div className="flex flex-col">
+                                                <span className={cn(
+                                                    "text-xs font-bold uppercase tracking-wider mb-1",
+                                                    totalPending > 0 ? "text-amber-700 dark:text-amber-500" : "text-emerald-700 dark:text-emerald-500"
+                                                )}>
+                                                    {totalPending > 0 ? "Total a Pagar" : "Cuenta Saldada"}
+                                                </span>
+                                                {totalPending > 0 && (
+                                                    <span className="text-[10px] text-amber-600/80 dark:text-amber-400/80 max-w-[150px] leading-tight">
+                                                        {booking.payment_method === 'transfer' ? "Realiza tu transferencia" : "Pagar en recepción"}
+                                                    </span>
                                                 )}
                                             </div>
-
-                                            {/* Final Result */}
-                                            <div className="flex justify-between items-end bg-stone-100 dark:bg-white/5 p-3 rounded-xl">
-                                                <div className="flex flex-col">
-                                                    <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">Total Pendiente</span>
-                                                    {totalPending > 0 && (
-                                                        <span className="text-[10px] text-amber-600 dark:text-amber-500 animate-pulse font-medium">
-                                                            {booking.payment_method === 'transfer' ? "Requiere Abono" : "Pagar en Recepción"}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <span className={cn(
-                                                    "text-2xl font-bold font-heading",
-                                                    totalPending > 0
-                                                        ? "text-amber-600 dark:text-amber-500"
-                                                        : "text-emerald-600 dark:text-emerald-500"
-                                                )}>
-                                                    Q{totalPending.toFixed(2)}
-                                                </span>
-                                            </div>
+                                            <span className={cn(
+                                                "text-3xl font-black font-heading tracking-tight",
+                                                totalPending > 0
+                                                    ? "text-amber-600 dark:text-amber-500"
+                                                    : "text-emerald-600 dark:text-emerald-500"
+                                            )}>
+                                                Q{totalPending > 0 ? totalPending.toFixed(2) : "0.00"}
+                                            </span>
                                         </div>
                                     </div>
 
@@ -1061,9 +1118,34 @@ export default function MyBookingPage() {
                                     )}
 
                                     {booking.status === 'checked_in' && (
-                                        <Button className="w-full bg-stone-800 hover:bg-stone-700 text-white font-bold h-12 border border-white/10" onClick={handleCheckout}>
-                                            <ArrowRight className="w-4 h-4 mr-2" /> Finalizar Estadía (Check-out)
-                                        </Button>
+                                        <div className="space-y-4 pt-2">
+                                            <Button
+                                                className="w-full bg-stone-900 hover:bg-black text-white font-bold h-14 rounded-xl shadow-xl shadow-stone-900/20 transition-all hover:scale-[1.01]"
+                                                onClick={handleCheckout}
+                                            >
+                                                <div className="flex items-center justify-between w-full px-4">
+                                                    <span className="flex items-center"><ArrowRight className="w-5 h-5 mr-3" /> Finalizar Estadía</span>
+                                                    <Badge variant="secondary" className="bg-white/20 text-white border-0 text-[10px]">Check-out</Badge>
+                                                </div>
+                                            </Button>
+
+                                            <div className="relative py-2">
+                                                <div className="absolute inset-0 flex items-center">
+                                                    <span className="w-full border-t border-stone-200 dark:border-white/10" />
+                                                </div>
+                                                <div className="relative flex justify-center text-[10px] uppercase tracking-widest">
+                                                    <span className="bg-stone-50/50 dark:bg-stone-950 px-3 text-stone-400">O extiende tu experiencia</span>
+                                                </div>
+                                            </div>
+
+                                            <ExtendStayDialog
+                                                bookingId={booking.id}
+                                                currentCheckOut={booking.check_out}
+                                                roomPrice={rooms.find(r => r.id === booking.room_type)?.basePrice || 0}
+                                                guestName={booking.guest_name}
+                                                roomName={rooms.find(r => r.id === booking.room_type)?.label || booking.room_type}
+                                            />
+                                        </div>
                                     )}
 
                                     {booking.status === 'checked_out' && (
@@ -1262,6 +1344,26 @@ export default function MyBookingPage() {
 
             </div>
 
+            {/* FLOATING ACTION BAR (Mobile Only) */}
+            {booking && booking.status === 'checked_in' && (
+                <motion.div
+                    initial={{ y: 100 }}
+                    animate={{ y: 0 }}
+                    className="fixed bottom-6 left-6 right-6 md:hidden z-40 bg-stone-900/90 dark:bg-white/90 backdrop-blur-xl text-white dark:text-stone-900 p-2 rounded-full shadow-2xl flex justify-between items-center pl-6 border border-white/10"
+                >
+                    <span className="text-xs font-bold mr-4 truncate max-w-[150px]">
+                        {smartTip ? smartTip.title : `Hab: ${roomConfig?.label || 'Mandalas'}`}
+                    </span>
+                    <div className="flex gap-2">
+                        <Button size="icon" className="rounded-full w-10 h-10 bg-white/10 dark:bg-black/10 hover:bg-white/20 text-white dark:text-stone-900" onClick={() => { navigator.clipboard.writeText(theme.wifiPass); toast.success("WiFi Copiado") }}>
+                            <Wifi className="w-4 h-4" />
+                        </Button>
+                        <Button size="icon" className="rounded-full w-10 h-10 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30" onClick={() => window.open("https://wa.me/50212345678", "_blank")}>
+                            <MessageCircle className="w-5 h-5" />
+                        </Button>
+                    </div>
+                </motion.div>
+            )}
 
             {/* MODALS */}
             <AnimatePresence>
@@ -1371,7 +1473,7 @@ export default function MyBookingPage() {
                                                 </div>
                                                 <p className="font-bold text-blue-900 dark:text-blue-200 text-sm">Pago en Recepción</p>
                                             </div>
-                                            <p className="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                                            <p className="text-xs text-blue-700 dark:text-blue-200 leading-relaxed opacity-90">
                                                 Tu reserva está confirmada con pago al llegar. Aceptamos efectivo y tarjetas.
                                             </p>
                                         </div>

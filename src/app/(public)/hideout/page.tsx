@@ -96,8 +96,6 @@ export default function HideoutPage() {
                                         defaultRoomType="hideout_dorm_female"
                                         roomName="Dormitorio Solo Chicas"
                                         pricePerNight={rooms?.find(r => r.id === 'hideout_dorm_female')?.basePrice || 16}
-                                    // TODO: Pass specific unit/room type ID to modal if supported, or ensure backend handles "dorm" correctly (legacy)
-                                    // We might need to update BookingModal to accept "specificRoomId" if we want to differentiate
                                     >
                                         <Button
                                             className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-lime-500 to-lime-700"
