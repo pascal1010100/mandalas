@@ -56,6 +56,7 @@ const LOCATION_ASSETS = {
 }
 
 import { APP_CONFIG } from "@/lib/config"
+import { ServiceRequestGrid } from "@/components/guest/service-request-grid"
 
 export default function MyBookingPage() {
     // Search State
@@ -1073,6 +1074,22 @@ export default function MyBookingPage() {
                                     )}
                                 </div>
 
+                                {/* SERVICE REQUESTS (NEW) */}
+                                <div className="bg-white/60 dark:bg-stone-900/40 rounded-xl border border-stone-200 dark:border-white/10 p-5 backdrop-blur-md">
+                                    <div className="mb-4 flex items-center gap-2">
+                                        <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                                            <Wrench className="w-4 h-4" />
+                                        </div>
+                                        <h3 className="text-sm font-bold text-stone-900 dark:text-white uppercase tracking-wider">
+                                            Servicios & Solicitudes
+                                        </h3>
+                                    </div>
+                                    <ServiceRequestGrid
+                                        bookingId={booking.id}
+                                        guestName={booking.guest_name}
+                                    />
+                                </div>
+
                                 {/* Digital Guidebook Grid */}
                                 <div className="grid grid-cols-2 gap-4">
                                     {/* WiFi Card */}
@@ -1537,66 +1554,68 @@ export default function MyBookingPage() {
             </AnimatePresence>
             {/* GROUP BOOKINGS (Elite Feature - Glass Card Style) */}
             {/* GROUP BOOKINGS (Elite Feature - Glass Card Style) */}
-            {allBookings.length > 1 && (
-                <div className="max-w-4xl mx-auto mt-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500 pb-20 px-6">
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-300 dark:via-white/10 to-transparent" />
-                        <div className="flex items-center gap-2 text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-900/50 px-4 py-1 rounded-full border border-stone-200 dark:border-white/5">
-                            <Users className="w-3 h-3" />
-                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em]">Tu Grupo ({allBookings.length})</h3>
+            {
+                allBookings.length > 1 && (
+                    <div className="max-w-4xl mx-auto mt-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500 pb-20 px-6">
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-300 dark:via-white/10 to-transparent" />
+                            <div className="flex items-center gap-2 text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-stone-900/50 px-4 py-1 rounded-full border border-stone-200 dark:border-white/5">
+                                <Users className="w-3 h-3" />
+                                <h3 className="text-[10px] font-bold uppercase tracking-[0.2em]">Tu Grupo ({allBookings.length})</h3>
+                            </div>
+                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-300 dark:via-white/10 to-transparent" />
                         </div>
-                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-300 dark:via-white/10 to-transparent" />
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {allBookings.filter(b => b.id !== booking?.id).map((otherBooking) => (
-                            <motion.button
-                                key={otherBooking.id}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="w-full bg-white/60 dark:bg-stone-900/40 backdrop-blur-xl p-4 rounded-xl border border-white/40 dark:border-white/5 shadow-lg dark:shadow-none flex items-center justify-between cursor-pointer transition-all group hover:bg-white/80 dark:hover:bg-stone-800/60 hover:border-emerald-500/30 text-left relative overflow-hidden"
-                                onClick={() => {
-                                    setBooking(otherBooking)
-                                    window.scrollTo({ top: 0, behavior: 'smooth' })
-                                }}
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/0 group-hover:to-emerald-500/5 transition-colors duration-500" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {allBookings.filter(b => b.id !== booking?.id).map((otherBooking) => (
+                                <motion.button
+                                    key={otherBooking.id}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="w-full bg-white/60 dark:bg-stone-900/40 backdrop-blur-xl p-4 rounded-xl border border-white/40 dark:border-white/5 shadow-lg dark:shadow-none flex items-center justify-between cursor-pointer transition-all group hover:bg-white/80 dark:hover:bg-stone-800/60 hover:border-emerald-500/30 text-left relative overflow-hidden"
+                                    onClick={() => {
+                                        setBooking(otherBooking)
+                                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                                    }}
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/0 group-hover:to-emerald-500/5 transition-colors duration-500" />
 
-                                <div className="flex items-center gap-4 relative z-10">
-                                    <div className={cn(
-                                        "w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold font-heading border shadow-sm transition-transform group-hover:scale-110",
-                                        otherBooking.location === 'pueblo'
-                                            ? "bg-amber-100/80 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800"
-                                            : "bg-lime-100/80 text-lime-700 border-lime-200 dark:bg-lime-900/30 dark:text-lime-400 dark:border-lime-800"
-                                    )}>
-                                        {otherBooking.location === 'pueblo' ? 'P' : 'H'}
+                                    <div className="flex items-center gap-4 relative z-10">
+                                        <div className={cn(
+                                            "w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold font-heading border shadow-sm transition-transform group-hover:scale-110",
+                                            otherBooking.location === 'pueblo'
+                                                ? "bg-amber-100/80 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800"
+                                                : "bg-lime-100/80 text-lime-700 border-lime-200 dark:bg-lime-900/30 dark:text-lime-400 dark:border-lime-800"
+                                        )}>
+                                            {otherBooking.location === 'pueblo' ? 'P' : 'H'}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-stone-800 dark:text-stone-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-tight">
+                                                {otherBooking.guest_name}
+                                            </p>
+                                            <p className="text-[10px] text-stone-500 uppercase tracking-wide mt-0.5">
+                                                {otherBooking.room_type.replace(/_/g, ' ')}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-bold text-stone-800 dark:text-stone-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-tight">
-                                            {otherBooking.guest_name}
-                                        </p>
-                                        <p className="text-[10px] text-stone-500 uppercase tracking-wide mt-0.5">
-                                            {otherBooking.room_type.replace(/_/g, ' ')}
-                                        </p>
+                                    <div className="text-right relative z-10">
+                                        <Badge variant="outline" className={cn(
+                                            "capitalize border-none text-[10px] px-2 py-0.5",
+                                            otherBooking.status === 'confirmed' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
+                                                otherBooking.payment_status === 'pending' ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 animate-pulse" : "bg-stone-500/10 text-stone-500"
+                                        )}>
+                                            {otherBooking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
+                                        </Badge>
+                                        <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-stone-400 flex justify-end items-center gap-1">
+                                            Ver <ArrowRight className="w-2 h-2" />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="text-right relative z-10">
-                                    <Badge variant="outline" className={cn(
-                                        "capitalize border-none text-[10px] px-2 py-0.5",
-                                        otherBooking.status === 'confirmed' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
-                                            otherBooking.payment_status === 'pending' ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 animate-pulse" : "bg-stone-500/10 text-stone-500"
-                                    )}>
-                                        {otherBooking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
-                                    </Badge>
-                                    <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-stone-400 flex justify-end items-center gap-1">
-                                        Ver <ArrowRight className="w-2 h-2" />
-                                    </div>
-                                </div>
-                            </motion.button>
-                        ))}
+                                </motion.button>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     )
 }

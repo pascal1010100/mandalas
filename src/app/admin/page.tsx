@@ -27,6 +27,7 @@ import { CreateReservationModal } from "@/components/admin/reservations/create-r
 import { ReservationDetailsModal } from "@/components/admin/reservations/reservation-details-modal"
 import { RoomStatusGrid } from "@/components/admin/dashboard/room-status-grid"
 import { MiniCalendarWidget } from "@/components/admin/dashboard/mini-calendar"
+import { ServiceRequestFeed } from "@/components/admin/dashboard/service-request-feed"
 import { useState, Suspense } from "react"
 import { cn } from "@/lib/utils"
 
@@ -281,6 +282,9 @@ function AdminContent() {
                 {/* Right Column (Calendar & Operations) takes 1/3 */}
                 <div className="lg:col-span-1 space-y-8">
                     <StaggerReveal delay={0.2} className="h-full flex flex-col gap-8">
+                        <div className="h-auto">
+                            <ServiceRequestFeed />
+                        </div>
                         <div className="h-auto">
                             <MiniCalendarWidget />
                         </div>
