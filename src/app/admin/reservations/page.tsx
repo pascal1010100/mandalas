@@ -43,13 +43,13 @@ import { ReservationDetailsModal } from "@/components/admin/reservations/reserva
 import { CreateReservationModal } from "@/components/admin/reservations/create-reservation-modal"
 import { DashboardStats } from "@/components/admin/dashboard/dashboard-stats"
 import { ReservationFilters } from "@/components/admin/reservations/reservation-filters"
-import { BedDouble, DoorOpen, CalendarClock, Users } from "lucide-react"
+import { BedDouble, DoorOpen, CalendarClock, Users, Home, LogOut } from "lucide-react"
 
 
 export default function ReservationsPage() {
     const { bookings, updateBookingStatus } = useAppStore()
     const [searchTerm, setSearchTerm] = useState("")
-    const [statusFilter, setStatusFilter] = useState<"ALL" | "confirmed" | "pending" | "cancelled">("ALL")
+    const [statusFilter, setStatusFilter] = useState<"ALL" | "confirmed" | "pending" | "cancelled" | "checked_in">("ALL")
     const [dateRange, setDateRange] = useState<DateRange | undefined>()
 
     // View State
@@ -94,6 +94,12 @@ export default function ReservationsPage() {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
+            case "checked_in":
+                return (
+                    <Badge className="bg-violet-100/50 text-violet-700 hover:bg-violet-200/50 border border-violet-200 px-3 py-1 font-medium tracking-wide shadow-sm">
+                        <Home className="w-3 h-3 mr-1.5" /> En Casa
+                    </Badge>
+                )
             case "confirmed":
                 return (
                     <Badge className="bg-emerald-100/50 text-emerald-700 hover:bg-emerald-200/50 border border-emerald-200 px-3 py-1 font-medium tracking-wide shadow-sm">
@@ -217,7 +223,8 @@ export default function ReservationsPage() {
 
                                     // Quick Action Logic
                                     const isToday = isSameDay(parseISO(booking.checkIn), new Date())
-                                    const showQuickCheckIn = booking.status === 'pending' && isToday
+                                    // Show Check-In if Pending or Confirmed AND it's today
+                                    const showQuickCheckIn = (booking.status === 'pending' || booking.status === 'confirmed') && isToday
 
                                     return (
                                         <TableRow
@@ -297,10 +304,10 @@ export default function ReservationsPage() {
                                                             className="h-7 text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm px-3 rounded-full animate-in fade-in zoom-in duration-300"
                                                             onClick={(e) => {
                                                                 e.stopPropagation()
-                                                                updateBookingStatus(booking.id, "confirmed")
+                                                                updateBookingStatus(booking.id, "checked_in")
                                                             }}
                                                         >
-                                                            Check In
+                                                            Check In (En Casa)
                                                         </Button>
                                                     )}
                                                     <DropdownMenu>
@@ -315,9 +322,19 @@ export default function ReservationsPage() {
                                                             <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800" onClick={() => handleSelectBooking(booking)}>
                                                                 <List className="mr-2 h-3.5 w-3.5" /> Ver Detalles
                                                             </DropdownMenuItem>
-                                                            <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800 text-emerald-600 focus:text-emerald-700" onClick={() => updateBookingStatus(booking.id, "confirmed")}>
-                                                                <CheckCircle className="mr-2 h-3.5 w-3.5" /> Confirmar / Check-In
+                                                            <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800 text-violet-600 focus:text-violet-700" onClick={() => updateBookingStatus(booking.id, "checked_in")}>
+                                                                <Home className="mr-2 h-3.5 w-3.5" /> Marcar En Casa (Check-in)
                                                             </DropdownMenuItem>
+                                                            {booking.status !== 'confirmed' && (
+                                                                <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800 text-emerald-600 focus:text-emerald-700" onClick={() => updateBookingStatus(booking.id, "confirmed")}>
+                                                                    <CheckCircle className="mr-2 h-3.5 w-3.5" /> Solo Confirmar
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                            {booking.status === 'checked_in' && (
+                                                                <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800 text-stone-600 focus:text-stone-700" onClick={() => updateBookingStatus(booking.id, "checked_out")}>
+                                                                    <LogOut className="mr-2 h-3.5 w-3.5" /> Check-Out
+                                                                </DropdownMenuItem>
+                                                            )}
                                                             <DropdownMenuItem className="rounded-lg cursor-pointer focus:bg-stone-100 dark:focus:bg-stone-800 text-amber-600 focus:text-amber-700" onClick={() => updateBookingStatus(booking.id, "pending")}>
                                                                 <Clock className="mr-2 h-3.5 w-3.5" /> Marcar Pendiente
                                                             </DropdownMenuItem>
