@@ -61,7 +61,10 @@ const ROOM_DETAILS: Record<string, string[]> = {
     // Hideout
     'hideout_dorm_female': ["Exclusivo Chicas", "Literas cómodas", "Lockers seguros"],
     'hideout_dorm_mixed': ["Ambiente social", "Literas robustas", "Vistas al jardín"],
-    'hideout_private': ["Cama Queen real", "Electricidad y WiFi", "Sonidos de la naturaleza"], // Matches new config
+    'hideout_private_1': ["Cama Queen", "Baño Privado", "Vista Jardín"],
+    'hideout_private_2': ["Cama Queen", "Baño Privado", "Tranquilidad"],
+    'hideout_private_3': ["Cama Queen", "Baño Privado", "Cerca del Río"],
+    'hideout_private_4': ["Cama Queen", "Baño Privado", "Cerca del Río"],
 }
 
 
@@ -86,7 +89,8 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
     const [step, setStep] = useState(1)
 
     // Form State
-    const [location, setLocation] = useState<"pueblo" | "hideout">("pueblo")
+    // DOGFOODING: Default to 'hideout' for this shift
+    const [location, setLocation] = useState<"pueblo" | "hideout">("hideout")
     const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
         from: undefined,
         to: undefined,
@@ -526,7 +530,7 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
                                                 />
                                                 {/* Price Badge Overlay */}
                                                 <div className="absolute bottom-2 right-2 bg-stone-900/90 dark:bg-white/90 backdrop-blur text-white dark:text-stone-900 text-xs font-bold px-2 py-1 rounded-lg shadow-lg">
-                                                    ${room.price}
+                                                    Q{room.price}
                                                 </div>
                                             </div>
 
@@ -604,7 +608,13 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
                                 }}
                             />
                             <div className="flex items-center justify-center gap-2 mt-4 text-xs bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-200 py-2 px-4 rounded-full border border-emerald-100 dark:border-emerald-900/30 w-fit mx-auto transition-all duration-300">
-                                <span className="font-bold text-lg">{selectedUnitIds.length}</span> Camas seleccionadas = <span className="font-bold text-lg">{guests}</span> Huéspedes
+                                {selectedUnitIds.length === 0 ? (
+                                    <span className="font-medium text-amber-600 dark:text-amber-400">Selecciona al menos 1 cama para continuar</span>
+                                ) : (
+                                    <>
+                                        <span className="font-bold text-lg">{selectedUnitIds.length}</span> Cama{selectedUnitIds.length > 1 ? 's' : ''} = <span className="font-bold text-lg">{guests}</span> Huésped{parseInt(guests) > 1 ? 'es' : ''}
+                                    </>
+                                )}
                             </div>
                         </div>
                     )}
@@ -632,7 +642,7 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
                                 </div>
                                 <div className="text-right">
                                     <p className="font-light text-3xl text-stone-900 dark:text-white">
-                                        ${(selectedRoom?.price || 0) * differenceInDays(dateRange.to!, dateRange.from!) * parseInt(guests)}
+                                        Q{(selectedRoom?.price || 0) * differenceInDays(dateRange.to!, dateRange.from!) * parseInt(guests)}
                                     </p>
                                     <Badge variant="outline" className="text-[9px] border-stone-300 text-stone-500 bg-white dark:bg-stone-950 dark:border-stone-800 mt-1">TOTAL ESTIMADO</Badge>
                                 </div>

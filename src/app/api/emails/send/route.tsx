@@ -6,10 +6,21 @@ import { BookingCancellationEmail } from '@/emails/booking-cancellation';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_123');
 
+// Safe Error Serialization Helper
+const safeSerialize = (obj: any) => {
+    try {
+        return JSON.stringify(obj, null, 2);
+    } catch (e) {
+        return String(obj);
+    }
+};
+
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const { type, to, data } = body;
+
+        console.log(`[API EMAIL] Request received for: ${to} (${type})`);
 
         if (!to) {
             return NextResponse.json({ error: "Missing recipient" }, { status: 400 });
@@ -18,61 +29,78 @@ export async function POST(req: NextRequest) {
         let emailComponent;
         let subject;
 
-        // Render Template based on Type
-        if (type === 'confirmation') {
-            subject = `Reserva Confirmada - Mandalas ${data.location === 'pueblo' ? 'Pueblo' : 'Hideout'}`;
-            emailComponent = (
-                <BookingConfirmationEmail
-                    guestName={data.guestName}
-                    bookingId={data.bookingId}
-                    checkIn={data.checkIn}
-                    checkOut={data.checkOut}
-                    roomName={data.roomName}
-                    totalPrice={data.totalPrice}
-                    location={data.location}
-                />
-            );
-        } else if (type === 'cancellation') {
-            subject = `Actualización de Reserva - Mandalas`;
-            emailComponent = (
-                <BookingCancellationEmail
-                    guestName={data.guestName}
-                    bookingId={data.bookingId}
-                    roomName={data.roomName}
-                    refundStatus={data.refundStatus}
-                    amountRefunded={data.refundAmount}
-                    totalPrice={data.totalPrice}
-                />
-            );
-        } else {
-            return NextResponse.json({ error: "Invalid email type" }, { status: 400 });
+        // Render Template based on Type (Wrapped in Try/Catch to prevent crash)
+        try {
+            if (type === 'confirmation') {
+                subject = `Reserva Confirmada - Mandalas ${data.location === 'pueblo' ? 'Pueblo' : 'Hideout'}`;
+                emailComponent = (
+                    <BookingConfirmationEmail
+                        guestName={data.guestName || 'Huésped'}
+                        bookingId={data.bookingId || 'Ref-???'}
+                        checkIn={data.checkIn || 'N/A'}
+                        checkOut={data.checkOut || 'N/A'}
+                        roomName={data.roomName || 'Habitación'}
+                        totalPrice={data.totalPrice || 0}
+                        location={data.location || 'pueblo'}
+                    />
+                );
+            } else if (type === 'cancellation') {
+                subject = `Actualización de Reserva - Mandalas`;
+                emailComponent = (
+                    <BookingCancellationEmail
+                        guestName={data.guestName || 'Huésped'}
+                        bookingId={data.bookingId || 'Ref-???'}
+                        roomName={data.roomName || 'Habitación'}
+                        refundStatus={data.refundStatus}
+                        amountRefunded={data.refundAmount}
+                        totalPrice={data.totalPrice || 0}
+                    />
+                );
+            } else {
+                return NextResponse.json({ error: "Invalid email type" }, { status: 400 });
+            }
+        } catch (renderError) {
+            console.error("React Email Rendering Failed:", renderError);
+            return NextResponse.json({ error: "Template Rendering Failed", details: safeSerialize(renderError) }, { status: 500 });
         }
 
-        // MOCK SENDING FOR DEV/DEMO
-        // If no real key is set, we simulate per protocol
-        if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_123') {
+        // SMART MOCK CHECK
+        const apiKey = process.env.RESEND_API_KEY;
+        // Mock if key is missing, short, placeholder, or the default value
+        const isMockMode = !apiKey || apiKey === 're_123' || apiKey.includes('placeholder') || apiKey.length < 10;
+
+        if (isMockMode) {
             console.log(`[MOCK EMAIL] To: ${to} | Subject: ${subject}`)
-            return NextResponse.json({ message: "Mock Email sent successfully", id: "mock_id_123" });
+            await new Promise(resolve => setTimeout(resolve, 500));
+            return NextResponse.json({ message: "Mock Email sent successfully", id: "mock_id_dev_123" });
         }
 
         // Real Send
-        const { data: result, error } = await resend.emails.send({
-            from: 'Mandalas <reservas@mandalashostel.com>',
-            to: [to],
-            // bcc: ['admin@mandalashostel.com'],
-            subject: subject,
-            react: emailComponent,
-        });
+        console.log(`[REAL EMAIL] Sending to ${to}...`);
 
-        if (error) {
-            console.error("Resend Error:", error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
+        try {
+            const { data: result, error } = await resend.emails.send({
+                from: 'Mandalas <reservas@mandalashostel.com>',
+                to: [to],
+                subject: subject!,
+                react: emailComponent,
+            });
+
+            if (error) {
+                console.error("Resend Provider Error:", error);
+                // Serialize error safely to avoid circular reference crashes in JSON response
+                return NextResponse.json({ error: error.message || "Provider Error", details: safeSerialize(error) }, { status: 500 });
+            }
+
+            return NextResponse.json({ message: "Email sent successfully", id: result?.id });
+
+        } catch (sendError) {
+            console.error("Resend SDK threw:", sendError);
+            return NextResponse.json({ error: "Email Provider Failed", details: safeSerialize(sendError) }, { status: 500 });
         }
-
-        return NextResponse.json({ message: "Email sent successfully", id: result?.id });
 
     } catch (error) {
         console.error("Internal Email API Error:", error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ error: "Internal Server Error", details: safeSerialize(error) }, { status: 500 });
     }
 }

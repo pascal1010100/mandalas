@@ -49,7 +49,7 @@ import { BedDouble, DoorOpen, CalendarClock, Users, Home, LogOut } from "lucide-
 export default function ReservationsPage() {
     const { bookings, updateBookingStatus } = useAppStore()
     const [searchTerm, setSearchTerm] = useState("")
-    const [statusFilter, setStatusFilter] = useState<"ALL" | "confirmed" | "pending" | "cancelled" | "checked_in">("ALL")
+    const [statusFilter, setStatusFilter] = useState<"ALL" | "confirmed" | "pending" | "cancelled" | "checked_in" | "checked_out">("ALL")
     const [dateRange, setDateRange] = useState<DateRange | undefined>()
 
     // View State
@@ -96,25 +96,31 @@ export default function ReservationsPage() {
         switch (status) {
             case "checked_in":
                 return (
-                    <Badge className="bg-violet-100/50 text-violet-700 hover:bg-violet-200/50 border border-violet-200 px-3 py-1 font-medium tracking-wide shadow-sm">
+                    <Badge className="bg-violet-100/50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20 border border-violet-200 dark:border-violet-500/20 px-3 py-1 font-medium tracking-wide shadow-sm">
                         <Home className="w-3 h-3 mr-1.5" /> En Casa
+                    </Badge>
+                )
+            case "checked_out":
+                return (
+                    <Badge variant="outline" className="bg-stone-100/50 text-stone-600 dark:bg-stone-800/50 dark:text-stone-400 hover:bg-stone-200/50 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 border-dashed px-3 py-1 font-medium tracking-wide shadow-sm">
+                        <LogOut className="w-3 h-3 mr-1.5" /> Historial
                     </Badge>
                 )
             case "confirmed":
                 return (
-                    <Badge className="bg-emerald-100/50 text-emerald-700 hover:bg-emerald-200/50 border border-emerald-200 px-3 py-1 font-medium tracking-wide shadow-sm">
+                    <Badge className="bg-emerald-100/50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 hover:bg-emerald-200/50 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 px-3 py-1 font-medium tracking-wide shadow-sm">
                         <CheckCircle className="w-3 h-3 mr-1.5" /> Confirmada
                     </Badge>
                 )
             case "cancelled":
                 return (
-                    <Badge className="bg-rose-100/50 text-rose-700 hover:bg-rose-200/50 border border-rose-200 px-3 py-1 font-medium tracking-wide shadow-sm">
+                    <Badge className="bg-rose-100/50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 hover:bg-rose-200/50 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/20 px-3 py-1 font-medium tracking-wide shadow-sm">
                         <XCircle className="w-3 h-3 mr-1.5" /> Cancelada
                     </Badge>
                 )
             default:
                 return (
-                    <Badge className="bg-amber-100/50 text-amber-700 hover:bg-amber-200/50 border border-amber-200 px-3 py-1 font-medium tracking-wide shadow-sm">
+                    <Badge className="bg-amber-100/50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 hover:bg-amber-200/50 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 px-3 py-1 font-medium tracking-wide shadow-sm">
                         <Clock className="w-3 h-3 mr-1.5" /> Pendiente
                     </Badge>
                 )

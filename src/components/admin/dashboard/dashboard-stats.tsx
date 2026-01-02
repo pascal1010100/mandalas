@@ -21,7 +21,7 @@ import {
 } from "date-fns"
 
 import { getBusinessDate, isStayNight } from '@/lib/business-date'
-import { cn } from "@/lib/utils"
+import { cn, formatMoney } from "@/lib/utils"
 
 export function DashboardStats() {
     const { bookings, rooms } = useAppStore()
@@ -94,7 +94,7 @@ export function DashboardStats() {
                                 <DollarSign className="w-3 h-3" /> Caja Real
                             </p>
                             <h3 className="text-2xl xl:text-3xl font-light text-white font-heading tracking-tight">
-                                ${collectedRevenue.toLocaleString('es-MX')}
+                                {formatMoney(collectedRevenue)}
                             </h3>
                         </div>
                         <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
@@ -104,7 +104,7 @@ export function DashboardStats() {
                     <div className="mt-6 space-y-2">
                         <div className="flex justify-between text-[10px] font-medium text-emerald-300/60 uppercase tracking-wide">
                             <span>Suma Proyectada</span>
-                            <span>${projectedRevenue.toLocaleString('es-MX')}</span>
+                            <span>{formatMoney(projectedRevenue)}</span>
                         </div>
                         <div className="w-full bg-emerald-950/50 rounded-full h-1.5 overflow-hidden border border-emerald-500/10">
                             <div
@@ -133,7 +133,7 @@ export function DashboardStats() {
                                 <AlertCircle className="w-3 h-3" /> Por Cobrar
                             </p>
                             <h3 className={cn("text-2xl xl:text-3xl font-light font-heading tracking-tight", totalDebt > 0 ? "text-white" : "text-stone-400")}>
-                                ${totalDebt.toLocaleString('es-MX')}
+                                {formatMoney(totalDebt)}
                             </h3>
                         </div>
                         <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center border shadow-lg",
@@ -194,7 +194,7 @@ export function DashboardStats() {
                             <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Pricing Power</p>
                             <div className="space-y-1">
                                 <div className="flex items-baseline gap-2">
-                                    <span className="text-2xl xl:text-3xl font-light text-white font-heading">${adr.toFixed(0)}</span>
+                                    <span className="text-2xl xl:text-3xl font-light text-white font-heading">{formatMoney(adr)}</span>
                                     <span className="text-[10px] text-stone-500 font-mono uppercase">ADR</span>
                                 </div>
                             </div>
@@ -206,7 +206,7 @@ export function DashboardStats() {
                     <div className="mt-6 flex items-center gap-3">
                         <div className="px-3 py-1.5 rounded-lg bg-stone-800/50 border border-white/5 flex items-center gap-2">
                             <BarChart3 className="w-3 h-3 text-purple-400" />
-                            <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">REVPAR: <span className="text-white">${(adr * (displayOccupancy / 100)).toFixed(0)}</span></span>
+                            <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">REVPAR: <span className="text-white">{formatMoney(adr * (displayOccupancy / 100))}</span></span>
                         </div>
                     </div>
                 </div>

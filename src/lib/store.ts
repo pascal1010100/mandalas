@@ -104,6 +104,28 @@ export interface Charge {
     created_at: string;
 }
 
+export interface CashTransactionRow {
+    id: string;
+    amount: number;
+    type: 'income' | 'expense';
+    category: 'reservation' | 'laundry' | 'shuttle' | 'bar' | 'supplies' | 'salary' | 'other';
+    description: string;
+    booking_id?: string;
+    payment_method?: 'cash' | 'card' | 'transfer';
+    created_at: string;
+}
+
+export interface CashTransaction {
+    id: string;
+    amount: number;
+    type: 'income' | 'expense';
+    category: 'reservation' | 'laundry' | 'shuttle' | 'bar' | 'supplies' | 'salary' | 'other';
+    description: string;
+    bookingId?: string;
+    paymentMethod?: 'cash' | 'card' | 'transfer';
+    createdAt: Date;
+}
+
 export interface Product {
     id: string;
     name: string;
@@ -142,10 +164,14 @@ interface AppState {
     events: AppEvent[];
 
     rooms: RoomConfig[];
+    transactions: CashTransaction[]; // New State
     isLoading: boolean;
+    isAdmin: boolean;
 
     // Actions
     fetchBookings: () => Promise<void>;
+    fetchTransactions: () => Promise<void>; // New Action
+    addTransaction: (tx: Omit<CashTransaction, 'id' | 'createdAt'>) => Promise<void>; // New Action
     addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'totalPrice' | 'status'> & { totalPrice?: number, status?: BookingStatus }, totalPrice?: number) => Promise<void>;
     updateBookingStatus: (id: string, status: BookingStatus) => Promise<void>;
     updateBooking: (id: string, data: Partial<Omit<Booking, 'id' | 'createdAt'>>) => Promise<void>;
@@ -227,23 +253,41 @@ const initialRooms: RoomConfig[] = [
     },
     // HIDEOUT
     {
-        id: 'hideout_dorm_female', location: 'hideout', type: 'dorm', label: 'Dormitorio Solo Chicas', capacity: 6, maxGuests: 6, basePrice: 16,
-        description: 'Espacio exclusivo para mujeres',
+        id: 'hideout_dorm_female', location: 'hideout', type: 'dorm', label: 'Hideout Dorm A (Chicas)', capacity: 5, maxGuests: 5, basePrice: 175,
+        description: 'Dormitorio de 5 camas exclusivo para mujeres',
         image: "https://images.unsplash.com/photo-1520277739336-7bf67edfa768?auto=format&fit=crop&q=80&w=300",
         housekeeping_status: 'clean'
     },
     {
-        id: 'hideout_dorm_mixed', location: 'hideout', type: 'dorm', label: 'Dormitorio Mixto', capacity: 6, maxGuests: 6, basePrice: 16,
-        description: 'Ambiente social y compartido',
-        image: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300",
+        id: 'hideout_dorm_mixed', location: 'hideout', type: 'dorm', label: 'Hideout Dorm B (Mixto)', capacity: 5, maxGuests: 5, basePrice: 148.75,
+        description: 'Dormitorio mixto de 5 camas',
+        image: "https://images.unsplash.com/photo-555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300",
         housekeeping_status: 'clean'
     },
     {
-        id: 'hideout_private', location: 'hideout', type: 'private', label: 'Habitación Privada', capacity: 4, maxGuests: 2, basePrice: 40,
-        description: 'Tranquilidad y privacidad en el Hideout',
+        id: 'hideout_private_1', location: 'hideout', type: 'private', label: 'Hideout Private 1', capacity: 2, maxGuests: 2, basePrice: 212.50,
+        description: 'Habitación privada confortable y tranquila',
         image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=300",
         housekeeping_status: 'clean'
     },
+    {
+        id: 'hideout_private_2', location: 'hideout', type: 'private', label: 'Hideout Private 2', capacity: 2, maxGuests: 2, basePrice: 212.50,
+        description: 'Habitación privada confortable y tranquila',
+        image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
+    {
+        id: 'hideout_private_3', location: 'hideout', type: 'private', label: 'Hideout Private 3', capacity: 2, maxGuests: 2, basePrice: 212.50,
+        description: 'Habitación privada confortable y tranquila',
+        image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    },
+    {
+        id: 'hideout_private_4', location: 'hideout', type: 'private', label: 'Hideout Private 4', capacity: 2, maxGuests: 2, basePrice: 212.50,
+        description: 'Habitación privada confortable y tranquila',
+        image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=300",
+        housekeeping_status: 'clean'
+    }
 ]
 
 
@@ -278,7 +322,9 @@ export const useAppStore = create<AppState>()(
             events: [],
             serviceRequests: [],
             rooms: initialRooms,
+            transactions: [], // Init
             isLoading: false,
+            isAdmin: true, // Default to true or handle logic
 
             subscribeToBookings: () => {
                 console.log("Subscribing to realtime bookings...")
@@ -286,114 +332,26 @@ export const useAppStore = create<AppState>()(
                     .channel('bookings-realtime')
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, (payload: any) => {
-                        console.log('Realtime Change:', payload)
-                        const state = get()
+                        console.log('Realtime Booking Change detected:', payload.eventType)
 
+                        // Show toast based on event type for feedback
                         if (payload.eventType === 'INSERT') {
-                            const row = payload.new as BookingRow
-                            const isMaintenance = row.guest_name === 'MANTENIMIENTO' || row.status === 'maintenance';
-                            const newBooking: Booking = {
-                                id: row.id,
-                                guestName: row.guest_name,
-                                email: row.email,
-                                phone: row.phone,
-                                location: row.location,
-                                roomType: row.room_type,
-                                guests: row.guests,
-                                checkIn: row.check_in,
-                                checkOut: row.check_out,
-                                status: isMaintenance ? 'maintenance' : row.status,
-                                totalPrice: row.total_price,
-                                createdAt: new Date(row.created_at),
-                                cancellationReason: row.cancellation_reason,
-                                refundStatus: row.refund_status,
-                                refundAmount: row.refund_amount,
-                                cancelledAt: row.cancelled_at,
-                                actualCheckOut: row.actual_check_out,
-                                paymentStatus: row.payment_status || 'pending',
-                                unitId: row.unit_id,
-                                guestIdType: row.guest_id_type,
-                                guestIdNumber: row.guest_id_number,
-                                paymentMethod: row.payment_method,
-                                paymentReference: row.payment_reference
-                            }
-                            // Prepend new booking
-                            set({ bookings: [newBooking, ...state.bookings] })
-                            toast.info(`Nueva reserva recibida: ${row.guest_name}`)
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const row = payload.new as any
+                            toast.info(`Nueva reserva: ${row.guest_name || 'Huésped'}`)
                         } else if (payload.eventType === 'UPDATE') {
-                            const row = payload.new as BookingRow
-                            console.log('Realtime UPDATE Payload:', row) // Debug
-
-                            set({
-                                bookings: state.bookings.map(b => {
-                                    if (b.id === row.id) {
-                                        // Safe Merge Helper
-                                        const val = <T>(newVal: T | undefined, currVal: T) => newVal !== undefined ? newVal : currVal
-
-                                        const isMaintenance = (row.guest_name === 'MANTENIMIENTO') || (row.status === 'maintenance') || (b.status === 'maintenance'); // Persist maintenance if not overridden
-
-                                        // ELITE NOTIFICATIONS: Check for State Changes
-                                        if (row.status === 'checked_in' && b.status !== 'checked_in') {
-                                            toast.success(`¡Check-in Realizado!`, { description: `${b.guestName} ha ingresado al hostal.` })
-                                            // Play sound? (Optional, maybe too intrusive)
-                                        }
-                                        if (row.payment_status === 'verifying' && b.paymentStatus !== 'verifying') {
-                                            toast.warning(`Pago por Verificar`, { description: `${b.guestName} ha reportado un pago.` })
-                                        }
-                                        if (row.status === 'checked_out' && b.status !== 'checked_out') {
-                                            toast.info(`Check-out Completado`, { description: `${b.guestName} ha dejado el hostal.` })
-                                        }
-
-                                        return {
-                                            ...b,
-                                            guestName: val(row.guest_name, b.guestName),
-                                            email: val(row.email, b.email),
-                                            phone: val(row.phone, b.phone),
-                                            location: val(row.location, b.location),
-                                            roomType: val(row.room_type, b.roomType),
-                                            guests: val(row.guests, b.guests),
-                                            checkIn: val(row.check_in, b.checkIn),
-                                            checkOut: val(row.check_out, b.checkOut),
-                                            // Status needs special handling for maintenance logic, but simple merge is safer for now unless status is explicit
-                                            status: row.status !== undefined ? (isMaintenance ? 'maintenance' : row.status) : b.status,
-
-                                            totalPrice: val(row.total_price, b.totalPrice),
-                                            cancellationReason: val(row.cancellation_reason, b.cancellationReason),
-                                            refundStatus: val(row.refund_status, b.refundStatus),
-                                            refundAmount: val(row.refund_amount, b.refundAmount),
-                                            cancelledAt: val(row.cancelled_at, b.cancelledAt),
-                                            actualCheckOut: val(row.actual_check_out, b.actualCheckOut),
-                                            paymentStatus: val(row.payment_status, b.paymentStatus),
-                                            unitId: val(row.unit_id, b.unitId),
-                                            guestIdType: val(row.guest_id_type, b.guestIdType),
-                                            guestIdNumber: val(row.guest_id_number, b.guestIdNumber), // CRITICAL FIX
-                                            paymentMethod: val(row.payment_method, b.paymentMethod),
-                                            paymentReference: val(row.payment_reference, b.paymentReference)
-                                        }
-                                    }
-                                    return b
-                                })
-                            })
-                            // Generic update toast removed in favor of specfic ones, or kept silent for background details updates
-                            if (window.location.pathname.includes('/admin')) {
-                                // Only show generic toast if no specific one triggered? 
-                                // Actually, let's keep it silent for generic updates (like typo fixes) to avoid noise.
-                                // The specific alerts above handle the important stuff.
-                            }
+                            // Optional: Could be more specific, but refetch is safest
+                            console.log("Booking updated, refreshing list...")
                         }
-                        // Silent update usually better for edits, but maybe notify for status changes?
-                        // toast.info("Reserva actualizada en tiempo real")
-                        else if (payload.eventType === 'DELETE') {
-                            const row = payload.old as { id: string }
-                            set({
-                                bookings: state.bookings.filter(b => b.id !== row.id)
-                            })
-                        }
+
+                        // NUCLEAR SYNC OPTION: Always refetch to guarantee consistency
+                        get().fetchBookings()
                     })
                     .subscribe()
 
-                // Optional: return unsubscribe function if needed, but for global store rarely used
-                return () => supabase.removeChannel(subscription)
+                return () => {
+                    supabase.removeChannel(subscription)
+                }
             },
 
             fetchBookings: async () => {
@@ -499,6 +457,54 @@ export const useAppStore = create<AppState>()(
                     console.log("Loaded rooms from DB:", mappedRooms.length);
                 } else {
                     console.log("Using local/fallback rooms (DB empty or error)");
+                }
+            },
+
+            fetchTransactions: async () => {
+                const today = new Date().toISOString().split('T')[0]
+                const { data, error } = await supabase
+                    .from('cash_transactions')
+                    .select('*')
+                    .gte('created_at', `${today}T00:00:00`)
+                    .lte('created_at', `${today}T23:59:59`)
+                    .order('created_at', { ascending: false })
+
+                if (data) {
+                    const mapped: CashTransaction[] = data.map((row: CashTransactionRow) => ({
+                        id: row.id,
+                        amount: row.amount,
+                        type: row.type,
+                        category: row.category,
+                        description: row.description,
+                        bookingId: row.booking_id,
+                        paymentMethod: row.payment_method,
+                        createdAt: new Date(row.created_at)
+                    }))
+                    set({ transactions: mapped })
+                }
+                if (error) {
+                    console.error("Error fetching transactions detailed:", JSON.stringify(error, null, 2))
+                    toast.error(`Error de Sistema: ${error.message || 'Consulta fallida'}`)
+                }
+            },
+
+            addTransaction: async (tx) => {
+                const payload = {
+                    amount: tx.amount,
+                    type: tx.type,
+                    category: tx.category,
+                    description: tx.description,
+                    payment_method: tx.paymentMethod || 'cash',
+                    booking_id: tx.bookingId
+                }
+
+                const { error } = await supabase.from('cash_transactions').insert([payload])
+                if (error) {
+                    console.error("Error adding transaction", error)
+                    toast.error("Error al registrar movimiento")
+                } else {
+                    toast.success("Movimiento registrado")
+                    get().fetchTransactions()
                 }
             },
 
@@ -819,15 +825,24 @@ export const useAppStore = create<AppState>()(
                     payload.cancelled_at = new Date().toISOString();
                 }
 
+                // OPTIMISTIC UPDATE: Update local state immediately to prevent UI lag/reversion
+                const currentBookings = get().bookings
+                const optimisticBookings = currentBookings.map(b =>
+                    b.id === id ? { ...b, ...payload } : b
+                )
+                set({ bookings: optimisticBookings })
+
                 const { error } = await supabase.from('bookings').update(payload).eq('id', id)
                 if (error) {
                     console.error('Error updating status:', error)
                     toast.error('Error al actualizar estado')
+                    // Rollback on error
+                    set({ bookings: currentBookings })
                     return
                 }
 
-                // Refresh local state first
-                await get().fetchBookings()
+                // Refresh in background (don't await to block UI)
+                get().fetchBookings()
 
                 // AUTOMATED EMAIL SYSTEM (Elite Feature)
                 // Trigger email in background after successful update
@@ -860,9 +875,25 @@ export const useAppStore = create<AppState>()(
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(emailData)
-                            }).then(res => {
-                                if (res.ok) toast.success(`📧 Email de ${emailType === 'confirmation' ? 'Confirmación' : 'Cancelación'} enviado`);
-                                else console.error("Email send failed");
+                            }).then(async res => {
+                                if (res.ok) {
+                                    toast.success(`📧 Email de ${emailType === 'confirmation' ? 'Confirmación' : 'Cancelación'} enviado`);
+                                } else {
+                                    let errData;
+                                    try {
+                                        errData = await res.json();
+                                    } catch (e) {
+                                        // If JSON fails, read text (it might be an HTML error page)
+                                        const text = await res.text();
+                                        console.error("Email API returned non-JSON:", text);
+                                        errData = { error: "Server Error (Non-JSON)", details: text.substring(0, 100) };
+                                    }
+
+                                    console.error("Email send failed:", res.status, errData);
+                                    if (res.status === 500) {
+                                        toast.error(`Error enviando email: ${errData.error || 'Error Desconocido'}`);
+                                    }
+                                }
                             }).catch(err => console.error("Email fetch error:", err));
                         }
                     }
@@ -917,6 +948,7 @@ export const useAppStore = create<AppState>()(
                 // Payment Updates
                 if (data.paymentMethod) payload.payment_method = data.paymentMethod
                 if (data.paymentReference) payload.payment_reference = data.paymentReference
+                if (data.totalPrice !== undefined) payload.total_price = data.totalPrice // ALLOW PRICE OVERRIDE
 
                 // ENABLED: Cancellation timestamp behavior (Schema updated)
                 if (data.status === 'cancelled') {
@@ -926,14 +958,41 @@ export const useAppStore = create<AppState>()(
                 if (data.actualCheckOut) payload.actual_check_out = data.actualCheckOut
                 if (data.paymentStatus) payload.payment_status = data.paymentStatus
 
+                // OPTIMISTIC UPDATE
+                const currentBookings = get().bookings
+                const optimisticBookings = currentBookings.map(b =>
+                    b.id === id ? { ...b, ...payload } : b
+                )
                 const { error } = await supabase.from('bookings').update(payload).eq('id', id)
 
                 if (error) {
                     console.error('Error updating booking:', error)
                     toast.error('Error al actualizar reserva')
+                    set({ bookings: currentBookings }) // Rollback
                     return
                 }
-                await get().fetchBookings()
+
+                // AUTOMATIC CASH LOGGING (Elite Feature)
+                // If payment is marked as PAID via CASH, log it in transactions automatically
+                if (data.paymentStatus === 'paid' && (data.paymentMethod === 'cash' || (!data.paymentMethod && get().bookings.find(b => b.id === id)?.paymentMethod === 'cash'))) {
+                    // Verify we haven't already logged this? (Ideally check DB, but for now just fire)
+                    // Calculate amount: If data.totalPrice exists use it, else use current booking total
+                    const targetBooking = get().bookings.find(b => b.id === id)
+                    if (targetBooking) {
+                        const amount = data.totalPrice || targetBooking.totalPrice
+                        get().addTransaction({
+                            amount: amount,
+                            type: 'income',
+                            category: 'reservation',
+                            description: `Pago Reserva: ${targetBooking.guestName}`,
+                            bookingId: id,
+                            paymentMethod: 'cash'
+                        })
+                    }
+                }
+
+                // Background refresh
+                get().fetchBookings()
             },
 
             checkOutBooking: async (id, paymentStatus) => {
@@ -941,7 +1000,7 @@ export const useAppStore = create<AppState>()(
                 const payload = {
                     status: 'checked_out',
                     actual_check_out: now.toISOString(),
-                    check_out: now.toISOString(), // RELEASE INVENTORY: Shorten booking to now
+                    // check_out: now.toISOString(), // KEEP ORIGINAL DATE for financial/history records. Availability now ignores 'checked_out' status.
                     payment_status: paymentStatus
                 }
                 const { error } = await supabase.from('bookings').update(payload).eq('id', id)
@@ -954,12 +1013,43 @@ export const useAppStore = create<AppState>()(
                 // Automation: Mark room as Dirty automatically
                 const booking = get().bookings.find(b => b.id === id)
                 if (booking) {
-                    // Start async update but don't block UI
-                    // FIX: Pass unitId to only dirtify the specific bed, not the whole room
-                    get().updateRoomStatus(booking.roomType, 'dirty', booking.unitId).catch(err =>
+                    // Logic: If unitId exists, dirty that bed. If private room (no unitId), dirty the whole room.
+                    const targetUnitId = booking.unitId ? String(booking.unitId) : undefined
+
+                    // SMART RESOLVER: Handle Legacy IDs
+                    let targetRoomId = booking.roomType
+                    const exists = get().rooms.some(r => r.id === targetRoomId)
+
+                    if (!exists) {
+                        const type = booking.roomType?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
+                        const loc = booking.location?.toLowerCase().trim() || ''
+
+                        if (loc === 'pueblo') {
+                            if (type === 'room101' || type === '101') targetRoomId = 'pueblo_private_1'
+                            else if (type === 'room102' || type === '102') targetRoomId = 'pueblo_private_2'
+                            else if (type === 'dorm1' || type === 'mixed' || type === 'dorm') targetRoomId = 'pueblo_dorm_mixed_8'
+                            else if (type === 'dorm2' || type === 'female') targetRoomId = 'pueblo_dorm_female_6'
+                            else if (type === 'suite1' || type === 'suite') targetRoomId = 'pueblo_suite_balcony'
+                            else if (type === 'family') targetRoomId = 'pueblo_private_family'
+                        } else if (loc === 'hideout') {
+                            if (type === 'dorm1' || type === 'mixed' || type === 'dorm') targetRoomId = 'hideout_dorm_mixed'
+                            else if (type === 'dorm2' || type === 'female') targetRoomId = 'hideout_dorm_female'
+                            else if (type === 'room1' || type === 'private') targetRoomId = 'hideout_private'
+                        }
+                    }
+
+                    console.log(`[CheckOut] Auto-Dirtying: Room ${targetRoomId} (Raw: ${booking.roomType}), Unit: ${targetUnitId || 'Whole Room'}`)
+
+                    try {
+                        await get().updateRoomStatus(targetRoomId, 'dirty', targetUnitId)
+                        // Trigger room refresh to update housekeeping grid instantly
+                        // RACE FIX: Do NOT fetchRooms immediately. updateRoomStatus already updates local store.
+                        // Fetching now might pull stale data if DB write is slow.
+                    } catch (err) {
                         console.error("Auto-dirty failed", err)
-                    )
-                    toast.success('Check-out realizado y cama liberada para venta')
+                    }
+
+                    toast.success('Check-out exitoso. Habitación marcada como sucia.')
                 }
 
                 await get().fetchBookings()
@@ -1125,7 +1215,7 @@ export const useAppStore = create<AppState>()(
                 const capacity = roomConfig?.capacity || (isDorm ? 6 : 1);
 
                 const overlappingBookings = state.bookings.filter(booking => {
-                    if (booking.status === 'cancelled') return false;
+                    if (booking.status === 'cancelled' || booking.status === 'checked_out') return false;
                     // Exclude currently processed booking (e.g. valid when updating existing booking)
                     if (excludeBookingId && booking.id === excludeBookingId) return false;
 
@@ -1185,7 +1275,7 @@ export const useAppStore = create<AppState>()(
                 const capacity = roomConfig?.capacity || (isDorm ? 6 : 1);
 
                 const overlappingBookings = state.bookings.filter(booking => {
-                    if (booking.status === 'cancelled') return false;
+                    if (booking.status === 'cancelled' || booking.status === 'checked_out') return false;
                     if (booking.location && booking.location !== location) return false;
                     if (booking.roomType !== roomId) return false;
 
@@ -1208,10 +1298,10 @@ export const useAppStore = create<AppState>()(
         {
             name: 'mandalas-storage',
             partialize: (state) => ({ rooms: state.rooms }),
-            version: 5, // FORCE CACHE RESET: Bumped to 5 to load new Pueblo rooms
+            version: 6, // FORCE CACHE RESET: Bump to 6 to load new Hideout rooms
             migrate: (persistedState: unknown, version) => {
-                if (version < 4) {
-                    // Ignore old persisted rooms if version < 4
+                if (version < 6) {
+                    // Force replace rooms with new initialRooms configuration
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     return { ...(persistedState as any), rooms: initialRooms }
                 }

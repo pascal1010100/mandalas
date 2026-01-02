@@ -285,7 +285,7 @@ export default function SettingsPage() {
                                     <div key={room.id} className="grid gap-2 p-3 rounded-lg hover:bg-white/40 dark:hover:bg-stone-800/40 transition-colors">
                                         <Label htmlFor={`price-${room.id}`} className="text-sm font-medium">{room.label}</Label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-2.5 text-stone-400 font-mono">$</span>
+                                            <span className="absolute left-3 top-2.5 text-stone-400 font-mono">Q</span>
                                             <Input
                                                 id={`price-${room.id}`}
                                                 type="number"
@@ -317,7 +317,7 @@ export default function SettingsPage() {
                                     <div key={room.id} className="grid gap-2 p-3 rounded-lg hover:bg-white/40 dark:hover:bg-stone-800/40 transition-colors">
                                         <Label htmlFor={`price-${room.id}`} className="text-sm font-medium">{room.label}</Label>
                                         <div className="relative">
-                                            <span className="absolute left-3 top-2.5 text-stone-400 font-mono">$</span>
+                                            <span className="absolute left-3 top-2.5 text-stone-400 font-mono">Q</span>
                                             <Input
                                                 id={`price-${room.id}`}
                                                 type="number"

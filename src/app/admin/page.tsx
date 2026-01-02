@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useAppStore, Booking } from "@/lib/store"
-import { DollarSign, Users, CalendarDays, Activity, ArrowRight, ArrowUpRight } from "lucide-react"
+import { DollarSign, Users, CalendarDays, Activity, ArrowRight, ArrowUpRight, Home, LogOut, CheckCircle, XCircle, Clock } from "lucide-react"
 import { format, isSameDay, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
 import {
@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StaggerReveal } from "@/components/animations/stagger-reveal"
 import { DashboardStats } from "@/components/admin/dashboard/dashboard-stats"
+import { CashManagementWidget } from "@/components/admin/finance/cash-management" // New Import
 import { CreateReservationModal } from "@/components/admin/reservations/create-reservation-modal"
 import { ReservationDetailsModal } from "@/components/admin/reservations/reservation-details-modal"
 import { RoomStatusGrid } from "@/components/admin/dashboard/room-status-grid"
@@ -52,6 +53,41 @@ function AdminContent() {
         const unsubscribe = subscribeToServiceRequests()
         return () => unsubscribe()
     }, [])
+
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case "checked_in":
+                return (
+                    <Badge className="bg-violet-100/50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20 border border-violet-200 dark:border-violet-500/20 px-3 py-1 font-medium tracking-wide shadow-sm">
+                        <Home className="w-3 h-3 mr-1.5" /> En Casa
+                    </Badge>
+                )
+            case "checked_out":
+                return (
+                    <Badge variant="outline" className="bg-stone-100/50 text-stone-600 dark:bg-stone-800/50 dark:text-stone-400 hover:bg-stone-200/50 dark:hover:bg-stone-800 border border-stone-200 dark:border-stone-700 border-dashed px-3 py-1 font-medium tracking-wide shadow-sm">
+                        <LogOut className="w-3 h-3 mr-1.5" /> Historial
+                    </Badge>
+                )
+            case "confirmed":
+                return (
+                    <Badge className="bg-emerald-100/50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 hover:bg-emerald-200/50 dark:hover:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/20 px-3 py-1 font-medium tracking-wide shadow-sm">
+                        <CheckCircle className="w-3 h-3 mr-1.5" /> Confirmada
+                    </Badge>
+                )
+            case "cancelled":
+                return (
+                    <Badge className="bg-rose-100/50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 hover:bg-rose-200/50 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-500/20 px-3 py-1 font-medium tracking-wide shadow-sm">
+                        <XCircle className="w-3 h-3 mr-1.5" /> Cancelada
+                    </Badge>
+                )
+            default:
+                return (
+                    <Badge className="bg-amber-100/50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 hover:bg-amber-200/50 dark:hover:bg-amber-500/20 border border-amber-200 dark:border-amber-500/20 px-3 py-1 font-medium tracking-wide shadow-sm">
+                        <Clock className="w-3 h-3 mr-1.5" /> Pendiente
+                    </Badge>
+                )
+        }
+    }
 
     const handleBookingClick = (booking: Booking) => {
         setSelectedBooking(booking)
@@ -271,6 +307,11 @@ function AdminContent() {
                 )}
             </div>
 
+            {/* CASH MANAGEMENT WIDGET (New) */}
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+                <CashManagementWidget />
+            </div>
+
             {/* Main Content Grid: Stats, Room Grid, Operations */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left Column (Stats & Grid) takes 2/3 */}
@@ -335,13 +376,7 @@ function AdminContent() {
                                                                 <span className="text-[10px] text-stone-400 uppercase tracking-wider">{b.roomType.replace(/_/g, ' ')}</span>
                                                             </div>
                                                         </div>
-                                                        <Badge className={
-                                                            b.status === 'confirmed' ? "bg-emerald-500/10 text-emerald-400 border-none" :
-                                                                b.status === 'checked_in' ? "bg-blue-500/10 text-blue-400 border-none" :
-                                                                    "bg-amber-500/10 text-amber-400 border-none"
-                                                        }>
-                                                            {b.status === 'confirmed' ? 'Conf.' : b.status === 'checked_in' ? 'En Casa' : 'Pend.'}
-                                                        </Badge>
+                                                        {getStatusBadge(b.status)}
                                                     </div>
                                                 ))
                                             )}
@@ -451,13 +486,7 @@ function AdminContent() {
                                         </div>
                                     </TableCell>
                                     <TableCell className="py-5">
-                                        <Badge className={
-                                            booking.status === 'confirmed' ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200/20 hover:bg-emerald-500/20" :
-                                                booking.status === 'pending' ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200/20 hover:bg-amber-500/20" :
-                                                    "bg-stone-100 text-stone-500 border-stone-200 dark:bg-stone-800 dark:border-stone-700 dark:text-stone-400"
-                                        }>
-                                            {booking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
-                                        </Badge>
+                                        {getStatusBadge(booking.status)}
                                     </TableCell>
                                     <TableCell className="text-right font-heading font-light text-lg pr-8 py-5 text-stone-900 dark:text-white">
                                         ${booking.totalPrice.toLocaleString()}

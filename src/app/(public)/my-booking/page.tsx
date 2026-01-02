@@ -459,7 +459,16 @@ export default function MyBookingPage() {
         const isTime = daysUntil <= 0
         const isConfirmed = booking.status === 'confirmed'
 
-        if (!isPaid || !hasId || !isTime || !isConfirmed) {
+        if (!hasId) {
+            toast.warning("Requerido: Completa tu Pre-Checkin Digital", {
+                description: "Por favor ingresa tu documento de identidad para continuar."
+            })
+            setIsEditingIdentity(true)
+            // Optional: scroll to card if needed, but opening it is usually enough cue
+            return
+        }
+
+        if (!isPaid || !isTime || !isConfirmed) {
             toast.error("No es posible hacer check-in aún. Verifica tu pago o identidad.")
             console.error("Check-in attempt failed: Rules violation", { isPaid, hasId, isTime, isConfirmed })
             return
@@ -764,8 +773,43 @@ export default function MyBookingPage() {
 
                 {/* DASHBOARD GRID */}
                 <AnimatePresence mode="wait">
-                    {booking && (
+                    {booking && booking.status === 'checked_out' ? (
                         <motion.div
+                            key="farewell"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="w-full max-w-2xl mx-auto text-center space-y-8 py-10"
+                        >
+                            <div className="w-24 h-24 mx-auto bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md shadow-2xl animate-bounce">
+                                <PartyPopper className="w-12 h-12 text-amber-400" />
+                            </div>
+
+                            <div className="space-y-4">
+                                <h2 className="text-4xl md:text-5xl font-bold text-stone-900 dark:text-white font-heading">
+                                    ¡Hasta Pronto, {booking.guest_name.split(' ')[0]}!
+                                </h2>
+                                <p className="text-lg text-stone-600 dark:text-stone-300 max-w-lg mx-auto leading-relaxed">
+                                    Gracias por elegir Mandalas. Esperamos que tu estancia en el <span className="font-bold text-emerald-600 dark:text-emerald-400">{booking.location === 'hideout' ? 'Hideout' : 'Pueblo'}</span> haya sido mágica.
+                                </p>
+                            </div>
+
+                            <Card className="bg-white/80 dark:bg-stone-900/60 backdrop-blur-xl border-stone-200 dark:border-white/10 overflow-hidden">
+                                <CardContent className="p-8 space-y-6">
+                                    <div className="flex justify-center pt-4">
+                                        <Button variant="outline" className="h-12 border-stone-300 dark:border-stone-700 w-full" onClick={() => setShowPaymentModal(true)}>
+                                            <CreditCard className="w-4 h-4 mr-2" /> Ver Recibo Final
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Button variant="ghost" className="text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white" onClick={() => { setBooking(null); setSearchQuery(""); }}>
+                                Volver al Inicio
+                            </Button>
+                        </motion.div>
+                    ) : booking && (
+                        <motion.div
+                            key="dashboard"
                             initial={{ opacity: 0, y: 40 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 40 }}
@@ -783,6 +827,13 @@ export default function MyBookingPage() {
                                             <div>
                                                 <p className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-widest font-bold">Alojamiento</p>
                                                 <p className="text-lg font-bold text-stone-900 dark:text-white mt-1 leading-tight">{roomConfig?.label || booking.room_type}</p>
+                                                {/* SHOW UNIT / BED IF ASSIGNED (Crucial for Dorms) */}
+                                                {booking.unit_id && booking.room_type.includes('dorm') && (
+                                                    <Badge variant="outline" className="mt-2 bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 font-mono text-xs">
+                                                        <BedDouble className="w-3 h-3 mr-1" />
+                                                        Cama {booking.unit_id}
+                                                    </Badge>
+                                                )}
                                             </div>
                                             {booking.room_type.includes('dorm') ? <BedDouble className="text-stone-400" /> : <ShieldCheck className="text-stone-400" />}
                                         </div>
@@ -803,45 +854,92 @@ export default function MyBookingPage() {
                                     </CardContent>
                                 </Card>
 
-                                {/* Guest Identity */}
-                                <Card className="bg-white/40 dark:bg-stone-900/40 border-stone-200 dark:border-white/5 backdrop-blur-md shadow-sm dark:shadow-none">
-                                    <CardHeader className="pb-2 pt-4 px-4">
-                                        <CardTitle className="text-xs uppercase tracking-widest text-stone-500 flex items-center gap-2">
-                                            <Users className="w-3 h-3" /> Pre-Checkin
+                                {/* Elite Pre-Checkin Module */}
+                                <Card className={cn(
+                                    "backdrop-blur-md shadow-sm transition-all duration-300 border overflow-hidden",
+                                    !booking.guest_id_number
+                                        ? "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-700/30"
+                                        : "bg-white/40 dark:bg-stone-900/40 border-stone-200 dark:border-white/5"
+                                )}>
+                                    <div className={cn("h-1 w-full", !booking.guest_id_number ? "bg-amber-400 animate-pulse" : "bg-emerald-500")} />
+
+                                    <CardHeader className="pb-2 pt-4 px-4 bg-white/20 dark:bg-black/10">
+                                        <CardTitle className="text-xs uppercase tracking-widest flex items-center justify-between gap-2">
+                                            <span className={cn("flex items-center gap-2 font-bold", !booking.guest_id_number ? "text-amber-600 dark:text-amber-500" : "text-stone-500 dark:text-stone-400")}>
+                                                <ShieldCheck className="w-4 h-4" /> Pre-Checkin Digital
+                                            </span>
+                                            {booking.guest_id_number && (
+                                                <Badge variant="default" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-0 hover:bg-emerald-500/20 text-[9px] px-2">
+                                                    VERIFICADO
+                                                </Badge>
+                                            )}
                                         </CardTitle>
                                     </CardHeader>
-                                    <CardContent className="px-4 pb-4">
+
+                                    <CardContent className="px-5 pb-5 pt-3">
                                         {!isEditingIdentity ? (
                                             <div className="space-y-3">
-                                                <div className="p-3 rounded-lg bg-white/40 dark:bg-white/5 border border-stone-200 dark:border-white/5 flex justify-between items-center group cursor-pointer hover:bg-white/60 dark:hover:bg-white/10 transition-colors" onClick={() => setIsEditingIdentity(true)}>
-                                                    <div>
-                                                        <p className="text-[10px] text-stone-500 dark:text-stone-400">Documento</p>
-                                                        <p className="font-mono text-stone-800 dark:text-stone-200">{booking.guest_id_number || "Pendiente"}</p>
+                                                {!booking.guest_id_number ? (
+                                                    <div className="space-y-3">
+                                                        <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                                                            Para agilizar tu llegada, necesitamos registrar tu documento de identidad ahora.
+                                                        </p>
+                                                        <Button
+                                                            onClick={() => setIsEditingIdentity(true)}
+                                                            className="w-full bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 text-xs font-bold tracking-wider h-9"
+                                                        >
+                                                            COMPLETAR REGISTRO
+                                                        </Button>
                                                     </div>
-                                                    <Badge variant={booking.guest_id_number ? "secondary" : "destructive"} className="text-[10px] h-5">
-                                                        {booking.guest_id_number ? "OK" : "!"}
-                                                    </Badge>
-                                                </div>
+                                                ) : (
+                                                    <div className="flex items-center justify-between group cursor-pointer" onClick={() => setIsEditingIdentity(true)}>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded-full text-emerald-600 dark:text-emerald-400">
+                                                                <CheckCircle2 className="w-4 h-4" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[10px] text-stone-400 font-bold uppercase">Documento Registrado</p>
+                                                                <p className="font-mono text-sm font-semibold text-stone-700 dark:text-stone-200">
+                                                                    {booking.guest_id_number} <span className="text-[10px] opacity-50 ml-1 uppercase">({booking.guest_id_type || 'ID'})</span>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <Button variant="ghost" size="icon" className="h-6 w-6 text-stone-300 group-hover:text-stone-500">
+                                                            <Wrench className="w-3 h-3" />
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
                                         ) : (
-                                            <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                                                <div className="space-y-1">
-                                                    <Label className="text-[10px] uppercase text-stone-500">Tipo</Label>
-                                                    <Select value={idType} onValueChange={setIdType}>
-                                                        <SelectTrigger className="h-8 text-xs bg-white dark:bg-black/20 border-stone-200 dark:border-white/10 text-stone-800 dark:text-stone-200"><SelectValue /></SelectTrigger>
-                                                        <SelectContent><SelectItem value="passport">Pasaporte</SelectItem><SelectItem value="dni">DNI</SelectItem></SelectContent>
-                                                    </Select>
+                                            <div className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    <div className="col-span-1 space-y-1.5">
+                                                        <Label className="text-[9px] uppercase font-bold text-stone-400">Tipo ID</Label>
+                                                        <Select value={idType} onValueChange={setIdType}>
+                                                            <SelectTrigger className="h-9 text-xs bg-white dark:bg-stone-900 border-stone-200 dark:border-white/10"><SelectValue /></SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="passport">Pasaporte</SelectItem>
+                                                                <SelectItem value="dni">DNI / DPI</SelectItem>
+                                                                <SelectItem value="license">Licencia</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="col-span-2 space-y-1.5">
+                                                        <Label className="text-[9px] uppercase font-bold text-stone-400">Número de Documento</Label>
+                                                        <Input
+                                                            value={idNumber}
+                                                            onChange={e => setIdNumber(e.target.value)}
+                                                            className="h-9 bg-white dark:bg-stone-900 border-stone-200 dark:border-white/10 font-mono text-xs"
+                                                            placeholder="A00000000"
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-1">
-                                                    <Label className="text-[10px] uppercase text-stone-500">Número</Label>
-                                                    <Input value={idNumber} onChange={e => setIdNumber(e.target.value)} className="h-8 bg-white dark:bg-black/20 border-stone-200 dark:border-white/10 font-mono text-xs text-stone-800 dark:text-stone-200" />
-                                                </div>
-                                                <div className="flex gap-2 pt-2">
-                                                    <Button variant="outline" size="sm" className="flex-1 bg-transparent border-stone-200 dark:border-white/10 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/5 h-8" onClick={() => setIsEditingIdentity(false)}>
+                                                <div className="flex gap-2">
+                                                    <Button variant="ghost" size="sm" className="flex-1 text-xs text-stone-500 h-8 hover:bg-stone-100" onClick={() => setIsEditingIdentity(false)}>
                                                         Cancelar
                                                     </Button>
-                                                    <Button size="sm" className="flex-1 bg-stone-900 dark:bg-white text-white dark:text-stone-900 hover:bg-stone-800 dark:hover:bg-stone-200 font-bold h-8" onClick={handleUpdateIdentity} disabled={savingIdentity}>
-                                                        {savingIdentity ? <Loader2 className="w-3 h-3 animate-spin" /> : "Guardar"}
+                                                    <Button size="sm" className="flex-1 bg-stone-900 dark:bg-white text-white dark:text-black font-bold text-xs h-8 shadow-md" onClick={handleUpdateIdentity} disabled={savingIdentity || !idNumber.trim()}>
+                                                        {savingIdentity ? <Loader2 className="w-3 h-3 animate-spin" /> : "GUARDAR"}
                                                     </Button>
                                                 </div>
                                             </div>

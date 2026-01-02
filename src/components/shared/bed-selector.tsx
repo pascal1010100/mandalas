@@ -22,7 +22,7 @@ export function BedSelector({ room, dateRange, selectedUnits, onToggleUnit, maxS
         // Filter bookings that overlap with requested dates
         const overlapping = bookings.filter(b => {
             // Basic overlap check
-            if (b.status === 'cancelled') return false
+            if (b.status === 'cancelled' || b.status === 'checked_out') return false
             // 1. Must match room Type ID (e.g. pueblo_dorm)
             if (b.roomType !== room.id) return false
 

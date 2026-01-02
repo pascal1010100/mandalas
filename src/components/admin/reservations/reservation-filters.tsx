@@ -20,8 +20,8 @@ import { Badge } from "@/components/ui/badge"
 interface ReservationFiltersProps {
     searchTerm: string
     onSearchChange: (value: string) => void
-    statusFilter: "ALL" | "confirmed" | "pending" | "cancelled" | "checked_in"
-    onStatusChange: (value: "ALL" | "confirmed" | "pending" | "cancelled" | "checked_in") => void
+    statusFilter: "ALL" | "confirmed" | "pending" | "cancelled" | "checked_in" | "checked_out"
+    onStatusChange: (value: "ALL" | "confirmed" | "pending" | "cancelled" | "checked_in" | "checked_out") => void
     dateRange: DateRange | undefined
     onDateRangeChange: (range: DateRange | undefined) => void
 }
@@ -101,19 +101,23 @@ export function ReservationFilters({
                     </div>
 
                     {/* Status Segmented Control */}
-                    <div className="flex bg-stone-100 dark:bg-stone-800/50 p-1 rounded-full border border-stone-200 dark:border-stone-800">
-                        {(["ALL", "pending", "confirmed", "checked_in", "cancelled"] as const).map((status) => (
+                    <div className="flex bg-stone-100 dark:bg-stone-800/50 p-1 rounded-full border border-stone-200 dark:border-stone-800 overflow-x-auto">
+                        {(["ALL", "pending", "confirmed", "checked_in", "checked_out", "cancelled"] as const).map((status) => (
                             <button
                                 key={status}
                                 onClick={() => onStatusChange(status)}
                                 className={cn(
-                                    "px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-300 capitalize",
+                                    "px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-300 capitalize whitespace-nowrap",
                                     statusFilter === status
                                         ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-white shadow-sm ring-1 ring-black/5"
                                         : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
                                 )}
                             >
-                                {status === "ALL" ? "Todas" : status === "checked_in" ? "En Casa" : status === "confirmed" ? "Confirmadas" : status === "pending" ? "Pendientes" : "Canceladas"}
+                                {status === "ALL" ? "Todas" :
+                                    status === "checked_in" ? "En Casa" :
+                                        status === "confirmed" ? "Confirmadas" :
+                                            status === "checked_out" ? "Historial" :
+                                                status === "pending" ? "Pendientes" : "Canceladas"}
                             </button>
                         ))}
                     </div>
