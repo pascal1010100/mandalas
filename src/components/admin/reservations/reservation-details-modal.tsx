@@ -72,7 +72,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { Booking, Charge, useAppStore } from "@/lib/store"
-import { cn, formatMoney } from "@/lib/utils"
+import { cn } from "@/lib/utils"
+import { formatMoney } from "@/lib/currency"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 
@@ -129,6 +130,9 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
         noDamage: false
     })
     const [checkOutWarnings, setCheckOutWarnings] = React.useState<string[]>([])
+    // New Feature: Handle Missing Unit ID (Legacy bookings)
+    const [showBedReassignmentDialog, setShowBedReassignmentDialog] = React.useState(false)
+    const [selectedBedId, setSelectedBedId] = React.useState<string>("")
 
     const [departureSuccess, setDepartureSuccess] = React.useState(false) // Premium UX State
 
@@ -503,12 +507,24 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
         setShowCheckOut(true)
     }
 
-    const handleCheckOut = async () => {
+    const handleCheckOut = async (overrideUnitId?: string) => {
         if (!booking.id) return
 
         // Audit Guard
         if (!checkOutAudit.keysReturned || !checkOutAudit.towelReturned || !checkOutAudit.noDamage) {
             toast.error("Debes completar la auditoría de salida")
+            return
+        }
+
+        // Feature: Dirty Bed Detection for Legacy Bookings
+        // If no unitId assigned, and it's a Dorm (capacity > 1), we MUST ask which bed was used.
+        // Otherwise the system doesn't know which bed to mark dirty.
+        const unitIdToUse = overrideUnitId || booking.unitId
+        const roomConfig = rooms.find(r => r.id === booking.roomType)
+
+        if (!unitIdToUse && roomConfig && roomConfig.capacity > 1 && !overrideUnitId) {
+            // Trigger Dialog instead of proceeding
+            setShowBedReassignmentDialog(true)
             return
         }
 
@@ -525,7 +541,9 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
             return
         }
 
-        await checkOutBooking(booking.id, isPaymentSettled ? 'paid' : 'pending')
+        await checkOutBooking(booking.id, isPaymentSettled ? 'paid' : 'pending', unitIdToUse ? String(unitIdToUse) : undefined)
+
+        setShowBedReassignmentDialog(false) // Close if open
         // Premium UX: Show Success Screen instead of closing immediately
         setDepartureSuccess(true)
         toast.success("Check-out registrado")
@@ -1956,6 +1974,56 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
             </Dialog>
 
             {/* ADD CHARGE DIALOG */}
+            {/* Bed Selection Dialog (Fix for Legacy Bookings) */}
+            <Dialog open={showBedReassignmentDialog} onOpenChange={setShowBedReassignmentDialog}>
+                <DialogContent className="sm:max-w-md bg-stone-900 border-stone-800 text-stone-200">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-amber-500">
+                            <AlertTriangle className="w-5 h-5" />
+                            Seleccionar Cama Usada
+                        </DialogTitle>
+                        <DialogDescription className="text-stone-400">
+                            Esta reserva antigua no tiene una cama asignada.
+                            Para marcarla como "Sucia" correctamente, indica qué cama usó el huésped.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="py-4">
+                        <Label className="mb-2 block text-xs uppercase text-stone-500">Cama Ocupada</Label>
+                        <div className="grid grid-cols-4 gap-2">
+                            {(() => {
+                                const room = rooms.find(r => r.id === booking.roomType)
+                                if (!room) return <p className="text-red-400">Error: Habitación no encontrada</p>
+                                return Array.from({ length: room.capacity }, (_, i) => i + 1).map(num => (
+                                    <Button
+                                        key={num}
+                                        variant={selectedBedId === String(num) ? "default" : "outline"}
+                                        className={cn(
+                                            "h-12 border-stone-700 hover:bg-stone-800",
+                                            selectedBedId === String(num) && "bg-amber-600 hover:bg-amber-700 text-white border-amber-600"
+                                        )}
+                                        onClick={() => setSelectedBedId(String(num))}
+                                    >
+                                        {num}
+                                    </Button>
+                                ))
+                            })()}
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setShowBedReassignmentDialog(false)}>Cancelar</Button>
+                        <Button
+                            className="bg-amber-600 hover:bg-amber-700 text-white"
+                            disabled={!selectedBedId}
+                            onClick={() => handleCheckOut(selectedBedId)}
+                        >
+                            Confirmar Salida & Ensuciar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             <Dialog open={showAddCharge} onOpenChange={setShowAddCharge}>
                 <DialogContent className="sm:max-w-[400px]">
                     <button onClick={() => setShowAddCharge(false)} className="absolute top-4 right-4 p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors z-[60]"><X className="w-4 h-4" /></button>

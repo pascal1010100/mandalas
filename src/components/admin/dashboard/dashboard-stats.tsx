@@ -21,7 +21,8 @@ import {
 } from "date-fns"
 
 import { getBusinessDate, isStayNight } from '@/lib/business-date'
-import { cn, formatMoney } from "@/lib/utils"
+import { cn } from "@/lib/utils"
+import { formatMoney } from "@/lib/currency"
 
 export function DashboardStats() {
     const { bookings, rooms } = useAppStore()
@@ -69,8 +70,14 @@ export function DashboardStats() {
         return checkInStr <= todayStr && checkOutStr > todayStr
     })
 
+    const totalOccupiedBeds = activeBookings.reduce((sum, b) => {
+        // Parse guests safely (fallback to 1)
+        const guestCount = parseInt(b.guests || "1", 10)
+        return sum + (isNaN(guestCount) ? 1 : guestCount)
+    }, 0)
+
     const totalUnits = rooms.reduce((sum, room) => sum + room.capacity, 0)
-    const occupancyRate = totalUnits > 0 ? Math.round((activeBookings.length / totalUnits) * 100) : 0
+    const occupancyRate = totalUnits > 0 ? Math.round((totalOccupiedBeds / totalUnits) * 100) : 0
     const displayOccupancy = Math.min(occupancyRate, 100)
 
     // 4. ADR (Average Daily Rate) - Efficiency of Pricing

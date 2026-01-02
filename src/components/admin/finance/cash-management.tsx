@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { formatMoney, cn } from "@/lib/utils"
+import { cn } from "@/lib/utils"
+import { formatMoney } from "@/lib/currency"
 import {
     Wallet,
     TrendingUp,

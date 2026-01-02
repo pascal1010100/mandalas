@@ -1,10 +1,9 @@
 import { clsx, type ClassValue } from "clsx"
+// Utility functions for class merging and currency formatting
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatMoney(amount: number) {
-  return `Q${amount.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-}
+

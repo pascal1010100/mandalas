@@ -176,7 +176,7 @@ interface AppState {
     updateBookingStatus: (id: string, status: BookingStatus) => Promise<void>;
     updateBooking: (id: string, data: Partial<Omit<Booking, 'id' | 'createdAt'>>) => Promise<void>;
     confirmGroupBookings: (email: string) => Promise<void>;
-    checkOutBooking: (id: string, paymentStatus: 'paid' | 'pending') => Promise<void>;
+    checkOutBooking: (id: string, paymentStatus: 'pending' | 'paid' | 'verifying', manualUnitId?: string) => Promise<void>;
     deleteBooking: (id: string) => Promise<void>;
     extendBooking: (bookingId: string, newCheckOutDate: string) => Promise<void>; // New Action
 
@@ -995,7 +995,7 @@ export const useAppStore = create<AppState>()(
                 get().fetchBookings()
             },
 
-            checkOutBooking: async (id, paymentStatus) => {
+            checkOutBooking: async (id, paymentStatus, manualUnitId) => {
                 const now = new Date()
                 const payload = {
                     status: 'checked_out',
@@ -1013,8 +1013,8 @@ export const useAppStore = create<AppState>()(
                 // Automation: Mark room as Dirty automatically
                 const booking = get().bookings.find(b => b.id === id)
                 if (booking) {
-                    // Logic: If unitId exists, dirty that bed. If private room (no unitId), dirty the whole room.
-                    const targetUnitId = booking.unitId ? String(booking.unitId) : undefined
+                    // Logic: If manualUnitId provided (from modal), use it. Else fall back to booking.unitId.
+                    const targetUnitId = manualUnitId ? String(manualUnitId) : (booking.unitId ? String(booking.unitId) : undefined)
 
                     // SMART RESOLVER: Handle Legacy IDs
                     let targetRoomId = booking.roomType
