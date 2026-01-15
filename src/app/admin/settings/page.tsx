@@ -18,12 +18,12 @@ export default function SettingsPage() {
     const [localRooms, setLocalRooms] = useState(rooms || [])
 
     // Sync local state when store loads
+    // Sync local state when store loads - only if empty
     useEffect(() => {
-        if (rooms && rooms.length > 0 && localRooms.length === 0) {
-
+        if (rooms.length > 0 && localRooms.length === 0) {
             setLocalRooms(rooms)
         }
-    }, [rooms, localRooms.length])
+    }, [rooms])
 
     const handlePriceChange = (roomId: string, value: string) => {
         setLocalRooms(prev => prev.map(room =>

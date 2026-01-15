@@ -31,7 +31,7 @@ async function verifyBookings() {
     console.log(`Found ${bookings.length} relevant bookings. User ID Inspection:`)
     bookings.forEach(b => {
         // Check if user_id exists in the returned object (it might be undefined if column doesn't exist)
-        // @ts-ignore
+
         console.log(`- [${b.status}] ${b.guest_name} | Unit: ${b.unit_id} | UserID: ${b.user_id}`)
     })
 }

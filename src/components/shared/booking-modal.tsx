@@ -96,7 +96,7 @@ export function BookingModal({
     }, [step])
 
     // Store Action
-    const { addBooking, rooms, checkAvailability, getRemainingCapacity } = useAppStore()
+    const { addBooking, createGroupBooking, rooms, checkAvailability, getRemainingCapacity } = useAppStore()
 
     // Determine Price & Max Guests dynamically
     // NOTE: rooms in store utilize IDs like "pueblo_dorm", "hideout_private" etc.
@@ -247,22 +247,24 @@ export function BookingModal({
 
                 // Add bookings for EACH selected unit if Dorm
                 if (isDorm) {
-                    selectedUnitIds.forEach(unitId => {
-                        addBooking({
-                            guestName: guestName.trim(),
-                            email: email.trim(),
-                            phone: phone.trim(),
-                            location: location as 'pueblo' | 'hideout',
-                            roomType,
-                            guests: "1", // Each bed is 1 guest
-                            unitId: unitId,
-                            checkIn: date.from!.toISOString(),
-                            checkOut: date.to!.toISOString(),
-                            totalPrice: Math.round((totalPrice / selectedUnitIds.length) * 100) / 100, // Split price per bed
-                            status: 'pending',
-                            paymentMethod: paymentPreference
-                        })
-                    })
+                    // ELITE LOGIC: Batch Insert + Auto-Naming
+                    const bookingPayloads = selectedUnitIds.map((unitId, idx) => ({
+                        guestName: selectedUnitIds.length > 1 ? `${guestName.trim()} (${idx + 1}/${selectedUnitIds.length})` : guestName.trim(), // Auto-numbering
+                        email: email.trim(),
+                        phone: phone.trim(),
+                        location: location as 'pueblo' | 'hideout',
+                        roomType,
+                        guests: "1", // Each bed is 1 guest
+                        unitId: unitId,
+                        checkIn: date.from!.toISOString(),
+                        checkOut: date.to!.toISOString(),
+                        totalPrice: Math.round((totalPrice / selectedUnitIds.length) * 100) / 100, // Split price per bed
+                        status: 'pending' as const,
+                        paymentMethod: paymentPreference,
+                        paymentStatus: 'pending' as const
+                    }));
+
+                    await createGroupBooking(bookingPayloads); // AWAIT THE BATCH!
                 } else {
                     addBooking({
                         guestName: guestName.trim(),
@@ -281,8 +283,8 @@ export function BookingModal({
 
                 setIsSubmitting(false)
                 setStep(5) // Success
-                toast.success("¡Reserva Confirmada!", {
-                    description: "Hemos enviado los detalles a tu correo."
+                toast.success("¡Solicitud Recibida!", {
+                    description: "Por favor confirma tu reserva vía WhatsApp."
                 })
                 return;
             }
@@ -485,33 +487,66 @@ export function BookingModal({
                                     <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
                                         {availableRooms.map((room) => {
                                             const isSelected = roomType === room.id;
+
+                                            // ELITE LOGIC: Check Real-Time Availability
+                                            // Must have date selected to be here (Step 2 requires Date from Step 1)
+                                            let isRoomAvailable = true;
+                                            if (date?.from && date?.to) {
+                                                const fromStr = date.from.toISOString();
+                                                const toStr = date.to.toISOString();
+                                                // Check generally for the room type. 
+                                                // If it's a private room, we need ANY unit free.
+                                                // If it's a dorm, we need ANY bed free.
+                                                // The existing checkAvailability function does this logic.
+                                                isRoomAvailable = checkAvailability(
+                                                    location as 'pueblo' | 'hideout',
+                                                    room.id,
+                                                    fromStr,
+                                                    toStr
+                                                );
+                                            }
+
                                             return (
                                                 <div
                                                     key={room.id}
                                                     onClick={() => {
+                                                        if (!isRoomAvailable) return;
                                                         setRoomType(room.id)
                                                         setGuests("1")
                                                         setSelectedUnitIds([]) // Reset beds
                                                     }}
                                                     className={cn(
-                                                        "relative overflow-hidden rounded-xl border cursor-pointer transition-all duration-300 group",
-                                                        isSelected
+                                                        "relative overflow-hidden rounded-xl border transition-all duration-300 group",
+                                                        !isRoomAvailable
+                                                            ? "opacity-60 grayscale cursor-not-allowed border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-900/50"
+                                                            : "cursor-pointer",
+                                                        isRoomAvailable && isSelected
                                                             ? cn("ring-2 shadow-lg scale-[1.02]", location === 'pueblo' ? "border-amber-500 ring-amber-500/20" : "border-lime-500 ring-lime-500/20")
-                                                            : "border-stone-200 dark:border-stone-800 hover:border-stone-300 hover:shadow-md"
+                                                            : isRoomAvailable
+                                                                ? "border-stone-200 dark:border-stone-800 hover:border-stone-300 hover:shadow-md"
+                                                                : ""
                                                     )}
                                                 >
                                                     <div className="h-28 w-full relative">
-                                                        <div className="absolute inset-0 bg-stone-900/20 group-hover:bg-stone-900/10 transition-colors z-10" />
+                                                        <div className={cn("absolute inset-0 transition-colors z-10", !isRoomAvailable ? "bg-stone-900/40" : "bg-stone-900/20 group-hover:bg-stone-900/10")} />
                                                         <div className={cn("absolute inset-0 bg-gradient-to-t from-stone-900/90 to-transparent z-20", isSelected ? "opacity-90" : "opacity-80")} />
                                                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                                         <img src={(room as any).image || "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300"} alt={room.label} className="w-full h-full object-cover" />
-                                                        {isSelected && (
+
+                                                        {isSelected && isRoomAvailable && (
                                                             <div className={cn("absolute top-2 right-2 z-30 text-white rounded-full p-0.5 shadow-sm", location === 'pueblo' ? "bg-amber-500" : "bg-lime-600")}>
                                                                 <CheckCircle className="w-3 h-3" />
                                                             </div>
                                                         )}
+
+                                                        {!isRoomAvailable && (
+                                                            <div className="absolute top-2 right-2 z-30 bg-stone-900/80 text-white text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wider border border-white/10 backdrop-blur-sm">
+                                                                Agotado
+                                                            </div>
+                                                        )}
+
                                                         <div className="absolute bottom-2 left-3 right-3 z-30">
-                                                            <h4 className={cn("font-bold text-sm leading-tight", isSelected ? (location === 'pueblo' ? "text-amber-400" : "text-lime-400") : "text-white")}>
+                                                            <h4 className={cn("font-bold text-sm leading-tight", isSelected && isRoomAvailable ? (location === 'pueblo' ? "text-amber-400" : "text-lime-400") : "text-white")}>
                                                                 {room.label}
                                                             </h4>
                                                             <p className="text-[10px] text-stone-300 line-clamp-1">{room.description || "Confort & Estilo"}</p>
@@ -633,7 +668,7 @@ export function BookingModal({
                                             />
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             <div className="space-y-1">
                                                 <Label htmlFor="email" className="text-[10px] font-medium text-stone-500 dark:text-stone-400 uppercase">Email</Label>
                                                 <Input
@@ -797,6 +832,17 @@ export function BookingModal({
                                         <p className="opacity-70 text-[10px]">Presenta tu ID #{bookingId} al llegar.</p>
                                     </div>
                                 )}
+
+                                {/* ELITE: WhatsApp Action Button */}
+                                <Button
+                                    onClick={() => {
+                                        const message = `Hola Mandalas! 🌿 Acabo de reservar en la web.\n\n🆔 ID: ${bookingId}\n👤 Nombre: ${guestName}\n📅 Fechas: ${date?.from?.toLocaleDateString()} - ${date?.to?.toLocaleDateString()}\n🏨 Lugar: ${location === 'pueblo' ? 'Pueblo' : 'Hideout'}\n\nQuedo atento a la confirmación!`;
+                                        window.open(`https://wa.me/50212345678?text=${encodeURIComponent(message)}`, '_blank');
+                                    }}
+                                    className="w-full rounded-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold shadow-lg shadow-emerald-900/20 py-6 text-base transition-transform hover:scale-105"
+                                >
+                                    Enviar Comprobante por WhatsApp
+                                </Button>
 
                                 <Card className="w-full bg-stone-50 dark:bg-stone-900/50 border-stone-200 dark:border-stone-800 p-4 rounded-xl flex items-center justify-between group cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                                     onClick={() => {

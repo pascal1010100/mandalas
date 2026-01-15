@@ -30,17 +30,17 @@ export function DebugPanel() {
             {bookings.slice(0, 3).map(b => (
                 <div key={b.id} className="mb-2 p-2 bg-white/5 rounded">
                     <div className="text-yellow-400">{b.guestName} ({b.status})</div>
-                    <div>RoomType: <span className="text-blue-300">'{b.roomType}'</span></div>
-                    <div>Location: <span className="text-blue-300">'{b.location}'</span></div>
+                    <div>RoomType: <span className="text-blue-300">&apos;{b.roomType}&apos;</span></div>
+                    <div>Location: <span className="text-blue-300">&apos;{b.location}&apos;</span></div>
                     <div>CheckIn: {b.checkIn}</div>
-                    <div>UnitId: '{b.unitId}'</div>
+                    <div>UnitId: &apos;{b.unitId}&apos;</div>
                 </div>
             ))}
 
             <h4 className="border-b border-gray-700 mt-4 mb-2">Raw Store Rooms (First 1):</h4>
             {rooms.slice(0, 1).map(r => (
                 <div key={r.id} className="mb-2">
-                    ID: '{r.id}' | Loc: '{r.location}' | Type: '{r.type}'
+                    ID: &apos;{r.id}&apos; | Loc: &apos;{r.location}&apos; | Type: &apos;{r.type}&apos;
                 </div>
             ))}
         </div>

@@ -108,7 +108,7 @@ export interface CashTransactionRow {
     id: string;
     amount: number;
     type: 'income' | 'expense';
-    category: 'reservation' | 'laundry' | 'shuttle' | 'bar' | 'supplies' | 'salary' | 'other';
+    category: 'reservation' | 'laundry' | 'shuttle' | 'bar' | 'supplies' | 'salary' | 'adjustment' | 'other';
     description: string;
     booking_id?: string;
     payment_method?: 'cash' | 'card' | 'transfer';
@@ -119,11 +119,30 @@ export interface CashTransaction {
     id: string;
     amount: number;
     type: 'income' | 'expense';
-    category: 'reservation' | 'laundry' | 'shuttle' | 'bar' | 'supplies' | 'salary' | 'other';
+    category: 'reservation' | 'laundry' | 'shuttle' | 'bar' | 'supplies' | 'salary' | 'adjustment' | 'other';
     description: string;
     bookingId?: string;
     paymentMethod?: 'cash' | 'card' | 'transfer';
     createdAt: Date;
+}
+
+export interface InventoryItem {
+    id: string;
+    name: string;
+    category: 'bebidas' | 'limpieza' | 'amenities' | 'insumos' | 'otros';
+    currentStock: number;
+    minStockAlert: number;
+    unit: string;
+    costPrice: number;
+}
+
+export interface InventoryMovement {
+    id: string;
+    itemId: string;
+    type: 'in' | 'out' | 'adjustment';
+    quantity: number;
+    reason: string;
+    createdAt: string;
 }
 
 export interface Product {
@@ -164,16 +183,27 @@ interface AppState {
     events: AppEvent[];
 
     rooms: RoomConfig[];
-    transactions: CashTransaction[]; // New State
+    transactions: CashTransaction[]; // Today's transactions (UI List)
+    cashBalance: number; // Persistent Running Total (Big Number)
+    inventory: InventoryItem[]; // Init
     isLoading: boolean;
     isAdmin: boolean;
 
     // Actions
     fetchBookings: () => Promise<void>;
-    fetchTransactions: () => Promise<void>; // New Action
+    fetchTransactions: () => Promise<void>; // Fetches TODAY'S list
+    fetchCashBalance: () => Promise<void>; // Fetches TOTAL numeric balance
     addTransaction: (tx: Omit<CashTransaction, 'id' | 'createdAt'>) => Promise<void>; // New Action
+    deleteTransaction: (id: string) => Promise<void>; // New Action
+
+    fetchInventory: () => Promise<void>;
+    addInventoryItem: (item: Omit<InventoryItem, 'id'>) => Promise<void>;
+    updateStock: (itemId: string, type: 'in' | 'out' | 'adjustment', quantity: number, reason: string) => Promise<void>;
+
     addBooking: (booking: Omit<Booking, 'id' | 'createdAt' | 'totalPrice' | 'status'> & { totalPrice?: number, status?: BookingStatus }, totalPrice?: number) => Promise<void>;
+    createGroupBooking: (bookings: (Omit<Booking, 'id' | 'createdAt' | 'status'> & { status?: BookingStatus })[]) => Promise<void>; // New Batch Action
     updateBookingStatus: (id: string, status: BookingStatus) => Promise<void>;
+    registerPayment: (bookingId: string, amount: number, method: 'cash' | 'card' | 'transfer' | 'other', reference?: string) => Promise<void>;
     updateBooking: (id: string, data: Partial<Omit<Booking, 'id' | 'createdAt'>>) => Promise<void>;
     confirmGroupBookings: (email: string) => Promise<void>;
     checkOutBooking: (id: string, paymentStatus: 'pending' | 'paid' | 'verifying', manualUnitId?: string) => Promise<void>;
@@ -208,6 +238,7 @@ interface AppState {
     getRemainingCapacity: (location: string, roomType: string, startDate: string, endDate: string) => number;
     fetchRooms: () => Promise<void>;
     subscribeToBookings: () => () => void;
+    subscribeToEvents: () => () => void; // New Action
 }
 
 // --- Initial Data ---
@@ -228,19 +259,19 @@ const initialRooms: RoomConfig[] = [
         housekeeping_status: 'clean'
     },
     {
-        id: 'pueblo_private_1', location: 'pueblo', type: 'private', label: 'Habitación Privada 1 (Jardín)', capacity: 4, maxGuests: 2, basePrice: 45,
+        id: 'pueblo_private_1', location: 'pueblo', type: 'private', label: 'Habitación Privada 1 (Jardín)', capacity: 1, maxGuests: 2, basePrice: 45,
         description: 'Privada con vista directa al jardín',
         image: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=300",
         housekeeping_status: 'clean'
     },
     {
-        id: 'pueblo_private_2', location: 'pueblo', type: 'private', label: 'Habitación Privada 2 (Estándar)', capacity: 4, maxGuests: 2, basePrice: 40,
+        id: 'pueblo_private_2', location: 'pueblo', type: 'private', label: 'Habitación Privada 2 (Estándar)', capacity: 1, maxGuests: 2, basePrice: 40,
         description: 'Habitación tranquila y confortable',
         image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&q=80&w=300",
         housekeeping_status: 'clean'
     },
     {
-        id: 'pueblo_private_family', location: 'pueblo', type: 'private', label: 'Habitación Familiar', capacity: 4, maxGuests: 4, basePrice: 60,
+        id: 'pueblo_private_family', location: 'pueblo', type: 'private', label: 'Habitación Familiar', capacity: 1, maxGuests: 4, basePrice: 60,
         description: 'Espacio amplio ideal para familias o grupos pequeños',
         image: "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&q=80&w=300",
         housekeeping_status: 'clean'
@@ -323,6 +354,8 @@ export const useAppStore = create<AppState>()(
             serviceRequests: [],
             rooms: initialRooms,
             transactions: [], // Init
+            cashBalance: 0, // Init
+            inventory: [], // Init
             isLoading: false,
             isAdmin: true, // Default to true or handle logic
 
@@ -346,6 +379,29 @@ export const useAppStore = create<AppState>()(
 
                         // NUCLEAR SYNC OPTION: Always refetch to guarantee consistency
                         get().fetchBookings()
+                    })
+                    .subscribe()
+
+                return () => {
+                    supabase.removeChannel(subscription)
+                }
+            },
+
+            subscribeToEvents: () => {
+                console.log("Subscribing to realtime events...")
+                const subscription = supabase
+                    .channel('events-realtime')
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, (payload: any) => {
+                        console.log('Realtime Event Change detected:', payload.eventType)
+
+                        if (payload.eventType === 'INSERT') {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const row = payload.new as any
+                            toast.info(`Nuevo Evento: ${row.title}`)
+                        }
+
+                        get().fetchEvents()
                     })
                     .subscribe()
 
@@ -460,7 +516,40 @@ export const useAppStore = create<AppState>()(
                 }
             },
 
+            // --- PROFESSIONAL CASH MANAGEMENT ---
+
+            fetchCashBalance: async () => {
+                // Fetch ALL transactions to calculate true running balance
+                // Optimization: In a huge app, use a Postgres function (RPC). For <10k rows, this is fine.
+                const { data, error } = await supabase
+                    .from('cash_transactions')
+                    .select('amount, type, payment_method')
+
+                if (error) {
+                    console.error('Error calculating cash balance:', error)
+                    return
+                }
+
+                if (data) {
+                    // Filter: Only Cash (or legacy null)
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const cashRows = data.filter((t: any) => t.payment_method === 'cash' || !t.payment_method)
+
+                    const income = cashRows
+                        .filter((t: any) => t.type === 'income')
+                        .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+
+                    const expense = cashRows
+                        .filter((t: any) => t.type === 'expense')
+                        .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+
+                    console.log(`[Cash Audit] Income: ${income}, Expense: ${expense}, Net: ${income - expense}`)
+                    set({ cashBalance: income - expense })
+                }
+            },
+
             fetchTransactions: async () => {
+                // FETCH TODAY ONLY (For UI List)
                 const today = new Date().toISOString().split('T')[0]
                 const { data, error } = await supabase
                     .from('cash_transactions')
@@ -481,6 +570,9 @@ export const useAppStore = create<AppState>()(
                         createdAt: new Date(row.created_at)
                     }))
                     set({ transactions: mapped })
+
+                    // Also refresh the Big Balance
+                    get().fetchCashBalance()
                 }
                 if (error) {
                     console.error("Error fetching transactions detailed:", JSON.stringify(error, null, 2))
@@ -505,6 +597,103 @@ export const useAppStore = create<AppState>()(
                 } else {
                     toast.success("Movimiento registrado")
                     get().fetchTransactions()
+                }
+            },
+
+            deleteTransaction: async (id: string) => {
+                const { error } = await supabase.from('cash_transactions').delete().eq('id', id)
+                if (error) {
+                    console.error("Error deleting transaction", error)
+                    toast.error("Error al eliminar movimiento")
+                } else {
+                    toast.success("Movimiento eliminado")
+                    // Optimistic update
+                    set(state => ({
+                        transactions: state.transactions.filter(t => t.id !== id)
+                    }))
+                    // IMPORTANT: Update the Big Balance too
+                    get().fetchCashBalance()
+                }
+            },
+
+            // --- Inventory System (Bodega) ---
+            fetchInventory: async () => {
+                const { data, error } = await supabase
+                    .from('inventory_items')
+                    .select('*')
+                    .order('name', { ascending: true })
+
+                if (error) {
+                    console.error("Error fetching inventory:", error)
+                    return
+                }
+
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const inventory = data.map((item: any) => ({
+                    id: item.id,
+                    name: item.name,
+                    category: item.category,
+                    currentStock: Number(item.current_stock),
+                    minStockAlert: Number(item.min_stock_alert),
+                    unit: item.unit,
+                    costPrice: Number(item.cost_price)
+                }))
+
+                set({ inventory })
+            },
+
+            addInventoryItem: async (item) => {
+                const payload = {
+                    name: item.name,
+                    category: item.category,
+                    current_stock: item.currentStock,
+                    min_stock_alert: item.minStockAlert,
+                    unit: item.unit,
+                    cost_price: item.costPrice
+                }
+                const { error } = await supabase.from('inventory_items').insert([payload])
+                if (error) {
+                    console.error("Error adding item:", error)
+                    toast.error("Error al crear producto")
+                } else {
+                    toast.success("Producto agregado a bodega")
+                    get().fetchInventory()
+                }
+            },
+
+            updateStock: async (itemId, type, quantity, reason) => {
+                const item = get().inventory.find(i => i.id === itemId)
+                if (!item) return
+
+                const previousStock = item.currentStock
+                let newStock = previousStock
+                if (type === 'in') newStock += quantity
+                if (type === 'out') newStock -= quantity
+                if (type === 'adjustment') newStock = quantity
+
+                // 1. Record Movement
+                const movementPayload = {
+                    item_id: itemId,
+                    type,
+                    quantity,
+                    previous_stock: previousStock,
+                    new_stock: newStock,
+                    reason
+                }
+                await supabase.from('inventory_movements').insert([movementPayload])
+
+                // 2. Update Item
+                const { error } = await supabase
+                    .from('inventory_items')
+                    .update({ current_stock: newStock })
+                    .eq('id', itemId)
+
+                if (error) {
+                    console.error("Error updating stock:", error)
+                    toast.error("Error al actualizar existencias")
+                } else {
+                    toast.success(`Stock actualizado: ${newStock} ${item.unit}`)
+                    get().fetchInventory()
                 }
             },
 
@@ -657,14 +846,19 @@ export const useAppStore = create<AppState>()(
 
                 // Persist
                 try {
-                    await supabase.from('rooms').update({
+                    const { error } = await supabase.from('rooms').update({
                         housekeeping_status: newGlobalStatus,
                         units_housekeeping: newMap,
                         last_cleaned_at: lastCleanedAt,
                         maintenance_note: maintenanceNote
                     }).eq('id', roomId);
+
+                    if (error) {
+                        console.error("Failed to persist room status (Supabase):", error)
+                        toast.error(`Error guardando Housekeeping: ${error.message}`)
+                    }
                 } catch (e) {
-                    console.error("Failed to persist status", e)
+                    console.error("Failed to persist status (Exception)", e)
                 }
 
                 // 2. Handle Calendar Blocking
@@ -676,31 +870,38 @@ export const useAppStore = create<AppState>()(
                         const nextYear = new Date(today)
                         nextYear.setFullYear(today.getFullYear() + 1) // Block for 1 year by default
 
+                        // CRITICAL FIX: If blocking a specific unit (Dorm Bed), only block 1 Guest + That Unit ID
+                        // If blocking the whole room (Private), block Full Capacity.
+                        const guestsToBlock = unitId ? "1" : String(room.capacity)
+                        const unitToBlock = unitId ? String(unitId) : null
+
                         const payload = {
-                            guest_name: "MANTENIMIENTO",
+                            guest_name: unitId ? `MANTENIMIENTO (Cama ${unitId})` : "MANTENIMIENTO",
                             email: "admin@mandalas.com",
                             location: room.location,
                             room_type: roomId,
-                            guests: String(room.capacity), // Block FULL capacity
+                            guests: guestsToBlock,
                             check_in: format(today, 'yyyy-MM-dd'),
                             check_out: format(nextYear, 'yyyy-MM-dd'),
-                            status: 'confirmed',
-                            total_price: 0
+                            status: 'confirmed', // Confirmed blocks availability
+                            total_price: 0,
+                            unit_id: unitToBlock // Targeted Block
                         }
 
                         // Check if already blocked to avoid duplicates
                         const isBlocked = state.bookings.some(b =>
                             b.roomType === roomId &&
-                            b.guestName === 'MANTENIMIENTO' &&
                             b.status !== 'cancelled' &&
-                            new Date(b.checkOut) > new Date()
+                            new Date(b.checkOut) > new Date() &&
+                            // If targeting unit, check if THIS unit is blocked. If targeting room, check if Any "Generico" maintenance exists.
+                            (unitId ? b.unitId === String(unitId) : b.guestName === 'MANTENIMIENTO')
                         )
 
                         if (!isBlocked) {
                             const { error } = await supabase.from('bookings').insert([payload])
                             if (!error) {
                                 await get().fetchBookings()
-                                toast.success(`Bloqueo de calendario creado`)
+                                toast.success(unitId ? `Cama ${unitId} bloqueada` : `Habitación bloqueada`)
                             }
                         }
                     }
@@ -708,17 +909,17 @@ export const useAppStore = create<AppState>()(
                     // UNBLOCK: Remove maintenance bookings if switching to Clean/Dirty
                     const maintenanceBookings = state.bookings.filter(b =>
                         b.roomType === roomId &&
-                        b.guestName === 'MANTENIMIENTO' &&
-                        b.status !== 'cancelled'
+                        b.status !== 'cancelled' &&
+                        // Smart Unblock: If unblocking a Unit, only remove that unit's block.
+                        // If unblocking the Room, remove the Generic block.
+                        (unitId ? (b.unitId === String(unitId) && b.guestName.includes('MANTENIMIENTO')) : b.guestName === 'MANTENIMIENTO')
                     )
 
                     if (maintenanceBookings.length > 0) {
-                        const ids = maintenanceBookings.map(b => b.id)
-                        const { error } = await supabase.from('bookings').delete().in('id', ids)
-                        if (!error) {
-                            await get().fetchBookings()
-                            toast.success(`Bloqueo de calendario eliminado`)
-                        }
+                        const idsToDelete = maintenanceBookings.map(b => b.id)
+                        await supabase.from('bookings').update({ status: 'cancelled' }).in('id', idsToDelete)
+                        await get().fetchBookings()
+                        toast.success(unitId ? `Cama ${unitId} desbloqueada` : `Habitación desbloqueada`)
                     }
                 }
 
@@ -765,6 +966,22 @@ export const useAppStore = create<AppState>()(
             },
 
             addBooking: async (bookingData, totalPrice) => {
+                // GUARD RAIL: Availability Check
+                const isAvailable = get().checkAvailability(
+                    bookingData.location,
+                    bookingData.roomType,
+                    bookingData.checkIn,
+                    bookingData.checkOut,
+                    Number(bookingData.guests),
+                    undefined, // No ID to exclude (new booking)
+                    bookingData.unitId // Check specific unit collision if provided
+                )
+
+                if (!isAvailable) {
+                    toast.error("❌ NO SE PUEDE CREAR: Fechas no disponibles (Overbooking)")
+                    throw new Error("Overbooking detected")
+                }
+
                 const computedTotal = totalPrice || bookingData.totalPrice || 0
                 const status = bookingData.status || 'pending'
 
@@ -783,7 +1000,7 @@ export const useAppStore = create<AppState>()(
                     payment_method: bookingData.paymentMethod // New: Persist preference
                 }
 
-                const { error } = await supabase.from('bookings').insert([payload])
+                const { data, error } = await supabase.from('bookings').insert([payload]).select().single()
 
                 if (error) {
                     console.error('Error adding booking:', error)
@@ -791,11 +1008,171 @@ export const useAppStore = create<AppState>()(
                     throw error
                 }
 
+                // AUTOMATIC CASH LOGGING (New Booking)
+                if ((status === 'confirmed' || status === 'checked_in') && bookingData.paymentStatus === 'paid' && bookingData.paymentMethod === 'cash') {
+                    if (data) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const bookingId = (data as any).id
+                        await get().addTransaction({
+                            amount: computedTotal,
+                            type: 'income',
+                            category: 'reservation',
+                            description: `Pago Reserva: ${bookingData.guestName}`,
+                            bookingId: bookingId,
+                            paymentMethod: 'cash'
+                        })
+                    }
+                }
+
                 await get().fetchBookings()
             },
 
+            createGroupBooking: async (bookingsData) => {
+                // 1. Guard Rail: Availability Check for ALL Items
+                // We must check availability for each item. 
+                // Since this is usually a mix of units, let's verify each unit collision.
+                const store = get()
+
+                // Perform checks in parallel or sequence? 
+                // Sequence is safer for logic debugging, but store usage is sync.
+                for (const b of bookingsData) {
+                    const isAvailable = store.checkAvailability(
+                        b.location,
+                        b.roomType,
+                        b.checkIn,
+                        b.checkOut,
+                        Number(b.guests),
+                        undefined,
+                        b.unitId
+                    )
+                    if (!isAvailable) {
+                        toast.error(`❌ Conflicto de disponibilidad: ${b.unitId ? `Cama ${b.unitId}` : b.roomType}`)
+                        throw new Error("Overbooking detected in group")
+                    }
+                }
+
+                // 2. Prepare Payload
+                const payload = bookingsData.map(b => ({
+                    guest_name: b.guestName,
+                    email: b.email,
+                    phone: b.phone,
+                    location: b.location,
+                    room_type: b.roomType,
+                    guests: b.guests,
+                    check_in: b.checkIn,
+                    check_out: b.checkOut,
+                    status: b.status || 'pending',
+                    total_price: b.totalPrice,
+                    unit_id: b.unitId,
+                    payment_method: b.paymentMethod,
+                    payment_status: 'pending'
+                }))
+
+                // 3. Batch Insert
+                const { error, data } = await supabase.from('bookings').insert(payload).select()
+
+                if (error) {
+                    console.error('Group booking error:', error)
+                    toast.error('Error al guardar grupo')
+                    throw error
+                }
+
+                // 4. Log Cash (If applicable - usually web bookings are pending, but logic remains)
+                // Filter for paid items only
+                const paidItmes = payload.filter((b, idx) =>
+                    (b.status === 'confirmed' || b.status === 'checked_in') &&
+                    bookingsData[idx].paymentStatus === 'paid' &&
+                    b.payment_method === 'cash'
+                )
+
+                if (paidItmes.length > 0) {
+                    // Note: We'd need the IDs from 'data' to link transactions correctly.
+                    // 'data' contains the inserted rows.
+                    if (data) {
+                        for (const row of data) {
+                            // find matching input based on something? Or just create blind transactions?
+                            // Safe bet: Loop logic is complex for auto-cash. 
+                            // For now, Group Booking is likely Web Pivot -> Pending.
+                            // Leaving this empty to avoid bugs. Cash will be logged on Check-In/Payment.
+                        }
+                    }
+                }
+
+                await get().fetchBookings()
+            },
+
+            registerPayment: async (bookingId, amount, method, reference) => {
+                const state = get()
+                const booking = state.bookings.find(b => b.id === bookingId)
+
+                if (!booking) {
+                    toast.error("Reserva no encontrada")
+                    return
+                }
+
+                // 1. Create Transaction (If it's a real payment)
+                // We only log income if it's explicitly CASH or CARD (if integrated later). 
+                // For now, track cash manually. Transfers are usually bank-to-bank.
+                if (method === 'cash') {
+                    await state.addTransaction({
+                        amount,
+                        type: 'income',
+                        category: 'reservation',
+                        description: `Pago Reserva: ${booking.guestName} (${booking.roomType})`,
+                        bookingId: booking.id,
+                        paymentMethod: 'cash'
+                    })
+                }
+
+                // 2. Update Booking Status
+                const payload = {
+                    paymentStatus: 'paid' as const,
+                    status: 'confirmed' as const, // Auto-confirm on payment
+                    paymentMethod: method,
+                    paymentReference: reference
+                }
+
+                // Optimistic Update
+                const optimisticBookings = state.bookings.map(b =>
+                    b.id === bookingId ? { ...b, ...payload } : b
+                )
+                set({ bookings: optimisticBookings })
+
+                const { error } = await supabase.from('bookings').update(payload).eq('id', bookingId)
+
+                if (error) {
+                    console.error("Error registering payment", error)
+                    toast.error("Error al registrar pago")
+                    // Rollback
+                    get().fetchBookings()
+                } else {
+                    toast.success("Pago registrado correctamente")
+
+                    // 3. Send Confirmation Email (Background)
+                    if (booking.email) {
+                        fetch('/api/emails/send', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'confirmation',
+                                to: booking.email,
+                                data: {
+                                    guestName: booking.guestName,
+                                    bookingId: booking.id,
+                                    checkIn: booking.checkIn,
+                                    checkOut: booking.checkOut,
+                                    roomName: booking.roomType,
+                                    totalPrice: booking.totalPrice,
+                                    location: booking.location
+                                }
+                            })
+                        }).catch(err => console.error("Background Email Error:", err))
+                    }
+                }
+            },
+
             updateBookingStatus: async (id, status) => {
-                // GUARD RAIL 1: Availability Check
+                // GUARD RAIL: Availability Check
                 if (status === 'confirmed') {
                     const booking = get().bookings.find(b => b.id === id)
                     if (booking) {
@@ -805,7 +1182,7 @@ export const useAppStore = create<AppState>()(
                             booking.checkIn,
                             booking.checkOut,
                             Number(booking.guests),
-                            booking.id // excludeBookingId: Ignore self
+                            booking.id
                         )
 
                         if (!isAvailable) {
@@ -815,17 +1192,11 @@ export const useAppStore = create<AppState>()(
                     }
                 }
 
-
-
-                // Prepare Payload
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const payload: any = { status };
+                if (status === 'cancelled') payload.cancelled_at = new Date().toISOString();
 
-                if (status === 'cancelled') {
-                    payload.cancelled_at = new Date().toISOString();
-                }
-
-                // OPTIMISTIC UPDATE: Update local state immediately to prevent UI lag/reversion
+                // Optimistic
                 const currentBookings = get().bookings
                 const optimisticBookings = currentBookings.map(b =>
                     b.id === id ? { ...b, ...payload } : b
@@ -836,70 +1207,35 @@ export const useAppStore = create<AppState>()(
                 if (error) {
                     console.error('Error updating status:', error)
                     toast.error('Error al actualizar estado')
-                    // Rollback on error
                     set({ bookings: currentBookings })
                     return
                 }
 
-                // Refresh in background (don't await to block UI)
-                get().fetchBookings()
-
-                // AUTOMATED EMAIL SYSTEM (Elite Feature)
-                // Trigger email in background after successful update
-                try {
-                    const updatedBooking = get().bookings.find(b => b.id === id);
-                    if (updatedBooking && updatedBooking.email) {
-                        let emailType = '';
-                        if (status === 'confirmed') emailType = 'confirmation';
-                        if (status === 'cancelled') emailType = 'cancellation';
-
-                        if (emailType) {
-                            const emailData = {
-                                type: emailType,
-                                to: updatedBooking.email,
+                // Email for Cancellation
+                if (status === 'cancelled') {
+                    const booking = get().bookings.find(b => b.id === id)
+                    if (booking && booking.email) {
+                        fetch('/api/emails/send', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'cancellation',
+                                to: booking.email,
                                 data: {
-                                    guestName: updatedBooking.guestName,
-                                    bookingId: updatedBooking.id.slice(0, 8).toUpperCase(),
-                                    checkIn: updatedBooking.checkIn,
-                                    checkOut: updatedBooking.checkOut,
-                                    roomName: get().rooms.find(r => r.id === updatedBooking.roomType)?.label || updatedBooking.roomType,
-                                    totalPrice: updatedBooking.totalPrice,
-                                    location: updatedBooking.location,
-                                    refundStatus: updatedBooking.refundStatus,
-                                    refundAmount: updatedBooking.refundAmount
+                                    guestName: booking.guestName,
+                                    bookingId: booking.id,
+                                    checkIn: booking.checkIn,
+                                    checkOut: booking.checkOut,
+                                    roomName: booking.roomType,
+                                    totalPrice: booking.totalPrice,
+                                    location: booking.location
                                 }
-                            };
-
-                            // Non-blocking call
-                            fetch('/api/emails/send', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(emailData)
-                            }).then(async res => {
-                                if (res.ok) {
-                                    toast.success(`📧 Email de ${emailType === 'confirmation' ? 'Confirmación' : 'Cancelación'} enviado`);
-                                } else {
-                                    let errData;
-                                    try {
-                                        errData = await res.json();
-                                    } catch (e) {
-                                        // If JSON fails, read text (it might be an HTML error page)
-                                        const text = await res.text();
-                                        console.error("Email API returned non-JSON:", text);
-                                        errData = { error: "Server Error (Non-JSON)", details: text.substring(0, 100) };
-                                    }
-
-                                    console.error("Email send failed:", res.status, errData);
-                                    if (res.status === 500) {
-                                        toast.error(`Error enviando email: ${errData.error || 'Error Desconocido'}`);
-                                    }
-                                }
-                            }).catch(err => console.error("Email fetch error:", err));
-                        }
+                            })
+                        }).catch(err => console.error("Email error:", err))
                     }
-                } catch (e) {
-                    console.error("Email trigger error:", e);
                 }
+
+                get().fetchBookings()
             },
 
             confirmGroupBookings: async (email: string) => {
@@ -908,29 +1244,16 @@ export const useAppStore = create<AppState>()(
 
                 if (groupBookings.length === 0) return
 
-                const ids = groupBookings.map(b => b.id)
+                toast.info(`Procesando pago grupal para ${groupBookings.length} reservas...`)
 
-                // 1. Update Local
-                set({
-                    bookings: state.bookings.map(b =>
-                        ids.includes(b.id) ? { ...b, status: 'confirmed', paymentStatus: 'paid' } : b
-                    )
-                })
+                // Use registerPayment to ensure transactions are created
+                // Defaulting to CASH as this is usually an "at desk" action
+                const promises = groupBookings.map(b =>
+                    get().registerPayment(b.id, b.totalPrice, 'cash', 'GRUPO')
+                )
 
-                // 2. Update DB
-                const { error } = await supabase
-                    .from('bookings')
-                    .update({ status: 'confirmed', payment_status: 'paid' })
-                    .in('id', ids)
-
-                if (error) {
-                    console.error("Error batch confirming:", error)
-                    toast.error("Error al confirmar grupo")
-                    // Revert? Complex, let's assume success or refresh.
-                    await get().fetchBookings()
-                } else {
-                    toast.success(`Grupo confirmado (${ids.length} reservas)`)
-                }
+                await Promise.all(promises)
+                toast.success(`Grupo confirmado y pagado (${groupBookings.length} reservas)`)
             },
 
             updateBooking: async (id, data) => {
@@ -972,24 +1295,9 @@ export const useAppStore = create<AppState>()(
                     return
                 }
 
-                // AUTOMATIC CASH LOGGING (Elite Feature)
-                // If payment is marked as PAID via CASH, log it in transactions automatically
-                if (data.paymentStatus === 'paid' && (data.paymentMethod === 'cash' || (!data.paymentMethod && get().bookings.find(b => b.id === id)?.paymentMethod === 'cash'))) {
-                    // Verify we haven't already logged this? (Ideally check DB, but for now just fire)
-                    // Calculate amount: If data.totalPrice exists use it, else use current booking total
-                    const targetBooking = get().bookings.find(b => b.id === id)
-                    if (targetBooking) {
-                        const amount = data.totalPrice || targetBooking.totalPrice
-                        get().addTransaction({
-                            amount: amount,
-                            type: 'income',
-                            category: 'reservation',
-                            description: `Pago Reserva: ${targetBooking.guestName}`,
-                            bookingId: id,
-                            paymentMethod: 'cash'
-                        })
-                    }
-                }
+                // LEAGACY AUTOMATIC CASH LOGGING REMOVED
+                // Responsibility now lies solely with 'registerPayment' action to prevent double-counting.
+                // This ensures we don't accidentally create transactions when just patching data.
 
                 // Background refresh
                 get().fetchBookings()

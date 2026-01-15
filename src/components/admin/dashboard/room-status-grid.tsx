@@ -644,11 +644,11 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
                                     <div key={b.id} className="text-xs bg-white dark:bg-stone-900 p-2 rounded border border-stone-100 dark:border-stone-800 shadow-sm flex flex-col gap-1">
                                         <span className="font-bold text-stone-700 dark:text-stone-300">{b.guestName}</span>
                                         <span className="font-mono text-[10px] text-stone-500 break-all">
-                                            RAW ID: "{b.roomType}" <br />
-                                            RAW LOC: "{b.location}" <br />
-                                            RAW STATUS: "{b.status}" <br />
-                                            NORM TYPE: "{typeSimple}" <br />
-                                            RESOLVED: "{resolved || 'NULL'}"
+                                            RAW ID: &quot;{b.roomType}&quot; <br />
+                                            RAW LOC: &quot;{b.location}&quot; <br />
+                                            RAW STATUS: &quot;{b.status}&quot; <br />
+                                            NORM TYPE: &quot;{typeSimple}&quot; <br />
+                                            RESOLVED: &quot;{resolved || 'NULL'}&quot;
                                         </span>
                                         <span className="text-[10px] text-amber-600 font-bold">
                                             {format(new Date(b.checkIn), "dd MMM")} - {format(new Date(b.checkOut), "dd MMM")}

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useAppStore, Booking } from "@/lib/store"
+import { formatMoney } from "@/lib/currency"
 import { DollarSign, Users, CalendarDays, Activity, ArrowRight, ArrowUpRight, Home, LogOut, CheckCircle, XCircle, Clock } from "lucide-react"
 import { format, isSameDay, parseISO } from "date-fns"
 import { es } from "date-fns/locale"
@@ -489,7 +490,8 @@ function AdminContent() {
                                         {getStatusBadge(booking.status)}
                                     </TableCell>
                                     <TableCell className="text-right font-heading font-light text-lg pr-8 py-5 text-stone-900 dark:text-white">
-                                        ${booking.totalPrice.toLocaleString()}
+                                        {/* Fixed: Use formatMoney for Q currency */}
+                                        {formatMoney(booking.totalPrice)}
                                     </TableCell>
                                 </TableRow>
                             ))}

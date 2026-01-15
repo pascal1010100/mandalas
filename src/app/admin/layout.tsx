@@ -2,13 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, CalendarDays, Users, Home, Menu, Sparkles, Settings, SprayCan, ArrowRight, ShoppingBag } from "lucide-react"
+import { LayoutDashboard, CalendarDays, Users, Home, Menu, Sparkles, Settings as SettingsIcon, SprayCan, ArrowRight, ShoppingBag, Package } from "lucide-react"
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ModeToggle } from "@/components/shared/mode-toggle"
 import { LogoutButton } from "@/components/admin/logout-button"
-import { NotificationsListener } from "@/components/admin/notifications-listener"
 import { AutoSyncHandler } from "@/components/admin/auto-sync-handler"
 
 // Sidebar component extracted to avoid React lint error
@@ -19,7 +19,8 @@ function SidebarContent({ pathname }: { pathname: string }) {
         { href: "/admin/events", label: "Eventos", icon: CalendarDays },
         { href: "/admin/housekeeping", label: "Limpieza", icon: SprayCan },
         { href: "/admin/products", label: "Minibar", icon: ShoppingBag },
-        { href: "/admin/settings", label: "Configuración", icon: Settings },
+        { href: "/admin/inventory", label: "Bodega", icon: Package }, // New Link
+        { href: "/admin/settings", label: "Configuración", icon: SettingsIcon },
     ]
 
     return (
@@ -116,7 +117,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     return (
         <div className="flex h-screen w-full bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans overflow-hidden transition-colors duration-500">
-            <NotificationsListener />
             <AutoSyncHandler />
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex w-72 flex-col h-full flex-shrink-0 z-30 shadow-2xl shadow-black/40 border-r border-white/5 bg-stone-950">

@@ -113,46 +113,60 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
 
     // Handle Initial Values
     React.useEffect(() => {
-        if (open && initialValues) {
-            // 1. Set Location
-            if (initialValues.location) setLocation(initialValues.location)
+        if (open) {
+            if (initialValues) {
+                // 1. Set Location
+                if (initialValues.location) setLocation(initialValues.location)
 
-            // 2. Set Default Dates (Today + 1 Night)
-            const today = new Date()
-            const tomorrow = new Date(today)
-            tomorrow.setDate(tomorrow.getDate() + 1)
-            setDateRange({ from: today, to: tomorrow })
+                // 2. Set Default Dates (Today + 1 Night)
+                const today = new Date()
+                const tomorrow = new Date(today)
+                tomorrow.setDate(tomorrow.getDate() + 1)
+                setDateRange({ from: today, to: tomorrow })
 
-            // 3. Find and Select Room
-            if (initialValues.roomType) {
-                const room = rooms.find(r => r.id === initialValues.roomType)
-                if (room) {
-                    setSelectedRoom({
-                        id: room.id,
-                        label: room.label,
-                        price: room.basePrice,
-                        maxGuests: room.maxGuests,
-                        capacity: room.capacity,
-                        type: room.type
-                    })
+                // 3. Find and Select Room
+                if (initialValues.roomType) {
+                    const room = rooms.find(r => r.id === initialValues.roomType)
+                    if (room) {
+                        setSelectedRoom({
+                            id: room.id,
+                            label: room.label,
+                            price: room.basePrice,
+                            maxGuests: room.maxGuests,
+                            capacity: room.capacity,
+                            type: room.type
+                        })
 
-                    // 4. Set Unit if provided
-                    if (initialValues.unitId) {
-                        setSelectedUnitIds([initialValues.unitId])
-                    }
+                        // 4. Set Unit if provided
+                        if (initialValues.unitId) {
+                            setSelectedUnitIds([initialValues.unitId])
+                        }
 
-                    // 5. Jump to appropriate step
-                    // If unit is already selected, we can go to Guest Details (Step 4)
-                    // If just room, we can go to Unit Selection (Step 3) or Details (Step 4 if Private)
-                    if (initialValues.unitId) {
-                        setGuests("1") // Default to 1 guest for single unit selection
-                        setStep(4)
-                    } else if (room.type === 'dorm') {
-                        setStep(3)
-                    } else {
-                        setStep(4)
+                        // 5. Jump to appropriate step
+                        if (initialValues.unitId) {
+                            setGuests("1")
+                            setStep(4)
+                        } else if (room.type === 'dorm') {
+                            setStep(3)
+                        } else {
+                            setStep(4)
+                        }
                     }
                 }
+            } else {
+                // Hard Reset if no initial values (Ensure fresh state)
+                setStep(1)
+                setLocation("pueblo") // Default or keep previous? Default is safer.
+                setDateRange({ from: undefined, to: undefined })
+                setGuests("1")
+                setSelectedRoom(null)
+                setSelectedUnitIds([])
+                setGuestName("")
+                setEmail("")
+                setPhone("")
+                setStatus("confirmed")
+                setPaymentMethod("cash")
+                setShowConfirmation(false)
             }
         }
     }, [open, initialValues, rooms])
@@ -174,8 +188,7 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
         setShowConfirmation(false)
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleSelectRoom = (room: any) => {
+    const handleSelectRoom = (room: { id: string, label: string, price: number, maxGuests: number, capacity: number, type: string, typeVal: 'dorm' | 'private' | 'suite', available: boolean, image?: string }) => {
         if (!room.available) return
         // FIXED: Saving maxGuests to state
         setSelectedRoom({
@@ -466,9 +479,9 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
                                         selected={dateRange}
                                         onSelect={(range: { from?: Date; to?: Date } | undefined) => setDateRange(range as { from: Date | undefined; to: Date | undefined } || { from: undefined, to: undefined })}
                                         numberOfMonths={2}
-                                        disabled={(date) => date < subDays(new Date(), 1)}
+                                        // disabled={(date) => date < subDays(new Date(), 1)}
                                         locale={es}
-                                        className="rounded-md"
+                                        className="rounded-md pointer-events-auto"
                                         classNames={{
                                             day_selected: "bg-stone-900 text-white hover:bg-stone-700 focus:bg-stone-900 dark:bg-white dark:text-stone-900",
                                             day_today: "bg-stone-100 text-stone-900 font-bold",

@@ -92,7 +92,7 @@ export function ServiceRequestFeed() {
                                                     </p>
                                                     {req.description && (
                                                         <p className="text-xs text-stone-500 italic bg-stone-50 dark:bg-stone-900/50 p-1.5 rounded border border-stone-100 dark:border-stone-800 inline-block">
-                                                            "{req.description}"
+                                                            &quot;{req.description}&quot;
                                                         </p>
                                                     )}
                                                 </div>

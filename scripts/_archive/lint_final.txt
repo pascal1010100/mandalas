@@ -1,0 +1,187 @@
+
+> mandalas@0.1.0 lint /Users/usuario/proyectos/mandalas
+> eslint
+
+
+/Users/usuario/proyectos/mandalas/scripts/simulate_logic.ts
+  2:10  warning  'start' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/scripts/verify_bookings.ts
+  34:9  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+/Users/usuario/proyectos/mandalas/src/app/(public)/contact/page.tsx
+  12:23  warning  'MapPin' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/app/(public)/hideout/page.tsx
+   76:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  116:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  155:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/app/(public)/my-booking/page.tsx
+     4:169  warning  'Info' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+     4:175  warning  'Save' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+     4:269  warning  'ShoppingBag' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+    12:52   warning  'CardDescription' is defined but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+    87:8    warning  React Hook useEffect has a missing dependency: 'searchQuery'. Either include it or remove the dependency array                                                                                                                                                                           react-hooks/exhaustive-deps
+    92:27   warning  'error' is assigned a value but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   292:8    warning  React Hook useEffect has a missing dependency: 'searchQuery'. Either include it or remove the dependency array                                                                                                                                                                           react-hooks/exhaustive-deps
+   297:27   warning  'error' is assigned a value but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   335:18   warning  'e' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   423:11   warning  'currentStep' is assigned a value but never used                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   434:44   warning  'price' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   446:18   warning  'e' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   491:18   warning  'e' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   524:18   warning  'e' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   575:18   warning  'e' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   589:21   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+   686:11   warning  'totalConsumed' is assigned a value but never used                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   703:25   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  1551:58   warning  'e' is defined but never used                                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/app/(public)/page.tsx
+  6:10  warning  'ArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+  8:10  warning  'cn' is defined but never used          @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/app/admin/page.tsx
+   5:10  warning  'DollarSign' is defined but never used                                                                                                                      @typescript-eslint/no-unused-vars
+   5:22  warning  'Users' is defined but never used                                                                                                                           @typescript-eslint/no-unused-vars
+   6:18  warning  'isSameDay' is defined but never used                                                                                                                       @typescript-eslint/no-unused-vars
+   6:29  warning  'parseISO' is defined but never used                                                                                                                        @typescript-eslint/no-unused-vars
+  55:8   warning  React Hook useEffect has missing dependencies: 'fetchServiceRequests' and 'subscribeToServiceRequests'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/usuario/proyectos/mandalas/src/app/admin/products/page.tsx
+  23:5   warning  'DialogTrigger' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  36:49  warning  'Beer' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  36:55  warning  'Coffee' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  36:63  warning  'Cookie' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+  36:71  warning  'Zap' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  83:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/usuario/proyectos/mandalas/src/app/admin/products/page.tsx:83:9
+  81 |
+  82 |     useEffect(() => {
+> 83 |         fetchProducts()
+     |         ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  84 |     }, [])
+  85 |
+  86 |     // Form Handlers  react-hooks/set-state-in-effect
+
+/Users/usuario/proyectos/mandalas/src/app/admin/reservations/page.tsx
+   22:10  warning  'Input' is defined but never used               @typescript-eslint/no-unused-vars
+   26:5   warning  'Filter' is defined but never used              @typescript-eslint/no-unused-vars
+   31:5   warning  'MapPin' is defined but never used              @typescript-eslint/no-unused-vars
+   36:39  warning  'isWithinInterval' is defined but never used    @typescript-eslint/no-unused-vars
+   46:31  warning  'CalendarClock' is defined but never used       @typescript-eslint/no-unused-vars
+  228:78  warning  'roomImage' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/app/admin/settings/page.tsx
+  26:8  warning  React Hook useEffect has a missing dependency: 'localRooms.length'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/usuario/proyectos/mandalas/src/app/api/emails/send/route.tsx
+  13:14  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/admin/auto-sync-handler.tsx
+  84:8  warning  React Hook useEffect has a missing dependency: 'subscribeToBookings'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/usuario/proyectos/mandalas/src/components/admin/dashboard/dashboard-stats.tsx
+   3:10  warning  'Card' is defined but never used           @typescript-eslint/no-unused-vars
+   3:16  warning  'CardContent' is defined but never used    @typescript-eslint/no-unused-vars
+   9:5   warning  'CalendarCheck' is defined but never used  @typescript-eslint/no-unused-vars
+  15:5   warning  'isSameDay' is defined but never used      @typescript-eslint/no-unused-vars
+  23:27  warning  'isStayNight' is defined but never used    @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/admin/dashboard/mini-calendar.tsx
+  24:10  warning  'Booking' is defined but never used  @typescript-eslint/no-unused-vars
+  72:45  warning  'dayIdx' is defined but never used   @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/admin/dashboard/room-status-grid.tsx
+    5:10  warning  'Badge' is defined but never used                    @typescript-eslint/no-unused-vars
+    8:18  warning  'isSameDay' is defined but never used                @typescript-eslint/no-unused-vars
+    8:29  warning  'parseISO' is defined but never used                 @typescript-eslint/no-unused-vars
+    8:39  warning  'startOfDay' is defined but never used               @typescript-eslint/no-unused-vars
+    8:51  warning  'isWithinInterval' is defined but never used         @typescript-eslint/no-unused-vars
+    8:69  warning  'addDays' is defined but never used                  @typescript-eslint/no-unused-vars
+   10:22  warning  'BedDouble' is defined but never used                @typescript-eslint/no-unused-vars
+   10:46  warning  'Hammer' is defined but never used                   @typescript-eslint/no-unused-vars
+   10:96  warning  'Clock' is defined but never used                    @typescript-eslint/no-unused-vars
+   26:21  warning  'Trash2' is defined but never used                   @typescript-eslint/no-unused-vars
+   96:15  warning  'todayStr' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  115:19  warning  'isRelevantDate' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  369:51  warning  'idx' is defined but never used                      @typescript-eslint/no-unused-vars
+  374:43  warning  'Content' is assigned a value but never used         @typescript-eslint/no-unused-vars
+  380:63  warning  'e' is defined but never used                        @typescript-eslint/no-unused-vars
+  640:39  warning  'locSimple' is assigned a value but never used       @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/admin/dashboard/service-request-feed.tsx
+   8:58  warning  'Clock' is defined but never used   @typescript-eslint/no-unused-vars
+   8:65  warning  'Trash2' is defined but never used  @typescript-eslint/no-unused-vars
+  38:18  warning  'error' is defined but never used   @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/admin/finance/cash-management.tsx
+  11:10  warning  'Tabs' is defined but never used                                                                                      @typescript-eslint/no-unused-vars
+  11:16  warning  'TabsList' is defined but never used                                                                                  @typescript-eslint/no-unused-vars
+  11:26  warning  'TabsTrigger' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+  43:8   warning  React Hook useEffect has a missing dependency: 'fetchTransactions'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/usuario/proyectos/mandalas/src/components/admin/reservations/create-reservation-modal.tsx
+    8:5   warning  'DialogDescription' is defined but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   34:5   warning  'Check' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   51:7   warning  'ROOM_DETAILS' is assigned a value but never used                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   73:5   warning  'AlertDialog' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   74:5   warning  'AlertDialogAction' is defined but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   75:5   warning  'AlertDialogCancel' is defined but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   76:5   warning  'AlertDialogContent' is defined but never used                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   77:5   warning  'AlertDialogDescription' is defined but never used                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+   78:5   warning  'AlertDialogFooter' is defined but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   79:5   warning  'AlertDialogHeader' is defined but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   80:5   warning  'AlertDialogTitle' is defined but never used                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+  112:12  warning  'showConfirmation' is assigned a value but never used                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  283:11  warning  'validateAndAskConfirmation' is assigned a value but never used                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  522:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/components/admin/reservations/reservation-details-modal.tsx
+  1214:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/components/admin/reservations/reservation-filters.tsx
+   6:47  warning  'Filter' is defined but never used  @typescript-eslint/no-unused-vars
+  18:10  warning  'Badge' is defined but never used   @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/admin/reservations/timeline-view.tsx
+   53:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+  204:49  warning  'i' is defined but never used      @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/guest/service-request-grid.tsx
+  16:34  warning  'GlassWater' is defined but never used  @typescript-eslint/no-unused-vars
+  25:49  warning  'guestName' is defined but never used   @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/components/shared/booking-modal.tsx
+    6:10  warning  'format' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+    6:18  warning  'addDays' is defined but never used                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+    6:36  warning  'differenceInDays' is defined but never used                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+   18:5   warning  'DialogDescription' is defined but never used                                                                                                                                                                                                                                            @typescript-eslint/no-unused-vars
+   99:51  warning  'getRemainingCapacity' is assigned a value but never used                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  507:57  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/usuario/proyectos/mandalas/src/components/shared/events-calendar.tsx
+  21:8  warning  React Hook useEffect has a missing dependency: 'fetchEvents'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/usuario/proyectos/mandalas/src/emails/booking-confirmation.tsx
+  32:5  warning  'bookingId' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/lib/ical-service.ts
+  35:24  warning  'deleteError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  80:28  warning  'cancelError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/usuario/proyectos/mandalas/src/lib/store.ts
+  890:46  warning  'e' is defined but never used                            @typescript-eslint/no-unused-vars
+  968:23  warning  'optimisticBookings' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 110 problems (2 errors, 108 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

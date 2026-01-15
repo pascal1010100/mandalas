@@ -61,7 +61,8 @@ export async function syncRoomImport(roomId: string, importUrl: string) {
                 status: 'confirmed',
                 total_price: 0,
                 external_id: externalId,
-                source: 'ical'
+                source: 'ical',
+                payment_status: 'paid', // External bookings are not debt in this system
             };
 
             const { error } = await supabase

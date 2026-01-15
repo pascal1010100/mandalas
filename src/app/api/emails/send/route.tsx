@@ -7,11 +7,24 @@ import { BookingCancellationEmail } from '@/emails/booking-cancellation';
 const resend = new Resend(process.env.RESEND_API_KEY || 're_123');
 
 // Safe Error Serialization Helper
-const safeSerialize = (obj: any) => {
+// Safe Error Serialization Helper
+const safeSerialize = (obj: unknown) => {
     try {
-        return JSON.stringify(obj, null, 2);
-    } catch (e) {
+        if (obj instanceof Error) {
+            return JSON.stringify({
+                message: obj.message,
+                name: obj.name,
+                stack: process.env.NODE_ENV === 'development' ? obj.stack : undefined,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                cause: (obj as any).cause
+            }, null, 2);
+        }
+        if (typeof obj === 'object' && obj !== null) {
+            return JSON.stringify(obj, null, 2);
+        }
         return String(obj);
+    } catch (e) {
+        return "Unserializable Error: " + String(e);
     }
 };
 
@@ -66,11 +79,14 @@ export async function POST(req: NextRequest) {
 
         // SMART MOCK CHECK
         const apiKey = process.env.RESEND_API_KEY;
+        const keyStatus = !apiKey ? 'MISSING' : apiKey === 're_123' ? 'DEFAULT' : apiKey.length < 10 ? 'SHORT' : 'VALID_FORMAT';
+        console.log(`[API EMAIL] Key Status: ${keyStatus} | ${apiKey ? '...' + apiKey.slice(-4) : 'N/A'}`);
+
         // Mock if key is missing, short, placeholder, or the default value
         const isMockMode = !apiKey || apiKey === 're_123' || apiKey.includes('placeholder') || apiKey.length < 10;
 
         if (isMockMode) {
-            console.log(`[MOCK EMAIL] To: ${to} | Subject: ${subject}`)
+            console.log(`[MOCK EMAIL] Simulating send to: ${to} | Subject: ${subject}`)
             await new Promise(resolve => setTimeout(resolve, 500));
             return NextResponse.json({ message: "Mock Email sent successfully", id: "mock_id_dev_123" });
         }
@@ -80,7 +96,7 @@ export async function POST(req: NextRequest) {
 
         try {
             const { data: result, error } = await resend.emails.send({
-                from: 'Mandalas <reservas@mandalashostel.com>',
+                from: process.env.EMAIL_FROM || 'Mandalas <reservas@mandalashostel.com>',
                 to: [to],
                 subject: subject!,
                 react: emailComponent,

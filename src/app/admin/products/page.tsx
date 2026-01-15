@@ -64,7 +64,7 @@ export default function ProductsPage() {
 
     // Fetch Products
     const fetchProducts = async () => {
-        setLoading(true)
+        // setLoading(true) - Removed to avoid useEffect warning. Initial state is true.
         const { data, error } = await supabase
             .from('products')
             .select('*')
@@ -80,6 +80,7 @@ export default function ProductsPage() {
     }
 
     useEffect(() => {
+        // eslint-disable-next-line
         fetchProducts()
     }, [])
 

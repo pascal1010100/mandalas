@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useAppStore, Booking } from "@/lib/store"
 import {
     Table,
@@ -61,30 +61,32 @@ export default function ReservationsPage() {
     // Create Modal State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-    const filteredBookings = bookings.filter(booking => {
-        const matchesSearch = booking.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (booking.email?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-            booking.id.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredBookings = useMemo(() => {
+        return bookings.filter(booking => {
+            const matchesSearch = booking.guestName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (booking.email?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
+                booking.id.toLowerCase().includes(searchTerm.toLowerCase())
 
-        const matchesStatus = statusFilter === "ALL" || booking.status === statusFilter
+            const matchesStatus = statusFilter === "ALL" || booking.status === statusFilter
 
-        let matchesDate = true
-        if (dateRange?.from && dateRange?.to) {
-            const bookingStart = parseISO(booking.checkIn)
-            const bookingEnd = parseISO(booking.checkOut)
-            // Check for Overlap (Inclusive)
-            matchesDate = areIntervalsOverlapping(
-                { start: bookingStart, end: bookingEnd },
-                { start: dateRange.from, end: dateRange.to },
-                { inclusive: true }
-            )
-        } else if (dateRange?.from) {
-            const bookingStart = parseISO(booking.checkIn)
-            matchesDate = isSameDay(bookingStart, dateRange.from)
-        }
+            let matchesDate = true
+            if (dateRange?.from && dateRange?.to) {
+                const bookingStart = parseISO(booking.checkIn)
+                const bookingEnd = parseISO(booking.checkOut)
+                // Check for Overlap (Inclusive)
+                matchesDate = areIntervalsOverlapping(
+                    { start: bookingStart, end: bookingEnd },
+                    { start: dateRange.from, end: dateRange.to },
+                    { inclusive: true }
+                )
+            } else if (dateRange?.from) {
+                const bookingStart = parseISO(booking.checkIn)
+                matchesDate = isSameDay(bookingStart, dateRange.from)
+            }
 
-        return matchesSearch && matchesStatus && matchesDate
-    })
+            return matchesSearch && matchesStatus && matchesDate
+        })
+    }, [bookings, searchTerm, statusFilter, dateRange])
 
     const handleSelectBooking = (booking: Booking, cancelMode = false) => {
         setSelectedBooking(booking)

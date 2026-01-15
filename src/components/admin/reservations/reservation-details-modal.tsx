@@ -85,13 +85,20 @@ interface ReservationDetailsModalProps {
 }
 
 export function ReservationDetailsModal({ booking: initialBooking, open, onOpenChange, defaultOpenCancellation = false }: ReservationDetailsModalProps) {
-    const { bookings, rooms, updateBooking, updateBookingStatus, deleteBooking, checkOutBooking } = useAppStore()
+    const { bookings, rooms, inventory, fetchInventory, updateStock, updateBooking, registerPayment, updateBookingStatus, deleteBooking, checkOutBooking, addTransaction } = useAppStore()
 
-    // LIVE DATA: Find the latest version of this booking in the store
-    // This allows UI to react instantly to changes (like Payment Status toggle)
+    // State to track which booking is currently being VIEWED (allows switching in group view)
+    const [viewedBookingId, setViewedBookingId] = React.useState<string | undefined>(initialBooking?.id)
+
+    // Sync state when the prop changes (e.g. user closes and opens another from calendar)
+    React.useEffect(() => {
+        setViewedBookingId(initialBooking?.id)
+    }, [initialBooking?.id, open])
+
+    // LIVE DATA: Find the latest version of the VIEWED booking
     const booking = React.useMemo(() =>
-        bookings.find(b => b.id === initialBooking?.id) || initialBooking,
-        [bookings, initialBooking])
+        bookings.find(b => b.id === viewedBookingId) || initialBooking,
+        [bookings, viewedBookingId, initialBooking])
 
     const [isEditing, setIsEditing] = React.useState(false)
     const [formData, setFormData] = React.useState<Partial<Booking>>({})
@@ -167,6 +174,14 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
     const [extraCharges, setExtraCharges] = React.useState<Charge[]>([])
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [products, setProducts] = React.useState<any[]>([])
+
+    // Ensure inventory is loaded for stock deduction
+    React.useEffect(() => {
+        if (open && inventory.length === 0) {
+            fetchInventory()
+        }
+    }, [open])
+
     const [showAddCharge, setShowAddCharge] = React.useState(false)
     const [newCharge, setNewCharge] = React.useState({ productId: "", quantity: 1 })
 
@@ -259,7 +274,16 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
         if (error) {
             toast.error("Error al agregar cargo")
         } else {
-            toast.success("Cargo agregado")
+            // INVENTORY SYNC (Elite Feature)
+            // Attempt to find matching inventory item by name and deduct stock
+            const inventoryItem = inventory.find(i => i.name.toLowerCase() === product.name.toLowerCase())
+            if (inventoryItem) {
+                await updateStock(inventoryItem.id, 'out', newCharge.quantity, `Venta Minibar (Reserva: ${booking?.guestName})`)
+                toast.success("Cargo agregado & Stock actualizado")
+            } else {
+                toast.success("Cargo agregado (Sin descuento de inventario)")
+            }
+
             setNewCharge({ productId: "", quantity: 1 })
             setShowAddCharge(false)
             fetchCharges() // Refresh list
@@ -292,15 +316,14 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
         onOpenChange(false)
     }
 
-    const handleBatchPayment = () => {
-        groupBookings.forEach(b => {
-            updateBooking(b.id, {
-                paymentStatus: 'paid',
-                paymentMethod: paymentMethod,
-                paymentReference: paymentReference
-            })
-        })
-        toast.success(`Pago grupal de Q${groupPendingDebt} registrado`)
+    const handleBatchPayment = async () => {
+        const promises = groupBookings.map(b =>
+            registerPayment(b.id, b.totalPrice, paymentMethod, paymentReference)
+        )
+        await Promise.all(promises)
+
+        // Store handles toasts per payment, but maybe we show a group success?
+        toast.success(`Pago grupal de Q${groupPendingDebt} procesado`)
         setShowPaymentCollectionDialog(false)
     }
 
@@ -596,19 +619,15 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
         onOpenChange(false)
     }
 
-    const handleConfirmPayment = () => {
+    const handleConfirmPayment = async () => {
         if (!booking.id) return
 
-        // Update Booking with Payment Details and Status
-        updateBooking(booking.id, {
-            paymentStatus: 'paid',
-            paymentMethod: paymentMethod,
-            paymentReference: paymentReference
-        })
+        // Unified Payment Action (Creates Transaction + Updates Status + Sends Email)
+        await registerPayment(booking.id, booking.totalPrice, paymentMethod, paymentReference)
 
         setIsPaymentSettled(true)
-        toast.success("Pago registrado exitosamente")
         setShowPaymentCollectionDialog(false)
+        // No need for manual toast or email trigger here, store handles it.
     }
 
     const togglePaymentStatus = (checked: boolean) => {
@@ -773,10 +792,12 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                         <div className="flex flex-col gap-2">
                                             <div className="flex gap-2">
                                                 <Button size="sm" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => {
-                                                    updateBooking(booking.id, { paymentStatus: 'paid', status: 'confirmed' })
+                                                    // Use Unified Action instead of manual update
+                                                    // Assuming verifying implies we already have the money or just confirmed it.
+                                                    // If verifying means "I just checked the bank", we treat it as a payment registration.
+                                                    // We pass 'transfer' or current method.
+                                                    registerPayment(booking.id, booking.totalPrice, booking.paymentMethod || 'transfer', booking.paymentReference || 'verificado')
                                                     setIsPaymentSettled(true)
-                                                    toast.success("Pago confirmado y Reserva Confirmada")
-                                                    sendEmail('confirmation')
                                                 }}>
                                                     <CheckCircle className="w-3.5 h-3.5 mr-1" /> Confirmar Pago & Reserva
                                                 </Button>
@@ -852,7 +873,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                     Cancelar
                                 </Button>
                                 <Button
-                                    onClick={handleCheckOut}
+                                    onClick={() => handleCheckOut()}
                                     className={cn(
                                         "text-white transition-colors",
                                         isPaymentSettled
@@ -1298,6 +1319,15 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                             }}>
                                                 <Trash2 className="w-4 h-4 mr-2" /> Cancelar Reserva Individual
                                             </DropdownMenuItem>
+
+                                            {booking.status === 'confirmed' && (
+                                                <>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, 'pending')}>
+                                                        <Clock className="w-4 h-4 mr-2" /> Revertir a Pendiente
+                                                    </DropdownMenuItem>
+                                                </>
+                                            )}
                                         </>
                                     )}
                                     {/* ... Rest of Dropdown ... */}
@@ -1379,7 +1409,13 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                             {/* Member List Helper */}
                             <div className="space-y-1 relative z-10 max-h-32 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-indigo-200">
                                 {relatedBookings.map(rel => (
-                                    <div key={rel.id} className="flex items-center justify-between text-xs p-2 bg-white/40 dark:bg-stone-900/30 rounded border border-transparent hover:border-indigo-200 transition-colors cursor-pointer" onClick={() => toast.info("Link click logic here")}>
+                                    <div key={rel.id} className="flex items-center justify-between text-xs p-2 bg-white/40 dark:bg-stone-900/30 rounded border border-transparent hover:border-indigo-200 transition-colors cursor-pointer"
+                                        onClick={() => {
+                                            // Switch context to this booking
+                                            setViewedBookingId(rel.id)
+                                            toast.info("Cambiando de reserva...")
+                                        }}
+                                    >
                                         <div className="flex items-center gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
                                             <span className="font-medium text-stone-700 dark:text-stone-300">{rel.guestName || "Huésped"}</span>
@@ -1770,10 +1806,33 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                                 : "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-400"
                                     )}
                                     onClick={() => {
-                                        // Toggle Logic: Paid -> Pending | Verifying/Pending -> Paid
-                                        const newStatus = booking.paymentStatus === 'paid' ? 'pending' : 'paid'
-                                        updateBooking(booking.id, { paymentStatus: newStatus })
-                                        toast.success(newStatus === 'paid' ? "Pago CONFIRMADO" : "Pago marcado como PENDIENTE")
+                                        // SAFE TOGGLE LOGIC (Professional)
+                                        if (booking.paymentStatus === 'paid') {
+                                            // 1. REVERSE LOGIC (Annulling Payment)
+                                            if (confirm("¿Estás seguro de anular el pago? \n\nSi fue en Efectivo, se creará un egreso de corrección en la Caja Chica.")) {
+                                                // Revert to pending
+                                                updateBooking(booking.id, { paymentStatus: 'pending' })
+
+                                                // If it was cash, create reversal transaction
+                                                if (booking.paymentMethod === 'cash') {
+                                                    addTransaction({
+                                                        amount: booking.totalPrice,
+                                                        type: 'expense',
+                                                        category: 'adjustment',
+                                                        description: `Corrección: Anulación pago ${booking.guestName}`,
+                                                        bookingId: booking.id,
+                                                        paymentMethod: 'cash'
+                                                    })
+                                                    toast.info("Corrección de caja registrada")
+                                                } else {
+                                                    toast.success("Pago anulado (Pendiente)")
+                                                }
+                                            }
+                                        } else {
+                                            // 2. FORWARD LOGIC (Collecting Payment)
+                                            // Instead of magically toggling, open the proper dialog to ensure Data Integrity
+                                            setShowPaymentCollectionDialog(true)
+                                        }
                                     }}
                                 >
                                     {booking.paymentStatus === 'verifying' && <Loader2 className="w-3 h-3 animate-spin" />}
@@ -1785,11 +1844,25 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                             <div className="pt-3 border-t border-stone-200 dark:border-stone-700/50 flex items-center justify-between text-xs">
                                 <div className="flex items-center gap-2">
                                     <p className="text-stone-500">Método:</p>
-                                    <Badge variant="secondary" className="font-normal capitalize bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
+                                    <Badge
+                                        variant="secondary"
+                                        className={cn(
+                                            "font-normal capitalize bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700",
+                                            !booking.paymentMethod && booking.paymentStatus === 'paid' && "cursor-pointer hover:bg-rose-50 border-rose-200 text-rose-600 animate-pulse"
+                                        )}
+                                        onClick={() => {
+                                            if (!booking.paymentMethod && booking.paymentStatus === 'paid') {
+                                                if (confirm("¿Esta reserva figura PAGADA pero no tiene método registrado? \n\nClic OK para registrar el ingreso en Caja Chica ahora.")) {
+                                                    setShowPaymentCollectionDialog(true)
+                                                }
+                                            }
+                                        }}
+                                        title={!booking.paymentMethod ? "Clic para corregir pago fantasma" : ""}
+                                    >
                                         {booking.paymentMethod === 'card' && "💳 Tarjeta"}
                                         {booking.paymentMethod === 'cash' && "💵 Efectivo"}
                                         {booking.paymentMethod === 'transfer' && "🏦 Transferencia"}
-                                        {!booking.paymentMethod && "---"}
+                                        {!booking.paymentMethod && "⚠️ Corregir Pago"}
                                     </Badge>
                                 </div>
                                 {booking.paymentReference && (
@@ -1984,7 +2057,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                         </DialogTitle>
                         <DialogDescription className="text-stone-400">
                             Esta reserva antigua no tiene una cama asignada.
-                            Para marcarla como "Sucia" correctamente, indica qué cama usó el huésped.
+                            Para marcarla como &quot;Sucia&quot; correctamente, indica qué cama usó el huésped.
                         </DialogDescription>
                     </DialogHeader>
 
