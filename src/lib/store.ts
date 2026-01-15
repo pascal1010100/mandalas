@@ -536,11 +536,15 @@ export const useAppStore = create<AppState>()(
                     const cashRows = data.filter((t: any) => t.payment_method === 'cash' || !t.payment_method)
 
                     const income = cashRows
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         .filter((t: any) => t.type === 'income')
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
 
                     const expense = cashRows
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         .filter((t: any) => t.type === 'expense')
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
 
                     console.log(`[Cash Audit] Income: ${income}, Expense: ${expense}, Net: ${income - expense}`)
@@ -1089,7 +1093,7 @@ export const useAppStore = create<AppState>()(
                     // Note: We'd need the IDs from 'data' to link transactions correctly.
                     // 'data' contains the inserted rows.
                     if (data) {
-                        for (const row of data) {
+                        for (const _row of data) {
                             // find matching input based on something? Or just create blind transactions?
                             // Safe bet: Loop logic is complex for auto-cash. 
                             // For now, Group Booking is likely Web Pivot -> Pending.
@@ -1125,20 +1129,28 @@ export const useAppStore = create<AppState>()(
                 }
 
                 // 2. Update Booking Status
-                const payload = {
+                // 2. Update Booking Status
+                const localPayload = {
                     paymentStatus: 'paid' as const,
                     status: 'confirmed' as const, // Auto-confirm on payment
                     paymentMethod: method,
                     paymentReference: reference
                 }
 
+                const dbPayload = {
+                    payment_status: 'paid',
+                    status: 'confirmed',
+                    payment_method: method,
+                    payment_reference: reference
+                }
+
                 // Optimistic Update
                 const optimisticBookings = state.bookings.map(b =>
-                    b.id === bookingId ? { ...b, ...payload } : b
+                    b.id === bookingId ? { ...b, ...localPayload } : b
                 )
                 set({ bookings: optimisticBookings })
 
-                const { error } = await supabase.from('bookings').update(payload).eq('id', bookingId)
+                const { error } = await supabase.from('bookings').update(dbPayload).eq('id', bookingId)
 
                 if (error) {
                     console.error("Error registering payment", error)
@@ -1283,9 +1295,13 @@ export const useAppStore = create<AppState>()(
 
                 // OPTIMISTIC UPDATE
                 const currentBookings = get().bookings
+
+                // Fix: Merge 'data' (camelCase) for local state, not 'payload' (snake_case)
                 const optimisticBookings = currentBookings.map(b =>
-                    b.id === id ? { ...b, ...payload } : b
+                    b.id === id ? { ...b, ...data } : b
                 )
+                set({ bookings: optimisticBookings })
+
                 const { error } = await supabase.from('bookings').update(payload).eq('id', id)
 
                 if (error) {
