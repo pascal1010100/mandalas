@@ -2,12 +2,11 @@
 
 import { Fragment, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { useAppStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
-import { format, isSameDay, parseISO, startOfDay, isWithinInterval, addDays } from "date-fns"
+import { format } from "date-fns"
 import { es } from "date-fns/locale"
-import { LayoutGrid, BedDouble, User, Brush, Hammer, CheckCircle2, Sparkles, SprayCan, Wrench, Clock, Wallet } from "lucide-react"
+import { LayoutGrid, User, Brush, CheckCircle2, Sparkles, SprayCan, Wrench, Wallet } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
@@ -23,7 +22,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 
-import { Plus, Ban, Trash2, AlertCircle } from "lucide-react"
+import { Plus, Ban, AlertCircle } from "lucide-react"
 
 import { Booking, RoomConfig } from "@/lib/store"
 
@@ -93,26 +92,18 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
     // Helper: Get units with stable sorting
     const getRoomUnits = (roomConfig: RoomConfig) => {
         const today = new Date()
-        const todayStr = format(today, 'yyyy-MM-dd')
 
         const activeBookings = bookings.filter(b => {
             // Robust String Comparison (UTC-safe)
-            const checkInStr = b.checkIn.split('T')[0]
-            const checkOutStr = b.checkOut.split('T')[0]
-            const todayStrComp = format(new Date(), 'yyyy-MM-dd')
 
             // Logic:
             // 1. Stayover: CheckIn < Today AND CheckOut > Today
             // 2. Arriving: CheckIn == Today
             // 3. Departing: CheckOut == Today
 
-            const isStayover = checkInStr < todayStrComp && checkOutStr > todayStrComp
-            const isArriving = checkInStr === todayStrComp
-            const isDeparting = checkOutStr === todayStrComp
             // Note: Departing guests usually NOT shown in grid for new bookings, 
             // but shown as 'Checkout' status. 
 
-            const isRelevantDate = isStayover || isArriving || isDeparting
 
             // 1. NORMALIZE STATUS & DATES
             const rawStatus = b.status?.toLowerCase().trim() || 'pending'
@@ -195,20 +186,21 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
         const isDorm = roomConfig.type === 'dorm'
         const gridSlots = isDorm ? roomConfig.capacity : 1 // FORCE 1 unit for Privates/Suites
 
-        // Initialize units
+        // Initialize units with an array for stacking
+         
         const units = Array.from({ length: gridSlots }, (_, i) => {
-            // Default label logic
             let label = ''
             if (isDorm) label = `C${i + 1}`
-            if (!isDorm) label = `HAB` // Single entity label
+            if (!isDorm) label = `HAB`
 
             return {
                 id: `${roomConfig.id}-${i}`,
-                unitId: (i + 1).toString(), // The logical ID of this unit
+                unitId: (i + 1).toString(),
                 status: 'available',
                 guestName: '',
                 label,
                 booking: undefined as Booking | undefined,
+                allBookings: [] as Booking[], // STACKING SUPPORT
                 housekeeping: roomConfig.units_housekeeping?.[(i + 1).toString()] || roomConfig.housekeeping_status || 'clean'
             }
         })
@@ -219,28 +211,32 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
         activeBookings.forEach(booking => {
             if (!isDorm) {
                 // PRIVATE ROOM / SUITE:
-                // The room is a single entity. Any valid booking for this room occupies the single slot.
-                // We take the first booking we find as the "primary". 
-                // Any additional booking for this same room (Double Booking!) goes to unassigned/overflow.
-                if (units[0].booking) {
-                    unassignedBookings.push(booking)
+                // Allow stacking if total guests fit capacity
+                const currentOccupancy = units[0].allBookings.reduce((sum, b) => sum + Number(b.guests || 1), 0)
+                const newGuests = Number(booking.guests || 1)
+
+                // If room empty OR adding this guest doesn't exceed Max Guests (Capacity)
+                // Note: roomConfig.capacity for Private is usually 1 (Entity), but maxGuests is e.g. 2.
+                // We use maxGuests for stacking limit.
+                const capacityLimit = roomConfig.maxGuests || roomConfig.capacity || 2
+
+                if (currentOccupancy + newGuests <= capacityLimit) {
+                    units[0].allBookings.push(booking)
+                    // Primary booking (for status color) is usually the first one or the one checking in today
+                    if (!units[0].booking) units[0].booking = booking
                 } else {
-                    units[0].booking = booking
+                    unassignedBookings.push(booking)
                 }
             } else {
                 // DORM: Strict Unit ID Matching
-                // If the booking has specific unitId (e.g. "1", "2"), put it there.
-                // If it has NO unitId, it is technically "Unassigned Bed" -> Send to Overflow.
-                // This prevents fake assignments.
                 if (booking.unitId && !isNaN(parseInt(booking.unitId))) {
                     const index = parseInt(booking.unitId) - 1
                     if (index >= 0 && index < gridSlots) {
-                        units[index].booking = booking
+                        units[index].booking = booking // Dorms don't stack per bed usually
                     } else {
                         unassignedBookings.push(booking)
                     }
                 } else {
-                    // DORM NO ID: Do NOT auto-fill. Push to unassigned.
                     unassignedBookings.push(booking)
                 }
             }
@@ -248,15 +244,22 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
 
         // Compute status/display for each unit
         const resultUnits = units.map(unit => {
-            if (!unit.booking) return unit // Still available
+            if (!unit.booking && unit.allBookings.length === 0) return unit
 
-            const booking = unit.booking
+            // Resolve Primary Booking (Priority: CheckIn > Stayover)
+            const primaryBooking = unit.booking || unit.allBookings[0]
+
             let status = 'occupied'
-            let guestName = booking.guestName
+            let guestName = primaryBooking.guestName
 
-            // Robust Date Comparison
-            const checkInStr = booking.checkIn.split('T')[0]
-            const checkOutStr = booking.checkOut.split('T')[0]
+            // Display Logic for multiple
+            if (unit.allBookings.length > 1) {
+                guestName = `${primaryBooking.guestName.split(' ')[0]} +${unit.allBookings.length - 1}`
+            }
+
+            // Robust Date Comparison based on PRIMARY booking
+            const checkInStr = primaryBooking.checkIn.split('T')[0]
+            const checkOutStr = primaryBooking.checkOut.split('T')[0]
             const todayStrComp = format(new Date(), 'yyyy-MM-dd')
 
             const isCheckOutToday = checkOutStr === todayStrComp
@@ -265,20 +268,18 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
             if (isCheckOutToday) status = 'checkout'
             else if (isCheckInToday) status = 'checkin'
 
-            if (booking.status === 'pending') status = 'pending'
+            if (primaryBooking.status === 'pending') status = 'pending'
 
-            // EXPLICIT: Checked Out (Override dates)
-            if (booking.status === 'checked_out') status = 'past_checkout'
+            if (primaryBooking.status === 'checked_out') status = 'past_checkout'
 
-            // PRIORITY: Verifying Payment
-            if (booking.paymentStatus === 'verifying') status = 'verifying'
+            if (primaryBooking.paymentStatus === 'verifying') status = 'verifying'
 
-            if (booking.status === 'maintenance') {
+            if (primaryBooking.status === 'maintenance') {
                 status = 'maintenance'
                 guestName = 'M'
             }
 
-            return { ...unit, status, guestName }
+            return { ...unit, status, guestName, booking: primaryBooking }
         })
 
         const overflow = unassignedBookings
@@ -366,18 +367,17 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
                         const { units, overflow } = getRoomUnits(room)
                         return (
                             <Fragment key={room.id}>
-                                {units.map((unit, idx) => {
+                                {units.map((unit) => {
                                     // Determine interaction wrapper
                                     // dynamic components
                                     const Container = isHousekeepingMode ? Popover : DropdownMenu
                                     const Trigger = isHousekeepingMode ? PopoverTrigger : DropdownMenuTrigger
-                                    const Content = isHousekeepingMode ? PopoverContent : DropdownMenuContent
 
                                     return (
                                         <Container key={unit.id}>
                                             <Trigger asChild>
                                                 <div
-                                                    onClick={(e) => {
+                                                    onClick={() => {
                                                         if (!isHousekeepingMode && unit.status !== "available") {
                                                             handleUnitClick(room, unit)
                                                         }
@@ -637,7 +637,6 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
                             {orphanedBookings.map(b => {
                                 // Live debug of resolution logic
                                 const typeSimple = b.roomType?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
-                                const locSimple = b.location?.toLowerCase().trim() || ''
                                 const resolved = resolveCanonicalRoomId(b.roomType, b.location)
 
                                 return (
