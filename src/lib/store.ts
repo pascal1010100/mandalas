@@ -361,28 +361,33 @@ export const useAppStore = create<AppState>()(
 
             subscribeToBookings: () => {
                 console.log("Subscribing to realtime bookings...")
+                let debounceTimer: NodeJS.Timeout | null = null
+
                 const subscription = supabase
                     .channel('bookings-realtime')
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, (payload: any) => {
-                        console.log('Realtime Booking Change detected:', payload.eventType)
+                        console.log('Realtime Booking Change:', payload.eventType)
 
-                        // Show toast based on event type for feedback
                         if (payload.eventType === 'INSERT') {
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             const row = payload.new as any
                             toast.info(`Nueva reserva: ${row.guest_name || 'Huésped'}`)
-                        } else if (payload.eventType === 'UPDATE') {
-                            // Optional: Could be more specific, but refetch is safest
-                            console.log("Booking updated, refreshing list...")
                         }
 
-                        // NUCLEAR SYNC OPTION: Always refetch to guarantee consistency
-                        get().fetchBookings()
+                        // DEBOUNCE REFETCH (1000ms)
+                        // Prevent fetch storms if multiple updates happen at once
+                        if (debounceTimer) clearTimeout(debounceTimer)
+
+                        debounceTimer = setTimeout(() => {
+                            console.log("Debounce limit reached, refreshing bookings...")
+                            get().fetchBookings()
+                        }, 1000)
                     })
                     .subscribe()
 
                 return () => {
+                    if (debounceTimer) clearTimeout(debounceTimer)
                     supabase.removeChannel(subscription)
                 }
             },

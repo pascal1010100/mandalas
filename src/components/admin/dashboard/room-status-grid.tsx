@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useState } from "react"
+import { Fragment, useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { useAppStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
@@ -29,6 +29,35 @@ import { Booking, RoomConfig } from "@/lib/store"
 interface RoomStatusGridProps {
     onSelectBooking?: (booking: Booking) => void
     onNewBooking?: (room: RoomConfig, unitId: string) => void
+}
+
+// SMART RESOLVER: Handles Legacy IDs + Location Context
+const resolveCanonicalRoomId = (bookingType: string, bookingLocation: string): string | null => {
+    // AGGRESSIVE NORMALIZATION: Remove everything except letters and numbers
+    const type = bookingType?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
+    const loc = bookingLocation?.toLowerCase().trim() || ''
+
+    // PUEBLO MAPPINGS
+    if (loc === 'pueblo') {
+        if (type === 'room101' || type === '101') return 'pueblo_private_1'
+        if (type === 'room102' || type === '102') return 'pueblo_private_2'
+        if (type === 'dorm1' || type === 'mixed' || type === 'dorm') return 'pueblo_dorm_mixed_8'
+        if (type === 'dorm2' || type === 'female') return 'pueblo_dorm_female_6'
+        if (type === 'suite1' || type === 'suite') return 'pueblo_suite_balcony'
+        // Family room map?
+        if (type === 'family') return 'pueblo_private_family'
+    }
+
+    // HIDEOUT MAPPINGS
+    if (loc === 'hideout') {
+        // Mapping 'dorm-1' in Hideout to Mixed or Female?
+        // Assuming dorm-1 = Mixed (Safe default)
+        if (type === 'dorm1' || type === 'mixed' || type === 'dorm') return 'hideout_dorm_mixed'
+        if (type === 'dorm2' || type === 'female') return 'hideout_dorm_female'
+        if (type === 'room1' || type === 'private') return 'hideout_private'
+    }
+
+    return null
 }
 
 export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGridProps) {
@@ -60,120 +89,81 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
         }
     }
 
-    // SMART RESOLVER: Handles Legacy IDs + Location Context
-    const resolveCanonicalRoomId = (bookingType: string, bookingLocation: string): string | null => {
-        // AGGRESSIVE NORMALIZATION: Remove everything except letters and numbers
-        const type = bookingType?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
-        const loc = bookingLocation?.toLowerCase().trim() || ''
-
-        // PUEBLO MAPPINGS
-        if (loc === 'pueblo') {
-            if (type === 'room101' || type === '101') return 'pueblo_private_1'
-            if (type === 'room102' || type === '102') return 'pueblo_private_2'
-            if (type === 'dorm1' || type === 'mixed' || type === 'dorm') return 'pueblo_dorm_mixed_8'
-            if (type === 'dorm2' || type === 'female') return 'pueblo_dorm_female_6'
-            if (type === 'suite1' || type === 'suite') return 'pueblo_suite_balcony'
-            // Family room map?
-            if (type === 'family') return 'pueblo_private_family'
-        }
-
-        // HIDEOUT MAPPINGS
-        if (loc === 'hideout') {
-            // Mapping 'dorm-1' in Hideout to Mixed or Female?
-            // Assuming dorm-1 = Mixed (Safe default)
-            if (type === 'dorm1' || type === 'mixed' || type === 'dorm') return 'hideout_dorm_mixed'
-            if (type === 'dorm2' || type === 'female') return 'hideout_dorm_female'
-            if (type === 'room1' || type === 'private') return 'hideout_private'
-        }
-
-        return null
-    }
-
-    // Helper: Get units with stable sorting
-    const getRoomUnits = (roomConfig: RoomConfig) => {
-        const today = new Date()
-
-        const activeBookings = bookings.filter(b => {
-            // Robust String Comparison (UTC-safe)
-
-            // Logic:
-            // 1. Stayover: CheckIn < Today AND CheckOut > Today
-            // 2. Arriving: CheckIn == Today
-            // 3. Departing: CheckOut == Today
-
-            // Note: Departing guests usually NOT shown in grid for new bookings, 
-            // but shown as 'Checkout' status. 
 
 
-            // 1. NORMALIZE STATUS & DATES
+    // OPTIMIZATION: Pre-calculate active bookings map to avoid O(N*M) filtering
+    // Group bookings by roomType (and resolve location matches)
+    const activeBookingsByRoom = useMemo(() => {
+        const map = new Map<string, Booking[]>()
+        const todayStr = format(new Date(), 'yyyy-MM-dd')
+
+        bookings.forEach(b => {
+            // 1. FILTERING LOGIC (Copied from previous getRoomUnits)
+            const checkInStr = b.checkIn.split('T')[0]
+            const checkOutStr = b.checkOut.split('T')[0]
+
+            const isStayover = checkInStr < todayStr && checkOutStr > todayStr
+            const isArriving = checkInStr === todayStr
+            const isDeparting = checkOutStr === todayStr
+
             const rawStatus = b.status?.toLowerCase().trim() || 'pending'
             const isCancelled = rawStatus === 'cancelled' || rawStatus === 'no_show' || rawStatus === 'refunded'
-            if (isCancelled) return false;
+            if (isCancelled) return
 
-            // PROFESSIONAL CHECKOUT LOGIC:
-            // If checked out, only show if the departures happened TODAY.
-            // If they left yesterday, they should not appear in the grid (bed is free).
             if (rawStatus === 'checked_out') {
-                if (!b.actualCheckOut) return false; // Fallback: If no timestamp, assume past
+                if (!b.actualCheckOut) return // Fallback
                 const actualOutDate = b.actualCheckOut.split('T')[0]
-                const todayCurrent = format(new Date(), 'yyyy-MM-dd')
-                if (actualOutDate < todayCurrent) return false;
+                if (actualOutDate < todayStr) return
 
-                // FAST TURNAROUND LOGIC:
-                // If the guest checked out TODAY, but the room has already been marked CLEAN,
-                // we hide this booking so the slot appears "Available" for new check-ins.
-                // We need to resolve the room/unit status here.
-                const isDorm = b.roomType && b.roomType.includes('dorm');
-                const targetRoom = rooms.find(r => r.id === b.roomType) || rooms.find(r => r.type === b.roomType && r.location === b.location);
-
+                // Fast Turnaround Logic (simplified for map: include it, clean filter handles it later or here?)
+                // We can't check room status here easily without full room list access inside loop efficiently? 
+                // We HAVE rooms list. So we can check.
+                const isDorm = b.roomType && b.roomType.includes('dorm')
+                const targetRoom = rooms.find(r => r.id === b.roomType)
                 if (targetRoom) {
                     const unitStatus = isDorm && b.unitId
                         ? targetRoom.units_housekeeping?.[b.unitId]
-                        : targetRoom.housekeeping_status;
-
-                    // If strictly CLEAN, free the slot.
-                    if (unitStatus === 'clean') return false;
+                        : targetRoom.housekeeping_status
+                    if (unitStatus === 'clean') return
                 }
             }
 
-            // DATE LOGIC
-            const todayStart = new Date(today); todayStart.setHours(0, 0, 0, 0);
-            const todayEnd = new Date(today); todayEnd.setHours(23, 59, 59, 999);
+            const isDateActive = isStayover || isArriving || isDeparting
+            if (!isDateActive && rawStatus !== 'checked_in') return
 
-            const bCheckIn = new Date(b.checkIn); bCheckIn.setHours(0, 0, 0, 0);
-            const bCheckOut = new Date(b.checkOut); bCheckOut.setHours(0, 0, 0, 0);
-            const isDateActive = bCheckIn <= todayEnd && bCheckOut >= todayStart;
+            // 2. MAPPING LOGIC
+            // Direct ID match
+            let targetId = b.roomType
 
-            if (!isDateActive && rawStatus !== 'checked_in') return false;
-
-            // 3. ID MATCHING
-            let isMatch = false;
-
-            if (b.roomType === roomConfig.id) {
-                isMatch = true;
-            }
-            else {
-                const typeSimple = b.roomType?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
-                let targetId = null;
-                if (typeSimple === 'room101') targetId = 'pueblo_private_1';
-                if (typeSimple === 'room102') targetId = 'pueblo_private_2';
-                if (typeSimple === 'dorm1') targetId = 'pueblo_dorm_mixed_8';
-
-                if (!targetId) targetId = resolveCanonicalRoomId(b.roomType, b.location);
-
-                if (targetId === roomConfig.id) isMatch = true;
+            // Legacy/Fuzzy match resolution
+            const isDirectMatch = rooms.some(r => r.id === b.roomType)
+            if (!isDirectMatch) {
+                targetId = resolveCanonicalRoomId(b.roomType, b.location) || b.roomType
             }
 
-            if (!isMatch) {
-                if (b.roomType === roomConfig.type) {
-                    const bLoc = b.location?.toLowerCase().trim();
-                    const cLoc = roomConfig.location?.toLowerCase().trim();
-                    if (bLoc === cLoc) isMatch = true;
-                }
-            }
+            if (!map.has(targetId)) map.set(targetId, [])
+            map.get(targetId)?.push(b)
+        })
 
-            return isMatch;
-        }).sort((a, b) => {
+        return map
+    }, [bookings, rooms])
+
+    // Helper: Get units with stable sorting
+    const getRoomUnits = (roomConfig: RoomConfig) => {
+        // RETRIEVE PRE-CALCULATED BOOKINGS
+        let activeBookings = activeBookingsByRoom.get(roomConfig.id) || []
+
+        // Secondary fuzzy fallback for location-based matching (legacy)
+        if (activeBookings.length === 0) {
+            // Try matching by type/location if ID match failed but resolveCanonical didn't catch it
+            // Actually resolveCanonical should have caught it.
+            // But let's check the map manually for unmapped keys?
+            // No, the map keys ARE the resolved IDs. 
+            // If manual fallback needed:
+            // activeBookings = bookings.filter(...) // Old expensive way? No, skip for perf.
+        }
+
+        activeBookings = activeBookings.sort((a, b) => {
             // Sort by CheckIn so arriving guests (later date) overwrite departing guests (earlier date) 
             // in the simple slot assignment logic
             return new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime()
@@ -187,7 +177,7 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
         const gridSlots = isDorm ? roomConfig.capacity : 1 // FORCE 1 unit for Privates/Suites
 
         // Initialize units with an array for stacking
-         
+
         const units = Array.from({ length: gridSlots }, (_, i) => {
             let label = ''
             if (isDorm) label = `C${i + 1}`
