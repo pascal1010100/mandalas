@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useAppStore } from "@/lib/store"
+import { useFinance } from "@/domains/finance"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils"
 import { formatMoney } from "@/lib/currency"
 import { DailyCheckinPayments } from "./daily-checkin-payments"
 import { ShiftClosureModal } from "./shift-closure-modal"
+import { ShiftHistoryModal } from "./history-modal"
 import {
     Wallet,
     TrendingUp,
@@ -32,7 +33,15 @@ import { es } from "date-fns/locale"
 import { toast } from "sonner"
 
 export function CashManagementWidget() {
-    const { transactions, fetchTransactions, addTransaction, deleteTransaction, cashBalance } = useAppStore()
+    const {
+        transactions,
+        cashBalance,
+        isLoading,
+        addTransaction,
+        deleteTransaction,
+        refreshFinanceData,
+        getStats
+    } = useFinance()
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income')
 
@@ -42,24 +51,17 @@ export function CashManagementWidget() {
     const [category, setCategory] = useState("other")
 
     useEffect(() => {
-        fetchTransactions()
-        const interval = setInterval(fetchTransactions, 30000) // Auto-refresh every 30s
+        refreshFinanceData()
+        const interval = setInterval(refreshFinanceData, 30000) // Auto-refresh every 30s
         return () => clearInterval(interval)
-    }, [])
+    }, [refreshFinanceData])
 
     // Calculations 
     const cashTransactions = transactions.filter(t => t.paymentMethod === 'cash' || !t.paymentMethod)
 
     // We use the STORE cashBalance (All time) for the Big Number
     const currentBalance = cashBalance
-
-    const todayIncome = cashTransactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + Number(t.amount), 0)
-
-    const todayExpense = cashTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + Number(t.amount), 0)
+    const { totalIncome: todayIncome, totalExpense: todayExpense } = getStats(cashTransactions)
 
     const handleQuickAction = (type: 'income' | 'expense', cat: string, defaultDesc: string) => {
         setTransactionType(type)
@@ -138,7 +140,10 @@ export function CashManagementWidget() {
                         {format(new Date(), "dd MMM yyyy", { locale: es })}
                     </Badge>
                 </div>
-                <ShiftClosureModal />
+                <div className="flex gap-2">
+                    <ShiftHistoryModal />
+                    <ShiftClosureModal />
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

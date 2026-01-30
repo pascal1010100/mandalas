@@ -20,7 +20,7 @@ import { ChevronLeft, ChevronRight, LogIn, LogOut, Wrench, Clock, CheckCircle, H
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Booking } from "@/lib/store"
+import { type Booking } from "@/domains/bookings/types/types"
 import {
     Tooltip,
     TooltipContent,

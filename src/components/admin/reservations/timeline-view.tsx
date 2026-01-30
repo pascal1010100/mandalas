@@ -18,7 +18,9 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { useAppStore, Booking } from "@/lib/store"
+import { useAppStore } from "@/lib/store"
+import { useBookings } from "@/domains/bookings"
+import type { Booking } from "@/domains/bookings/types/types"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 interface TimelineViewProps {
@@ -32,7 +34,8 @@ const ROW_HEIGHT = 88 // slightly taller
 const HEADER_HEIGHT = 56 // taller header
 
 export function TimelineView({ bookings, onSelectBooking }: TimelineViewProps) {
-    const { rooms, deleteBooking } = useAppStore() // Fetch from store
+    const { rooms } = useAppStore() // Fetch from store
+    const { deleteBooking } = useBookings()
     const [currentDate, setCurrentDate] = useState(new Date())
     const [isPurging, setIsPurging] = useState(false)
 

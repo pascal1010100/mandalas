@@ -1,7 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useAppStore, Booking } from "@/lib/store"
+import { useAppStore } from "@/lib/store"
+import { useBookings } from "@/domains/bookings"
+import type { Booking } from "@/domains/bookings/types/types"
 import { formatMoney } from "@/lib/currency"
 import { DollarSign, Users, CalendarDays, Activity, ArrowRight, ArrowUpRight, Home, LogOut, CheckCircle, XCircle, Clock } from "lucide-react"
 import { format, isSameDay, parseISO } from "date-fns"
@@ -37,12 +39,12 @@ import { useEffect } from "react" // Add useEffect import
 
 function AdminContent() {
     const {
-        bookings,
         serviceRequests,
         fetchServiceRequests,
         updateServiceRequestStatus,
         subscribeToServiceRequests
     } = useAppStore()
+    const { bookings } = useBookings()
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const [createModalInitialValues, setCreateModalInitialValues] = useState<{ location: "pueblo" | "hideout", roomType: string, unitId: string } | null>(null)
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)

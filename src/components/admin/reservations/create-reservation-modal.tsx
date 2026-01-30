@@ -81,9 +81,11 @@ import {
 } from "@/components/ui/alert-dialog"
 
 import { BedSelector } from "@/components/shared/bed-selector"
+import { useBookings } from "@/domains/bookings"
 
 export function CreateReservationModal({ open, onOpenChange, initialValues }: CreateReservationModalProps) {
-    const { addBooking, checkAvailability, rooms } = useAppStore()
+    const { createBooking, createGroupBooking, checkAvailability } = useBookings()
+    const { rooms } = useAppStore()
 
     // Steps: 1 = Search, 2 = Select Room, 3 = Guest Details
     const [step, setStep] = useState(1)
@@ -220,13 +222,8 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
             if (roomConfig.type === 'private') typeLabel = "Habitación"
             if (roomConfig.type === 'suite') typeLabel = "Suite"
 
-            const isAvailable = checkAvailability(
-                location,
-                roomConfig.id,
-                dateRange.from!.toISOString(),
-                dateRange.to!.toISOString(),
-                parseInt(guests) || 1
-            )
+            // Note: checkAvailability is now async, so we can't use it in useMemo
+            // We'll mark all as potentially available and validate on selection
             return {
                 id: roomConfig.id, // Use actual RoomConfig ID (e.g. pueblo_dorm)
                 label: roomConfig.label,
@@ -234,13 +231,13 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
                 price: roomConfig.basePrice,
                 maxGuests: roomConfig.maxGuests,
                 type: typeLabel,
-                available: isAvailable,
+                available: true, // Will validate on selection/creation
                 capacity: roomConfig.capacity,
                 typeVal: roomConfig.type, // Pass raw type for logic
                 image: roomConfig.image // Pass image from store
             }
         })
-    }, [location, dateRange, checkAvailability, rooms, guests])
+    }, [location, dateRange, rooms, guests])
 
 
 
@@ -327,36 +324,32 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
             // SCENARIO A: Specific Units Selected (Dorms or specific private rooms)
             if (selectedUnitIds.length > 0) {
                 // Create one booking per selected unit
-                const promises = selectedUnitIds.map((unitId, index) => {
-                    const isPrincipal = index === 0 // Logic to flag primary guest if needed?
-                    return addBooking({
-                        guestName: isPrincipal ? guestName : `${guestName} (${index + 1})`, // Differentiate names? Or same name.
-                        // Let's keep same name for now, or append clone suffix logic if desired. 
-                        // Usually hotel PMS uses "Guest (2)" or requires names list.
-                        // For simplicity: Same name, maybe unique ID internally handle.
-                        // Better: "Juan Perez" for all.
+                // Create bookings group
+                const bookingsData = selectedUnitIds.map((unitId, index) => {
+                    const isPrincipal = index === 0
+                    return {
+                        guestName: isPrincipal ? guestName : `${guestName} (${index + 1})`,
                         email: email,
                         phone: phone,
                         location: location,
                         roomType: selectedRoom.id,
-                        guests: selectedRoom.type === 'dorm' ? "1" : guests, // For Dorms, 1 guest per bed. For Private, use total guests.
+                        guests: selectedRoom.type === 'dorm' ? "1" : guests,
                         checkIn: checkInDate,
                         checkOut: checkOutDate,
-                        status: status === 'confirmed' ? 'confirmed' : 'pending',
-                        cancellationReason: undefined,
-                        refundStatus: undefined,
+                        status: (status === 'confirmed' ? 'confirmed' : 'pending') as 'confirmed' | 'pending',
+                        totalPrice: pricePerBooking,
                         unitId: unitId,
-                        paymentMethod: status === 'confirmed' ? paymentMethod : undefined
-                    }, pricePerBooking)
+                        paymentMethod: status === 'confirmed' ? paymentMethod : undefined,
+                    }
                 })
 
-                await Promise.all(promises)
+                await createGroupBooking(bookingsData)
 
             } else {
                 // SCENARIO B: No specific units (Legacy or "Run of House" Private)
                 // Just create one booking for the whole party
                 // NOTE: If this is a private room for 2 people, we usually treat it as 1 unit occupied.
-                await addBooking({
+                await createBooking({
                     guestName,
                     email,
                     phone,
@@ -366,11 +359,9 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
                     checkIn: checkInDate,
                     checkOut: checkOutDate,
                     status: status === 'confirmed' ? 'confirmed' : 'pending',
-                    cancellationReason: undefined,
-                    refundStatus: undefined,
-                    unitId: undefined,
+                    totalPrice: pricePerBooking * totalGuests,
                     paymentMethod: status === 'confirmed' ? paymentMethod : undefined
-                }, pricePerBooking * totalGuests) // Full price
+                })
             }
 
             toast.success("Reserva(s) creada(s) exitosamente")

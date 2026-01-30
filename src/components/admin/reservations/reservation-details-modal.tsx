@@ -71,7 +71,10 @@ import {
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 
-import { Booking, Charge, useAppStore } from "@/lib/store"
+import { useAppStore } from "@/lib/store"
+import { useBookings } from "@/domains/bookings"
+import type { Booking } from "@/domains/bookings/types/types"
+import type { Charge } from "@/lib/store" // Keep Charge from old store
 import { cn } from "@/lib/utils"
 import { formatMoney } from "@/lib/currency"
 import { toast } from "sonner"
@@ -85,7 +88,17 @@ interface ReservationDetailsModalProps {
 }
 
 export function ReservationDetailsModal({ booking: initialBooking, open, onOpenChange, defaultOpenCancellation = false }: ReservationDetailsModalProps) {
-    const { bookings, rooms, inventory, fetchInventory, updateStock, updateBooking, registerPayment, updateBookingStatus, deleteBooking, checkOutBooking, addTransaction } = useAppStore()
+    const { rooms, inventory, fetchInventory, updateStock, addTransaction, updateRoomStatus } = useAppStore()
+    const {
+        bookings,
+        updateBooking,
+        updateBookingStatus,
+        deleteBooking,
+        checkOutBooking,
+        registerPayment,
+        confirmGroupBookings,
+        extendBooking
+    } = useBookings()
 
     // State to track which booking is currently being VIEWED (allows switching in group view)
     const [viewedBookingId, setViewedBookingId] = React.useState<string | undefined>(initialBooking?.id)
@@ -149,7 +162,7 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
     const [paymentReference, setPaymentReference] = React.useState("")
 
     // GROUP LOGIC (Elite)
-    const { confirmGroupBookings } = useAppStore() // Destructure new action
+
 
     const relatedBookings = React.useMemo(() => {
         if (!booking) return []
@@ -411,14 +424,16 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
             return
         }
 
-        await updateBooking(booking.id, { totalPrice: newPrice })
+        const updateData: any = { totalPrice: newPrice }
+        await updateBooking(booking.id, updateData)
         toast.success(`Precio actualizado a ${formatMoney(newPrice)}`)
         setIsEditingPrice(false)
     }
 
     const handleSave = () => {
         if (!booking.id) return
-        updateBooking(booking.id, formData)
+        const updateData: any = { ...formData }
+        updateBooking(booking.id, updateData)
         setIsEditing(false)
         toast.success("Reserva actualizada")
     }
@@ -565,6 +580,11 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
         }
 
         await checkOutBooking(booking.id, isPaymentSettled ? 'paid' : 'pending', unitIdToUse ? String(unitIdToUse) : undefined)
+
+        // Trigger Automatic Housekeeping Update (Elite Sync)
+        if (booking.roomType) {
+            updateRoomStatus(booking.roomType, 'dirty', unitIdToUse ? String(unitIdToUse) : undefined)
+        }
 
         setShowBedReassignmentDialog(false) // Close if open
         // Premium UX: Show Success Screen instead of closing immediately
@@ -803,7 +823,8 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                                 </Button>
                                                 <Button size="sm" variant="outline" className="w-full border-blue-200 text-blue-700 hover:bg-blue-100" onClick={() => {
                                                     if (window.confirm("¿Rechazar este pago? Volverá a estado pendiente.")) {
-                                                        updateBooking(booking.id, { paymentStatus: 'pending', paymentReference: null })
+                                                        const updateData: any = { paymentStatus: 'pending', paymentReference: undefined }
+                                                        updateBooking(booking.id, updateData)
                                                         setIsPaymentSettled(false)
                                                         toast.info("Pago rechazado / devuelto a pendiente")
                                                     }
@@ -1598,14 +1619,18 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="dorm">Dormitorio</SelectItem>
-                                            <SelectItem value="private">Privada</SelectItem>
-                                            <SelectItem value="suite">Suite</SelectItem>
+                                            {rooms
+                                                .filter(r => r.location === (formData.location || booking.location))
+                                                .map(room => (
+                                                    <SelectItem key={room.id} value={room.id}>
+                                                        {room.label}
+                                                    </SelectItem>
+                                                ))}
                                         </SelectContent>
                                     </Select>
                                 ) : (
                                     <p className="capitalize font-medium text-stone-900 dark:text-stone-100">
-                                        {booking.roomType === 'dorm' ? "Compartido" : booking.roomType}
+                                        {rooms.find(r => r.id === booking.roomType)?.label || booking.roomType}
                                     </p>
                                 )}
                             </div>
@@ -1627,24 +1652,30 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                                 <SelectValue placeholder="Selecciona una cama..." />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {[1, 2, 3, 4, 5, 6, 7, 8].map(n => {
-                                                    // Determine if bed is taken
-                                                    const isOccupied = bookings.some(b =>
-                                                        b.id !== booking.id && // Exclude self
-                                                        b.status !== 'cancelled' &&
-                                                        b.roomType === booking.roomType &&
-                                                        b.unitId === String(n) &&
-                                                        // Date Overlap Logic
-                                                        (new Date(formData.checkIn || booking.checkIn) < new Date(b.checkOut) &&
-                                                            new Date(formData.checkOut || booking.checkOut) > new Date(b.checkIn))
-                                                    );
+                                                {(() => {
+                                                    const targetRoomId = formData.roomType || booking.roomType
+                                                    const targetRoom = rooms.find(r => r.id === targetRoomId)
+                                                    const capacity = targetRoom ? targetRoom.capacity : 8
 
-                                                    return (
-                                                        <SelectItem key={n} value={String(n)} disabled={isOccupied}>
-                                                            Cama {n} {isOccupied && "(Ocupada)"}
-                                                        </SelectItem>
-                                                    )
-                                                })}
+                                                    return Array.from({ length: capacity }, (_, i) => i + 1).map(n => {
+                                                        // Determine if bed is taken
+                                                        const isOccupied = bookings.some(b =>
+                                                            b.id !== booking.id && // Exclude self
+                                                            b.status !== 'cancelled' &&
+                                                            b.roomType === targetRoomId &&
+                                                            b.unitId === String(n) &&
+                                                            // Date Overlap Logic
+                                                            (new Date(formData.checkIn || booking.checkIn) < new Date(b.checkOut) &&
+                                                                new Date(formData.checkOut || booking.checkOut) > new Date(b.checkIn))
+                                                        );
+
+                                                        return (
+                                                            <SelectItem key={n} value={String(n)} disabled={isOccupied}>
+                                                                Cama {n} {isOccupied && "(Ocupada)"}
+                                                            </SelectItem>
+                                                        )
+                                                    })
+                                                })()}
                                             </SelectContent>
                                         </Select>
                                     ) : (
@@ -2028,7 +2059,6 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                         <Button
                             onClick={async () => {
                                 if (!extensionDate) return
-                                const { extendBooking } = useAppStore.getState()
                                 try {
                                     await extendBooking(booking.id, format(extensionDate, 'yyyy-MM-dd'))
                                     setShowExtensionDialog(false)

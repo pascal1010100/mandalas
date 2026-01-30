@@ -1,6 +1,6 @@
-"use client"
-
-import { useAppStore, Booking } from "@/lib/store"
+import { useFinance } from "@/domains/finance"
+import { useBookings } from "@/domains/bookings"
+import type { Booking } from "@/domains/bookings/types/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatMoney } from "@/lib/currency"
@@ -11,7 +11,8 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
 export function DailyCheckinPayments() {
-    const { bookings, registerPayment } = useAppStore()
+    const { bookings, registerPayment } = useBookings()
+    const { refreshFinanceData } = useFinance()
 
     // Filter Logic:
     // 1. Check-in Date is TODAY
@@ -32,6 +33,7 @@ export function DailyCheckinPayments() {
 
         try {
             await registerPayment(booking.id, booking.totalPrice || 0, method)
+            await refreshFinanceData()
             toast.dismiss(loadingId)
             // Success toast is handled in registerPayment
         } catch (error) {

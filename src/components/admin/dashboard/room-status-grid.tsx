@@ -2,7 +2,8 @@
 
 import { Fragment, useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { useAppStore } from "@/lib/store"
+import { useBookings, type Booking } from "@/domains/bookings"
+import { useAppStore, type RoomConfig } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
@@ -23,8 +24,6 @@ import {
 } from "@/components/ui/popover"
 
 import { Plus, Ban, AlertCircle } from "lucide-react"
-
-import { Booking, RoomConfig } from "@/lib/store"
 
 interface RoomStatusGridProps {
     onSelectBooking?: (booking: Booking) => void
@@ -52,8 +51,8 @@ const resolveCanonicalRoomId = (bookingType: string, bookingLocation: string): s
     if (loc === 'hideout') {
         // Mapping 'dorm-1' in Hideout to Mixed or Female?
         // Assuming dorm-1 = Mixed (Safe default)
-        if (type === 'dorm1' || type === 'mixed' || type === 'dorm') return 'hideout_dorm_mixed'
-        if (type === 'dorm2' || type === 'female') return 'hideout_dorm_female'
+        if (type === 'dorm1' || type === 'mixed' || type === 'dorm' || type === 'hideoutdormmixed') return 'hideout_dorm_mixed'
+        if (type === 'dorm2' || type === 'female' || type === 'hideoutdormfemale') return 'hideout_dorm_female'
         if (type === 'room1' || type === 'private') return 'hideout_private'
     }
 
@@ -61,7 +60,8 @@ const resolveCanonicalRoomId = (bookingType: string, bookingLocation: string): s
 }
 
 export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGridProps) {
-    const { rooms, bookings, blockUnit, unblockUnit, updateRoomStatus } = useAppStore()
+    const { bookings, blockUnit, unblockUnit } = useBookings()
+    const { rooms, updateRoomStatus } = useAppStore()
     const [isHousekeepingMode, setIsHousekeepingMode] = useState(false)
 
     // Helper: Group rooms by location dynamically
@@ -222,7 +222,13 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
                 if (booking.unitId && !isNaN(parseInt(booking.unitId))) {
                     const index = parseInt(booking.unitId) - 1
                     if (index >= 0 && index < gridSlots) {
-                        units[index].booking = booking // Dorms don't stack per bed usually
+                        // CONFLICT CHECK:
+                        if (units[index].booking) {
+                            // Slot already taken! Push to unassigned to show as overflow/conflict
+                            unassignedBookings.push(booking)
+                        } else {
+                            units[index].booking = booking
+                        }
                     } else {
                         unassignedBookings.push(booking)
                     }
@@ -636,20 +642,45 @@ export function RoomStatusGrid({ onSelectBooking, onNewBooking }: RoomStatusGrid
                                             RAW ID: &quot;{b.roomType}&quot; <br />
                                             RAW LOC: &quot;{b.location}&quot; <br />
                                             RAW STATUS: &quot;{b.status}&quot; <br />
+                                            RAW UNIT: &quot;{b.unitId || 'NULL'}&quot; <br />
                                             NORM TYPE: &quot;{typeSimple}&quot; <br />
                                             RESOLVED: &quot;{resolved || 'NULL'}&quot;
                                         </span>
                                         <span className="text-[10px] text-amber-600 font-bold">
-                                            {format(new Date(b.checkIn), "dd MMM")} - {format(new Date(b.checkOut), "dd MMM")}
+                                            {format(new Date(b.checkIn + 'T12:00:00'), "dd MMM")} - {format(new Date(b.checkOut + 'T12:00:00'), "dd MMM")}
                                         </span>
                                     </div>
                                 )
                             })}
                         </div>
                         <p className="mt-3 text-[10px] text-stone-500">
-                            Estas reservas están activas hoy pero no coinciden con ninguna ID de habitación configurada.
                             Revise la configuración de habitaciones o contacte soporte.
                         </p>
+
+                        {/* DEEP DEBUG TRACE */}
+                        <div className="mt-4 p-2 bg-black text-green-400 font-mono text-[10px] rounded overflow-x-auto">
+                            <p className="font-bold mb-1">--- DEBUG INTERNO ---</p>
+                            <p>Total Rooms: {rooms.length}</p>
+                            <p>Room IDs in Store: {rooms.map(r => `"${r.id}"`).join(', ')}</p>
+                            <div className="mt-2 border-t border-green-800 pt-2">
+                                {orphanedBookings.map(b => {
+                                    const targetId = b.roomType
+                                    const directMatch = rooms.some(r => r.id === b.roomType)
+                                    const isInMap = activeBookingsByRoom.has(targetId)
+                                    const bookingsInMap = activeBookingsByRoom.get(targetId)?.length || 0
+
+                                    return (
+                                        <div key={b.id} className="mb-2">
+                                            <p>[{b.guestName}]</p>
+                                            <p>Target ID: "{targetId}"</p>
+                                            <p>Direct Match in Rooms Array? {directMatch ? "YES" : "NO"}</p>
+                                            <p>Found in Pre-Calc Map? {isInMap ? "YES" : "NO"}</p>
+                                            <p>Bookings in Map Entry: {bookingsInMap}</p>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
                     </div>
                 )}
 

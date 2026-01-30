@@ -1,6 +1,7 @@
 "use client"
 
 import { useAppStore } from "@/lib/store"
+import { useBookings } from "@/domains/bookings"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,7 +13,8 @@ import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
 
 export function ServiceRequestFeed() {
-    const { serviceRequests, updateServiceRequestStatus, bookings } = useAppStore()
+    const { serviceRequests, updateServiceRequestStatus } = useAppStore()
+    const { bookings } = useBookings()
 
     // Filter for active requests (not cancelled)
     const activeRequests = serviceRequests

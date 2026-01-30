@@ -1,5 +1,6 @@
 import React from 'react'
 import { RoomConfig, useAppStore } from '@/lib/store'
+import { useBookings } from '@/domains/bookings'
 import { cn } from '@/lib/utils'
 import { Check, User, BedDouble, Lock } from 'lucide-react'
 
@@ -13,7 +14,7 @@ interface BedSelectorProps {
 }
 
 export function BedSelector({ room, dateRange, selectedUnits, onToggleUnit, maxSelections, activeColorClass }: BedSelectorProps) {
-    const { bookings } = useAppStore()
+    const { bookings } = useBookings()
 
     // Helper: Determine if a specific unit (e.g., "1", "2") is occupied for the dates
     const getUnitStatus = (unitId: string) => {

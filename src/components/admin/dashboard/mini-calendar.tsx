@@ -21,10 +21,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import { Booking, useAppStore } from "@/lib/store"
+import { useBookings } from "@/domains/bookings"
 
 export function MiniCalendarWidget() {
-    const { bookings } = useAppStore()
+    const { bookings } = useBookings()
     const [currentDate, setCurrentDate] = React.useState(new Date())
 
     const monthStart = startOfMonth(currentDate)

@@ -9,6 +9,7 @@ import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
 import { useAppStore } from "@/lib/store"
+import { useBookings } from "@/domains/bookings"
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -83,6 +84,10 @@ export function BookingModal({
     // Receipt State
     const [bookingId, setBookingId] = useState("")
 
+    // Availability Cache
+    const [availabilityMap, setAvailabilityMap] = useState<Record<string, boolean>>({})
+    const [checkingAvailability, setCheckingAvailability] = useState(false)
+
     // ...
 
     // Scroll Container
@@ -95,8 +100,9 @@ export function BookingModal({
         }
     }, [step])
 
-    // Store Action
-    const { addBooking, createGroupBooking, rooms, checkAvailability, getRemainingCapacity } = useAppStore()
+    // Actions & State
+    const { createBooking, createGroupBooking, checkAvailability, getRemainingCapacity } = useBookings()
+    const { rooms } = useAppStore()
 
     // Determine Price & Max Guests dynamically
     // NOTE: rooms in store utilize IDs like "pueblo_dorm", "hideout_private" etc.
@@ -137,6 +143,34 @@ export function BookingModal({
 
     const [isSubmitting, setIsSubmitting] = useState(false)
 
+    // Pre-calculate availability whenever dates or location changes
+    useEffect(() => {
+        const updateAvailability = async () => {
+            if (!date?.from || !date?.to || !isOpen) return
+
+            setCheckingAvailability(true)
+            const map: Record<string, boolean> = {}
+
+            // Limit to relevant rooms
+            const relevantRoomsForLoc = rooms.filter(r => r.location === location)
+
+            await Promise.all(relevantRoomsForLoc.map(async (room) => {
+                const isAvailable = await checkAvailability({
+                    location: location as 'pueblo' | 'hideout',
+                    roomId: room.id,
+                    startDate: date.from!.toISOString(),
+                    endDate: date.to!.toISOString()
+                })
+                map[room.id] = isAvailable
+            }))
+
+            setAvailabilityMap(map)
+            setCheckingAvailability(false)
+        }
+
+        updateAvailability()
+    }, [date?.from, date?.to, location, isOpen, rooms, checkAvailability])
+
 
 
     const handleNext = async () => {
@@ -154,12 +188,12 @@ export function BookingModal({
 
             if (preSelectedRoom && preSelectedRoom.location === location) {
                 // Check specific availability
-                const isAvailable = checkAvailability(
-                    preSelectedRoom.location,
-                    preSelectedRoom.id,
-                    date.from.toISOString(),
-                    date.to.toISOString()
-                )
+                const isAvailable = await checkAvailability({
+                    location: preSelectedRoom.location,
+                    roomId: preSelectedRoom.id,
+                    startDate: date.from.toISOString(),
+                    endDate: date.to.toISOString()
+                })
 
                 if (isAvailable) {
                     setRoomType(preSelectedRoom.id)
@@ -266,7 +300,7 @@ export function BookingModal({
 
                     await createGroupBooking(bookingPayloads); // AWAIT THE BATCH!
                 } else {
-                    addBooking({
+                    await createBooking({
                         guestName: guestName.trim(),
                         email: email.trim(),
                         phone: phone.trim(),
@@ -488,23 +522,10 @@ export function BookingModal({
                                         {availableRooms.map((room) => {
                                             const isSelected = roomType === room.id;
 
-                                            // ELITE LOGIC: Check Real-Time Availability
-                                            // Must have date selected to be here (Step 2 requires Date from Step 1)
-                                            let isRoomAvailable = true;
-                                            if (date?.from && date?.to) {
-                                                const fromStr = date.from.toISOString();
-                                                const toStr = date.to.toISOString();
-                                                // Check generally for the room type. 
-                                                // If it's a private room, we need ANY unit free.
-                                                // If it's a dorm, we need ANY bed free.
-                                                // The existing checkAvailability function does this logic.
-                                                isRoomAvailable = checkAvailability(
-                                                    location as 'pueblo' | 'hideout',
-                                                    room.id,
-                                                    fromStr,
-                                                    toStr
-                                                );
-                                            }
+                                            // ELITE LOGIC: Check Real-Time Availability (From Cache)
+                                            const isRoomAvailable = date?.from && date?.to
+                                                ? availabilityMap[room.id] ?? true
+                                                : true;
 
                                             return (
                                                 <div

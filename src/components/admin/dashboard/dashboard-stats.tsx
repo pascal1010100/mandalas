@@ -1,4 +1,5 @@
 import React from 'react'
+import { useBookings } from '@/domains/bookings'
 import { useAppStore } from '@/lib/store'
 import { Card, CardContent } from "@/components/ui/card"
 import {
@@ -24,7 +25,8 @@ import {
 } from "@/components/ui/tooltip"
 
 export function DashboardStats() {
-    const { bookings, rooms } = useAppStore()
+    const { bookings } = useBookings()
+    const { rooms } = useAppStore()
     const businessDate = getBusinessDate()
 
     // Robust String Comparison (UTC-safe)

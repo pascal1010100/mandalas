@@ -8,7 +8,7 @@ const SYNC_INTERVAL_MS = 1000 * 60 * 15 // 15 Minutes
 const LAST_SYNC_KEY = 'mandalas_last_autoupdate'
 
 export function AutoSyncHandler() {
-    const { rooms, subscribeToBookings, subscribeToEvents } = useAppStore()
+    const { rooms, subscribeToEvents } = useAppStore()
     const isSyncing = useRef(false)
 
     useEffect(() => {
@@ -21,11 +21,11 @@ export function AutoSyncHandler() {
 
             // If synced recently (less than 15 mins), skip
             if (lastSync && (now - parseInt(lastSync) < SYNC_INTERVAL_MS)) {
-                console.log("AutoSync: Skipping (Synced recently)")
+                // console.log("AutoSync: Skipping (Synced recently)")
                 return
             }
 
-            console.log("AutoSync: Starting background sync...")
+            // console.log("AutoSync: Starting background sync...")
             isSyncing.current = true
 
             // Find rooms with Import URLs
@@ -72,18 +72,9 @@ export function AutoSyncHandler() {
 
     }, [rooms])
 
-    // Real-time Database Sync (Supabase)
-    useEffect(() => {
-        console.log("AutoSync: Initializing Realtime Connection...")
-        const unsubBookings = subscribeToBookings()
-        const unsubEvents = subscribeToEvents()
-
-        return () => {
-            console.log("AutoSync: Cleaning up Realtime Connection...")
-            if (unsubBookings) unsubBookings()
-            if (unsubEvents) unsubEvents()
-        }
-    }, []) // Run once on mount
+    // Note: Database subscriptions and initial fetching are now handled 
+    // globally by the DataInitializer component in the root layout.
+    // This component now focuses strictly on background iCal synchronization.
 
     return null // Invisible component
 }

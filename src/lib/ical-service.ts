@@ -14,7 +14,7 @@ export async function syncRoomImport(roomId: string, importUrl: string) {
     if (!importUrl) return { success: false, error: 'No URL provided' }
 
     try {
-        console.log(`Syncing room ${roomId} from ${importUrl}...`)
+        // console.log(`Syncing room ${roomId} from ${importUrl}...`)
 
         // 1. Fetch and Parse iCal
         const events = await ical.async.fromURL(importUrl)
@@ -25,7 +25,7 @@ export async function syncRoomImport(roomId: string, importUrl: string) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ) as any[]
 
-        console.log(`Found ${validEvents.length} events. Processing...`)
+        // console.log(`Found ${validEvents.length} events. Processing...`)
 
         const now = startOfDay(new Date())
         const importedBookings = []
@@ -111,7 +111,7 @@ export async function syncRoomImport(roomId: string, importUrl: string) {
         if (existingBookings) {
             const toCancel = existingBookings.filter(b => !currentExternalIds.has(b.external_id));
             if (toCancel.length > 0) {
-                console.log(`Cancelling ${toCancel.length} orphaned bookings`);
+                // console.log(`Cancelling ${toCancel.length} orphaned bookings`);
                 await supabase
                     .from('bookings')
                     .update({ status: 'cancelled', cancellation_reason: 'Sync: Removed from Source' })

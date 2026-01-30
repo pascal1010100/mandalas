@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { useAppStore, Booking } from "@/lib/store"
+import { useAppStore } from "@/lib/store"
+import { useBookings } from "@/domains/bookings"
+import type { Booking } from "@/domains/bookings/types/types"
 import {
     Table,
     TableBody,
@@ -47,7 +49,8 @@ import { BedDouble, DoorOpen, CalendarClock, Users, Home, LogOut } from "lucide-
 
 
 export default function ReservationsPage() {
-    const { bookings, updateBookingStatus } = useAppStore()
+    const { rooms } = useAppStore()
+    const { bookings, updateBookingStatus } = useBookings()
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState<"ALL" | "confirmed" | "pending" | "cancelled" | "checked_in" | "checked_out">("ALL")
     const [dateRange, setDateRange] = useState<DateRange | undefined>()
@@ -220,7 +223,7 @@ export default function ReservationsPage() {
                             ) : (
                                 filteredBookings.map((booking) => {
                                     // Logic: Find Room Config for Label & Image
-                                    const roomConfig = useAppStore.getState().rooms.find(r => r.id === booking.roomType)
+                                    const roomConfig = rooms.find(r => r.id === booking.roomType)
                                     const roomLabel = roomConfig?.label || booking.roomType
 
                                     // Dynamic Image Logic

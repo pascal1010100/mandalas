@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useAppStore } from "@/lib/store"
+import { useBookings } from "@/domains/bookings"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -29,7 +30,7 @@ interface ExtendStayDialogProps {
 }
 
 export function ExtendStayDialog({ bookingId, currentCheckOut, roomPrice, guestName, roomName }: ExtendStayDialogProps) {
-    const { extendBooking } = useAppStore()
+    const { extendBooking } = useBookings()
     const [isOpen, setIsOpen] = useState(false)
     const [newCheckOut, setNewCheckOut] = useState<Date | undefined>(undefined)
     const [isSubmitting, setIsSubmitting] = useState(false)

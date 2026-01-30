@@ -1,10 +1,12 @@
 
 "use client"
 import { useAppStore } from "@/lib/store"
+import { useBookings } from "@/domains/bookings"
 import { format } from "date-fns"
 
 export function DebugPanel() {
-    const { bookings, rooms, isLoading } = useAppStore()
+    const { rooms, isLoading } = useAppStore()
+    const { bookings } = useBookings()
     const todayStr = format(new Date(), 'yyyy-MM-dd')
 
     return (

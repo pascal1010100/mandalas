@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { type, to, data } = body;
 
-        console.log(`[API EMAIL] Request received for: ${to} (${type})`);
+        // console.log(`[API EMAIL] Request received for: ${to} (${type})`);
 
         if (!to) {
             return NextResponse.json({ error: "Missing recipient" }, { status: 400 });
@@ -44,29 +44,30 @@ export async function POST(req: NextRequest) {
 
         // Render Template based on Type (Wrapped in Try/Catch to prevent crash)
         try {
+            const emailData = data || {};
             if (type === 'confirmation') {
-                subject = `Reserva Confirmada - Mandalas ${data.location === 'pueblo' ? 'Pueblo' : 'Hideout'}`;
+                subject = `Reserva Confirmada - Mandalas ${emailData.location === 'hideout' ? 'Hideout' : 'Pueblo'}`;
                 emailComponent = (
                     <BookingConfirmationEmail
-                        guestName={data.guestName || 'Huésped'}
-                        bookingId={data.bookingId || 'Ref-???'}
-                        checkIn={data.checkIn || 'N/A'}
-                        checkOut={data.checkOut || 'N/A'}
-                        roomName={data.roomName || 'Habitación'}
-                        totalPrice={data.totalPrice || 0}
-                        location={data.location || 'pueblo'}
+                        guestName={emailData.guestName || 'Huésped'}
+                        bookingId={emailData.bookingId || 'Ref-???'}
+                        checkIn={emailData.checkIn || 'N/A'}
+                        checkOut={emailData.checkOut || 'N/A'}
+                        roomName={emailData.roomName || 'Habitación'}
+                        totalPrice={emailData.totalPrice || 0}
+                        location={emailData.location || 'pueblo'}
                     />
                 );
             } else if (type === 'cancellation') {
                 subject = `Actualización de Reserva - Mandalas`;
                 emailComponent = (
                     <BookingCancellationEmail
-                        guestName={data.guestName || 'Huésped'}
-                        bookingId={data.bookingId || 'Ref-???'}
-                        roomName={data.roomName || 'Habitación'}
-                        refundStatus={data.refundStatus}
-                        amountRefunded={data.refundAmount}
-                        totalPrice={data.totalPrice || 0}
+                        guestName={emailData.guestName || 'Huésped'}
+                        bookingId={emailData.bookingId || 'Ref-???'}
+                        roomName={emailData.roomName || 'Habitación'}
+                        refundStatus={emailData.refundStatus}
+                        amountRefunded={emailData.refundAmount}
+                        totalPrice={emailData.totalPrice || 0}
                     />
                 );
             } else {
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
         // SMART MOCK CHECK
         const apiKey = process.env.RESEND_API_KEY;
         const keyStatus = !apiKey ? 'MISSING' : apiKey === 're_123' ? 'DEFAULT' : apiKey.length < 10 ? 'SHORT' : 'VALID_FORMAT';
-        console.log(`[API EMAIL] Key Status: ${keyStatus} | ${apiKey ? '...' + apiKey.slice(-4) : 'N/A'}`);
+        // console.log(`[API EMAIL] Key Status: ${keyStatus} | ${apiKey ? '...' + apiKey.slice(-4) : 'N/A'}`);
 
         // Mock if key is missing, short, placeholder, or the default value
         const isMockMode = !apiKey || apiKey === 're_123' || apiKey.includes('placeholder') || apiKey.length < 10;
