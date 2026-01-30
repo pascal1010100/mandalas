@@ -1,33 +1,113 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: ["main", "develop", "staging"]
   pull_request:
     branches: ["main", "develop"]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
+    name: Test & Lint
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          node-version: '20'
+          cache: 'pnpm'
 
-      - name: Install Dependencies
-        run: npm ci
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
 
-      - name: Lint Code
-        run: npm run lint
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Build Application
-        run: npm run build
+      - name: Run linter
+        run: pnpm run lint
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Build application
+        run: pnpm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+
+  deploy-staging:
+    needs: test
+    runs-on: ubuntu-latest
+    name: Deploy to Staging
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NEXT_PUBLIC_APP_URL: ${{ secrets.STAGING_URL }}
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying to staging..."
+          # Add your staging deployment command here
+          # Example: echo "Deployed to https://staging.mandalas.com"
+
+  deploy-production:
+    needs: test
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NEXT_PUBLIC_APP_URL: ${{ secrets.PRODUCTION_URL }}
+
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying to production..."
+          # Add your production deployment command here
+          # Example: echo "Deployed to https://mandalas.com"
