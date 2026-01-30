@@ -64,10 +64,23 @@ export interface Product {
     id: string;
     name: string;
     price: number;
-    category: 'beer' | 'soda' | 'water' | 'snack';
-    icon: string;
-    active: boolean;
+    category: string;
+    description?: string;
+    image?: string;
+    icon?: React.ReactNode;
+    stock?: number;
+    createdAt: string;
+}
+
+export interface Charge {
+    id: string;
+    booking_id: string;
+    product_id?: string;
+    item_name: string;
+    amount: number;
+    status: 'pending' | 'paid';
     created_at: string;
+    updated_at?: string;
 }
 
 export interface ServiceRequest {

@@ -88,7 +88,7 @@ interface ReservationDetailsModalProps {
 }
 
 export function ReservationDetailsModal({ booking: initialBooking, open, onOpenChange, defaultOpenCancellation = false }: ReservationDetailsModalProps) {
-    const { rooms, inventory, fetchInventory, updateStock, addTransaction, updateRoomStatus } = useAppStore()
+    const { rooms, inventory, fetchInventory, updateStock, updateRoomStatus } = useAppStore()
     const {
         bookings,
         updateBooking,
@@ -1846,6 +1846,8 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
 
                                                 // If it was cash, create reversal transaction
                                                 if (booking.paymentMethod === 'cash') {
+                                                    // TODO: Implement cash transaction reversal when addTransaction is available
+                                                    /*
                                                     addTransaction({
                                                         amount: booking.totalPrice,
                                                         type: 'expense',
@@ -1854,7 +1856,8 @@ export function ReservationDetailsModal({ booking: initialBooking, open, onOpenC
                                                         bookingId: booking.id,
                                                         paymentMethod: 'cash'
                                                     })
-                                                    toast.info("Corrección de caja registrada")
+                                                    */
+                                                    toast.info("Corrección de caja registrada (manual)")
                                                 } else {
                                                     toast.success("Pago anulado (Pendiente)")
                                                 }
