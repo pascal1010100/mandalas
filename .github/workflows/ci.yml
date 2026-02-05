@@ -73,8 +73,18 @@ jobs:
       - name: Deploy to staging
         run: |
           echo "🚀 Deploying to staging..."
-          # Add your staging deployment command here
-          # Example: echo "Deployed to https://staging.mandalas.com"
+          # Install Vercel CLI
+          npm install --global vercel@latest
+          # Deploy to Vercel staging
+          vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --scope ${{ secrets.VERCEL_ORG_ID }}
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.STAGING_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
 
   deploy-production:
     needs: test
@@ -109,5 +119,15 @@ jobs:
       - name: Deploy to production
         run: |
           echo "🚀 Deploying to production..."
-          # Add your production deployment command here
-          # Example: echo "Deployed to https://mandalas.com"
+          # Install Vercel CLI
+          npm install --global vercel@latest
+          # Deploy to Vercel production
+          vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --scope ${{ secrets.VERCEL_ORG_ID }}
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.PRODUCTION_URL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
