@@ -204,7 +204,7 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                                                     <div className="text-[10px] text-stone-500 mb-1">{b.roomType} (Unit: {b.unitId || 'N/A'})</div>
                                                     <div className="flex justify-between gap-4 text-[10px]">
                                                         <span>{format(parseISO(b.checkIn), "d MMM")} - {format(parseISO(b.checkOut), "d MMM", { locale: es })}</span>
-                                                        <span className="font-mono">${b.totalPrice}</span>
+                                                        <span className="font-mono">Q{b.totalPrice}</span>
                                                     </div>
                                                 </TooltipContent>
                                             </Tooltip>

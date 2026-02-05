@@ -267,6 +267,11 @@ export function BookingModal({
             }
 
             if (date?.from && date?.to) {
+                // Prevenir doble clic
+                if (isSubmitting) {
+                    return
+                }
+                
                 // Final Availability Check (Optimistic)
                 setIsSubmitting(true)
                 // Simulate network delay for "Elite" feel
@@ -574,7 +579,7 @@ export function BookingModal({
                                                         </div>
                                                     </div>
                                                     <div className="p-2 bg-white dark:bg-stone-900 flex justify-between items-center">
-                                                        <span className="text-sm font-bold text-stone-900 dark:text-stone-100">${room.basePrice}</span>
+                                                        <span className="text-sm font-bold text-stone-900 dark:text-stone-100">Q{room.basePrice}</span>
                                                         <div className="text-[10px] text-stone-500 flex items-center gap-1">
                                                             <Users className="w-3 h-3" /> max {room.maxGuests}
                                                         </div>
@@ -655,7 +660,7 @@ export function BookingModal({
                                     <div className="space-y-1 pt-1">
                                         <div className="flex justify-between text-stone-500">
                                             <span>Precio por noche</span>
-                                            <span>${currentPrice}</span>
+                                            <span>Q{currentPrice}</span>
                                         </div>
                                         {isDorm && (
                                             <div className="flex justify-between text-stone-500">
@@ -666,7 +671,7 @@ export function BookingModal({
                                         <div className="flex justify-between items-center pt-2 mt-2 border-t border-stone-200/50 dark:border-stone-700/50">
                                             <span className="font-bold text-stone-900 dark:text-stone-100 text-sm">Total Estimado</span>
                                             <span className={cn("font-heading font-bold text-xl", theme.accentText)}>
-                                                ${(currentPrice * differenceInCalendarDays(date?.to || new Date(), date?.from || new Date()) * (isDorm ? (parseInt(guests) || 1) : 1)).toLocaleString()}
+                                                Q{(currentPrice * differenceInCalendarDays(date?.to || new Date(), date?.from || new Date()) * (isDorm ? (parseInt(guests) || 1) : 1)).toLocaleString()}
                                             </span>
                                         </div>
                                     </div>

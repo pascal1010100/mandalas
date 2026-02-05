@@ -301,7 +301,7 @@ export default function ReservationsPage() {
                                             </TableCell>
                                             <TableCell>
                                                 <div className="font-bold font-heading text-sm text-stone-900 dark:text-stone-100 tabular-nums">
-                                                    ${booking.totalPrice?.toLocaleString()}
+                                                    Q{booking.totalPrice?.toLocaleString()}
                                                 </div>
                                             </TableCell>
                                             <TableCell>

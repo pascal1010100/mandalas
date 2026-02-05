@@ -86,7 +86,7 @@ export default function PuebloPage() {
                                         <li>• Enchufe y luz de lectura</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">${rooms?.find(r => r.id === 'pueblo_dorm')?.basePrice || 18}</span>
+                                        <span className="text-3xl font-bold text-amber-600">Q{rooms?.find(r => r.id === 'pueblo_dorm')?.basePrice || 18}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
@@ -125,7 +125,7 @@ export default function PuebloPage() {
                                         <li>• Ventilador de techo</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">${rooms?.find(r => r.id === 'pueblo_private_2')?.basePrice || 40}</span>
+                                        <span className="text-3xl font-bold text-amber-600">Q{rooms?.find(r => r.id === 'pueblo_private_2')?.basePrice || 40}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
@@ -164,7 +164,7 @@ export default function PuebloPage() {
                                         <li>• Cama King Size</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">${rooms?.find(r => r.id === 'pueblo_suite_balcony')?.basePrice || 75}</span>
+                                        <span className="text-3xl font-bold text-amber-600">Q{rooms?.find(r => r.id === 'pueblo_suite_balcony')?.basePrice || 75}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>

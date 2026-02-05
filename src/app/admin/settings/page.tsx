@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DollarSign, Save, Loader2, BedDouble, RefreshCw, Copy, ExternalLink, Calendar } from "lucide-react"
 import { toast } from "sonner"
+import { IcalSyncManager } from "@/components/admin/ical-sync-manager"
+import { SyncDashboard } from "@/components/admin/sync-dashboard"
 
 export default function SettingsPage() {
     const { rooms, updateRoomCapacity, updateRoomPrice, updateRoomMaxGuests, updateRoomIcalUrl } = useAppStore()
@@ -124,10 +126,16 @@ export default function SettingsPage() {
                         Precios Base
                     </TabsTrigger>
                     <TabsTrigger
-                        value="sync"
+                        value="ical"
                         className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-stone-900 dark:data-[state=active]:text-stone-100 data-[state=active]:shadow-sm transition-all"
                     >
                         Sincronización (iCal)
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="dashboard"
+                        className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-stone-900 dark:data-[state=active]:text-stone-100 data-[state=active]:shadow-sm transition-all"
+                    >
+                        Dashboard Sync
                     </TabsTrigger>
                 </TabsList>
 
@@ -332,6 +340,14 @@ export default function SettingsPage() {
                             </CardContent>
                         </Card>
                     </div>
+                </TabsContent>
+
+                <TabsContent value="ical" className="space-y-4">
+                    <IcalSyncManager />
+                </TabsContent>
+
+                <TabsContent value="dashboard" className="space-y-4">
+                    <SyncDashboard />
                 </TabsContent>
 
                 <TabsContent value="sync" className="space-y-8 outline-none">

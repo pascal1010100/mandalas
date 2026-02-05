@@ -86,7 +86,7 @@ export default function HideoutPage() {
                                         <li>• Luz de lectura y lockers</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-lime-600">${rooms?.find(r => r.id === 'hideout_dorm_female')?.basePrice || 16}</span>
+                                        <span className="text-3xl font-bold text-lime-600">Q{rooms?.find(r => r.id === 'hideout_dorm_female')?.basePrice || 16}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
@@ -126,7 +126,7 @@ export default function HideoutPage() {
                                         <li>• Vistas al jardín</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-lime-600">${rooms?.find(r => r.id === 'hideout_dorm_mixed')?.basePrice || 16}</span>
+                                        <span className="text-3xl font-bold text-lime-600">Q{rooms?.find(r => r.id === 'hideout_dorm_mixed')?.basePrice || 16}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
@@ -165,7 +165,7 @@ export default function HideoutPage() {
                                         <li>• Cama Matrimonial</li>
                                     </ul>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-lime-600">${rooms?.find(r => r.id === 'hideout_private')?.basePrice || 40}</span>
+                                        <span className="text-3xl font-bold text-lime-600">Q{rooms?.find(r => r.id === 'hideout_private')?.basePrice || 40}</span>
                                         <span className="text-sm text-stone-500">/ noche</span>
                                     </div>
                                 </CardContent>
