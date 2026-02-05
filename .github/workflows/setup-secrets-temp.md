@@ -1,9 +1,1 @@
-# Temporary file for secrets setup
-VERCEL_TOKEN=Erb5YZJPyiVfiJEb9tFj0tb3
-VERCEL_ORG_ID=team_eBliS0vkDcxbdpVnwaiQB2OO
-VERCEL_PROJECT_ID=prj_c7gk9h1FRmXJpGepL5zsm0k7Nf5i
-PRODUCTION_URL=https://mandalas-sigma.vercel.app
-STAGING_URL=https://mandalas-sigma.vercel.app
-SUPABASE_URL=https://zfbrcdwkunbvjnxmwlor.supabase.co
-SUPABASE_ANON_KEY=sb_publishable_UQ8GSwZicCSQsMn37ZktrA_C9qdqG3I
-RESEND_API_KEY=re_Wj4tVawh_HuvGdZgir6DqmNaZNiYQ4VvZ
+# DELETE THIS FILE - Secrets should be configured in GitHub Settings
