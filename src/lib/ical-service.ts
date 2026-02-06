@@ -67,16 +67,20 @@ export async function syncRoomImport(roomId: string, importUrl: string): Promise
         }
 
         // 2. Validate and filter events
-        const validEvents = Object.values(events).filter((event: { type?: string; start?: string; end?: string; summary?: string }) => {
-            if (event.type !== 'VEVENT') return false
-            if (!event.start || !event.end) return false
+        const validEvents = Object.values(events).filter((event: unknown) => {
+            // Type guard for VEvent
+            if (!event || typeof event !== 'object') return false;
+            const vEvent = event as Record<string, unknown>;
+            
+            if (vEvent.type !== 'VEVENT') return false;
+            if (!vEvent.start || !vEvent.end) return false;
             
             // Validate dates
-            const startDate = new Date(event.start)
-            const endDate = new Date(event.end)
+            const startDate = new Date(vEvent.start as string);
+            const endDate = new Date(vEvent.end as string);
             
             if (!isValid(startDate) || !isValid(endDate)) {
-                result.warnings.push(`Invalid dates for event: ${event.summary || 'Unknown'}`)
+                result.warnings.push(`Invalid dates for event: ${vEvent.summary || 'Unknown'}`)
                 return false
             }
 
@@ -86,7 +90,7 @@ export async function syncRoomImport(roomId: string, importUrl: string): Promise
             }
 
             return true
-        }) as Array<{ type: string; start: string; end: string; summary?: string }>
+        }) as unknown as Array<{ type: string; start: string; end: string; summary?: string; uid?: string }>
 
         result.rawCount = Object.values(events).length
         result.processed = validEvents.length
