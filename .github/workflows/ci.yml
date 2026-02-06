@@ -22,16 +22,16 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install
 
       - name: Run linter
-        run: pnpm run lint
+        run: npm run lint
 
       - name: Run tests
-        run: pnpm run test
+        run: npm run test
 
       - name: Build application
-        run: pnpm run build
+        run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: 1
 
