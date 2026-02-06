@@ -15,14 +15,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
         with:
-          node-version: '20'
+          version: '9'
           cache: 'pnpm'
-
-      - name: Install pnpm globally
-        run: npm install -g pnpm@10
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -48,14 +45,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
         with:
-          node-version: '20'
+          version: '9'
           cache: 'pnpm'
-
-      - name: Install pnpm globally
-        run: npm install -g pnpm@10
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -92,14 +86,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
         with:
-          node-version: '20'
+          version: '9'
           cache: 'pnpm'
-
-      - name: Install pnpm globally
-        run: npm install -g pnpm@10
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
