@@ -39,8 +39,8 @@ export function useFinance() {
             ]);
             setTransactions(todayTransactions);
             setCashBalance(currentBalance);
-        } catch (err: any) {
-            const message = err.message || 'Error al cargar datos financieros';
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Error al cargar datos financieros';
             setError(message);
             toast.error(message);
         } finally {
@@ -57,8 +57,9 @@ export function useFinance() {
             await financeService.addTransaction(tx);
             toast.success('Movimiento registrado');
             await refreshFinanceData();
-        } catch (err: any) {
-            toast.error(err.message || 'Error al registrar movimiento');
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Error al registrar movimiento';
+            toast.error(message);
         } finally {
             setLoading(false);
         }

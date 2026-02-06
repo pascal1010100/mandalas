@@ -99,7 +99,7 @@ export class BookingRepository implements IBookingRepository {
             // Definir el tipo extendido para el error
             type ExtendedError = Error & {
                 code?: string;
-                details?: any;
+                details?: unknown;
                 hint?: string;
             };
 
@@ -201,7 +201,7 @@ export class BookingRepository implements IBookingRepository {
             // Definir el tipo extendido para el error
             type ExtendedError = Error & {
                 code?: string;
-                details?: any;
+                details?: unknown;
                 hint?: string;
             };
 
@@ -336,7 +336,7 @@ export class BookingRepository implements IBookingRepository {
             // Definir el tipo extendido para el error
             type ExtendedError = Error & {
                 code?: string;
-                details?: any;
+                details?: unknown;
                 hint?: string;
             };
 

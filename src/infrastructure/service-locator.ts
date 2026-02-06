@@ -10,6 +10,7 @@ import { useAppStore } from '@/lib/store'; // For room config and cash transacti
 import { BookingRepository } from '@/domains/bookings/repositories/booking.repository';
 import { AvailabilityService } from '@/domains/bookings/services/availability.service';
 import { BookingService } from '@/domains/bookings/services/booking.service';
+import { TransactionCategory, PaymentMethod } from '@/domains/finance/types/types';
 import { FinanceRepository } from '@/domains/finance/repositories/finance.repository';
 import { FinanceService } from '@/domains/finance/services/finance.service';
 
@@ -61,12 +62,12 @@ class ServiceLocator {
             const addCashTransaction = async (tx: {
                 amount: number;
                 type: 'income' | 'expense';
-                category: any; // Using any for transition
+                category: TransactionCategory;
                 description: string;
                 bookingId?: string;
-                paymentMethod?: any;
+                paymentMethod?: PaymentMethod;
             }) => {
-                await financeService.addTransaction(tx as any);
+                await financeService.addTransaction(tx);
             };
 
             this.bookingService = new BookingService(

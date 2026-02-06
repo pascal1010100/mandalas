@@ -67,7 +67,7 @@ export async function syncRoomImport(roomId: string, importUrl: string): Promise
         }
 
         // 2. Validate and filter events
-        const validEvents = Object.values(events).filter((event: any) => {
+        const validEvents = Object.values(events).filter((event: { type?: string; start?: string; end?: string; summary?: string }) => {
             if (event.type !== 'VEVENT') return false
             if (!event.start || !event.end) return false
             
@@ -86,7 +86,7 @@ export async function syncRoomImport(roomId: string, importUrl: string): Promise
             }
 
             return true
-        }) as any[]
+        }) as Array<{ type: string; start: string; end: string; summary?: string }>
 
         result.rawCount = Object.values(events).length
         result.processed = validEvents.length
@@ -236,7 +236,7 @@ export async function validateIcalUrl(url: string): Promise<{ valid: boolean; er
         
         // Try to fetch and parse a small sample
         const events = await ical.async.fromURL(url)
-        const eventCount = Object.values(events).filter((event: any) => event.type === 'VEVENT').length
+        const eventCount = Object.values(events).filter((event: { type?: string }) => event.type === 'VEVENT').length
         
         return { valid: true, eventCount }
     } catch (error) {
