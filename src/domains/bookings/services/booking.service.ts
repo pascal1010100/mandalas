@@ -13,6 +13,7 @@ import type {
     RefundData,
     ServiceResult,
 } from '../types/types';
+import { TransactionCategory, PaymentMethod } from '../../finance/types/types';
 import { differenceInDays } from 'date-fns';
 import type { IBookingRepository } from '../repositories/booking.repository';
 import { AvailabilityService } from './availability.service';
@@ -26,10 +27,10 @@ export class BookingService {
         private addCashTransaction?: (tx: {
             amount: number;
             type: 'income' | 'expense';
-            category: string;
+            category: TransactionCategory;
             description: string;
             bookingId?: string;
-            paymentMethod?: string;
+            paymentMethod?: PaymentMethod;
         }) => Promise<void>
     ) { }
 
@@ -93,10 +94,10 @@ export class BookingService {
                 await this.addCashTransaction({
                     amount: totalPrice,
                     type: 'income',
-                    category: 'reservation',
-                    description: `Pago Reserva: ${dto.guestName}`,
+                    category: 'reservation' as TransactionCategory,
+                    description: `Reserva ${dto.guestName} - ${dto.roomType}`,
                     bookingId: booking.id,
-                    paymentMethod: 'cash',
+                    paymentMethod: dto.paymentMethod as PaymentMethod
                 });
             }
 
@@ -203,10 +204,10 @@ export class BookingService {
                 await this.addCashTransaction({
                     amount,
                     type: 'income',
-                    category: 'reservation',
+                    category: 'reservation' as TransactionCategory,
                     description: `Pago Reserva: ${booking.guestName} (${booking.roomType})`,
                     bookingId: booking.id,
-                    paymentMethod: 'cash',
+                    paymentMethod: 'cash' as PaymentMethod,
                 });
             }
 
