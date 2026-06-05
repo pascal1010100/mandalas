@@ -17,6 +17,7 @@ export default function PuebloPage() {
                 title="Mandalas"
                 subtitle="Una base céntrica para caminar San Pedro, volver a la terraza y dejar que el viaje encuentre su ritmo."
                 backgroundImage="/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"
+                backgroundPosition="center center"
                 align="center"
             >
                 <BookingLink

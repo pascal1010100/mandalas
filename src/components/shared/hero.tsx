@@ -10,6 +10,7 @@ interface HeroProps {
     subtitle?: string
     backgroundImage?: string
     backgroundGradient?: string
+    backgroundPosition?: string
     align?: "center" | "left"
     height?: "full" | "large"
     children?: React.ReactNode
@@ -20,6 +21,7 @@ export function Hero({
     subtitle,
     backgroundImage,
     backgroundGradient = "var(--pueblo-gradient)", // Default to Pueblo Living Light
+    backgroundPosition = "center",
     align = "center",
     height = "full",
     children
@@ -27,15 +29,18 @@ export function Hero({
     return (
         <div
             className={cn(
-                "relative flex items-center w-full overflow-hidden bg-stone-950",
-                height === "full" ? "h-screen" : "h-[70vh]"
+                "relative flex w-full items-center overflow-hidden bg-stone-950",
+                height === "full"
+                    ? "min-h-[100svh] py-28 md:min-h-screen md:py-32"
+                    : "min-h-[72svh] py-24 md:min-h-[70vh] md:py-28"
             )}
         >
             {/* Background */}
             <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-[1.5s] scale-105"
+                className="absolute inset-0 scale-105 bg-cover transition-transform duration-[1.5s]"
                 style={{
-                    backgroundImage: backgroundImage ? `url(${backgroundImage})` : backgroundGradient
+                    backgroundImage: backgroundImage ? `url(${backgroundImage})` : backgroundGradient,
+                    backgroundPosition
                 }}
             />
             {/* Cinematic Noise & Overlay */}
@@ -50,13 +55,13 @@ export function Hero({
 
             {/* Content */}
             <div className={cn(
-                "relative z-20 container mx-auto px-4 pt-16",
+                "container relative z-20 mx-auto px-4 pt-10 md:pt-16",
                 align === "center" ? "text-center" : "text-left"
             )}>
                 <StaggerReveal>
                     <StaggerItem>
                         <div className={cn(
-                            "mb-7 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/85 backdrop-blur-md",
+                            "mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/85 backdrop-blur-md sm:px-4 sm:text-[11px] sm:tracking-[0.24em] md:mb-7",
                             align === "left" && "mx-0"
                         )}>
                             <MapPin className="h-3.5 w-3.5" />
@@ -64,14 +69,17 @@ export function Hero({
                         </div>
                     </StaggerItem>
                     <StaggerItem>
-                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-light font-heading text-white mb-6 tracking-[0.16em] uppercase drop-shadow-2xl">
+                        <h1 className={cn(
+                            "mb-6 max-w-[21rem] break-words font-heading text-[2.35rem] font-light uppercase leading-[0.98] tracking-[0.06em] text-white drop-shadow-2xl [text-wrap:balance] sm:max-w-5xl sm:text-6xl sm:tracking-[0.1em] md:text-7xl md:tracking-[0.14em] lg:text-8xl lg:tracking-[0.16em]",
+                            align === "center" ? "mx-auto" : "mx-0"
+                        )}>
                             {title}
                         </h1>
                     </StaggerItem>
                     {subtitle && (
                         <StaggerItem>
                             <p className={cn(
-                                "text-lg md:text-xl text-white/85 max-w-2xl font-light leading-relaxed tracking-wide drop-shadow-lg",
+                                "max-w-[20rem] text-base font-light leading-relaxed tracking-wide text-white/85 drop-shadow-lg [text-wrap:balance] sm:max-w-2xl sm:text-lg md:text-xl",
                                 align === "center" ? "mx-auto" : "mx-0"
                             )}>
                                 {subtitle}
@@ -79,7 +87,7 @@ export function Hero({
                         </StaggerItem>
                     )}
                     {children && (
-                        <StaggerItem className="mt-12">
+                        <StaggerItem className="mt-8 md:mt-12">
                             {children}
                         </StaggerItem>
                     )}

@@ -17,6 +17,7 @@ export default function HideoutPage() {
                 title="Mandalas Hideout"
                 subtitle="Una base más tranquila para dormir mejor, caminar al lago y bajar el volumen de San Pedro."
                 backgroundImage="/images/mandalas/hostelworld/hideout-exterior-volcano.jpg"
+                backgroundPosition="center 46%"
                 align="center"
             >
                 <BookingLink

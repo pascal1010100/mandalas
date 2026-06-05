@@ -17,7 +17,7 @@ export default function LandingPage() {
 
   return (
     <main className="bg-background">
-      <section className="flex min-h-screen flex-col overflow-hidden relative bg-black md:flex-row">
+      <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black md:min-h-screen md:flex-row">
         <div className="absolute inset-x-0 top-24 z-30 flex justify-center px-4 pointer-events-none">
           <div className="hidden md:flex flex-col items-center text-white">
             <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">
@@ -204,13 +204,13 @@ function HomePanel({
         style={{ transformOrigin: "left" }}
       />
 
-      <Link href={href} className="relative z-10 flex h-full min-h-[50vh] flex-col justify-end p-7 text-white md:min-h-screen md:p-12 lg:p-16">
+      <Link href={href} className="relative z-10 flex h-full min-h-[54svh] flex-col justify-end p-6 text-white sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-12 lg:p-16">
         <motion.div
-          className="mb-auto flex items-center justify-between pt-20 md:pt-24"
+          className="mb-auto flex items-center justify-between gap-5 pt-16 md:pt-24"
           animate={{ opacity: isDimmed ? 0.55 : 1 }}
           transition={{ duration: 0.45 }}
         >
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/55">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55 sm:tracking-[0.28em]">
             {label}
           </p>
           <ArrowUpRight className="h-5 w-5 text-white/50 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-white" />
@@ -221,16 +221,16 @@ function HomePanel({
           animate={{ y: isActive ? -8 : 0, opacity: isDimmed ? 0.72 : 1 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/55">
+          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55 sm:mb-5 sm:tracking-[0.28em]">
             {kicker}
           </p>
-          <h2 className="font-heading text-4xl font-light uppercase leading-none tracking-[0.08em] text-white sm:text-5xl sm:tracking-[0.12em] md:text-7xl md:tracking-[0.16em]">
+          <h2 className="font-heading text-[2rem] font-light uppercase leading-none tracking-[0.06em] text-white sm:text-5xl sm:tracking-[0.12em] md:text-7xl md:tracking-[0.16em]">
             {title}
           </h2>
-          <p className="mt-6 min-h-[4.5rem] max-w-md text-base font-light leading-relaxed text-white/70">
+          <p className="mt-5 max-w-[20rem] text-sm font-light leading-relaxed text-white/70 sm:mt-6 sm:min-h-[4.5rem] sm:max-w-md sm:text-base">
             {description}
           </p>
-          <div className="mt-10 flex items-center justify-between border-t border-white/15 pt-5">
+          <div className="mt-8 flex flex-col items-start gap-4 border-t border-white/15 pt-5 sm:mt-10 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45 sm:tracking-[0.22em]">
               {meta}
             </span>
