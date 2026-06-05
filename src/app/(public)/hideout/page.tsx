@@ -14,7 +14,7 @@ export default function HideoutPage() {
     return (
         <div className="bg-background min-h-screen">
             <Hero
-                title="Mandalas Hideout"
+                title="Hideout"
                 subtitle="Una base más tranquila para dormir mejor, caminar al lago y bajar el volumen de San Pedro."
                 backgroundImage="/images/mandalas/hostelworld/hideout-exterior-volcano.jpg"
                 backgroundPosition="center 46%"

@@ -28,13 +28,13 @@ export function LocationMap() {
             })()
     }, [])
 
-    if (!isMounted) return <div className="h-[400px] w-full bg-stone-200 animate-pulse rounded-lg" />
+    if (!isMounted) return <div className="h-full min-h-[320px] w-full animate-pulse rounded-lg bg-stone-200" />
 
     const puebloCoords: [number, number] = [14.693, -91.274] // Approximate
     const hideoutCoords: [number, number] = [14.688, -91.270] // Approximate (further along shore)
 
     return (
-        <div className="h-[500px] w-full rounded-2xl overflow-hidden shadow-xl border border-stone-200">
+        <div className="h-full min-h-[320px] w-full overflow-hidden rounded-lg border border-stone-200 shadow-xl">
             <MapContainer center={puebloCoords} zoom={15} scrollWheelZoom={false} className="h-full w-full">
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
