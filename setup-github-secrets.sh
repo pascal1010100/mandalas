@@ -6,9 +6,11 @@
 echo "🔐 Configurando GitHub Secrets para Mandalas..."
 
 # Variables extraídas de .env.local
-SUPABASE_URL="https://zfbrcdwkunbvjnxmwlor.supabase.co"
-SUPABASE_ANON_KEY="sb_publishable_UQ8GSwZicCSQsMn37ZktrA_C9qdqG3I"
-RESEND_API_KEY="re_Wj4tVawh_HuvGdZgir6DqmNaZNiYQ4VvZ"
+# No guardes secretos reales en este archivo. Usa GitHub CLI con valores de entorno:
+#   gh secret set RESEND_API_KEY --body "$RESEND_API_KEY"
+SUPABASE_URL="${SUPABASE_URL:-https://your-project.supabase.co}"
+SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-your-supabase-anon-key}"
+RESEND_API_KEY="${RESEND_API_KEY:-your-resend-api-key}"
 
 # Variables de Vercel
 VERCEL_ORG_ID="team_eBliS0vkDcxbdpVnwaiQB2OO"
@@ -43,9 +45,9 @@ VERCEL_ORG_ID=team_eBliS0vkDcxbdpVnwaiQB2OO
 VERCEL_PROJECT_ID=prj_c7gk9h1FRmXJpGepL5zsm0k7Nf5i
 PRODUCTION_URL=https://mandalas-sigma.vercel.app
 STAGING_URL=https://mandalas-sigma.vercel.app
-SUPABASE_URL=https://zfbrcdwkunbvjnxmwlor.supabase.co
-SUPABASE_ANON_KEY=sb_publishable_UQ8GSwZicCSQsMn37ZktrA_C9qdqG3I
-RESEND_API_KEY=re_Wj4tVawh_HuvGdZgir6DqmNaZNiYQ4VvZ
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+RESEND_API_KEY=your-resend-api-key
 VERCEL_TOKEN=obtener_desde_vercel_dashboard
 EOF
 

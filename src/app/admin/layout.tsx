@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { ModeToggle } from "@/components/shared/mode-toggle"
 import { LogoutButton } from "@/components/admin/logout-button"
 import { AutoSyncHandler } from "@/components/admin/auto-sync-handler"
+import { DataInitializer } from "@/components/shared/data-initializer"
 
 // Sidebar component extracted to avoid React lint error
 function SidebarContent({ pathname }: { pathname: string }) {
@@ -115,8 +116,13 @@ function SidebarContent({ pathname }: { pathname: string }) {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname()
 
+    if (pathname === "/admin/login") {
+        return children
+    }
+
     return (
         <div className="flex h-screen w-full bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 font-sans overflow-hidden transition-colors duration-500">
+            <DataInitializer />
             <AutoSyncHandler />
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex w-72 flex-col h-full flex-shrink-0 z-30 shadow-2xl shadow-black/40 border-r border-white/5 bg-stone-950">

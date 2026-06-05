@@ -20,7 +20,7 @@ export function LogoutButton() {
             if (error) throw error
             
             // Limpiar la cookie de sesión personalizada
-            document.cookie = "mandalas_admin_session=; path=/; max-age=0; SameSite=Lax"
+            await fetch("/api/admin/session", { method: "DELETE" })
             
             // Mostrar mensaje de éxito
             toast.success("Sesión cerrada", {

@@ -25,6 +25,13 @@ export default function LoginPage() {
 
     // Verificar bloqueo al cargar el componente
     useEffect(() => {
+        supabase.auth.getSession().then(async ({ data }) => {
+            if (data.session) {
+                await fetch("/api/admin/session", { method: "POST" })
+                window.location.replace("/admin")
+            }
+        })
+
         const storedLock = localStorage.getItem('loginLockUntil')
         if (storedLock) {
             const lockTime = new Date(storedLock)
@@ -36,7 +43,7 @@ export default function LoginPage() {
                 setAttempts(0)
             }
         }
-    }, [])
+    }, [router])
 
     // Contador regresivo cuando está bloqueado
     useEffect(() => {
@@ -132,11 +139,11 @@ export default function LoginPage() {
             localStorage.removeItem('loginLockUntil')
 
             if (data.session) {
-                document.cookie = "mandalas_admin_session=true; path=/; max-age=86400; SameSite=Lax; Secure"
+                await fetch("/api/admin/session", { method: "POST" })
                 toast.success("Bienvenido", {
                     description: "Acceso autorizado al sistema central."
                 })
-                router.push("/admin")
+                window.location.assign("/admin")
             }
         } catch (error) {
             console.error("Error inesperado:", error)

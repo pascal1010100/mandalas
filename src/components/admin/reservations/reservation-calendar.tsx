@@ -138,7 +138,7 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                                     const isEnd = isSameDay(day, parseISO(b.checkOut))
 
                                     // Elite Status Logic
-                                    let statusConfig = {
+                                    const statusConfig = {
                                         bg: "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800",
                                         icon: null as React.ReactNode,
                                         opacity: "opacity-100"
@@ -232,7 +232,7 @@ export function ReservationCalendar({ bookings, onSelectBooking }: ReservationCa
                                                         const isEnd = isSameDay(day, parseISO(b.checkOut))
 
                                                         // Elite Status Logic (Reused)
-                                                        let statusConfig = {
+                                                        const statusConfig = {
                                                             bg: "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800",
                                                             icon: null as React.ReactNode,
                                                             opacity: "opacity-100"

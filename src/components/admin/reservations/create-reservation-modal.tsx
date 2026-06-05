@@ -343,13 +343,17 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
                     }
                 })
 
-                await createGroupBooking(bookingsData)
+                const result = await createGroupBooking(bookingsData)
+                if (!result.success) {
+                    toast.error(result.error || "No se pudo crear la reserva")
+                    return
+                }
 
             } else {
                 // SCENARIO B: No specific units (Legacy or "Run of House" Private)
                 // Just create one booking for the whole party
                 // NOTE: If this is a private room for 2 people, we usually treat it as 1 unit occupied.
-                await createBooking({
+                const result = await createBooking({
                     guestName,
                     email,
                     phone,
@@ -362,6 +366,11 @@ export function CreateReservationModal({ open, onOpenChange, initialValues }: Cr
                     totalPrice: pricePerBooking * totalGuests,
                     paymentMethod: status === 'confirmed' ? paymentMethod : undefined
                 })
+
+                if (!result.success) {
+                    toast.error(result.error || "No se pudo crear la reserva")
+                    return
+                }
             }
 
             toast.success("Reserva(s) creada(s) exitosamente")

@@ -31,7 +31,7 @@ export function SyncStatusIndicator() {
         errors: []
     })
 
-    const [currentTime, setCurrentTime] = useState(Date.now())
+    const [currentTime, setCurrentTime] = useState(() => Date.now())
 
     useEffect(() => {
         const timer = setInterval(() => {

@@ -1,5 +1,9 @@
 import Link from "next/link"
-import { Facebook, Instagram, Mail, MapPin, Phone } from "lucide-react"
+import { Mail, MapPin, Phone } from "lucide-react"
+import { BookingLink } from "@/components/shared/booking-link"
+
+const phoneNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "50212345678").replace(/\D/g, "")
+const displayPhone = `+${phoneNumber.replace(/^502/, "502 ")}`
 
 export function Footer() {
     return (
@@ -11,7 +15,7 @@ export function Footer() {
                             MANDALAS<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">.</span>
                         </h3>
                         <p className="text-sm leading-relaxed max-w-xs text-stone-500 font-light">
-                            Fusionando la energía social del pueblo con la paz de la naturaleza. San Pedro La Laguna, Atitlán.
+                            Dos formas sencillas de quedarse en San Pedro: cerca del movimiento o con más calma junto al lago.
                         </p>
                     </div>
 
@@ -21,7 +25,7 @@ export function Footer() {
                             <li>
                                 <Link href="/pueblo" className="hover:text-amber-500 transition-colors flex items-center gap-2 group">
                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    Pueblo
+                                    Mandalas
                                 </Link>
                             </li>
                             <li>
@@ -38,11 +42,15 @@ export function Footer() {
                         <ul className="space-y-4 text-sm font-light">
                             <li className="flex items-center gap-3">
                                 <Phone className="h-4 w-4 text-stone-600" />
-                                <span>+502 1234 5678</span>
+                                <a href={`https://wa.me/${phoneNumber}`} className="hover:text-amber-300 transition-colors">
+                                    {displayPhone}
+                                </a>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Mail className="h-4 w-4 text-stone-600" />
-                                <span>info@mandalashostal.com</span>
+                                <a href="mailto:info@mandalashostal.com" className="hover:text-lime-300 transition-colors">
+                                    info@mandalashostal.com
+                                </a>
                             </li>
                             <li className="flex items-start gap-3">
                                 <MapPin className="h-4 w-4 mt-1 text-stone-600" />
@@ -52,25 +60,21 @@ export function Footer() {
                     </div>
 
                     <div>
-                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Social</h4>
-                        <div className="flex gap-4">
-                            <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-white/10 hover:text-white transition-colors">
-                                <Instagram className="h-5 w-5" />
-                                <span className="sr-only">Instagram</span>
-                            </a>
-                            <a href="#" className="p-2 bg-white/5 rounded-full hover:bg-white/10 hover:text-white transition-colors">
-                                <Facebook className="h-5 w-5" />
-                                <span className="sr-only">Facebook</span>
-                            </a>
-                        </div>
+                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Reserva Directa</h4>
+                        <p className="text-sm leading-relaxed text-stone-500 font-light mb-5">
+                            Cuéntanos tus fechas y te orientamos por WhatsApp.
+                        </p>
+                        <BookingLink
+                            location="Mandalas Hostal"
+                            className="rounded-full bg-white text-stone-950 hover:bg-stone-200 font-semibold"
+                        >
+                            Consultar
+                        </BookingLink>
                     </div>
                 </div>
 
                 <div className="border-t border-stone-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-stone-600">
-                    <p>&copy; {new Date().getFullYear()} Mandalas Hostal. Crafted with radiant energy.</p>
-                    <Link href="/admin" className="hover:text-stone-400 transition-colors opacity-50 hover:opacity-100">
-                        Staff Access
-                    </Link>
+                    <p>&copy; {new Date().getFullYear()} Mandalas Hostal. San Pedro La Laguna, Lago Atitlan.</p>
                 </div>
             </div>
         </footer>

@@ -7,8 +7,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
-import { BookingModal } from "@/components/shared/booking-modal"
-import { ModeToggle } from "@/components/shared/mode-toggle"
+import { BookingLink } from "@/components/shared/booking-link"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
 
 export function Navbar() {
@@ -105,7 +104,7 @@ export function Navbar() {
                                 : scrolled || !isHome ? "text-stone-700 dark:text-stone-300" : "text-white/90"
                         )}
                     >
-                        Pueblo
+                        Mandalas
                         {pathname === "/pueblo" && (
                             <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-600" />
                         )}
@@ -126,21 +125,6 @@ export function Navbar() {
                         )}
                     </Link>
                     <Link
-                        href="/my-booking"
-                        className={cn(
-                            "relative px-4 py-2 rounded-lg transition-all duration-300",
-                            "hover:bg-stone-100 hover:text-stone-900",
-                            pathname === "/my-booking"
-                                ? "text-stone-900 bg-stone-100"
-                                : scrolled || !isHome ? "text-stone-700 dark:text-stone-300" : "text-white/90"
-                        )}
-                    >
-                        Mi Reserva
-                        {pathname === "/my-booking" && (
-                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-stone-600" />
-                        )}
-                    </Link>
-                    <Link
                         href="/contact"
                         className={cn(
                             "relative px-4 py-2 rounded-lg transition-all duration-300",
@@ -153,22 +137,16 @@ export function Navbar() {
                         Contacto
                     </Link>
 
-                    {/* Divider */}
-                    <div className="w-px h-6 bg-stone-300/50 mx-2" />
-
-                    <ModeToggle />
-
-                    <BookingModal defaultLocation={isHideout ? 'hideout' : 'pueblo'}>
-                        <Button
-                            className={cn(
-                                "rounded-full font-bold px-6 h-10 shadow-lg transition-all duration-300 text-white border-0",
-                                theme.button,
-                                "hover:scale-105"
-                            )}
-                        >
-                            Reservar
-                        </Button>
-                    </BookingModal>
+                    <BookingLink
+                        location={isHideout ? "Mandalas Hideout" : "Mandalas"}
+                        className={cn(
+                            "rounded-full font-bold px-6 h-10 shadow-lg transition-all duration-300 text-white border-0 gap-2",
+                            theme.button,
+                            "hover:scale-105"
+                        )}
+                    >
+                        WhatsApp
+                    </BookingLink>
                 </div>
 
                 <Sheet>
@@ -205,8 +183,8 @@ export function Navbar() {
                                                 pathname === "/pueblo" ? "text-amber-600 pl-4 border-amber-200" : "text-stone-800 dark:text-stone-200 hover:pl-4 hover:text-amber-600"
                                             )}
                                         >
-                                            Pueblo
-                                            <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-amber-400 transition-colors">En el corazón del pueblo</span>
+                                            Mandalas
+                                            <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-amber-400 transition-colors">En el centro de San Pedro</span>
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
@@ -237,34 +215,14 @@ export function Navbar() {
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
-                                <StaggerItem>
-                                    <SheetClose asChild>
-                                        <Link
-                                            href="/my-booking"
-                                            className={cn(
-                                                "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-stone-200 dark:hover:border-stone-800 group",
-                                                pathname === "/my-booking" ? "text-stone-900 pl-4 border-stone-200" : "text-stone-500 dark:text-stone-400 hover:pl-4 hover:text-stone-900 dark:hover:text-white"
-                                            )}
-                                        >
-                                            Mi Reserva
-                                        </Link>
-                                    </SheetClose>
-                                </StaggerItem>
-
                                 <div className="mt-auto mb-8 space-y-8">
                                     <StaggerItem>
-                                        <div className="flex items-center justify-between p-4 rounded-2xl bg-stone-50 dark:bg-stone-900/50">
-                                            <span className="text-sm font-medium text-stone-500 uppercase tracking-wider">Apariencia</span>
-                                            <ModeToggle />
-                                        </div>
-                                    </StaggerItem>
-
-                                    <StaggerItem>
-                                        <BookingModal defaultLocation={isHideout ? 'hideout' : 'pueblo'}>
-                                            <Button className={cn("w-full rounded-2xl text-xl py-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]", theme.button)}>
-                                                RESERVAR AHORA
-                                            </Button>
-                                        </BookingModal>
+                                        <BookingLink
+                                            location={isHideout ? "Mandalas Hideout" : "Mandalas"}
+                                            className={cn("w-full rounded-2xl text-xl py-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] gap-2", theme.button)}
+                                        >
+                                            CONSULTAR POR WHATSAPP
+                                        </BookingLink>
                                     </StaggerItem>
                                 </div>
                             </StaggerReveal>

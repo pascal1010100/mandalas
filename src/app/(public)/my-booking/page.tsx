@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Loader2, ArrowRight, ArrowLeft, ShieldCheck, Calendar, Users, BedDouble, MapPin, Copy, ExternalLink, MessageCircle, CheckCircle2, Clock, Wallet, Wifi, Info, Save, X, Utensils, Music, Sparkles, Bus, Waves, Shirt, QrCode, Smartphone, PartyPopper, Beer, ShoppingBag, Plus, CreditCard, Wrench } from "lucide-react"
+import { Search, Loader2, ArrowRight, ArrowLeft, ShieldCheck, Calendar, Users, BedDouble, MapPin, Copy, ExternalLink, MessageCircle, CheckCircle2, Clock, Wallet, Wifi, X, Utensils, Music, Sparkles, Bus, Waves, Shirt, QrCode, Smartphone, PartyPopper, Beer, Plus, CreditCard, Wrench } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { format, differenceInDays } from "date-fns"
 import { es } from "date-fns/locale"
@@ -9,7 +9,7 @@ import { toast } from "sonner"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -31,34 +31,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-
-// Elite Assets & Config
-const LOCATION_ASSETS = {
-    pueblo: {
-        bg: "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=2070&auto=format&fit=crop", // Warm/Cozy
-        color: "amber",
-        gradient: "from-amber-600 to-orange-600",
-        mapUrl: "https://goo.gl/maps/examplePueblo",
-        wifiSSID: "Mandalas_Pueblo",
-        wifiPass: "mandala123",
-        breakfastTime: "8:00 AM - 10:00 AM",
-        breakfastLoc: "Cocina Principal"
-    },
-    hideout: {
-        bg: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?q=80&w=2069&auto=format&fit=crop", // Jungle/Pool
-        color: "lime",
-        gradient: "from-lime-600 to-green-600",
-        mapUrl: "https://goo.gl/maps/exampleHideout",
-        wifiSSID: "Mandalas_Hideout",
-        wifiPass: "hideout2025",
-        breakfastTime: "8:30 AM - 10:30 AM",
-        breakfastLoc: "Terraza del Lago"
-    }
-}
-
 import { APP_CONFIG } from "@/lib/config"
 import { ServiceRequestGrid } from "@/components/guest/service-request-grid"
 import { ExtendStayDialog } from "@/components/guest/extend-stay-dialog"
+import { LOCATION_ASSETS, getGuestGreeting, getGuestLocationKey } from "./guest-config"
 
 export default function MyBookingPage() {
     // Search State
@@ -76,42 +52,6 @@ export default function MyBookingPage() {
     const [confirmProduct, setConfirmProduct] = useState<Product | null>(null)
     // Account / Charges State
     const [myCharges, setMyCharges] = useState<Charge[]>([])
-
-    // Realtime Sync for Guest
-    useEffect(() => {
-        // ... (existing realtime logic) ...
-        const savedEmail = localStorage.getItem('guest_session_email')
-        if (savedEmail && !searchQuery) {
-            setSearchQuery(savedEmail)
-            handleAutoLoad(savedEmail)
-        }
-    }, [])
-
-    const handleAutoLoad = async (email: string) => {
-        setLoading(true)
-        try {
-            const { data, error } = await supabase
-                .from('bookings')
-                .select('*')
-                .ilike('email', email)
-                .order('check_in', { ascending: false })
-
-            if (data && data.length > 0) {
-                setAllBookings(data)
-
-                // Logic: Multi-booking -> Dashboard/List. Single -> Details.
-                if (data.length > 1) {
-                    setViewMode('list')
-                    setBooking(null)
-                } else {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const active = data.find((b: any) => new Date(b.check_out) >= new Date()) || data[0]
-                    setBooking(active)
-                    setViewMode('details')
-                }
-            }
-        } catch (e) { console.error(e) } finally { setLoading(false) }
-    }
 
     // Realtime Sync for Guest (Booking & Charges & Service Requests)
     useEffect(() => {
@@ -286,7 +226,7 @@ export default function MyBookingPage() {
     // Auto-Restore Session
     useEffect(() => {
         const savedEmail = localStorage.getItem('guest_session_email')
-        if (savedEmail && !searchQuery) {
+        if (savedEmail) {
             setSearchQuery(savedEmail)
             autoLoadSession(savedEmail)
         }
@@ -300,15 +240,19 @@ export default function MyBookingPage() {
                 .select('*')
                 .ilike('email', email)
                 .order('check_in', { ascending: false })
+            if (error) throw error
 
             if (data && data.length > 0) {
                 setAllBookings(data)
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const active = data.find((b: any) => new Date(b.check_out) >= new Date()) || data[0]
-                if (active) {
-                    setBooking(active)
-                    setViewMode('details')
+
+                if (data.length > 1) {
+                    setViewMode('list')
+                    setBooking(null)
+                    return
                 }
+
+                setBooking(data[0])
+                setViewMode('details')
             }
         } catch (e) {
             console.error("Auto-load failed", e)
@@ -341,7 +285,7 @@ export default function MyBookingPage() {
     }
 
     // Derived State for UI
-    const locationKey = booking?.location as keyof typeof LOCATION_ASSETS || 'pueblo'
+    const locationKey = getGuestLocationKey(booking?.location)
     const theme = LOCATION_ASSETS[locationKey]
     const roomConfig = booking ? rooms.find(r => r.id === booking.room_type) : null
     const backgroundImage = roomConfig?.image || theme.bg
@@ -351,23 +295,6 @@ export default function MyBookingPage() {
     const relevantEvents = booking
         ? events.filter(e => e.location.toLowerCase() === booking.location.toLowerCase()).slice(0, 3)
         : []
-
-    // Progress Step
-    const getProgressStep = () => {
-        if (!booking) return 0
-        if (booking.status === 'checked_out') return 4
-        if (booking.status === 'checked_in') return 3
-        if (booking.payment_status === 'paid') return 2
-        return 1
-    }
-
-    // UX: Dynamic Greeting
-    const getGreeting = () => {
-        const hour = new Date().getHours()
-        if (hour < 12) return "Buenos días"
-        if (hour < 18) return "Buenas tardes"
-        return "Buenas noches"
-    }
 
     // UX: meaningful "Smart Tip" based on time/status
     const getSmartTip = () => {
@@ -421,7 +348,6 @@ export default function MyBookingPage() {
         return null
     }
 
-    const currentStep = getProgressStep()
     const smartTip = getSmartTip()
     const canCheckIn = booking && booking.payment_status === 'paid' && booking.guest_id_number && daysUntil <= 0 && booking.status === 'confirmed'
 
@@ -434,7 +360,7 @@ export default function MyBookingPage() {
 
     const handleUpsell = (service: string, price: string) => {
         if (!booking) return
-        const text = `Hola, soy ${booking.guest_name}. Me gustaría reservar el servicio: ${service} (${service}). Mi reserva es: ${booking.id.slice(0, 6)}...`
+        const text = `Hola, soy ${booking.guest_name}. Me gustaría reservar el servicio: ${service} (${price}). Mi reserva es: ${booking.id.slice(0, 6)}...`
         window.open(`https://wa.me/50212345678?text=${encodeURIComponent(text)}`, '_blank')
     }
 
@@ -479,8 +405,6 @@ export default function MyBookingPage() {
             const { error } = await supabase.from('bookings').update({ status: 'checked_in' }).eq('id', booking.id)
             if (error) throw error
 
-            toast.success("¡Bienvenido a Casa! Check-in exitoso.")
-            setShowCheckInModal(false)
             toast.success("¡Bienvenido a Casa! Check-in exitoso.")
             setShowCheckInModal(false)
             setBooking(prev => prev ? ({ ...prev, status: 'checked_in' }) : null)
@@ -635,7 +559,7 @@ export default function MyBookingPage() {
                                 <div className="relative z-10 flex justify-between items-start">
                                     <div className="space-y-1">
                                         <Badge variant="outline" className={cn("text-[10px] uppercase tracking-wider py-1 border-none", b.location === 'hideout' ? "bg-lime-500/20 text-lime-400" : "bg-amber-500/20 text-amber-400")}>
-                                            {b.location === 'hideout' ? 'The Hideout' : 'Pueblo'}
+                                            {b.location === 'hideout' ? 'The Hideout' : 'Mandalas'}
                                         </Badge>
                                         <h3 className="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors mt-2">
                                             {b.room_type.replace(/_/g, ' ')}
@@ -725,7 +649,7 @@ export default function MyBookingPage() {
                         <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-4 duration-700 delay-100">
                             {booking && (
                                 <Badge variant="outline" className={cn("uppercase tracking-[0.2em] text-[10px] py-1.5 px-4 bg-white/50 dark:bg-white/5 border-stone-200 dark:border-white/10 text-stone-900 dark:text-white backdrop-blur-md shadow-sm")}>
-                                    {booking.location === 'hideout' ? 'The Hideout' : 'Pueblo'}
+                                    {booking.location === 'hideout' ? 'The Hideout' : 'Mandalas'}
                                 </Badge>
                             )}
                             {booking && booking.status === 'confirmed' && (
@@ -737,7 +661,7 @@ export default function MyBookingPage() {
                         <h1 className="text-5xl md:text-7xl font-bold font-heading text-stone-900 dark:text-white drop-shadow-sm leading-tight animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
                             {booking ? (
                                 <>
-                                    <span className="block text-2xl md:text-3xl font-light text-stone-500 dark:text-stone-400 mb-2">{getGreeting()},</span>
+                                    <span className="block text-2xl md:text-3xl font-light text-stone-500 dark:text-stone-400 mb-2">{getGuestGreeting()},</span>
                                     {booking.guest_name.split(' ')[0]}
                                 </>
                             ) : "Bienvenido"}
@@ -790,7 +714,7 @@ export default function MyBookingPage() {
                                     ¡Hasta Pronto, {booking.guest_name.split(' ')[0]}!
                                 </h2>
                                 <p className="text-lg text-stone-600 dark:text-stone-300 max-w-lg mx-auto leading-relaxed">
-                                    Gracias por elegir Mandalas. Esperamos que tu estancia en el <span className="font-bold text-emerald-600 dark:text-emerald-400">{booking.location === 'hideout' ? 'Hideout' : 'Pueblo'}</span> haya sido mágica.
+                                    Gracias por elegir Mandalas. Esperamos que tu estancia en el <span className="font-bold text-emerald-600 dark:text-emerald-400">{booking.location === 'hideout' ? 'Hideout' : 'Mandalas'}</span> haya sido mágica.
                                 </p>
                             </div>
 

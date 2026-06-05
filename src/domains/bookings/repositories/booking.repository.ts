@@ -38,6 +38,35 @@ export class BookingRepository implements IBookingRepository {
         console.log('🔵 BookingRepository inicializado');
     }
 
+    private formatSupabaseError(error: unknown) {
+        const supabaseError = error as {
+            code?: unknown;
+            message?: unknown;
+            details?: unknown;
+            hint?: unknown;
+        };
+
+        const message = typeof supabaseError.message === 'string'
+            ? supabaseError.message
+            : String(error);
+        const details = typeof supabaseError.details === 'string'
+            ? supabaseError.details
+            : undefined;
+        const hint = typeof supabaseError.hint === 'string'
+            ? supabaseError.hint
+            : undefined;
+
+        return {
+            code: typeof supabaseError.code === 'string' && supabaseError.code
+                ? supabaseError.code
+                : 'SUPABASE_ERROR',
+            message,
+            details,
+            hint,
+            isNetworkError: message.includes('fetch failed') || (details?.includes('ENOTFOUND') ?? false),
+        };
+    }
+
     /**
      * Obtiene una reserva por su ID
      * @param id ID de la reserva a buscar
@@ -155,13 +184,16 @@ export class BookingRepository implements IBookingRepository {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('❌ Error al obtener las reservas:', {
-                    code: error.code,
-                    message: error.message,
-                    details: error.details,
-                    hint: error.hint
-                });
-                throw new Error(`Error al obtener las reservas: ${error.message}`);
+                const errorContext = this.formatSupabaseError(error);
+                const message = errorContext.isNetworkError
+                    ? 'No se pudo conectar con Supabase. Verifica que el proyecto esté activo y que la URL sea correcta.'
+                    : errorContext.message;
+
+                console.error(
+                    `❌ Error al obtener las reservas: ${message}`,
+                    JSON.stringify(errorContext, null, 2)
+                );
+                throw new Error(message);
             }
 
             if (!data || data.length === 0) {

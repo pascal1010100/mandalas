@@ -134,7 +134,7 @@ export class AvailabilityService {
     private checkPrivateRoomAvailability(
         overlappingBookings: Booking[],
         roomConfig: RoomConfig | undefined,
-        capacity: number,
+        _capacity: number,
         requestedGuests: number
     ): boolean {
         // 1. Max Occupancy Check (Physical limit)
@@ -145,9 +145,9 @@ export class AvailabilityService {
             return false;
         }
 
-        // 2. Inventory Check (Capacity = Number of Rooms)
-        // If we have 1 unit, and 1 overlap, it's full.
-        const blocked = overlappingBookings.length >= capacity;
-        return !blocked;
+        // 2. Inventory Check
+        // A private/suite room row represents one sellable room. Capacity is the
+        // number of people/beds inside it in legacy data, not independent inventory.
+        return overlappingBookings.length === 0;
     }
 }

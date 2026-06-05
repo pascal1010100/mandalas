@@ -45,7 +45,10 @@ export class BookingService {
             return bookings;
         } catch (error) {
             console.error('❌ Error al obtener las reservas:', error);
-            throw new Error('No se pudieron cargar las reservas');
+            const message = error instanceof Error
+                ? error.message
+                : 'No se pudieron cargar las reservas';
+            throw new Error(message);
         }
     }
 

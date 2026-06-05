@@ -478,7 +478,7 @@ export function BookingModal({
                                     className="w-full"
                                 >
                                     <TabsList className="grid w-full grid-cols-2 bg-stone-200/50 dark:bg-stone-800/50 p-1 rounded-xl">
-                                        <TabsTrigger value="pueblo" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-amber-600 dark:data-[state=active]:text-amber-400">Mandalas Pueblo</TabsTrigger>
+                                        <TabsTrigger value="pueblo" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-amber-600 dark:data-[state=active]:text-amber-400">Mandalas</TabsTrigger>
                                         <TabsTrigger value="hideout" className="rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-stone-800 data-[state=active]:text-lime-600 dark:data-[state=active]:text-lime-400">Mandalas Hideout</TabsTrigger>
                                     </TabsList>
                                 </Tabs>
@@ -557,7 +557,7 @@ export function BookingModal({
                                                         <div className={cn("absolute inset-0 transition-colors z-10", !isRoomAvailable ? "bg-stone-900/40" : "bg-stone-900/20 group-hover:bg-stone-900/10")} />
                                                         <div className={cn("absolute inset-0 bg-gradient-to-t from-stone-900/90 to-transparent z-20", isSelected ? "opacity-90" : "opacity-80")} />
                                                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                                        <img src={(room as any).image || "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300"} alt={room.label} className="w-full h-full object-cover" />
+                                                        <img src={(room as any).image || "/images/mandalas/pueblo-dock-boat.jpg"} alt={room.label} className="w-full h-full object-cover" />
 
                                                         {isSelected && isRoomAvailable && (
                                                             <div className={cn("absolute top-2 right-2 z-30 text-white rounded-full p-0.5 shadow-sm", location === 'pueblo' ? "bg-amber-500" : "bg-lime-600")}>
@@ -862,7 +862,7 @@ export function BookingModal({
                                 {/* ELITE: WhatsApp Action Button */}
                                 <Button
                                     onClick={() => {
-                                        const message = `Hola Mandalas! 🌿 Acabo de reservar en la web.\n\n🆔 ID: ${bookingId}\n👤 Nombre: ${guestName}\n📅 Fechas: ${date?.from?.toLocaleDateString()} - ${date?.to?.toLocaleDateString()}\n🏨 Lugar: ${location === 'pueblo' ? 'Pueblo' : 'Hideout'}\n\nQuedo atento a la confirmación!`;
+                                        const message = `Hola Mandalas! 🌿 Acabo de reservar en la web.\n\n🆔 ID: ${bookingId}\n👤 Nombre: ${guestName}\n📅 Fechas: ${date?.from?.toLocaleDateString()} - ${date?.to?.toLocaleDateString()}\n🏨 Lugar: ${location === 'pueblo' ? 'Mandalas' : 'Hideout'}\n\nQuedo atento a la confirmación!`;
                                         window.open(`https://wa.me/50212345678?text=${encodeURIComponent(message)}`, '_blank');
                                     }}
                                     className="w-full rounded-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold shadow-lg shadow-emerald-900/20 py-6 text-base transition-transform hover:scale-105"
@@ -928,4 +928,3 @@ export function BookingModal({
 
 // Convert Button to Motion Button for animation
 const MButton = motion(Button)
-

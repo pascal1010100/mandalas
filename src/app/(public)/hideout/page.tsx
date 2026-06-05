@@ -1,52 +1,50 @@
 "use client"
 
-import { BookingModal } from "@/components/shared/booking-modal"
-import { useAppStore } from "@/lib/store"
-
 import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Leaf, Waves, Mountain, Flame, Cloud, Stars } from "lucide-react"
-import { EventsCalendar } from "@/components/shared/events-calendar"
+import { Waves, Cloud, Moon, Sprout, BedDouble, DoorClosed, ShieldCheck, MapPin, Bike, Utensils, Clock, Luggage, Wifi } from "lucide-react"
+import { BookingLink } from "@/components/shared/booking-link"
+import { ExperienceSection } from "@/components/shared/experience-section"
+import { PracticalDetails } from "@/components/shared/practical-details"
+import { PropertyGallery } from "@/components/shared/property-gallery"
+import { StayOptions } from "@/components/shared/stay-options"
 
 export default function HideoutPage() {
-    const { rooms } = useAppStore()
-
     return (
         <div className="bg-background min-h-screen">
             <Hero
                 title="Mandalas Hideout"
-                subtitle="Desconecta del mundo y reconecta contigo mismo en nuestro santuario natural."
-                // Zen Green Gradient - Healing, Organic
-                backgroundGradient="linear-gradient(135deg, #84cc16 0%, #65a30d 40%, #3f6212 100%)"
+                subtitle="Una base más tranquila para dormir mejor, caminar al lago y bajar el volumen de San Pedro."
+                backgroundImage="/images/mandalas/hostelworld/hideout-exterior-volcano.jpg"
                 align="center"
             >
-                <BookingModal defaultLocation="hideout">
-                    <Button size="lg" className="rounded-full bg-white text-lime-800 hover:bg-stone-50 font-bold text-lg px-8 shadow-xl shadow-lime-900/10 transition-transform hover:scale-105 duration-300">
-                        Reservar Retiro
-                    </Button>
-                </BookingModal>
+                <BookingLink
+                    location="Mandalas Hideout"
+                    size="lg"
+                    className="rounded-full bg-white text-lime-800 hover:bg-stone-50 font-bold text-lg px-8 shadow-xl shadow-lime-900/10 transition-transform hover:scale-105 duration-300 gap-2"
+                >
+                    Consultar fechas
+                </BookingLink>
             </Hero>
 
             {/* Intro Section */}
             <section className="py-24 container mx-auto px-4">
                 <FadeIn>
                     <div className="max-w-4xl mx-auto text-center space-y-8">
-                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">Paz en la Naturaleza</h2>
+                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">Bajar el ritmo</h2>
                         <div className="w-24 h-px bg-gradient-to-r from-transparent via-lime-400 to-transparent mx-auto opacity-50" />
                         <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
-                            Escondido entre jardines exuberantes y con acceso directo al lago, Hideout es el lugar perfecto para yoga temprano, tardes de hamaca y noches bajo las estrellas.
+                            Hideout es para quienes quieren despertar con montaña cerca, moverse al lago sin prisa y volver a una noche más tranquila.
                         </p>
                         <StaggerReveal className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8" delay={0.2}>
                             {[
-                                { icon: Leaf, label: "Jardines Tropicales" },
-                                { icon: Waves, label: "Acceso al Lago" },
-                                { icon: Mountain, label: "Vistas al Volcán" },
-                                { icon: Flame, label: "Fogatas Nocturnas" },
-                                { icon: Cloud, label: "Deck de Yoga" },
-                                { icon: Stars, label: "Cielos Estrellados" },
+                                { icon: Waves, label: "Lago a pie" },
+                                { icon: Bike, label: "Bicis gratis" },
+                                { icon: Utensils, label: "Cocina equipada" },
+                                { icon: Wifi, label: "WiFi gratis" },
+                                { icon: Moon, label: "Noches en calma" },
+                                { icon: Sprout, label: "Fuera del centro" },
                             ].map((feature, idx) => (
                                 <StaggerItem key={idx} className="flex flex-col items-center gap-4 text-muted-foreground/80 group">
                                     <feature.icon className="w-6 h-6 text-lime-600/80 stroke-[1.5px] group-hover:text-lime-500 transition-colors" />
@@ -58,149 +56,175 @@ export default function HideoutPage() {
                 </FadeIn>
             </section>
 
-            {/* Events Section - Added for consistency */}
-            <div className="bg-stone-950/5">
-                <EventsCalendar filterLocation="Hideout" />
-            </div>
-
-            {/* Rooms Section */}
-            <section className="py-24 bg-stone-50 dark:bg-stone-950/50">
+            <section className="border-y border-stone-200/70 bg-stone-50 py-16 dark:border-stone-800 dark:bg-stone-950">
                 <div className="container mx-auto px-4">
                     <FadeIn>
-                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em] mb-12 text-center">Alojamientos</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {/* Room 1: DORMITORIO SOLO CHICAS */}
-                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-lime-500/30">
-                                <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-lime-500 to-lime-700 group-hover:scale-105 transition-transform duration-500" />
-                                    <img src="https://images.unsplash.com/photo-1520277739336-7bf67edfa768?q=80&w=800&auto=format&fit=crop" alt="Dormitorio Chicas" className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110" />
-                                </div>
-                                <CardHeader>
-                                    <CardTitle>Dormitorio Solo Chicas</CardTitle>
-                                    <CardDescription>Espacio seguro y tranquilo</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                                        <li>• 6 Camas Disponibles</li>
-                                        <li>• Baño Incorporado</li>
-                                        <li>• Luz de lectura y lockers</li>
-                                    </ul>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-lime-600">Q{rooms?.find(r => r.id === 'hideout_dorm_female')?.basePrice || 16}</span>
-                                        <span className="text-sm text-stone-500">/ noche</span>
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <BookingModal
-                                        defaultLocation="hideout"
-                                        defaultRoomType="hideout_dorm_female"
-                                        roomName="Dormitorio Solo Chicas"
-                                        pricePerNight={rooms?.find(r => r.id === 'hideout_dorm_female')?.basePrice || 16}
-                                    >
-                                        <Button
-                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-lime-500 to-lime-700"
-                                        >
-                                            Reservar Cama
-                                        </Button>
-                                    </BookingModal>
-                                </CardFooter>
-                            </Card>
+                        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+                            <div>
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-lime-700/70 dark:text-lime-300/60">
+                                    Datos útiles
+                                </p>
+                                <h2 className="font-heading text-3xl font-light uppercase leading-tight tracking-[0.14em] text-stone-950 dark:text-white md:text-4xl">
+                                    Tranquilo, pero resuelto
+                                </h2>
+                                <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
+                                    Hideout funciona como refugio: más calma por la noche, acceso sencillo al lago y lo necesario para que el viaje no dependa siempre del centro.
+                                </p>
+                            </div>
 
-                            {/* Room 2: DORMITORIO MIXTO */}
-                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-lime-500/30">
-                                <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div
-                                        className="absolute inset-0 group-hover:scale-105 transition-transform duration-500 bg-gradient-to-r from-lime-500 to-lime-700"
-                                    />
-                                    {/* Using a very standard, reliable hostel bunk image */}
-                                    <img src="https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=800&auto=format&fit=crop" alt="Dormitorio Mixto" className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110" />
-                                </div>
-                                <CardHeader>
-                                    <CardTitle>Dormitorio Mixto</CardTitle>
-                                    <CardDescription>Conecta con otros viajeros</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                                        <li>• 6 Camas Disponibles</li>
-                                        <li>• Ambiente social</li>
-                                        <li>• Vistas al jardín</li>
-                                    </ul>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-lime-600">Q{rooms?.find(r => r.id === 'hideout_dorm_mixed')?.basePrice || 16}</span>
-                                        <span className="text-sm text-stone-500">/ noche</span>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {[
+                                    { icon: Waves, title: "Lago cerca", description: "A pocos minutos caminando de la orilla." },
+                                    { icon: Bike, title: "Bicicletas", description: "Bicis gratis para huéspedes, ideal para moverte al pueblo." },
+                                    { icon: Utensils, title: "Cocina", description: "Cocina equipada para preparar algo simple durante la estadía." },
+                                    { icon: Clock, title: "Horarios", description: "Check-in 15:00-24:00. Check-out hasta las 10:00." },
+                                    { icon: Luggage, title: "Equipaje", description: "Consigna de equipaje gratuita disponible." },
+                                    { icon: MapPin, title: "Ubicación", description: "Aproximadamente 1.7 km del centro de San Pedro." },
+                                ].map((detail) => (
+                                    <div key={detail.title} className="border-t border-stone-200 py-5 dark:border-stone-800">
+                                        <detail.icon className="mb-4 h-5 w-5 text-lime-700/70 dark:text-lime-300/70" />
+                                        <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-stone-950 dark:text-white">
+                                            {detail.title}
+                                        </h3>
+                                        <p className="text-sm leading-relaxed text-muted-foreground">
+                                            {detail.description}
+                                        </p>
                                     </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <BookingModal
-                                        defaultLocation="hideout"
-                                        defaultRoomType="hideout_dorm_mixed"
-                                        roomName="Dormitorio Mixto"
-                                        pricePerNight={rooms?.find(r => r.id === 'hideout_dorm_mixed')?.basePrice || 16}
-                                    >
-                                        <Button
-                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-lime-500 to-lime-700"
-                                        >
-                                            Reservar Cama
-                                        </Button>
-                                    </BookingModal>
-                                </CardFooter>
-                            </Card>
-
-                            {/* Room 3: PRIVATE */}
-                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-lime-500/30">
-                                <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div
-                                        className="absolute inset-0 group-hover:scale-105 transition-transform duration-500 bg-gradient-to-r from-lime-500 to-lime-700"
-                                    />
-                                    <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=800&auto=format&fit=crop" alt="Habitación Privada" className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110" />
-                                </div>
-                                <CardHeader>
-                                    <CardTitle>Habitación Privada</CardTitle>
-                                    <CardDescription>Espacio privado y cómodo</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                                        <li>• 4 Unidades Disponibles</li>
-                                        <li>• Baño Privado</li>
-                                        <li>• Cama Matrimonial</li>
-                                    </ul>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-lime-600">Q{rooms?.find(r => r.id === 'hideout_private')?.basePrice || 40}</span>
-                                        <span className="text-sm text-stone-500">/ noche</span>
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <BookingModal
-                                        defaultLocation="hideout"
-                                        defaultRoomType="hideout_private"
-                                        roomName="Cabaña Privada (Baño Propio)"
-                                        pricePerNight={rooms?.find(r => r.id === 'hideout_private')?.basePrice || 40}
-                                    >
-                                        <Button
-                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg hover:shadow-lime-900/20 transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-r from-lime-500 to-lime-700"
-                                        >
-                                            Reservar Privada
-                                        </Button>
-                                    </BookingModal>
-                                </CardFooter>
-                            </Card>
+                                ))}
+                            </div>
                         </div>
                     </FadeIn>
                 </div>
             </section>
 
+            <PropertyGallery
+                eyebrow="El lugar"
+                title="Montaña cerca, noches suaves"
+                description="Hideout se entiende mejor por sus contrastes: la entrada frente al volcán, una terraza para bajar revoluciones y espacios comunes que se sienten más pausados que el centro."
+                accent="lime"
+                images={[
+                    {
+                        src: "/images/mandalas/hostelworld/hideout-exterior-volcano.jpg",
+                        alt: "Entrada de Mandalas Hideout con volcán al fondo",
+                        label: "Entrada",
+                    },
+                    {
+                        src: "/images/mandalas/hostelworld/hideout-terrace-dusk.jpg",
+                        alt: "Terraza de Mandalas Hideout al atardecer",
+                        label: "Terraza",
+                    },
+                    {
+                        src: "/images/mandalas/hostelworld/hideout-courtyard-night.jpg",
+                        alt: "Patio nocturno de Mandalas Hideout",
+                        label: "Patio",
+                    },
+                ]}
+            />
+
+            <ExperienceSection
+                eyebrow="Más calma"
+                title="Cerca del lago, lejos del ruido"
+                description="Hideout no intenta competir con el centro. Su valor está en darte aire, pausa y una vuelta más suave después de explorar."
+                accent="lime"
+                items={[
+                    {
+                        icon: Cloud,
+                        title: "Mañanas de lago",
+                        description: "Salir temprano, caminar al agua o empezar el día sin entrar directo al ruido.",
+                    },
+                    {
+                        icon: Sprout,
+                        title: "Barrio tranquilo",
+                        description: "Un entorno más local para resolver lo simple y guardar energía.",
+                    },
+                    {
+                        icon: Moon,
+                        title: "Noches suaves",
+                        description: "Social cuando quieres, descansado cuando lo necesitas.",
+                    },
+                ]}
+            />
+
+            <PracticalDetails
+                eyebrow="Cómo se siente"
+                title="Una estadía con pausa"
+                description="Elige Hideout si prefieres dormir con más calma, moverte al lago y volver a un lugar menos cargado."
+                accent="lime"
+                details={[
+                    {
+                        icon: Sprout,
+                        title: "Fuera del centro",
+                        description: "Ideal si priorizas calma y prefieres no dormir en medio del movimiento.",
+                    },
+                    {
+                        icon: Waves,
+                        title: "Lago cerca",
+                        description: "A pocos minutos a pie para caminar, nadar, hacer kayak o empezar el día más despacio.",
+                    },
+                    {
+                        icon: Bike,
+                        title: "Movimiento fácil",
+                        description: "Las bicicletas ayudan a llegar al centro sin tener que quedarte encima de él.",
+                    },
+                    {
+                        icon: MapPin,
+                        title: "San Pedro sigue cerca",
+                        description: "La sede está aproximadamente a 1.7 km del centro, suficiente para sentir otra energía.",
+                    },
+                ]}
+            />
+
+            <StayOptions
+                eyebrow="Dormir en Hideout"
+                title="Opciones simples para descansar mejor"
+                description="Hideout no necesita sentirse lleno. Cada opción mantiene el foco en descansar, moverte al lago y volver a un lugar más tranquilo."
+                location="Mandalas Hideout"
+                accent="lime"
+                options={[
+                    {
+                        icon: ShieldCheck,
+                        title: "Dormitorio Solo Chicas",
+                        subtitle: "calmado",
+                        description: "Para viajeras que buscan una base compartida con una energía más suave.",
+                        details: ["Solo chicas", "Más calma", "WhatsApp"],
+                        price: "Desde Q16",
+                        roomName: "Dormitorio Solo Chicas",
+                    },
+                    {
+                        icon: BedDouble,
+                        title: "Dormitorio Mixto",
+                        subtitle: "social suave",
+                        description: "Para compartir el viaje sin estar encima del ruido del centro.",
+                        details: ["Compartido", "Lago cerca", "Caminatas"],
+                        price: "Desde Q16",
+                        roomName: "Dormitorio Mixto",
+                    },
+                    {
+                        icon: DoorClosed,
+                        title: "Habitación Privada",
+                        subtitle: "pausa",
+                        description: "Para parejas o viajeros lentos que quieren más privacidad para descansar.",
+                        details: ["Privacidad", "Más calma", "Viaje lento"],
+                        price: "Desde Q40",
+                        roomName: "Habitación Privada",
+                    },
+                ]}
+            />
+
             {/* CTA */}
-            < section className="py-24 bg-stone-900 text-white text-center" >
+            <section className="py-24 bg-stone-900 text-white text-center">
                 <FadeIn>
-                    <h2 className="text-3xl md:text-5xl font-bold mb-6">Tu escapada perfecta</h2>
-                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Reserva directamente y obtén desayuno gratis en tu primera mañana.</p>
-                    <BookingModal defaultLocation="hideout">
-                        <Button size="lg" className="rounded-full bg-white text-black hover:bg-stone-200 text-lg px-10 py-6">
-                            Reservar Ahora
-                        </Button>
-                    </BookingModal>
+                    <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Baja el ritmo</h2>
+                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Cuéntanos tus fechas y te confirmamos la opción más tranquila disponible.</p>
+                    <BookingLink
+                        location="Mandalas Hideout"
+                        size="lg"
+                        className="rounded-full bg-white text-black hover:bg-stone-200 text-lg px-10 py-6 gap-2"
+                    >
+                        Escribir por WhatsApp
+                    </BookingLink>
                 </FadeIn>
-            </section >
-        </div >
+            </section>
+        </div>
     )
 }

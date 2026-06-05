@@ -82,8 +82,11 @@ export function useBookings() {
      */
     const createGroupBooking = useCallback(
         async (dtos: CreateBookingDTO[]) => {
-            await bookingService.createGroupBooking(dtos);
-            await fetchBookings();
+            const result = await bookingService.createGroupBooking(dtos);
+            if (result.success) {
+                await fetchBookings();
+            }
+            return result;
         },
         [bookingService, fetchBookings]
     );

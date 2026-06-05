@@ -3,7 +3,6 @@ import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "sonner"
-import { DataInitializer } from "@/components/shared/data-initializer"
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -17,7 +16,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Mandalas Hostal - San Pedro La Laguna",
-  description: "Experience the harmonic duality of Mandalas: Social Vibes at the Pueblo, Nature Retreat at the Hideout.",
+  description: "Hostal boutique en San Pedro La Laguna: una base social en el pueblo y un hideout tranquilo cerca del lago.",
 };
 
 export default function RootLayout({
@@ -35,7 +34,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <DataInitializer />
           {children}
           <Toaster />
         </ThemeProvider>

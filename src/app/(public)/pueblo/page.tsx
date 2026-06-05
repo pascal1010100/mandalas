@@ -3,49 +3,48 @@
 import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Wifi, Beer, Coffee, Music, Users, Sun } from "lucide-react"
-import { EventsCalendar } from "@/components/shared/events-calendar"
-import { BookingModal } from "@/components/shared/booking-modal"
-import { useAppStore } from "@/lib/store"
+import { Wifi, Coffee, Sun, MapPin, Utensils, BedDouble, DoorClosed, Mountain, ShipWheel, Clock, WashingMachine, Route, LockKeyhole } from "lucide-react"
+import { BookingLink } from "@/components/shared/booking-link"
+import { ExperienceSection } from "@/components/shared/experience-section"
+import { PracticalDetails } from "@/components/shared/practical-details"
+import { PropertyGallery } from "@/components/shared/property-gallery"
+import { StayOptions } from "@/components/shared/stay-options"
 
 export default function PuebloPage() {
-    const { rooms } = useAppStore()
-
     return (
         <div className="bg-background min-h-screen">
             <Hero
                 title="Mandalas"
-                subtitle="Tu hogar social en el corazón de San Pedro. Conecta, celebra y vive la magia del lago."
-                backgroundGradient="linear-gradient(135deg, #F59E0B 0%, #D97706 50%, #B45309 100%)"
+                subtitle="Una base céntrica para caminar San Pedro, volver a la terraza y dejar que el viaje encuentre su ritmo."
+                backgroundImage="/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"
                 align="center"
             >
-                <BookingModal>
-                    <Button size="lg" className="rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-lg shadow-orange-900/20 hover:shadow-2xl hover:shadow-orange-900/30 transition-all duration-500 ease-out hover:scale-[1.02] text-lg px-8 border border-white/20 backdrop-blur-sm">
-                        Reservar Estadía
-                    </Button>
-                </BookingModal>
+                <BookingLink
+                    location="Mandalas"
+                    size="lg"
+                    className="rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-lg shadow-orange-900/20 hover:shadow-2xl hover:shadow-orange-900/30 transition-all duration-500 ease-out hover:scale-[1.02] text-lg px-8 border border-white/20 backdrop-blur-sm gap-2"
+                >
+                    Consultar fechas
+                </BookingLink>
             </Hero>
 
             {/* Intro Section */}
             <section className="py-24 container mx-auto px-4">
                 <FadeIn>
                     <div className="max-w-4xl mx-auto text-center space-y-8">
-                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">La Esencia del Pueblo</h2>
+                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">El pulso del pueblo</h2>
                         <div className="w-24 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent mx-auto opacity-50" />
                         <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
-                            Ubicado a pasos de los mejores cafés y bares, Mandalas es el punto de encuentro para viajeros de todo el mundo.
-                            Disfruta de nuestra terraza con vista a los volcanes, únete a nuestras cenas familiares o simplemente relájate con un buen libro.
+                            Aquí la estadía se siente caminable: llegas, dejas la mochila, subes a ver el lago y sales a encontrar el ritmo del pueblo.
                         </p>
                         <StaggerReveal className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8" delay={0.2}>
                             {[
-                                { icon: Wifi, label: "WiFi Alta Velocidad" },
-                                { icon: Beer, label: "Bar & Happy Hour" },
-                                { icon: Coffee, label: "Desayuno Inlcuido" },
-                                { icon: Users, label: "Eventos Diarios" },
-                                { icon: Music, label: "Música en Vivo" },
-                                { icon: Sun, label: "Terraza Panorámica" },
+                                { icon: Wifi, label: "WiFi Gratis" },
+                                { icon: Coffee, label: "Cocina Equipada" },
+                                { icon: Sun, label: "Rooftop con Vista" },
+                                { icon: LockKeyhole, label: "Lockers gratis" },
+                                { icon: WashingMachine, label: "Lavandería" },
+                                { icon: MapPin, label: "Centro a pie" },
                             ].map((feature, idx) => (
                                 <StaggerItem key={idx} className="flex flex-col items-center gap-4 text-muted-foreground/80 group">
                                     <feature.icon className="w-6 h-6 text-orange-500/80 stroke-[1.5px] group-hover:text-orange-500 transition-colors" />
@@ -57,147 +56,173 @@ export default function PuebloPage() {
                 </FadeIn>
             </section>
 
-            {/* Events Section */}
-            <FadeIn>
-                <EventsCalendar filterLocation="Pueblo" />
-            </FadeIn>
-
-            {/* Rooms Section */}
-            <section className="py-24 bg-stone-50 dark:bg-stone-950/50">
+            <section className="border-y border-stone-200/70 bg-stone-50 py-16 dark:border-stone-800 dark:bg-stone-950">
                 <div className="container mx-auto px-4">
                     <FadeIn>
-                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em] mb-12 text-center">Nuestras Habitaciones</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {/* Room 1 */}
-                            {/* Room 1 */}
-                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-orange-500/30">
-                                <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-600 group-hover:scale-105 transition-transform duration-500" />
-                                    {/* Placeholder for image */}
-                                </div>
-                                <CardHeader>
-                                    <CardTitle>Dormitorio Compartido</CardTitle>
-                                    <CardDescription>Ideal para conocer gente nueva</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                                        <li>• Camas con cortinas de privacidad</li>
-                                        <li>• Lockers individuales</li>
-                                        <li>• Enchufe y luz de lectura</li>
-                                    </ul>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">Q{rooms?.find(r => r.id === 'pueblo_dorm')?.basePrice || 18}</span>
-                                        <span className="text-sm text-stone-500">/ noche</span>
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <BookingModal
-                                        defaultLocation="pueblo"
-                                        defaultRoomType="pueblo_dorm_mixed_8"
-                                        roomName="Dormitorio Compartido"
-                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_dorm_mixed_8')?.basePrice || 18}
-                                    >
-                                        <Button
-                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
-                                        >
-                                            Reservar Ahora
-                                        </Button>
-                                    </BookingModal>
-                                </CardFooter>
-                            </Card>
+                        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+                            <div>
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-amber-700/70 dark:text-amber-300/60">
+                                    Datos útiles
+                                </p>
+                                <h2 className="font-heading text-3xl font-light uppercase leading-tight tracking-[0.14em] text-stone-950 dark:text-white md:text-4xl">
+                                    Céntrico, simple, con vista
+                                </h2>
+                                <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
+                                    Mandalas funciona como base social y práctica: llegas fácil, resuelves lo básico y tienes una terraza para volver cuando baja el sol.
+                                </p>
+                            </div>
 
-                            {/* Room 2 */}
-                            {/* Room 2 */}
-                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-orange-500/30">
-                                <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div
-                                        className="absolute inset-0 group-hover:scale-105 transition-transform duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
-                                    />
-                                </div>
-                                <CardHeader>
-                                    <CardTitle>Privada Estándar</CardTitle>
-                                    <CardDescription>Tu propio espacio de confort</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                                        <li>• Cama Matrimonial</li>
-                                        <li>• Baño Privado</li>
-                                        <li>• Ventilador de techo</li>
-                                    </ul>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">Q{rooms?.find(r => r.id === 'pueblo_private_2')?.basePrice || 40}</span>
-                                        <span className="text-sm text-stone-500">/ noche</span>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {[
+                                    { icon: Sun, title: "Rooftop", description: "Terraza en el cuarto piso con vista al lago y montañas volcánicas." },
+                                    { icon: Utensils, title: "Cocina", description: "Cocina completa para preparar comida durante tu estadía." },
+                                    { icon: WashingMachine, title: "Lavandería", description: "Servicio de lavandería disponible en el hostal." },
+                                    { icon: Route, title: "Tours", description: "Conexión con agencia de viajes asociada para moverte por Atitlán." },
+                                    { icon: Clock, title: "Horarios", description: "Check-in 14:00-24:00. Check-out hasta las 11:00." },
+                                    { icon: MapPin, title: "Ubicación", description: "Aproximadamente 0.3 km del centro de San Pedro." },
+                                ].map((detail) => (
+                                    <div key={detail.title} className="border-t border-stone-200 py-5 dark:border-stone-800">
+                                        <detail.icon className="mb-4 h-5 w-5 text-amber-700/70 dark:text-amber-300/70" />
+                                        <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-stone-950 dark:text-white">
+                                            {detail.title}
+                                        </h3>
+                                        <p className="text-sm leading-relaxed text-muted-foreground">
+                                            {detail.description}
+                                        </p>
                                     </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <BookingModal
-                                        defaultLocation="pueblo"
-                                        defaultRoomType="pueblo_private_2"
-                                        roomName="Habitación Privada Estándar"
-                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_private_2')?.basePrice || 40}
-                                    >
-                                        <Button
-                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
-                                        >
-                                            Reservar Ahora
-                                        </Button>
-                                    </BookingModal>
-                                </CardFooter>
-                            </Card>
-
-                            {/* Room 3 */}
-                            {/* Room 3 */}
-                            <Card className="border-stone-200 dark:border-stone-800 shadow-lg overflow-hidden group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-out bg-white dark:bg-stone-900 border hover:border-orange-500/30">
-                                <div className="h-64 bg-muted relative overflow-hidden">
-                                    <div
-                                        className="absolute inset-0 group-hover:scale-105 transition-transform duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
-                                    />
-                                </div>
-                                <CardHeader>
-                                    <CardTitle>Suite con Vista</CardTitle>
-                                    <CardDescription>Lujo relajado frente al lago</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <ul className="text-sm text-muted-foreground space-y-2 mb-6">
-                                        <li>• Vista panorámica al lago</li>
-                                        <li>• Balcón privado</li>
-                                        <li>• Cama King Size</li>
-                                    </ul>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-3xl font-bold text-amber-600">Q{rooms?.find(r => r.id === 'pueblo_suite_balcony')?.basePrice || 75}</span>
-                                        <span className="text-sm text-stone-500">/ noche</span>
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <BookingModal
-                                        defaultLocation="pueblo"
-                                        defaultRoomType="pueblo_suite_balcony"
-                                        roomName="Suite con Vista"
-                                        pricePerNight={rooms?.find(r => r.id === 'pueblo_suite_balcony')?.basePrice || 75}
-                                    >
-                                        <Button
-                                            className="w-full rounded-full hover:brightness-110 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-600"
-                                        >
-                                            Reservar Ahora
-                                        </Button>
-                                    </BookingModal>
-                                </CardFooter>
-                            </Card>
+                                ))}
+                            </div>
                         </div>
                     </FadeIn>
                 </div>
             </section>
 
+            <PropertyGallery
+                eyebrow="El lugar"
+                title="Arquitectura blanca, luz cálida y lago"
+                description="Mandalas tiene una energía más urbana, pero su encanto está en los detalles: pasillos con plantas, hamacas, rincones de descanso y una vista que ordena el día."
+                accent="amber"
+                images={[
+                    {
+                        src: "/images/mandalas/hostelworld/pueblo-exterior.jpg",
+                        alt: "Fachada interior de Mandalas",
+                        label: "Entrada",
+                    },
+                    {
+                        src: "/images/mandalas/hostelworld/pueblo-lake-view.jpg",
+                        alt: "Vista al lago desde Mandalas",
+                        label: "Vista al lago",
+                    },
+                    {
+                        src: "/images/mandalas/hostelworld/pueblo-stair-detail.jpg",
+                        alt: "Escaleras y detalles arquitectónicos de Mandalas",
+                        label: "Detalles",
+                    },
+                ]}
+            />
+
+            <ExperienceSection
+                eyebrow="Vida compartida"
+                title="Para estar cerca de todo"
+                description="Mandalas es para quienes quieren sentir San Pedro desde adentro: un lugar de paso, conversación y regreso fácil."
+                accent="amber"
+                items={[
+                    {
+                        icon: Sun,
+                        title: "Terraza con atardecer",
+                        description: "El punto natural para cerrar el día antes de decidir qué sigue.",
+                    },
+                    {
+                        icon: Utensils,
+                        title: "Casa práctica",
+                        description: "Lo necesario para viajar ligero sin convertir la estadía en logística.",
+                    },
+                    {
+                        icon: MapPin,
+                        title: "Todo queda a mano",
+                        description: "Sales a caminar y San Pedro empieza a aparecer sin planear demasiado.",
+                    },
+                ]}
+            />
+
+            <PracticalDetails
+                eyebrow="Cómo se siente"
+                title="Una estadía con movimiento"
+                description="Elige Mandalas si quieres salir caminando, decidir planes al momento y tener una base social donde volver."
+                accent="amber"
+                details={[
+                    {
+                        icon: MapPin,
+                        title: "Centro caminable",
+                        description: "Aproximadamente 0.3 km del centro, buena opción si quieres resolver todo a pie.",
+                    },
+                    {
+                        icon: ShipWheel,
+                        title: "Muelle cerca",
+                        description: "Práctico para moverte entre pueblos, tomar tours o salir temprano.",
+                    },
+                    {
+                        icon: Sun,
+                        title: "Terraza y áreas comunes",
+                        description: "El valor está en la vista, la cocina, la sala común y los cruces naturales entre viajeros.",
+                    },
+                    {
+                        icon: Route,
+                        title: "Tours y movimiento",
+                        description: "Puedes apoyarte en la conexión con agencia asociada para organizar planes alrededor del lago.",
+                    },
+                ]}
+            />
+
+            <StayOptions
+                eyebrow="Dormir en Mandalas"
+                title="Opciones simples para quedarte cerca"
+                description="Sin fotos inventadas ni promesas de hotel grande. Te mostramos el tipo de estadía y resolvemos disponibilidad por WhatsApp."
+                location="Mandalas"
+                accent="amber"
+                options={[
+                    {
+                        icon: BedDouble,
+                        title: "Dormitorio Compartido",
+                        subtitle: "social",
+                        description: "Para viajar ligero, conocer gente y tener una base práctica en el centro.",
+                        details: ["Espacios compartidos", "Cocina", "Terraza"],
+                        price: "Desde Q18",
+                        roomName: "Dormitorio Compartido",
+                    },
+                    {
+                        icon: DoorClosed,
+                        title: "Privada Estándar",
+                        subtitle: "céntrica",
+                        description: "Más privacidad sin perder la facilidad de moverte caminando por San Pedro.",
+                        details: ["Privacidad", "Áreas comunes", "Centro"],
+                        price: "Desde Q40",
+                        roomName: "Habitación Privada Estándar",
+                    },
+                    {
+                        icon: Mountain,
+                        title: "Privada con Vista",
+                        subtitle: "pausada",
+                        description: "Una opción más tranquila para quedarte con más espacio y bajar el ritmo.",
+                        details: ["Más calma", "Viaje lento", "Consultar vista"],
+                        price: "Desde Q75",
+                        roomName: "Privada con Vista",
+                    },
+                ]}
+            />
+
             {/* CTA */}
             <section className="py-24 bg-stone-900 text-white text-center">
                 <FadeIn>
-                    <h2 className="text-3xl md:text-5xl font-bold mb-6">¿Listo para la aventura?</h2>
-                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Reserva directamente con nosotros para obtener los mejores precios y beneficios exclusivos.</p>
-                    <BookingModal defaultLocation="pueblo">
-                        <Button size="lg" className="rounded-full bg-white text-black hover:bg-stone-200 text-lg px-10 py-6 transition-transform hover:scale-105 duration-300">
-                            Reservar Ahora
-                        </Button>
-                    </BookingModal>
+                    <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Quédate en Mandalas</h2>
+                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Cuéntanos tus fechas y te confirmamos qué opción tiene más sentido para tu viaje.</p>
+                    <BookingLink
+                        location="Mandalas"
+                        size="lg"
+                        className="rounded-full bg-white text-black hover:bg-stone-200 text-lg px-10 py-6 transition-transform hover:scale-105 duration-300 gap-2"
+                    >
+                        Escribir por WhatsApp
+                    </BookingLink>
                 </FadeIn>
             </section>
         </div>
