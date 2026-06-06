@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BedSelector } from "@/components/shared/bed-selector"
+import { buildContactHref } from "@/lib/public-contact"
 
 // ... imports remain the same ...
 
@@ -863,7 +864,7 @@ export function BookingModal({
                                 <Button
                                     onClick={() => {
                                         const message = `Hola Mandalas! 🌿 Acabo de reservar en la web.\n\n🆔 ID: ${bookingId}\n👤 Nombre: ${guestName}\n📅 Fechas: ${date?.from?.toLocaleDateString()} - ${date?.to?.toLocaleDateString()}\n🏨 Lugar: ${location === 'pueblo' ? 'Mandalas' : 'Hideout'}\n\nQuedo atento a la confirmación!`;
-                                        window.open(`https://wa.me/50212345678?text=${encodeURIComponent(message)}`, '_blank');
+                                        window.open(buildContactHref(message), '_blank');
                                     }}
                                     className="w-full rounded-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold shadow-lg shadow-emerald-900/20 py-6 text-base transition-transform hover:scale-105"
                                 >

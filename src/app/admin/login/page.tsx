@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
+import { publicContact } from "@/lib/public-contact"
 
 // Tiempo de bloqueo después de 3 intentos fallidos (5 minutos)
 const LOCKOUT_DURATION = 5 * 60 * 1000
@@ -27,7 +28,12 @@ export default function LoginPage() {
     useEffect(() => {
         supabase.auth.getSession().then(async ({ data }) => {
             if (data.session) {
-                await fetch("/api/admin/session", { method: "POST" })
+                await fetch("/api/admin/session", {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${data.session.access_token}`,
+                    },
+                })
                 window.location.replace("/admin")
             }
         })
@@ -139,7 +145,12 @@ export default function LoginPage() {
             localStorage.removeItem('loginLockUntil')
 
             if (data.session) {
-                await fetch("/api/admin/session", { method: "POST" })
+                await fetch("/api/admin/session", {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${data.session.access_token}`,
+                    },
+                })
                 toast.success("Bienvenido", {
                     description: "Acceso autorizado al sistema central."
                 })
@@ -256,7 +267,7 @@ export default function LoginPage() {
                     <div className="mt-6 pt-6 border-t border-white/5">
                         <p className="text-xs text-center text-stone-500">
                             ¿Necesitas ayuda?{' '}
-                            <a href="mailto:soporte@tudominio.com" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+                            <a href={`mailto:${publicContact.email}`} className="text-emerald-400 hover:text-emerald-300 transition-colors">
                                 Contáctanos
                             </a>
                         </p>

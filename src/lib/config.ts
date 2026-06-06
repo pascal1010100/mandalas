@@ -1,8 +1,8 @@
 export const APP_CONFIG = {
     business: {
         name: "Mandalas Hostal",
-        email: "reservas@mandalas.com",
-        phone: "+502 1234 5678",
+        email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@mandalashostal.com",
+        phone: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "",
     },
     payment: {
         bankName: "BANRURAL",

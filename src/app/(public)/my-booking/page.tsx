@@ -32,6 +32,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { APP_CONFIG } from "@/lib/config"
+import { buildContactHref } from "@/lib/public-contact"
 import { ServiceRequestGrid } from "@/components/guest/service-request-grid"
 import { ExtendStayDialog } from "@/components/guest/extend-stay-dialog"
 import { LOCATION_ASSETS, getGuestGreeting, getGuestLocationKey } from "./guest-config"
@@ -361,7 +362,7 @@ export default function MyBookingPage() {
     const handleUpsell = (service: string, price: string) => {
         if (!booking) return
         const text = `Hola, soy ${booking.guest_name}. Me gustaría reservar el servicio: ${service} (${price}). Mi reserva es: ${booking.id.slice(0, 6)}...`
-        window.open(`https://wa.me/50212345678?text=${encodeURIComponent(text)}`, '_blank')
+        window.open(buildContactHref(text), '_blank')
     }
 
     const handleServiceRequest = async (type: 'cleaning' | 'maintenance', desc: string) => {
@@ -1354,7 +1355,7 @@ export default function MyBookingPage() {
                                 </div>
 
                                 <div className="pt-4 border-t border-stone-200 dark:border-white/5">
-                                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-900/20" onClick={() => window.open("https://wa.me/50212345678", "_blank")}>
+                                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-900/20" onClick={() => window.open(buildContactHref("Hola Mandalas, necesito ayuda con mi estadía."), "_blank")}>
                                         <MessageCircle className="w-4 h-4 mr-2" /> Chat Concierge
                                     </Button>
                                 </div>
@@ -1381,7 +1382,7 @@ export default function MyBookingPage() {
                         <Button size="icon" className="rounded-full w-10 h-10 bg-white/10 dark:bg-black/10 hover:bg-white/20 text-white dark:text-stone-900" onClick={() => { navigator.clipboard.writeText(theme.wifiPass); toast.success("WiFi Copiado") }}>
                             <Wifi className="w-4 h-4" />
                         </Button>
-                        <Button size="icon" className="rounded-full w-10 h-10 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30" onClick={() => window.open("https://wa.me/50212345678", "_blank")}>
+                        <Button size="icon" className="rounded-full w-10 h-10 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30" onClick={() => window.open(buildContactHref("Hola Mandalas, necesito ayuda con mi estadía."), "_blank")}>
                             <MessageCircle className="w-5 h-5" />
                         </Button>
                     </div>
@@ -1468,8 +1469,7 @@ export default function MyBookingPage() {
                                                     setTimeout(() => {
                                                         const wantProof = window.confirm("¿Deseas enviar foto del comprobante por WhatsApp para agilizar?")
                                                         if (wantProof) {
-                                                            const phone = APP_CONFIG.business.phone.replace(/\D/g, '')
-                                                            window.open(`https://wa.me/${phone}?text=Hola, reporté mi pago de Q${booking.total_price} (Ref: ${ref}) para reserva ${booking.id}. Adjunto foto.`, '_blank')
+                                                            window.open(buildContactHref(`Hola, reporté mi pago de Q${booking.total_price} (Ref: ${ref}) para reserva ${booking.id}. Adjunto foto.`), '_blank')
                                                         }
                                                     }, 500)
 

@@ -96,7 +96,7 @@ export function StayOptions({ eyebrow, title, description, location, accent, opt
                                             <p className={`text-2xl font-semibold ${style.price}`}>
                                                 {option.price}
                                             </p>
-                                            <p className="text-xs text-muted-foreground">por noche</p>
+                                            <p className="text-xs text-muted-foreground">confirmar por WhatsApp</p>
                                         </div>
                                         <BookingLink
                                             location={location}

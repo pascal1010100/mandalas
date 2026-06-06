@@ -3,7 +3,7 @@
 import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
-import { Wifi, Coffee, Sun, MapPin, Utensils, BedDouble, DoorClosed, Mountain, ShipWheel, Clock, WashingMachine, Route, LockKeyhole } from "lucide-react"
+import { Wifi, Coffee, Sun, MapPin, Utensils, BedDouble, DoorClosed, ShieldCheck, ShipWheel, Clock, WashingMachine, Route, LockKeyhole } from "lucide-react"
 import { BookingLink } from "@/components/shared/booking-link"
 import { ExperienceSection } from "@/components/shared/experience-section"
 import { PracticalDetails } from "@/components/shared/practical-details"
@@ -178,36 +178,36 @@ export default function PuebloPage() {
             <StayOptions
                 eyebrow="Dormir en Mandalas"
                 title="Opciones simples para quedarte cerca"
-                description="Sin fotos inventadas ni promesas de hotel grande. Te mostramos el tipo de estadía y resolvemos disponibilidad por WhatsApp."
+                description="Dormitorios compartidos y privadas sencillas, con la terraza como punto de encuentro y disponibilidad confirmada por WhatsApp."
                 location="Mandalas"
                 accent="amber"
                 options={[
                     {
                         icon: BedDouble,
-                        title: "Dormitorio Compartido",
+                        title: "Dormitorio Mixto",
                         subtitle: "social",
-                        description: "Para viajar ligero, conocer gente y tener una base práctica en el centro.",
-                        details: ["Espacios compartidos", "Cocina", "Terraza"],
-                        price: "Desde Q18",
-                        roomName: "Dormitorio Compartido",
+                        description: "Para viajar ligero, conocer gente y tener una base práctica cerca del movimiento de San Pedro.",
+                        details: ["Locker", "Luz de lectura", "Enchufe"],
+                        price: "Según fecha",
+                        roomName: "Dormitorio Mixto",
+                    },
+                    {
+                        icon: ShieldCheck,
+                        title: "Dormitorio Solo Chicas",
+                        subtitle: "compartido",
+                        description: "Una opción compartida para viajeras que quieren una base simple, segura y bien ubicada.",
+                        details: ["Solo chicas", "Locker", "Áreas comunes"],
+                        price: "Según fecha",
+                        roomName: "Dormitorio Solo Chicas",
                     },
                     {
                         icon: DoorClosed,
-                        title: "Privada Estándar",
-                        subtitle: "céntrica",
-                        description: "Más privacidad sin perder la facilidad de moverte caminando por San Pedro.",
-                        details: ["Privacidad", "Áreas comunes", "Centro"],
-                        price: "Desde Q40",
-                        roomName: "Habitación Privada Estándar",
-                    },
-                    {
-                        icon: Mountain,
-                        title: "Privada con Vista",
-                        subtitle: "pausada",
-                        description: "Una opción más tranquila para quedarte con más espacio y bajar el ritmo.",
-                        details: ["Más calma", "Viaje lento", "Consultar vista"],
-                        price: "Desde Q75",
-                        roomName: "Privada con Vista",
+                        title: "Habitación Privada",
+                        subtitle: "con o sin baño",
+                        description: "Más privacidad sin perder la cocina, la terraza y la facilidad de moverte caminando.",
+                        details: ["Privacidad", "Baño según opción", "Centro"],
+                        price: "Según fecha",
+                        roomName: "Habitación Privada",
                     },
                 ]}
             />

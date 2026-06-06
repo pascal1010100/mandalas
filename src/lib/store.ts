@@ -200,7 +200,7 @@ const initialRooms: RoomConfig[] = [
     {
         id: 'hideout_dorm_mixed', location: 'hideout', type: 'dorm', label: 'Hideout Dorm B (Mixto)', capacity: 5, maxGuests: 5, basePrice: 148.75,
         description: 'Dormitorio mixto de 5 camas',
-        image: "https://images.unsplash.com/photo-555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=300",
+        image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=300",
         housekeeping_status: 'clean'
     },
     {

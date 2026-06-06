@@ -1,9 +1,9 @@
 import Link from "next/link"
 import { Mail, MapPin, Phone } from "lucide-react"
 import { BookingLink } from "@/components/shared/booking-link"
+import { buildContactHref, getDisplayPhone, publicContact } from "@/lib/public-contact"
 
-const phoneNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "50212345678").replace(/\D/g, "")
-const displayPhone = `+${phoneNumber.replace(/^502/, "502 ")}`
+const displayPhone = getDisplayPhone()
 
 export function Footer() {
     return (
@@ -42,14 +42,14 @@ export function Footer() {
                         <ul className="space-y-4 text-sm font-light">
                             <li className="flex items-center gap-3">
                                 <Phone className="h-4 w-4 text-stone-600" />
-                                <a href={`https://wa.me/${phoneNumber}`} className="hover:text-amber-300 transition-colors">
+                                <a href={buildContactHref("Hola Mandalas, quiero consultar disponibilidad")} className="hover:text-amber-300 transition-colors">
                                     {displayPhone}
                                 </a>
                             </li>
                             <li className="flex items-center gap-3">
                                 <Mail className="h-4 w-4 text-stone-600" />
-                                <a href="mailto:info@mandalashostal.com" className="hover:text-lime-300 transition-colors">
-                                    info@mandalashostal.com
+                                <a href={`mailto:${publicContact.email}`} className="hover:text-lime-300 transition-colors">
+                                    {publicContact.email}
                                 </a>
                             </li>
                             <li className="flex items-start gap-3">

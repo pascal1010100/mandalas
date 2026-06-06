@@ -4,14 +4,13 @@ import * as React from "react"
 import { MessageCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { buildContactHref } from "@/lib/public-contact"
 
 type BookingLinkProps = React.ComponentProps<typeof Button> & {
     location?: string
     roomName?: string
     showIcon?: boolean
 }
-
-const whatsappNumber = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "50212345678").replace(/\D/g, "")
 
 export function BookingLink({
     location,
@@ -26,7 +25,7 @@ export function BookingLink({
         location ? `en ${location}` : "",
     ].filter(Boolean).join(" ")
 
-    const href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
+    const href = buildContactHref(message)
 
     return (
         <Button asChild {...props}>

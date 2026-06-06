@@ -5,6 +5,7 @@ import { BookingConfirmationEmail } from '@/emails/booking-confirmation';
 import { BookingCancellationEmail } from '@/emails/booking-cancellation';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_123');
+const ENABLE_ADMIN = process.env.ENABLE_ADMIN === 'true';
 
 // Safe Error Serialization Helper
 // Safe Error Serialization Helper
@@ -29,6 +30,10 @@ const safeSerialize = (obj: unknown) => {
 };
 
 export async function POST(req: NextRequest) {
+    if (!ENABLE_ADMIN) {
+        return NextResponse.json({ error: "Operational emails disabled" }, { status: 404 });
+    }
+
     try {
         const body = await req.json();
         const { type, to, data } = body;
@@ -46,7 +51,7 @@ export async function POST(req: NextRequest) {
         try {
             const emailData = data || {};
             if (type === 'confirmation') {
-                subject = `Reserva Confirmada - Mandalas ${emailData.location === 'hideout' ? 'Hideout' : 'Pueblo'}`;
+                subject = `Reserva Confirmada - ${emailData.location === 'hideout' ? 'Hideout' : 'Mandalas'}`;
                 emailComponent = (
                     <BookingConfirmationEmail
                         guestName={emailData.guestName || 'Huésped'}

@@ -38,12 +38,10 @@ export const BookingConfirmationEmail = ({
 }: BookingConfirmationEmailProps) => {
     const isPueblo = location === "pueblo";
     const address = isPueblo
-        ? "Calle Principal #123, San Marcos La Laguna"
-        : "Acceso por lancha, Muelle de Mandalas";
+        ? "Mandalas, zona central de San Pedro La Laguna"
+        : "Mandalas Hideout, playa tranquila cerca de San Pedro La Laguna";
 
-    const mapLink = isPueblo
-        ? "https://goo.gl/maps/examplePueblo"
-        : "https://goo.gl/maps/exampleHideout";
+    const mapLink = "";
 
     return (
         <Html>
@@ -68,7 +66,7 @@ export const BookingConfirmationEmail = ({
                             Hola <strong>{guestName}</strong>,
                         </Text>
                         <Text className="text-black text-[14px] leading-[24px]">
-                            Estamos felices de confirmarte tu estancia en <strong>Mandalas {isPueblo ? "Pueblo" : "Hideout"}</strong>.
+                            Estamos felices de confirmarte tu estancia en <strong>{isPueblo ? "Mandalas" : "Hideout"}</strong>.
                             Aquí tienes los detalles de tu reserva:
                         </Text>
 
@@ -111,12 +109,14 @@ export const BookingConfirmationEmail = ({
                             <Text className="text-black text-[14px] leading-[24px] m-0">
                                 Ubicación: {address}
                             </Text>
-                            <Link
-                                href={mapLink}
-                                className="text-blue-600 text-[14px] underline block mt-2"
-                            >
-                                Ver en Google Maps
-                            </Link>
+                            {mapLink ? (
+                                <Link
+                                    href={mapLink}
+                                    className="text-blue-600 text-[14px] underline block mt-2"
+                                >
+                                    Ver en Google Maps
+                                </Link>
+                            ) : null}
                         </Section>
 
                         <Text className="text-black text-[14px] leading-[24px] mt-6">

@@ -6,6 +6,7 @@ import { FadeIn } from "@/components/animations/fade-in"
 import { BookingLink } from "@/components/shared/booking-link"
 import { Hero } from "@/components/shared/hero"
 import { LocationMap } from "@/components/shared/location-map"
+import { publicContact } from "@/lib/public-contact"
 
 export default function ContactPage() {
     return (
@@ -95,10 +96,10 @@ export default function ContactPage() {
                                                 Para grupos, colaboraciones o consultas que necesitan más detalle.
                                             </p>
                                             <a
-                                                href="mailto:info@mandalashostal.com"
+                                                href={`mailto:${publicContact.email}`}
                                                 className="text-sm text-stone-100 underline decoration-white/20 underline-offset-4 hover:text-amber-200"
                                             >
-                                                info@mandalashostal.com
+                                                {publicContact.email}
                                             </a>
                                         </div>
                                     </div>

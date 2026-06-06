@@ -178,7 +178,7 @@ export default function HideoutPage() {
             <StayOptions
                 eyebrow="Dormir en Hideout"
                 title="Opciones simples para descansar mejor"
-                description="Hideout no necesita sentirse lleno. Cada opción mantiene el foco en descansar, moverte al lago y volver a un lugar más tranquilo."
+                description="Opciones compartidas y privadas para bajar el ritmo, con disponibilidad y tarifa final confirmadas directo por WhatsApp."
                 location="Mandalas Hideout"
                 accent="lime"
                 options={[
@@ -188,7 +188,7 @@ export default function HideoutPage() {
                         subtitle: "calmado",
                         description: "Para viajeras que buscan una base compartida con una energía más suave.",
                         details: ["Solo chicas", "Más calma", "WhatsApp"],
-                        price: "Desde Q16",
+                        price: "Según fecha",
                         roomName: "Dormitorio Solo Chicas",
                     },
                     {
@@ -197,7 +197,7 @@ export default function HideoutPage() {
                         subtitle: "social suave",
                         description: "Para compartir el viaje sin estar encima del ruido del centro.",
                         details: ["Compartido", "Lago cerca", "Caminatas"],
-                        price: "Desde Q16",
+                        price: "Según fecha",
                         roomName: "Dormitorio Mixto",
                     },
                     {
@@ -206,7 +206,7 @@ export default function HideoutPage() {
                         subtitle: "pausa",
                         description: "Para parejas o viajeros lentos que quieren más privacidad para descansar.",
                         details: ["Privacidad", "Más calma", "Viaje lento"],
-                        price: "Desde Q40",
+                        price: "Según fecha",
                         roomName: "Habitación Privada",
                     },
                 ]}

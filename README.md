@@ -1,10 +1,12 @@
-# Mandalas Hostal Web App
+# Mandalas Hostal Website
 
 ![Mandalas Hostal](https://via.placeholder.com/1200x600?text=Mandalas+Hostal+Preview)
 
-A modern, "Harmonic Duality" web application for **Mandalas Hostal** in San Pedro La Laguna. This project connects two unique experiences:
-*   **Mandalas (Pueblo)**: Social hub, co-working, and events.
-*   **Mandalas Hideout**: Nature retreat, yoga, and relaxation.
+A boutique public website for **Mandalas Hostal** in San Pedro La Laguna. Phase 1 focuses on direct WhatsApp inquiries and a clear presentation of two stays:
+*   **Mandalas**: central, walkable and social.
+*   **Hideout**: quieter, closer to the lake and outside the center.
+
+The repository still contains an older operational app/admin area for a possible phase 2. It is disabled by default unless explicitly enabled with environment flags.
 
 ## 🚀 Tecnologías
 
@@ -17,7 +19,7 @@ A modern, "Harmonic Duality" web application for **Mandalas Hostal** in San Pedr
 *   **Maps**: [React Leaflet](https://react-leaflet.js.org/)
 *   **Database**: Supabase
 *   **State Management**: Zustand
-*   **Architecture**: Clean Architecture (Domain-Driven Design)
+*   **Architecture**: Public website plus archived operational modules for future phases
 
 ## 🛠️ Instalación
 
@@ -75,9 +77,13 @@ El proyecto incluye pipelines automáticos:
 
 ```bash
 NEXT_PUBLIC_APP_URL=https://your-domain.com
+NEXT_PUBLIC_WHATSAPP_NUMBER=502XXXXXXXX
+NEXT_PUBLIC_CONTACT_EMAIL=info@example.com
 SUPABASE_URL=your-supabase-url
 SUPABASE_ANON_KEY=your-supabase-anon-key
 RESEND_API_KEY=your-resend-api-key
+ENABLE_ADMIN=false
+ENABLE_GUEST_PORTAL=false
 ```
 
 ## 🌳 Ramas (Gitflow)
