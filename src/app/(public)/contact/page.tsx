@@ -22,21 +22,21 @@ export default function ContactPage() {
                 <BookingLink
                     location="Mandalas Hostal"
                     size="lg"
-                    className="rounded-full bg-white text-stone-950 hover:bg-stone-100 font-semibold text-lg px-8 shadow-xl transition-transform hover:scale-[1.02] duration-300 gap-2"
+                    className="h-12 border-white/25 bg-white px-8 text-stone-950 hover:bg-stone-200 gap-2"
                 >
                     Consultar por WhatsApp
                 </BookingLink>
             </Hero>
 
-            <section className="container mx-auto px-4 py-20 md:py-24">
-                <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-start">
+            <section className="container mx-auto px-4 py-16 md:py-24">
+                <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
                     <FadeIn className="lg:col-span-5">
                         <div className="space-y-8">
                             <div>
                                 <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-white/40">
                                     Reserva directa
                                 </p>
-                                <h2 className="mb-5 max-w-xl break-words font-heading text-[1.35rem] font-light uppercase leading-tight tracking-[0.06em] text-white [text-wrap:balance] sm:text-3xl sm:tracking-[0.1em] md:text-4xl md:tracking-[0.14em]">
+                                <h2 className="mb-5 max-w-xl break-words font-heading text-[1.2rem] font-light uppercase leading-tight tracking-[0.08em] text-white [text-wrap:balance] sm:text-3xl sm:tracking-[0.1em] md:text-4xl md:tracking-[0.14em]">
                                     Una conversación, dos formas de quedarse
                                 </h2>
                                 <p className="max-w-xl text-base leading-relaxed text-stone-400 md:text-lg">
@@ -45,7 +45,7 @@ export default function ContactPage() {
                             </div>
 
                             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-                                <div className="rounded-lg border border-white/10 bg-white/[0.04] p-6 shadow-2xl shadow-black/20">
+                                <div className="rounded-lg border border-white/10 bg-white/[0.04] p-6">
                                     <div className="flex items-start gap-4">
                                         <div className="mt-1 rounded-full bg-white/10 p-3 text-white">
                                             <Phone className="h-5 w-5" />
@@ -58,7 +58,7 @@ export default function ContactPage() {
                                             <BookingLink
                                                 location="Mandalas Hostal"
                                                 variant="outline"
-                                                className="rounded-full border-white/15 bg-transparent text-white hover:bg-white hover:text-stone-950 gap-2"
+                                                className="border-white/15 bg-transparent text-white hover:bg-white hover:text-stone-950 gap-2"
                                             >
                                                 Enviar mensaje
                                             </BookingLink>
@@ -113,7 +113,7 @@ export default function ContactPage() {
                             <MapPin className="h-4 w-4" />
                             San Pedro La Laguna
                         </div>
-                        <div className="relative h-[420px] w-full overflow-hidden rounded-lg border border-white/10 bg-stone-900 shadow-2xl shadow-black/30 sm:h-[520px]">
+                        <div className="relative h-[420px] w-full overflow-hidden rounded-lg border border-white/10 bg-stone-900 sm:h-[520px]">
                             <LocationMap />
                             <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-inset ring-white/10" />
                         </div>

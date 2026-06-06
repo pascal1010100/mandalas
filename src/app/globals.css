@@ -151,4 +151,8 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .leaflet-container {
+    background: #0c0a09 !important;
+  }
 }

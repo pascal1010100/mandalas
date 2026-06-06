@@ -16,14 +16,14 @@ export default function HideoutPage() {
             <Hero
                 title="Hideout"
                 subtitle="Una base más tranquila para dormir mejor, caminar al lago y bajar el volumen de San Pedro."
-                backgroundImage="/images/mandalas/hostelworld/hideout-exterior-volcano.jpg"
-                backgroundPosition="center 46%"
-                align="center"
+                backgroundImage="/images/mandalas/hostelworld/hideout-terrace-dusk.jpg"
+                backgroundPosition="32% 50%"
+                align="left"
             >
                 <BookingLink
                     location="Mandalas Hideout"
                     size="lg"
-                    className="rounded-full bg-white text-lime-800 hover:bg-stone-50 font-bold text-lg px-8 shadow-xl shadow-lime-900/10 transition-transform hover:scale-105 duration-300 gap-2"
+                    className="h-12 border-white/25 bg-white px-8 text-stone-950 hover:bg-stone-200 gap-2"
                 >
                     Consultar fechas
                 </BookingLink>
@@ -34,7 +34,7 @@ export default function HideoutPage() {
                 <FadeIn>
                     <div className="max-w-4xl mx-auto text-center space-y-8">
                         <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">Bajar el ritmo</h2>
-                        <div className="w-24 h-px bg-gradient-to-r from-transparent via-lime-400 to-transparent mx-auto opacity-50" />
+                        <div className="mx-auto h-px w-24 bg-lime-300/40" />
                         <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
                             Hideout es para quienes quieren despertar con montaña cerca, moverse al lago sin prisa y volver a una noche más tranquila.
                         </p>
@@ -57,15 +57,15 @@ export default function HideoutPage() {
                 </FadeIn>
             </section>
 
-            <section className="border-y border-stone-200/70 bg-stone-50 py-16 dark:border-stone-800 dark:bg-stone-950">
+            <section className="border-y border-white/10 bg-stone-950 py-16">
                 <div className="container mx-auto px-4">
                     <FadeIn>
                         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
                             <div>
-                                <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-lime-700/70 dark:text-lime-300/60">
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-lime-300/60">
                                     Datos útiles
                                 </p>
-                                <h2 className="font-heading text-3xl font-light uppercase leading-tight tracking-[0.14em] text-stone-950 dark:text-white md:text-4xl">
+                                <h2 className="font-heading text-3xl font-light uppercase leading-tight tracking-[0.14em] text-white md:text-4xl">
                                     Tranquilo, pero resuelto
                                 </h2>
                                 <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
@@ -82,9 +82,9 @@ export default function HideoutPage() {
                                     { icon: Luggage, title: "Equipaje", description: "Consigna de equipaje gratuita disponible." },
                                     { icon: MapPin, title: "Ubicación", description: "Aproximadamente 1.7 km del centro de San Pedro." },
                                 ].map((detail) => (
-                                    <div key={detail.title} className="border-t border-stone-200 py-5 dark:border-stone-800">
-                                        <detail.icon className="mb-4 h-5 w-5 text-lime-700/70 dark:text-lime-300/70" />
-                                        <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-stone-950 dark:text-white">
+                                    <div key={detail.title} className="border-t border-white/10 py-5">
+                                        <detail.icon className="mb-4 h-5 w-5 text-lime-300/70" />
+                                        <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-white">
                                             {detail.title}
                                         </h3>
                                         <p className="text-sm leading-relaxed text-muted-foreground">
@@ -220,7 +220,7 @@ export default function HideoutPage() {
                     <BookingLink
                         location="Mandalas Hideout"
                         size="lg"
-                        className="rounded-full bg-white text-black hover:bg-stone-200 text-lg px-10 py-6 gap-2"
+                        className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
                     >
                         Escribir por WhatsApp
                     </BookingLink>

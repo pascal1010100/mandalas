@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { ArrowUpRight, Coffee, MapPin, MessageCircle, Moon } from "lucide-react"
+import { ArrowUpRight, MapPin, MessageCircle, SunMedium, Waves } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { BookingLink } from "@/components/shared/booking-link"
 
@@ -41,7 +41,7 @@ export default function LandingPage() {
         <HomePanel
           href="/pueblo"
           label="Mandalas"
-          kicker="Centro del pueblo"
+          kicker="Centro turistico"
           title="Mandalas"
           description="Para estar en el centro, subir a la terraza y dejar que San Pedro suceda caminando."
           meta="Rooftop / Centro / Lago"
@@ -57,7 +57,7 @@ export default function LandingPage() {
         <HomePanel
           href="/hideout"
           label="Mandalas Hideout"
-          kicker="Fuera del centro"
+          kicker="Camino a la finca"
           title="Hideout"
           description="Para bajar el volumen, tener montaña alrededor y volver a noches más tranquilas."
           meta="Volcán / Lago / Pausa"
@@ -70,55 +70,139 @@ export default function LandingPage() {
         />
       </section>
 
-      <section className="bg-stone-950 py-20 text-white">
+      <section className="relative overflow-hidden bg-stone-950 py-20 text-white md:py-28">
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage: "linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px)",
+            backgroundSize: "72px 72px",
+          }}
+          aria-hidden="true"
+        />
         <div className="container mx-auto px-4">
-          <div className="grid gap-12 lg:grid-cols-[1fr_0.8fr] lg:items-end">
-            <div>
-              <p className="mb-6 text-xs font-semibold uppercase tracking-[0.28em] text-white/45">
-                Mandalas Hostal
+          <div className="relative grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
+            <div className="max-w-3xl">
+              <p className="mb-6 text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
+                El mapa emocional
               </p>
-              <h1 className="max-w-4xl font-heading text-4xl font-light uppercase leading-[1.08] tracking-[0.12em] text-white md:text-6xl">
-                Dos ritmos, un mismo lago
+              <h1 className="max-w-3xl font-heading text-4xl font-light uppercase leading-[1.05] tracking-[0.1em] text-white md:text-6xl md:tracking-[0.14em]">
+                Una casa para el movimiento. Otra para volver a respirar.
               </h1>
             </div>
 
-            <div className="max-w-xl lg:pb-2">
-              <p className="text-lg leading-relaxed text-white/65">
-                Quédate cerca del movimiento o baja el ritmo junto al lago. En Mandalas la reserva empieza simple: escribes, cuentas tus fechas y elegimos contigo el lugar que mejor calza con tu viaje.
+            <div className="max-w-xl lg:justify-self-end lg:pb-2">
+              <p className="text-lg leading-relaxed text-white/62">
+                Mandalas no se vende como una sola experiencia. Se entiende mejor como dos ritmos conectados por el mismo lago: el centro para salir, Hideout para bajar la velocidad.
               </p>
+            </div>
+          </div>
 
-              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+          <div className="relative mt-14 grid gap-6 lg:mt-20 lg:grid-cols-[0.72fr_1.28fr] lg:items-stretch">
+            <div className="order-2 flex flex-col justify-between border-y border-white/10 py-8 lg:order-1 lg:border-y-0 lg:border-r lg:py-0 lg:pr-10">
+              <div className="grid gap-7">
+                <RhythmPoint
+                  icon={SunMedium}
+                  eyebrow="Mandalas"
+                  title="Centro vivo"
+                  description="Rooftop, cocina, movimiento a pie y una energía más social para entrar al pueblo sin pedir permiso."
+                />
+                <RhythmPoint
+                  icon={Waves}
+                  eyebrow="Hideout"
+                  title="Lago y pausa"
+                  description="Una base más tranquila para dormir mejor, caminar al agua y regresar sin cargar el ruido del centro."
+                />
+                <RhythmPoint
+                  icon={MessageCircle}
+                  eyebrow="Reserva directa"
+                  title="Sin fricción"
+                  description="No necesitas decidirlo solo. Mandas fechas, cuentas el tipo de viaje y te orientamos hacia la sede correcta."
+                />
+              </div>
+
+              <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 <BookingLink
                   location="Mandalas Hostal"
-                  className="rounded-full bg-white px-8 py-6 text-stone-950 hover:bg-stone-200"
+                  className="h-12 border-white/20 bg-white px-8 text-stone-950 hover:bg-stone-200"
                 >
                   Consultar fechas
                 </BookingLink>
                 <Link href="/contact">
-                  <Button variant="outline" className="rounded-full border-white/20 bg-transparent px-8 py-6 text-white hover:bg-white hover:text-stone-950">
+                  <Button variant="outline" className="h-12 w-full rounded-full border-white/20 bg-transparent px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-none hover:bg-white hover:text-stone-950">
                     Contacto
                   </Button>
                 </Link>
               </div>
             </div>
+
+            <div className="order-1 grid min-h-[38rem] gap-4 lg:order-2 lg:grid-cols-[0.58fr_0.42fr]">
+              <Link href="/pueblo" className="group relative overflow-hidden border border-white/10 bg-stone-900">
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{ backgroundImage: "url('/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg')" }}
+                  aria-hidden="true"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/28 to-black/5" />
+                <div className="relative flex h-full min-h-[22rem] flex-col justify-between p-6 md:p-8">
+                  <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">
+                    <span>01</span>
+                    <span>Centro</span>
+                  </div>
+                  <div>
+                    <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-200/75">
+                      Mandalas
+                    </p>
+                    <h2 className="font-heading text-4xl font-light uppercase leading-none tracking-[0.14em] text-white md:text-6xl">
+                      Social
+                    </h2>
+                    <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/68">
+                      Para caminar, subir a la terraza y estar cerca de lo que pasa.
+                    </p>
+                  </div>
+                </div>
+              </Link>
+
+              <div className="grid gap-4">
+                <Link href="/hideout" className="group relative overflow-hidden border border-white/10 bg-stone-900">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                    style={{ backgroundImage: "url('/images/mandalas/hostelworld/hideout-terrace-dusk.jpg')" }}
+                    aria-hidden="true"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10" />
+                  <div className="relative flex min-h-[18rem] flex-col justify-end p-6 md:p-7">
+                    <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-lime-200/75">
+                      Hideout
+                    </p>
+                    <h2 className="font-heading text-3xl font-light uppercase tracking-[0.12em] text-white md:text-4xl">
+                      Pausa
+                    </h2>
+                    <p className="mt-4 text-sm leading-relaxed text-white/64">
+                      Más silencio, lago cerca y noches suaves.
+                    </p>
+                  </div>
+                </Link>
+
+                <div className="relative overflow-hidden border border-white/10 bg-white/[0.035] p-6 md:p-7">
+                  <MapPin className="mb-8 h-5 w-5 text-white/35" />
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/35">
+                    San Pedro La Laguna
+                  </p>
+                  <p className="mt-4 text-2xl font-light leading-snug text-white md:text-3xl">
+                    Elige por energía: ciudad de lago o refugio lento.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-20 grid border-y border-white/10 md:grid-cols-3">
-            <HomeNote
-              icon={MapPin}
-              title="San Pedro a tu manera"
-              description="Centro caminable o una base más tranquila fuera del ruido."
-            />
-            <HomeNote
-              icon={Coffee}
-              title="Sin complicar el viaje"
-              description="Resuelve disponibilidad, llegada y dudas por WhatsApp."
-            />
-            <HomeNote
-              icon={Moon}
-              title="Con alma de hostal"
-              description="Espacios sencillos, gente viajando y el lago siempre cerca."
-            />
+          <div className="mt-10 grid border-t border-white/10 pt-6 text-xs uppercase tracking-[0.18em] text-white/42 md:grid-cols-4 md:gap-8">
+            <div className="py-3 md:py-0">Centro caminable</div>
+            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Rooftop y cocina</div>
+            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Lago cerca</div>
+            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">
+              Dormitorios y privadas
+            </div>
           </div>
         </div>
       </section>
@@ -167,7 +251,7 @@ function HomePanel({
 
   return (
     <motion.div
-      className={`relative flex-1 group overflow-hidden cursor-pointer border-white/10 ${isActive ? "z-20 shadow-2xl shadow-black/35" : "z-10"} ${borderClass || ""}`}
+      className={`relative flex-1 group overflow-hidden cursor-pointer border-white/10 ${isActive ? "z-20" : "z-10"} ${borderClass || ""}`}
       animate={panelState}
       transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
       onMouseEnter={onMouseEnter}
@@ -210,9 +294,17 @@ function HomePanel({
           animate={{ opacity: isDimmed ? 0.55 : 1 }}
           transition={{ duration: 0.45 }}
         >
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55 sm:tracking-[0.28em]">
-            {label}
-          </p>
+          <div className="inline-flex max-w-[16rem] items-center gap-3 border border-white/15 bg-black/20 px-3 py-2 backdrop-blur-md">
+            <span className={`h-px w-6 ${accentClass}`} />
+            <div className="min-w-0">
+              <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-white/82 sm:tracking-[0.22em]">
+                {label}
+              </p>
+              <p className="mt-1 truncate text-[10px] font-medium uppercase tracking-[0.14em] text-white/48 sm:tracking-[0.18em]">
+                {kicker}
+              </p>
+            </div>
+          </div>
           <ArrowUpRight className="h-5 w-5 text-white/50 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-white" />
         </motion.div>
 
@@ -221,9 +313,6 @@ function HomePanel({
           animate={{ y: isActive ? -8 : 0, opacity: isDimmed ? 0.72 : 1 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/55 sm:mb-5 sm:tracking-[0.28em]">
-            {kicker}
-          </p>
           <h2 className="font-heading text-[2rem] font-light uppercase leading-none tracking-[0.06em] text-white sm:text-5xl sm:tracking-[0.12em] md:text-7xl md:tracking-[0.16em]">
             {title}
           </h2>
@@ -254,16 +343,31 @@ function HomePanel({
   )
 }
 
-function HomeNote({ icon: Icon, title, description }: { icon: typeof MessageCircle; title: string; description: string }) {
+function RhythmPoint({
+  icon: Icon,
+  eyebrow,
+  title,
+  description,
+}: {
+  icon: typeof MessageCircle
+  eyebrow: string
+  title: string
+  description: string
+}) {
   return (
-    <div className="border-white/10 py-8 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0 md:last:pr-0">
-      <Icon className="mb-6 h-5 w-5 text-white/45" />
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-white">
-        {title}
-      </h2>
-      <p className="text-sm leading-relaxed text-white/55">
-        {description}
-      </p>
+    <div className="grid grid-cols-[auto_1fr] gap-5 border-t border-white/10 pt-6 first:border-t-0 first:pt-0">
+      <Icon className="mt-1 h-5 w-5 text-white/42" />
+      <div>
+        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/38">
+          {eyebrow}
+        </p>
+        <h2 className="text-base font-semibold uppercase tracking-[0.14em] text-white">
+          {title}
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-white/55">
+          {description}
+        </p>
+      </div>
     </div>
   )
 }

@@ -20,13 +20,13 @@ type PracticalDetailsProps = {
 
 const accentStyles = {
     amber: {
-        text: "text-amber-700 dark:text-amber-300",
-        icon: "text-amber-600 dark:text-amber-300",
+        text: "text-amber-300",
+        icon: "text-amber-300",
         line: "bg-amber-500/30",
     },
     lime: {
-        text: "text-lime-700 dark:text-lime-300",
-        icon: "text-lime-600 dark:text-lime-300",
+        text: "text-lime-300",
+        icon: "text-lime-300",
         line: "bg-lime-500/30",
     },
 }
@@ -54,7 +54,7 @@ export function PracticalDetails({ eyebrow, title, description, details, accent 
 
                         <div className="grid gap-x-8 gap-y-9 sm:grid-cols-2">
                             {details.map((detail) => (
-                                <div key={detail.title} className="border-t border-border pt-5">
+                                <div key={detail.title} className="border-t border-white/10 pt-5">
                                     <detail.icon className={`mb-4 h-5 w-5 stroke-[1.8px] ${style.icon}`} />
                                     <h3 className="mb-2 text-base font-semibold text-foreground">
                                         {detail.title}

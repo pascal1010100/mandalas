@@ -23,7 +23,7 @@ export default function PuebloPage() {
                 <BookingLink
                     location="Mandalas"
                     size="lg"
-                    className="rounded-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-lg shadow-orange-900/20 hover:shadow-2xl hover:shadow-orange-900/30 transition-all duration-500 ease-out hover:scale-[1.02] text-lg px-8 border border-white/20 backdrop-blur-sm gap-2"
+                    className="h-12 border-white/25 bg-white px-8 text-stone-950 hover:bg-stone-200 gap-2"
                 >
                     Consultar fechas
                 </BookingLink>
@@ -34,7 +34,7 @@ export default function PuebloPage() {
                 <FadeIn>
                     <div className="max-w-4xl mx-auto text-center space-y-8">
                         <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">El pulso del pueblo</h2>
-                        <div className="w-24 h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent mx-auto opacity-50" />
+                        <div className="mx-auto h-px w-24 bg-amber-300/40" />
                         <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
                             Aquí la estadía se siente caminable: llegas, dejas la mochila, subes a ver el lago y sales a encontrar el ritmo del pueblo.
                         </p>
@@ -57,15 +57,15 @@ export default function PuebloPage() {
                 </FadeIn>
             </section>
 
-            <section className="border-y border-stone-200/70 bg-stone-50 py-16 dark:border-stone-800 dark:bg-stone-950">
+            <section className="border-y border-white/10 bg-stone-950 py-16">
                 <div className="container mx-auto px-4">
                     <FadeIn>
                         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
                             <div>
-                                <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-amber-700/70 dark:text-amber-300/60">
+                                <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-amber-300/60">
                                     Datos útiles
                                 </p>
-                                <h2 className="font-heading text-3xl font-light uppercase leading-tight tracking-[0.14em] text-stone-950 dark:text-white md:text-4xl">
+                                <h2 className="font-heading text-3xl font-light uppercase leading-tight tracking-[0.14em] text-white md:text-4xl">
                                     Céntrico, simple, con vista
                                 </h2>
                                 <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
@@ -82,9 +82,9 @@ export default function PuebloPage() {
                                     { icon: Clock, title: "Horarios", description: "Check-in 14:00-24:00. Check-out hasta las 11:00." },
                                     { icon: MapPin, title: "Ubicación", description: "Aproximadamente 0.3 km del centro de San Pedro." },
                                 ].map((detail) => (
-                                    <div key={detail.title} className="border-t border-stone-200 py-5 dark:border-stone-800">
-                                        <detail.icon className="mb-4 h-5 w-5 text-amber-700/70 dark:text-amber-300/70" />
-                                        <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-stone-950 dark:text-white">
+                                    <div key={detail.title} className="border-t border-white/10 py-5">
+                                        <detail.icon className="mb-4 h-5 w-5 text-amber-300/70" />
+                                        <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.16em] text-white">
                                             {detail.title}
                                         </h3>
                                         <p className="text-sm leading-relaxed text-muted-foreground">
@@ -220,7 +220,7 @@ export default function PuebloPage() {
                     <BookingLink
                         location="Mandalas"
                         size="lg"
-                        className="rounded-full bg-white text-black hover:bg-stone-200 text-lg px-10 py-6 transition-transform hover:scale-105 duration-300 gap-2"
+                        className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
                     >
                         Escribir por WhatsApp
                     </BookingLink>

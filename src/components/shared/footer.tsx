@@ -12,7 +12,7 @@ export function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     <div className="space-y-6">
                         <h3 className="text-2xl font-black text-white tracking-tighter font-heading">
-                            MANDALAS<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600">.</span>
+                            MANDALAS<span className="text-amber-400">.</span>
                         </h3>
                         <p className="text-sm leading-relaxed max-w-xs text-stone-500 font-light">
                             Dos formas sencillas de quedarse en San Pedro: cerca del movimiento o con más calma junto al lago.
@@ -66,7 +66,7 @@ export function Footer() {
                         </p>
                         <BookingLink
                             location="Mandalas Hostal"
-                            className="rounded-full bg-white text-stone-950 hover:bg-stone-200 font-semibold"
+                            className="border-white/20 bg-white text-stone-950 hover:bg-stone-200"
                         >
                             Consultar
                         </BookingLink>

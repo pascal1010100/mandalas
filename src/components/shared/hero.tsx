@@ -52,6 +52,9 @@ export function Hero({
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-black/75" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,transparent_0%,rgba(0,0,0,0.18)_42%,rgba(0,0,0,0.72)_100%)]" />
+            {align === "left" && (
+                <div className="absolute inset-0 bg-gradient-to-r from-black/78 via-black/38 to-transparent" />
+            )}
 
             {/* Content */}
             <div className={cn(

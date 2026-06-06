@@ -13,8 +13,6 @@ import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reve
 export function Navbar() {
     const [scrolled, setScrolled] = React.useState(false)
     const pathname = usePathname()
-    const isHome = pathname === "/"
-
     React.useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20)
@@ -31,7 +29,7 @@ export function Navbar() {
             hoverBg: "hover:bg-amber-50/80 dark:hover:bg-amber-900/30",
             activeBg: "bg-amber-50/50 dark:bg-amber-900/20",
             indicator: "bg-amber-600 dark:bg-amber-500",
-            button: "bg-gradient-to-r from-amber-500 to-orange-600 hover:shadow-orange-900/20"
+            button: "border-white/15 bg-white text-stone-950 hover:bg-stone-200"
         }
         if (pathname.includes("/hideout")) return {
             text: "text-lime-700 dark:text-lime-400",
@@ -40,7 +38,7 @@ export function Navbar() {
             hoverBg: "hover:bg-lime-50/80 dark:hover:bg-lime-900/30",
             activeBg: "bg-lime-50/50 dark:bg-lime-900/20",
             indicator: "bg-lime-600 dark:bg-lime-500",
-            button: "bg-gradient-to-r from-lime-600 to-green-700 hover:shadow-lime-900/20"
+            button: "border-white/15 bg-white text-stone-950 hover:bg-stone-200"
         }
         return {
             text: "text-stone-800 dark:text-stone-100",
@@ -49,7 +47,7 @@ export function Navbar() {
             hoverBg: "hover:bg-stone-100 dark:hover:bg-stone-800",
             activeBg: "bg-stone-100 dark:bg-stone-800",
             indicator: "bg-stone-800 dark:bg-stone-200",
-            button: "bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white"
+            button: "border-white/15 bg-white text-stone-950 hover:bg-stone-200"
         }
     }
 
@@ -62,10 +60,8 @@ export function Navbar() {
             className={cn(
                 "fixed top-0 w-full z-50 transition-all duration-300 border-b",
                 scrolled
-                    ? "bg-white/80 dark:bg-stone-950/80 backdrop-blur-xl border-stone-200/50 dark:border-white/10 shadow-lg shadow-stone-900/5 dark:shadow-black/20 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-stone-950/60"
-                    : isHome
-                        ? "bg-transparent border-transparent text-white"
-                        : "bg-white/80 dark:bg-stone-950/80 backdrop-blur-xl border-stone-200/50 dark:border-white/10 shadow-lg shadow-stone-900/5 dark:shadow-black/20 supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-stone-950/60"
+                    ? "bg-stone-950/80 backdrop-blur-xl border-white/10 shadow-lg shadow-black/20 supports-[backdrop-filter]:bg-stone-950/60"
+                    : "bg-transparent border-transparent text-white"
             )}
         >
             <div className="container mx-auto px-4 h-20 flex items-center justify-between">
@@ -73,9 +69,7 @@ export function Navbar() {
                     {/* Main Brand */}
                     <span className={cn(
                         "text-3xl font-black tracking-tighter transition-all duration-300 font-heading",
-                        scrolled || !isHome
-                            ? "text-stone-800 dark:text-stone-100"
-                            : "text-white",
+                        scrolled ? "text-stone-100" : "text-white",
                         isPueblo && "group-hover:text-amber-600",
                         isHideout && "group-hover:text-lime-600"
                     )}>
@@ -84,9 +78,7 @@ export function Navbar() {
                     {/* Subtitle */}
                     <span className={cn(
                         "text-[10px] font-medium tracking-wide uppercase transition-all duration-300 mt-0.5",
-                        scrolled || !isHome
-                            ? "text-stone-500 dark:text-stone-400"
-                            : "text-white/70"
+                        scrolled ? "text-stone-400" : "text-white/70"
                     )}>
                         Hostal · San Pedro
                     </span>
@@ -97,52 +89,54 @@ export function Navbar() {
                     <Link
                         href="/pueblo"
                         className={cn(
-                            "relative px-4 py-2 rounded-lg transition-all duration-300",
-                            "hover:bg-amber-50/80 hover:text-amber-700",
+                            "relative px-3 py-2 transition-colors duration-300",
+                            "hover:text-amber-300",
                             pathname === "/pueblo"
-                                ? "text-amber-700 bg-amber-50/50"
-                                : scrolled || !isHome ? "text-stone-700 dark:text-stone-300" : "text-white/90"
+                                ? "text-amber-300"
+                                : scrolled ? "text-stone-300" : "text-white/90"
                         )}
                     >
                         Mandalas
                         {pathname === "/pueblo" && (
-                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-amber-600" />
+                            <span className="absolute bottom-0 left-3 right-3 h-px bg-amber-300/70" />
                         )}
                     </Link>
                     <Link
                         href="/hideout"
                         className={cn(
-                            "relative px-4 py-2 rounded-lg transition-all duration-300",
-                            "hover:bg-lime-50/80 hover:text-lime-700",
+                            "relative px-3 py-2 transition-colors duration-300",
+                            "hover:text-lime-300",
                             pathname === "/hideout"
-                                ? "text-lime-700 bg-lime-50/50"
-                                : scrolled || !isHome ? "text-stone-700 dark:text-stone-300" : "text-white/90"
+                                ? "text-lime-300"
+                                : scrolled ? "text-stone-300" : "text-white/90"
                         )}
                     >
                         Hideout
                         {pathname === "/hideout" && (
-                            <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-lime-600" />
+                            <span className="absolute bottom-0 left-3 right-3 h-px bg-lime-300/70" />
                         )}
                     </Link>
                     <Link
                         href="/contact"
                         className={cn(
-                            "relative px-4 py-2 rounded-lg transition-all duration-300",
-                            "hover:bg-stone-100 hover:text-stone-900",
+                            "relative px-3 py-2 transition-colors duration-300",
+                            "hover:text-white",
                             pathname === "/contact"
-                                ? "text-stone-900 bg-stone-100"
-                                : scrolled || !isHome ? "text-stone-700 dark:text-stone-300" : "text-white/90"
+                                ? "text-white"
+                                : scrolled ? "text-stone-300" : "text-white/90"
                         )}
                     >
                         Contacto
+                        {pathname === "/contact" && (
+                            <span className="absolute bottom-0 left-3 right-3 h-px bg-white/70" />
+                        )}
                     </Link>
 
                     <BookingLink
                         location={isHideout ? "Mandalas Hideout" : "Mandalas"}
                         className={cn(
-                            "rounded-full font-bold px-6 h-10 shadow-lg transition-all duration-300 text-white border-0 gap-2",
-                            theme.button,
-                            "hover:scale-105"
+                            "h-10 px-6 gap-2",
+                            theme.button
                         )}
                     >
                         WhatsApp
@@ -151,14 +145,11 @@ export function Navbar() {
 
                 <Sheet>
                     <SheetTrigger asChild className="md:hidden">
-                        <Button variant="ghost" size="icon" className={cn("transition-colors", !scrolled && isHome ? "text-white hover:text-white/80" : "text-stone-800 dark:text-stone-100")} suppressHydrationWarning>
+                        <Button variant="ghost" size="icon" className={cn("transition-colors", scrolled ? "text-stone-100 hover:text-white" : "text-white hover:text-white/80")} suppressHydrationWarning>
                             <Menu className="h-6 w-6" />
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="right" className="w-full sm:w-[400px] border-l-stone-200/50 dark:border-l-stone-800/50 bg-white/95 dark:bg-stone-950/95 backdrop-blur-3xl p-0 overflow-hidden">
-                        {/* Decorative Background Blob */}
-                        <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] bg-gradient-to-br from-amber-200/20 to-lime-200/20 rounded-full blur-[80px] pointer-events-none" />
-
+                    <SheetContent side="right" className="w-full sm:w-[400px] border-l border-white/10 bg-stone-950/95 backdrop-blur-3xl p-0 overflow-hidden">
                         <div className="h-full flex flex-col p-8 relative z-10">
                             <SheetHeader className="mb-8">
                                 <SheetTitle className="text-left">
@@ -180,7 +171,7 @@ export function Navbar() {
                                             href="/pueblo"
                                             className={cn(
                                                 "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-amber-200 dark:hover:border-amber-900 group",
-                                                pathname === "/pueblo" ? "text-amber-600 pl-4 border-amber-200" : "text-stone-800 dark:text-stone-200 hover:pl-4 hover:text-amber-600"
+                                                pathname === "/pueblo" ? "text-amber-300 pl-4 border-amber-300/30" : "text-stone-200 hover:pl-4 hover:text-amber-300"
                                             )}
                                         >
                                             Mandalas
@@ -194,7 +185,7 @@ export function Navbar() {
                                             href="/hideout"
                                             className={cn(
                                                 "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-lime-200 dark:hover:border-lime-900 group",
-                                                pathname === "/hideout" ? "text-lime-600 pl-4 border-lime-200" : "text-stone-800 dark:text-stone-200 hover:pl-4 hover:text-lime-600"
+                                                pathname === "/hideout" ? "text-lime-300 pl-4 border-lime-300/30" : "text-stone-200 hover:pl-4 hover:text-lime-300"
                                             )}
                                         >
                                             Hideout
@@ -208,7 +199,7 @@ export function Navbar() {
                                             href="/contact"
                                             className={cn(
                                                 "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-stone-200 dark:hover:border-stone-800 group",
-                                                pathname === "/contact" ? "text-stone-900 pl-4 border-stone-200" : "text-stone-500 dark:text-stone-400 hover:pl-4 hover:text-stone-900 dark:hover:text-white"
+                                                pathname === "/contact" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
                                             )}
                                         >
                                             Contacto
@@ -219,7 +210,7 @@ export function Navbar() {
                                     <StaggerItem>
                                         <BookingLink
                                             location={isHideout ? "Mandalas Hideout" : "Mandalas"}
-                                            className={cn("w-full rounded-2xl text-xl py-8 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] gap-2", theme.button)}
+                                            className={cn("h-14 w-full gap-2", theme.button)}
                                         >
                                             CONSULTAR POR WHATSAPP
                                         </BookingLink>

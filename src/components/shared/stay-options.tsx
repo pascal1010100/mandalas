@@ -26,16 +26,16 @@ type StayOptionsProps = {
 
 const accentStyles = {
     amber: {
-        eyebrow: "text-amber-700 dark:text-amber-300",
-        icon: "text-amber-600 dark:text-amber-300",
-        button: "bg-amber-600 text-white hover:bg-amber-700",
-        price: "text-amber-700 dark:text-amber-300",
+        eyebrow: "text-amber-300",
+        icon: "text-amber-300",
+        button: "border-white/15 bg-white/[0.04] text-white hover:bg-white hover:text-stone-950",
+        price: "text-amber-300",
     },
     lime: {
-        eyebrow: "text-lime-700 dark:text-lime-300",
-        icon: "text-lime-600 dark:text-lime-300",
-        button: "bg-lime-700 text-white hover:bg-lime-800",
-        price: "text-lime-700 dark:text-lime-300",
+        eyebrow: "text-lime-300",
+        icon: "text-lime-300",
+        button: "border-white/15 bg-white/[0.04] text-white hover:bg-white hover:text-stone-950",
+        price: "text-lime-300",
     },
 }
 
@@ -43,7 +43,7 @@ export function StayOptions({ eyebrow, title, description, location, accent, opt
     const style = accentStyles[accent]
 
     return (
-        <section className="bg-stone-50 py-24 dark:bg-stone-950/50">
+        <section className="bg-stone-950/50 py-24">
             <div className="container mx-auto px-4">
                 <FadeIn>
                     <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
@@ -59,14 +59,14 @@ export function StayOptions({ eyebrow, title, description, location, accent, opt
                             </p>
                         </div>
 
-                        <div className="border-y border-border">
+                        <div className="border-y border-white/10">
                             {options.map((option) => (
                                 <div
                                     key={option.title}
-                                    className="grid gap-6 border-b border-border py-8 last:border-b-0 md:grid-cols-[1fr_auto] md:items-center"
+                                    className="grid gap-6 border-b border-white/10 py-8 last:border-b-0 md:grid-cols-[1fr_auto] md:items-center"
                                 >
                                     <div className="grid gap-5 sm:grid-cols-[auto_1fr]">
-                                        <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-background ${style.icon}`}>
+                                        <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.04] ${style.icon}`}>
                                             <option.icon className="h-5 w-5" />
                                         </div>
                                         <div>
@@ -101,7 +101,7 @@ export function StayOptions({ eyebrow, title, description, location, accent, opt
                                         <BookingLink
                                             location={location}
                                             roomName={option.roomName}
-                                            className={`rounded-full px-6 ${style.button}`}
+                                            className={`px-6 ${style.button}`}
                                         >
                                             Preguntar
                                         </BookingLink>

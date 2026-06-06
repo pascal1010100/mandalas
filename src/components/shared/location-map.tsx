@@ -28,17 +28,17 @@ export function LocationMap() {
             })()
     }, [])
 
-    if (!isMounted) return <div className="h-full min-h-[320px] w-full animate-pulse rounded-lg bg-stone-200" />
+    if (!isMounted) return <div className="h-full min-h-[320px] w-full animate-pulse rounded-lg bg-stone-900" />
 
     const puebloCoords: [number, number] = [14.693, -91.274] // Approximate
     const hideoutCoords: [number, number] = [14.688, -91.270] // Approximate (further along shore)
 
     return (
-        <div className="h-full min-h-[320px] w-full overflow-hidden rounded-lg border border-stone-200 shadow-xl">
-            <MapContainer center={puebloCoords} zoom={15} scrollWheelZoom={false} className="h-full w-full">
+        <div className="h-full min-h-[320px] w-full overflow-hidden rounded-lg border border-white/10 bg-stone-950">
+            <MapContainer center={puebloCoords} zoom={15} scrollWheelZoom={false} className="h-full w-full bg-stone-950">
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" // Light theme map
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                 />
 
                 <Marker position={puebloCoords}>
