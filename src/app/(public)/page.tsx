@@ -288,7 +288,7 @@ function HomePanel({
         style={{ transformOrigin: "left" }}
       />
 
-      <Link href={href} className="relative z-10 flex h-full min-h-[54svh] flex-col justify-end p-6 text-white sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-12 lg:p-16">
+      <Link href={href} className="relative z-10 flex h-full min-h-[54svh] flex-col justify-end p-6 text-white sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-9 lg:p-12 xl:p-16">
         <motion.div
           className="mb-auto flex items-center justify-between gap-5 pt-16 md:pt-24"
           animate={{ opacity: isDimmed ? 0.55 : 1 }}
@@ -313,7 +313,7 @@ function HomePanel({
           animate={{ y: isActive ? -8 : 0, opacity: isDimmed ? 0.72 : 1 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h2 className="font-heading text-[2rem] font-light uppercase leading-none tracking-[0.06em] text-white sm:text-5xl sm:tracking-[0.12em] md:text-7xl md:tracking-[0.16em]">
+          <h2 className="font-heading max-w-full text-[2rem] font-light uppercase leading-none tracking-[0.06em] text-white sm:text-5xl sm:tracking-[0.12em] md:text-[3.6rem] md:tracking-[0.08em] lg:text-[4.25rem] xl:text-[5.25rem] xl:tracking-[0.12em] 2xl:text-8xl 2xl:tracking-[0.16em]">
             {title}
           </h2>
           <p className="mt-5 max-w-[20rem] text-sm font-light leading-relaxed text-white/70 sm:mt-6 sm:min-h-[4.5rem] sm:max-w-md sm:text-base">
