@@ -3,14 +3,14 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
     title: "Mandalas Hideout cerca del Lago Atitlan",
     description:
-        "Mandalas Hideout es la sede tranquila en San Pedro La Laguna, cerca del lago y fuera del centro, con terraza, cocina, dormitorios, privadas y reserva directa por WhatsApp.",
+        "Mandalas Hideout es la sede tranquila en San Pedro La Laguna, cerca del lago y fuera del centro, con terraza, cocina, dormitorios, privadas y consulta por WhatsApp.",
     alternates: {
         canonical: "/hideout",
     },
     openGraph: {
         title: "Mandalas Hideout cerca del Lago Atitlan",
         description:
-            "Una sede tranquila cerca del lago en San Pedro La Laguna, ideal para bajar el ritmo y reservar directo por WhatsApp.",
+            "Una sede tranquila cerca del lago en San Pedro La Laguna, ideal para bajar el ritmo y consultar fechas por WhatsApp.",
         url: "/hideout",
         images: [
             {

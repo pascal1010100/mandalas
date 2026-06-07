@@ -3,12 +3,13 @@
 import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
-import { Waves, Cloud, Moon, Sprout, BedDouble, DoorClosed, ShieldCheck, MapPin, Bike, Utensils, Clock, Luggage, Wifi } from "lucide-react"
+import { Waves, Cloud, Moon, Sprout, BedDouble, DoorClosed, ShieldCheck, MapPin, Bike, Utensils, Clock, Luggage, Wifi, Instagram } from "lucide-react"
 import { ConsultationLink } from "@/components/shared/consultation-link"
 import { ExperienceSection } from "@/components/shared/experience-section"
 import { PracticalDetails } from "@/components/shared/practical-details"
 import { PropertyGallery } from "@/components/shared/property-gallery"
 import { StayOptions } from "@/components/shared/stay-options"
+import { publicContact } from "@/lib/public-contact"
 
 export default function HideoutPage() {
     return (
@@ -225,6 +226,15 @@ export default function HideoutPage() {
                     >
                         Consultar disponibilidad
                     </ConsultationLink>
+                    <a
+                        href={publicContact.instagram.hideout}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-lime-200"
+                    >
+                        <Instagram className="h-4 w-4" />
+                        Ver Hideout en Instagram
+                    </a>
                 </FadeIn>
             </section>
         </div>

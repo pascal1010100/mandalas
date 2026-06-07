@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     default: "Mandalas Hostal | Hostal en San Pedro La Laguna",
     template: "%s | Mandalas Hostal",
   },
-  description: "Hostal en San Pedro La Laguna con dos sedes: Mandalas en el centro y Hideout cerca del Lago Atitlan. Consulta disponibilidad y reserva directo por WhatsApp.",
+  description: "Hostal en San Pedro La Laguna con dos sedes: Mandalas en el centro y Hideout cerca del Lago Atitlan. Consulta fechas por WhatsApp.",
   applicationName: "Mandalas Hostal",
   keywords: [
     "Mandalas Hostal",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Mandalas Hostal | Hostal en San Pedro La Laguna",
-    description: "Mandalas en el centro y Hideout cerca del Lago Atitlan, con reserva directa por WhatsApp.",
+    description: "Mandalas en el centro y Hideout cerca del Lago Atitlan, con consulta personalizada por WhatsApp.",
     url: "/",
     siteName: "Mandalas Hostal",
     locale: "es_GT",

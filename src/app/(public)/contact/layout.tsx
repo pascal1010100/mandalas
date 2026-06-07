@@ -1,16 +1,16 @@
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-    title: "Contacto y reserva directa",
+    title: "Contacto y consulta de estadia",
     description:
-        "Contacta a Mandalas Hostal para consultar disponibilidad, fechas y elegir entre Mandalas en el centro o Hideout cerca del lago en San Pedro La Laguna.",
+        "Contacta a Mandalas Hostal para consultar fechas y elegir entre Mandalas en el centro o Hideout cerca del lago en San Pedro La Laguna.",
     alternates: {
         canonical: "/contact",
     },
     openGraph: {
-        title: "Contacto y reserva directa | Mandalas Hostal",
+        title: "Contacto y consulta de estadia | Mandalas Hostal",
         description:
-            "Escríbenos por WhatsApp para consultar fechas y elegir la sede que mejor va con tu viaje.",
+            "Consulta fechas por WhatsApp y elige la sede que mejor va con tu viaje.",
         url: "/contact",
         images: [
             {
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "Contacto y reserva directa | Mandalas Hostal",
-        description: "Consulta fechas y disponibilidad por WhatsApp.",
+        title: "Contacto y consulta de estadia | Mandalas Hostal",
+        description: "Consulta fechas y sede ideal por WhatsApp.",
         images: ["/images/mandalas/pueblo-dock-boat.jpg"],
     },
 }

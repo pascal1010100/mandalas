@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Mail, MapPin, Phone } from "lucide-react"
 import { ConsultationLink } from "@/components/shared/consultation-link"
+import { SocialLinks } from "@/components/shared/social-links"
 import { buildContactHref, getDisplayPhone, publicContact } from "@/lib/public-contact"
 
 const displayPhone = getDisplayPhone()
@@ -17,6 +18,10 @@ export function Footer() {
                         <p className="text-sm leading-relaxed max-w-xs text-stone-500 font-light">
                             Dos formas sencillas de quedarse en San Pedro: cerca del movimiento o con más calma junto al lago.
                         </p>
+                        <SocialLinks
+                            className="gap-2"
+                            itemClassName="border-stone-800 px-3 py-2 text-[10px] text-stone-500 hover:border-white/20 hover:text-white"
+                        />
                     </div>
 
                     <div>

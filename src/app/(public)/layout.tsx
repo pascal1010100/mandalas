@@ -15,6 +15,10 @@ const siteJsonLd = {
             name: "Mandalas Hostal",
             url: siteUrl,
             inLanguage: "es-GT",
+            sameAs: [
+                publicContact.instagram.mandalas,
+                publicContact.instagram.hideout,
+            ],
         },
         {
             "@type": "Hostel",
@@ -25,6 +29,10 @@ const siteJsonLd = {
             url: siteUrl,
             telephone: publicContact.whatsappNumber ? `+${publicContact.whatsappNumber}` : undefined,
             email: publicContact.email,
+            sameAs: [
+                publicContact.instagram.mandalas,
+                publicContact.instagram.hideout,
+            ],
             image: [
                 `${siteUrl}/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg`,
                 `${siteUrl}/images/mandalas/hostelworld/hideout-terrace-dusk.jpg`,
@@ -39,13 +47,14 @@ const siteJsonLd = {
                 { "@type": "LocationFeatureSpecification", name: "Free WiFi", value: true },
                 { "@type": "LocationFeatureSpecification", name: "Shared kitchen", value: true },
                 { "@type": "LocationFeatureSpecification", name: "Rooftop terrace", value: true },
-                { "@type": "LocationFeatureSpecification", name: "Direct booking by WhatsApp", value: true },
+                { "@type": "LocationFeatureSpecification", name: "WhatsApp booking inquiry", value: true },
             ],
             hasPart: [
                 {
                     "@type": "Hostel",
                     name: "Mandalas Hostal",
                     url: `${siteUrl}/pueblo`,
+                    sameAs: publicContact.instagram.mandalas,
                     image: `${siteUrl}/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg`,
                     address: {
                         "@type": "PostalAddress",
@@ -58,6 +67,7 @@ const siteJsonLd = {
                     "@type": "Hostel",
                     name: "Mandalas Hideout",
                     url: `${siteUrl}/hideout`,
+                    sameAs: publicContact.instagram.hideout,
                     image: `${siteUrl}/images/mandalas/hostelworld/hideout-terrace-dusk.jpg`,
                     address: {
                         "@type": "PostalAddress",

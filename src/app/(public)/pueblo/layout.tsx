@@ -3,14 +3,14 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
     title: "Mandalas Hostal en San Pedro La Laguna",
     description:
-        "Mandalas Hostal es la sede céntrica para quedarte en San Pedro La Laguna: terraza, cocina, dormitorios compartidos, privadas sencillas y reserva directa por WhatsApp.",
+        "Mandalas Hostal es la sede centrica para quedarte en San Pedro La Laguna: terraza, cocina, dormitorios compartidos, privadas sencillas y consulta por WhatsApp.",
     alternates: {
         canonical: "/pueblo",
     },
     openGraph: {
         title: "Mandalas Hostal en San Pedro La Laguna",
         description:
-            "Hostal céntrico en San Pedro La Laguna con terraza, ambiente social y reserva directa por WhatsApp.",
+            "Hostal centrico en San Pedro La Laguna con terraza, ambiente social y consulta personalizada por WhatsApp.",
         url: "/pueblo",
         images: [
             {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     twitter: {
         card: "summary_large_image",
         title: "Mandalas Hostal en San Pedro La Laguna",
-        description: "Hostal céntrico con terraza, cocina y reserva directa por WhatsApp.",
+        description: "Hostal centrico con terraza, cocina y consulta por WhatsApp.",
         images: ["/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"],
     },
 }

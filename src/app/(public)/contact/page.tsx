@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
   CalendarDays,
+  Instagram,
   Mail,
   MapPin,
   MessageCircle,
@@ -17,6 +18,7 @@ import { FadeIn } from "@/components/animations/fade-in";
 import { BookingLink } from "@/components/shared/booking-link";
 import { Hero } from "@/components/shared/hero";
 import { LocationMap } from "@/components/shared/location-map";
+import { SocialLinks } from "@/components/shared/social-links";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -350,6 +352,26 @@ export default function ContactPage() {
                       >
                         {publicContact.email}
                       </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-white/[0.04] p-6 sm:col-span-2 lg:col-span-1">
+                  <div className="flex items-start gap-4">
+                    <div className="mt-1 rounded-full bg-white/10 p-3 text-white">
+                      <Instagram className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="mb-2 font-semibold text-white">
+                        Instagram
+                      </h3>
+                      <p className="mb-4 text-sm leading-relaxed text-stone-400">
+                        Mira el ambiente reciente de cada sede antes de decidir.
+                      </p>
+                      <SocialLinks
+                        className="gap-2"
+                        itemClassName="border-white/15 px-3 py-2 text-[10px]"
+                      />
                     </div>
                   </div>
                 </div>
