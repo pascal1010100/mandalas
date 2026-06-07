@@ -1,8 +1,8 @@
 export const APP_CONFIG = {
     business: {
         name: "Mandalas Hostal",
-        email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@mandalashostal.com",
-        phone: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "",
+        email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "mandalashostal@gmail.com",
+        phone: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "50232289507",
     },
     payment: {
         bankName: "BANRURAL",

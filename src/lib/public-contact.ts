@@ -1,8 +1,8 @@
-const rawWhatsAppNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ""
+const rawWhatsAppNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "50232289507"
 
 export const publicContact = {
     whatsappNumber: rawWhatsAppNumber.replace(/\D/g, ""),
-    email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@mandalashostal.com",
+    email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "mandalashostal@gmail.com",
     instagram: {
         mandalas: "https://www.instagram.com/mandalas_hostal/",
         hideout: "https://www.instagram.com/mandalashideout/",
