@@ -99,15 +99,16 @@ export default function PuebloPage() {
             </section>
 
             <PropertyGallery
+                id="galeria"
                 eyebrow="El lugar"
                 title="Arquitectura blanca, luz cálida y lago"
                 description="Mandalas tiene una energía más urbana, pero su encanto está en los detalles: pasillos con plantas, hamacas, rincones de descanso y una vista que ordena el día."
                 accent="amber"
                 images={[
                     {
-                        src: "/images/mandalas/hostelworld/pueblo-exterior.jpg",
-                        alt: "Fachada interior de Mandalas",
-                        label: "Entrada",
+                        src: "/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg",
+                        alt: "Patio interior de Mandalas con hamacas y luz natural",
+                        label: "Patio",
                     },
                     {
                         src: "/images/mandalas/hostelworld/pueblo-lake-view.jpg",

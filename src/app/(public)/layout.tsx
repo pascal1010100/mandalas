@@ -2,28 +2,72 @@ import { Navbar } from "@/components/shared/navbar"
 import { Footer } from "@/components/shared/footer"
 import { MobileCTA } from "@/components/shared/mobile-cta"
 import Script from "next/script"
+import { publicContact } from "@/lib/public-contact"
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://mandalas-sigma.vercel.app"
 
 const siteJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Hostel",
-    name: "Mandalas Hostal",
-    url: siteUrl,
-    image: [
-        `${siteUrl}/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg`,
-        `${siteUrl}/images/mandalas/hostelworld/hideout-exterior-volcano.jpg`,
-    ],
-    address: {
-        "@type": "PostalAddress",
-        addressLocality: "San Pedro La Laguna",
-        addressRegion: "Solola",
-        addressCountry: "GT",
-    },
-    amenityFeature: [
-        { "@type": "LocationFeatureSpecification", name: "Free WiFi", value: true },
-        { "@type": "LocationFeatureSpecification", name: "Shared kitchen", value: true },
-        { "@type": "LocationFeatureSpecification", name: "Rooftop terrace", value: true },
+    "@graph": [
+        {
+            "@type": "WebSite",
+            "@id": `${siteUrl}/#website`,
+            name: "Mandalas Hostal",
+            url: siteUrl,
+            inLanguage: "es-GT",
+        },
+        {
+            "@type": "Hostel",
+            "@id": `${siteUrl}/#hostel`,
+            name: "Mandalas Hostal",
+            alternateName: ["Mandala's Hostal", "Mandalas Hideout"],
+            description: "Hostal en San Pedro La Laguna con dos sedes: Mandalas en el centro y Hideout cerca del Lago Atitlan.",
+            url: siteUrl,
+            telephone: publicContact.whatsappNumber ? `+${publicContact.whatsappNumber}` : undefined,
+            email: publicContact.email,
+            image: [
+                `${siteUrl}/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg`,
+                `${siteUrl}/images/mandalas/hostelworld/hideout-terrace-dusk.jpg`,
+            ],
+            address: {
+                "@type": "PostalAddress",
+                addressLocality: "San Pedro La Laguna",
+                addressRegion: "Solola",
+                addressCountry: "GT",
+            },
+            amenityFeature: [
+                { "@type": "LocationFeatureSpecification", name: "Free WiFi", value: true },
+                { "@type": "LocationFeatureSpecification", name: "Shared kitchen", value: true },
+                { "@type": "LocationFeatureSpecification", name: "Rooftop terrace", value: true },
+                { "@type": "LocationFeatureSpecification", name: "Direct booking by WhatsApp", value: true },
+            ],
+            hasPart: [
+                {
+                    "@type": "Hostel",
+                    name: "Mandalas Hostal",
+                    url: `${siteUrl}/pueblo`,
+                    image: `${siteUrl}/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg`,
+                    address: {
+                        "@type": "PostalAddress",
+                        addressLocality: "San Pedro La Laguna",
+                        addressRegion: "Solola",
+                        addressCountry: "GT",
+                    },
+                },
+                {
+                    "@type": "Hostel",
+                    name: "Mandalas Hideout",
+                    url: `${siteUrl}/hideout`,
+                    image: `${siteUrl}/images/mandalas/hostelworld/hideout-terrace-dusk.jpg`,
+                    address: {
+                        "@type": "PostalAddress",
+                        addressLocality: "San Pedro La Laguna",
+                        addressRegion: "Solola",
+                        addressCountry: "GT",
+                    },
+                },
+            ],
+        },
     ],
 }
 

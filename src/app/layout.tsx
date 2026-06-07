@@ -17,16 +17,20 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://mandalas-sigma.vercel.app"),
   title: {
-    default: "Mandalas Hostal | San Pedro La Laguna",
+    default: "Mandalas Hostal | Hostal en San Pedro La Laguna",
     template: "%s | Mandalas Hostal",
   },
-  description: "Dos formas de quedarte en San Pedro La Laguna: Mandalas en el centro y Hideout cerca del lago, con reservas directas por WhatsApp.",
+  description: "Hostal en San Pedro La Laguna con dos sedes: Mandalas en el centro y Hideout cerca del Lago Atitlan. Consulta disponibilidad y reserva directo por WhatsApp.",
   applicationName: "Mandalas Hostal",
   keywords: [
     "Mandalas Hostal",
+    "Mandala's Hostal",
     "San Pedro La Laguna",
+    "Lago Atitlan",
+    "hostal Lago Atitlan",
     "Lake Atitlan hostel",
     "Hostal en San Pedro",
+    "hostal San Pedro La Laguna",
     "Mandalas Hideout",
     "hostel Guatemala",
   ],
@@ -37,8 +41,8 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Mandalas Hostal | San Pedro La Laguna",
-    description: "Una base social en el centro y un hideout tranquilo cerca del lago Atitlan.",
+    title: "Mandalas Hostal | Hostal en San Pedro La Laguna",
+    description: "Mandalas en el centro y Hideout cerca del Lago Atitlan, con reserva directa por WhatsApp.",
     url: "/",
     siteName: "Mandalas Hostal",
     locale: "es_GT",
@@ -54,8 +58,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mandalas Hostal | San Pedro La Laguna",
-    description: "Mandalas en el centro y Hideout cerca del lago.",
+    title: "Mandalas Hostal | Hostal en San Pedro La Laguna",
+    description: "Dos sedes en San Pedro La Laguna: centro y hideout cerca del lago.",
     images: ["/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"],
   },
   robots: {

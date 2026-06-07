@@ -9,7 +9,7 @@ import { BookingLink } from "@/components/shared/booking-link"
 
 const BACKGROUNDS = {
   pueblo: "linear-gradient(rgba(120, 53, 15, 0.22), rgba(28, 25, 23, 0.68)), url('/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg')",
-  hideout: "linear-gradient(rgba(63, 98, 18, 0.18), rgba(20, 83, 45, 0.72)), url('/images/mandalas/hostelworld/hideout-exterior-volcano.jpg')"
+  hideout: "linear-gradient(rgba(63, 98, 18, 0.18), rgba(20, 83, 45, 0.72)), url('/images/mandalas/hostelworld/hideout-terrace-dusk.jpg')"
 }
 
 export default function LandingPage() {

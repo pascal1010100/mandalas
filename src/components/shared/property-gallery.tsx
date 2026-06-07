@@ -11,6 +11,7 @@ type GalleryImage = {
 }
 
 type PropertyGalleryProps = {
+    id?: string
     eyebrow: string
     title: string
     description: string
@@ -23,11 +24,11 @@ const accentStyles = {
     lime: "text-lime-700 dark:text-lime-300",
 }
 
-export function PropertyGallery({ eyebrow, title, description, images, accent }: PropertyGalleryProps) {
+export function PropertyGallery({ id, eyebrow, title, description, images, accent }: PropertyGalleryProps) {
     const accentClass = accentStyles[accent]
 
     return (
-        <section className="bg-background py-24">
+        <section id={id} className="scroll-mt-24 bg-background py-24">
             <div className="container mx-auto px-4">
                 <FadeIn>
                     <div className="mb-12 grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">

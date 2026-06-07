@@ -99,16 +99,12 @@ export default function HideoutPage() {
             </section>
 
             <PropertyGallery
+                id="galeria"
                 eyebrow="El lugar"
                 title="Montaña cerca, noches suaves"
                 description="Hideout se entiende mejor por sus contrastes: la entrada frente al volcán, una terraza para bajar revoluciones y espacios comunes que se sienten más pausados que el centro."
                 accent="lime"
                 images={[
-                    {
-                        src: "/images/mandalas/hostelworld/hideout-exterior-volcano.jpg",
-                        alt: "Entrada de Mandalas Hideout con volcán al fondo",
-                        label: "Entrada",
-                    },
                     {
                         src: "/images/mandalas/hostelworld/hideout-terrace-dusk.jpg",
                         alt: "Terraza de Mandalas Hideout al atardecer",
@@ -118,6 +114,11 @@ export default function HideoutPage() {
                         src: "/images/mandalas/hostelworld/hideout-courtyard-night.jpg",
                         alt: "Patio nocturno de Mandalas Hideout",
                         label: "Patio",
+                    },
+                    {
+                        src: "/images/mandalas/hostelworld/hideout-exterior-volcano.jpg",
+                        alt: "Entrada de Mandalas Hideout con volcán al fondo",
+                        label: "Entrada",
                     },
                 ]}
             />

@@ -10,7 +10,7 @@ export function buildContactHref(message: string) {
         return `https://wa.me/${publicContact.whatsappNumber}?text=${encodeURIComponent(message)}`
     }
 
-    return `mailto:${publicContact.email}?subject=${encodeURIComponent("Consulta Mandalas")}&body=${encodeURIComponent(message)}`
+    return `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`
 }
 
 export function getDisplayPhone() {

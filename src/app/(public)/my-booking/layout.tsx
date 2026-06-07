@@ -1,0 +1,13 @@
+import type { Metadata } from "next"
+
+export const metadata: Metadata = {
+    title: "Mi reserva",
+    robots: {
+        index: false,
+        follow: false,
+    },
+}
+
+export default function MyBookingLayout({ children }: { children: React.ReactNode }) {
+    return children
+}
