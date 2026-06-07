@@ -4,7 +4,7 @@ import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
 import { Wifi, Coffee, Sun, MapPin, Utensils, BedDouble, DoorClosed, ShieldCheck, ShipWheel, Clock, WashingMachine, Route, LockKeyhole } from "lucide-react"
-import { BookingLink } from "@/components/shared/booking-link"
+import { ConsultationLink } from "@/components/shared/consultation-link"
 import { ExperienceSection } from "@/components/shared/experience-section"
 import { PracticalDetails } from "@/components/shared/practical-details"
 import { PropertyGallery } from "@/components/shared/property-gallery"
@@ -20,13 +20,13 @@ export default function PuebloPage() {
                 backgroundPosition="center center"
                 align="center"
             >
-                <BookingLink
+                <ConsultationLink
                     location="Mandalas"
                     size="lg"
                     className="h-12 border-white/25 bg-white px-8 text-stone-950 hover:bg-stone-200 gap-2"
                 >
                     Consultar fechas
-                </BookingLink>
+                </ConsultationLink>
             </Hero>
 
             {/* Intro Section */}
@@ -66,7 +66,7 @@ export default function PuebloPage() {
                                     Datos útiles
                                 </p>
                                 <h2 className="font-heading text-3xl font-light uppercase leading-tight tracking-[0.14em] text-white md:text-4xl">
-                                    Céntrico, simple, con vista
+                                    Céntrico, ligero, con vista
                                 </h2>
                                 <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
                                     Mandalas funciona como base social y práctica: llegas fácil, resuelves lo básico y tienes una terraza para volver cuando baja el sol.
@@ -178,8 +178,8 @@ export default function PuebloPage() {
 
             <StayOptions
                 eyebrow="Dormir en Mandalas"
-                title="Opciones simples para quedarte cerca"
-                description="Dormitorios compartidos y privadas sencillas, con la terraza como punto de encuentro y disponibilidad confirmada por WhatsApp."
+                title="Formas de quedarte cerca"
+                description="Dormitorios compartidos y privadas para viajar ligero, con la terraza como punto de encuentro y tarifa final confirmada por mensaje."
                 location="Mandalas"
                 accent="amber"
                 options={[
@@ -196,7 +196,7 @@ export default function PuebloPage() {
                         icon: ShieldCheck,
                         title: "Dormitorio Solo Chicas",
                         subtitle: "compartido",
-                        description: "Una opción compartida para viajeras que quieren una base simple, segura y bien ubicada.",
+                        description: "Una opción compartida para viajeras que quieren una base tranquila, segura y bien ubicada.",
                         details: ["Solo chicas", "Locker", "Áreas comunes"],
                         price: "Según fecha",
                         roomName: "Dormitorio Solo Chicas",
@@ -217,14 +217,14 @@ export default function PuebloPage() {
             <section className="py-24 bg-stone-900 text-white text-center">
                 <FadeIn>
                     <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Quédate en Mandalas</h2>
-                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Cuéntanos tus fechas y te confirmamos qué opción tiene más sentido para tu viaje.</p>
-                    <BookingLink
+                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Comparte tus fechas y te orientamos hacia la habitación que mejor acompaña tu viaje.</p>
+                    <ConsultationLink
                         location="Mandalas"
                         size="lg"
                         className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
                     >
-                        Escribir por WhatsApp
-                    </BookingLink>
+                        Consultar disponibilidad
+                    </ConsultationLink>
                 </FadeIn>
             </section>
         </div>

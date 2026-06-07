@@ -5,7 +5,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { ArrowUpRight, MapPin, MessageCircle, SunMedium, Waves } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { BookingLink } from "@/components/shared/booking-link"
+import { ConsultationLink } from "@/components/shared/consultation-link"
 
 const BACKGROUNDS = {
   pueblo: "linear-gradient(rgba(120, 53, 15, 0.22), rgba(28, 25, 23, 0.68)), url('/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg')",
@@ -114,19 +114,16 @@ export default function LandingPage() {
                 />
                 <RhythmPoint
                   icon={MessageCircle}
-                  eyebrow="Reserva directa"
-                  title="Sin fricción"
-                  description="No necesitas decidirlo solo. Mandas fechas, cuentas el tipo de viaje y te orientamos hacia la sede correcta."
+                  eyebrow="Consulta guiada"
+                  title="El ritmo correcto"
+                  description="Envías fechas y el tipo de viaje que buscas. Te orientamos hacia la sede que tiene más sentido."
                 />
               </div>
 
               <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                <BookingLink
-                  location="Mandalas Hostal"
-                  className="h-12 border-white/20 bg-white px-8 text-stone-950 hover:bg-stone-200"
-                >
+                <ConsultationLink className="h-12 border-white/20 bg-white px-8 text-stone-950 hover:bg-stone-200">
                   Consultar fechas
-                </BookingLink>
+                </ConsultationLink>
                 <Link href="/contact">
                   <Button variant="outline" className="h-12 w-full rounded-full border-white/20 bg-transparent px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-none hover:bg-white hover:text-stone-950">
                     Contacto

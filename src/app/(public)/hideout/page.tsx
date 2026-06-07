@@ -4,7 +4,7 @@ import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
 import { Waves, Cloud, Moon, Sprout, BedDouble, DoorClosed, ShieldCheck, MapPin, Bike, Utensils, Clock, Luggage, Wifi } from "lucide-react"
-import { BookingLink } from "@/components/shared/booking-link"
+import { ConsultationLink } from "@/components/shared/consultation-link"
 import { ExperienceSection } from "@/components/shared/experience-section"
 import { PracticalDetails } from "@/components/shared/practical-details"
 import { PropertyGallery } from "@/components/shared/property-gallery"
@@ -20,13 +20,13 @@ export default function HideoutPage() {
                 backgroundPosition="32% 50%"
                 align="left"
             >
-                <BookingLink
+                <ConsultationLink
                     location="Mandalas Hideout"
                     size="lg"
                     className="h-12 border-white/25 bg-white px-8 text-stone-950 hover:bg-stone-200 gap-2"
                 >
                     Consultar fechas
-                </BookingLink>
+                </ConsultationLink>
             </Hero>
 
             {/* Intro Section */}
@@ -77,7 +77,7 @@ export default function HideoutPage() {
                                 {[
                                     { icon: Waves, title: "Lago cerca", description: "A pocos minutos caminando de la orilla." },
                                     { icon: Bike, title: "Bicicletas", description: "Bicis gratis para huéspedes, ideal para moverte al pueblo." },
-                                    { icon: Utensils, title: "Cocina", description: "Cocina equipada para preparar algo simple durante la estadía." },
+                                    { icon: Utensils, title: "Cocina", description: "Cocina equipada para preparar algo ligero durante la estadía." },
                                     { icon: Clock, title: "Horarios", description: "Check-in 15:00-24:00. Check-out hasta las 10:00." },
                                     { icon: Luggage, title: "Equipaje", description: "Consigna de equipaje gratuita disponible." },
                                     { icon: MapPin, title: "Ubicación", description: "Aproximadamente 1.7 km del centro de San Pedro." },
@@ -137,7 +137,7 @@ export default function HideoutPage() {
                     {
                         icon: Sprout,
                         title: "Barrio tranquilo",
-                        description: "Un entorno más local para resolver lo simple y guardar energía.",
+                        description: "Un entorno más local para resolver lo necesario y guardar energía.",
                     },
                     {
                         icon: Moon,
@@ -178,8 +178,8 @@ export default function HideoutPage() {
 
             <StayOptions
                 eyebrow="Dormir en Hideout"
-                title="Opciones simples para descansar mejor"
-                description="Opciones compartidas y privadas para bajar el ritmo, con disponibilidad y tarifa final confirmadas directo por WhatsApp."
+                title="Formas de dormir con más calma"
+                description="Opciones compartidas y privadas para bajar el ritmo, con tarifa final y disponibilidad confirmadas por mensaje."
                 location="Mandalas Hideout"
                 accent="lime"
                 options={[
@@ -188,7 +188,7 @@ export default function HideoutPage() {
                         title: "Dormitorio Solo Chicas",
                         subtitle: "calmado",
                         description: "Para viajeras que buscan una base compartida con una energía más suave.",
-                        details: ["Solo chicas", "Más calma", "WhatsApp"],
+                        details: ["Solo chicas", "Más calma", "Lago cerca"],
                         price: "Según fecha",
                         roomName: "Dormitorio Solo Chicas",
                     },
@@ -217,14 +217,14 @@ export default function HideoutPage() {
             <section className="py-24 bg-stone-900 text-white text-center">
                 <FadeIn>
                     <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Baja el ritmo</h2>
-                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Cuéntanos tus fechas y te confirmamos la opción más tranquila disponible.</p>
-                    <BookingLink
+                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Comparte tus fechas y te orientamos hacia la opción más tranquila disponible.</p>
+                    <ConsultationLink
                         location="Mandalas Hideout"
                         size="lg"
                         className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
                     >
-                        Escribir por WhatsApp
-                    </BookingLink>
+                        Consultar disponibilidad
+                    </ConsultationLink>
                 </FadeIn>
             </section>
         </div>

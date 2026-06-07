@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Mail, MapPin, Phone } from "lucide-react"
-import { BookingLink } from "@/components/shared/booking-link"
+import { ConsultationLink } from "@/components/shared/consultation-link"
 import { buildContactHref, getDisplayPhone, publicContact } from "@/lib/public-contact"
 
 const displayPhone = getDisplayPhone()
@@ -62,14 +62,11 @@ export function Footer() {
                     <div>
                         <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Reserva Directa</h4>
                         <p className="text-sm leading-relaxed text-stone-500 font-light mb-5">
-                            Cuéntanos tus fechas y te orientamos por WhatsApp.
+                            Comparte fechas y estilo de viaje. Te orientamos hacia la sede correcta.
                         </p>
-                        <BookingLink
-                            location="Mandalas Hostal"
-                            className="border-white/20 bg-white text-stone-950 hover:bg-stone-200"
-                        >
+                        <ConsultationLink className="border-white/20 bg-white text-stone-950 hover:bg-stone-200">
                             Consultar
-                        </BookingLink>
+                        </ConsultationLink>
                     </div>
                 </div>
 

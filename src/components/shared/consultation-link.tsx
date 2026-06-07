@@ -1,0 +1,59 @@
+import Link from "next/link"
+import type * as React from "react"
+import { CalendarDays } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+
+type ConsultationLinkProps = React.ComponentProps<typeof Button> & {
+    location?: string
+    roomName?: string
+    showIcon?: boolean
+}
+
+function getContactLocation(location?: string) {
+    if (!location) return undefined
+    return location.toLowerCase().includes("hideout") ? "Hideout" : "Mandalas"
+}
+
+function buildInquiryHref(location?: string, roomName?: string) {
+    const params = new URLSearchParams()
+    const contactLocation = getContactLocation(location)
+
+    if (contactLocation) {
+        params.set("sede", contactLocation)
+    }
+
+    if (roomName) {
+        params.set("habitacion", roomName)
+    }
+
+    const query = params.toString()
+
+    return `/contact${query ? `?${query}` : ""}#consulta`
+}
+
+export function ConsultationLink({
+    location,
+    roomName,
+    showIcon = true,
+    children = "Consultar fechas",
+    className,
+    ...props
+}: ConsultationLinkProps) {
+    return (
+        <Button
+            asChild
+            className={cn(
+                "rounded-full border border-white/15 bg-white px-6 text-xs font-semibold uppercase tracking-[0.16em] text-stone-950 shadow-none transition-colors hover:bg-stone-200 hover:text-stone-950",
+                className
+            )}
+            {...props}
+        >
+            <Link href={buildInquiryHref(location, roomName)}>
+                {showIcon && <CalendarDays className="h-4 w-4" />}
+                {children}
+            </Link>
+        </Button>
+    )
+}
