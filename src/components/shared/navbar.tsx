@@ -80,7 +80,7 @@ export function Navbar() {
                         "text-[10px] font-medium tracking-wide uppercase transition-all duration-300 mt-0.5",
                         scrolled ? "text-stone-400" : "text-white/70"
                     )}>
-                        Hostal · San Pedro
+                        Hostel · San Pedro
                     </span>
                 </Link>
 
@@ -126,7 +126,7 @@ export function Navbar() {
                                 : scrolled ? "text-stone-300" : "text-white/90"
                         )}
                     >
-                        Contacto
+                        Contact
                         {pathname === "/contact" && (
                             <span className="absolute bottom-0 left-3 right-3 h-px bg-white/70" />
                         )}
@@ -158,7 +158,7 @@ export function Navbar() {
                                             MANDALAS
                                         </span>
                                         <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-400 dark:text-stone-500 mt-1">
-                                            Hostal · San Pedro
+                                            Hostel · San Pedro
                                         </span>
                                     </div>
                                 </SheetTitle>
@@ -175,7 +175,7 @@ export function Navbar() {
                                             )}
                                         >
                                             Mandalas
-                                            <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-amber-400 transition-colors">En el centro de San Pedro</span>
+                                            <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-amber-400 transition-colors">in the center of San Pedro</span>
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
@@ -189,7 +189,7 @@ export function Navbar() {
                                             )}
                                         >
                                             Hideout
-                                            <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-lime-400 transition-colors">Naturaleza y desconexión</span>
+                                            <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-lime-400 transition-colors">nature and slower nights</span>
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
@@ -202,7 +202,7 @@ export function Navbar() {
                                                 pathname === "/contact" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
                                             )}
                                         >
-                                            Contacto
+                                            Contact
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
@@ -212,7 +212,7 @@ export function Navbar() {
                                             location={isHideout ? "Mandalas Hideout" : "Mandalas"}
                                             className={cn("h-14 w-full gap-2", theme.button)}
                                         >
-                                            CONSULTAR POR WHATSAPP
+                                            ASK ON WHATSAPP
                                         </BookingLink>
                                     </StaggerItem>
                                 </div>

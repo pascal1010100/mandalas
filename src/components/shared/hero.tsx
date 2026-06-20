@@ -100,7 +100,7 @@ export function Hero({
             <div className="absolute bottom-0 left-0 right-0 z-20 hidden md:block">
                 <div className="container mx-auto px-4 pb-8">
                     <div className="flex items-center justify-between border-t border-white/15 pt-5 text-xs uppercase tracking-[0.22em] text-white/65">
-                        <span>Lago Atitlan</span>
+                        <span>Lake Atitlan</span>
                         <span>Hostal Mandalas</span>
                     </div>
                 </div>

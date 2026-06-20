@@ -15,22 +15,22 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://mandalas-sigma.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://mandalashostels.com"),
   title: {
-    default: "Mandalas Hostal | Hostal en San Pedro La Laguna",
+    default: "Mandalas Hostal | San Pedro La Laguna Hostel",
     template: "%s | Mandalas Hostal",
   },
-  description: "Hostal en San Pedro La Laguna con dos sedes: Mandalas en el centro y Hideout cerca del Lago Atitlan. Consulta fechas por WhatsApp.",
+  description: "A San Pedro La Laguna hostel with two stays: Mandalas in town and Hideout near Lake Atitlan. Ask about dates on WhatsApp.",
   applicationName: "Mandalas Hostal",
   keywords: [
     "Mandalas Hostal",
     "Mandala's Hostal",
     "San Pedro La Laguna",
-    "Lago Atitlan",
-    "hostal Lago Atitlan",
+    "Lake Atitlan",
     "Lake Atitlan hostel",
-    "Hostal en San Pedro",
-    "hostal San Pedro La Laguna",
+    "Lake Atitlan hostel",
+    "San Pedro hostel",
+    "San Pedro La Laguna hostel",
     "Mandalas Hideout",
     "hostel Guatemala",
   ],
@@ -41,25 +41,25 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Mandalas Hostal | Hostal en San Pedro La Laguna",
-    description: "Mandalas en el centro y Hideout cerca del Lago Atitlan, con consulta personalizada por WhatsApp.",
+    title: "Mandalas Hostal | San Pedro La Laguna Hostel",
+    description: "Mandalas in town and Hideout near Lake Atitlan, with personal booking inquiries on WhatsApp.",
     url: "/",
     siteName: "Mandalas Hostal",
-    locale: "es_GT",
+    locale: "en_US",
     type: "website",
     images: [
       {
         url: "/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg",
         width: 1200,
         height: 800,
-        alt: "Hamacas y patio de Mandalas Hostal en San Pedro La Laguna",
+        alt: "Hammocks and courtyard at Mandalas Hostal in San Pedro La Laguna",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Mandalas Hostal | Hostal en San Pedro La Laguna",
-    description: "Dos sedes en San Pedro La Laguna: centro y hideout cerca del lago.",
+    title: "Mandalas Hostal | San Pedro La Laguna Hostel",
+    description: "Two stays in San Pedro La Laguna: a town hostel and a quieter hideout near the lake.",
     images: ["/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"],
   },
   robots: {
@@ -74,7 +74,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es-GT" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning className={`${outfit.variable} ${inter.variable} notranslate`} translate="no">
         {/* ThemeProvider wrapping */}
         <ThemeProvider

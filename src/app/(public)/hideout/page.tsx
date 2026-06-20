@@ -16,7 +16,7 @@ export default function HideoutPage() {
         <div className="bg-background min-h-screen">
             <Hero
                 title="Hideout"
-                subtitle="Una base más tranquila para dormir mejor, caminar al lago y bajar el volumen de San Pedro."
+                subtitle="A quieter base for better sleep, lake walks, and turning down the volume of San Pedro."
                 backgroundImage="/images/mandalas/hostelworld/hideout-terrace-dusk.jpg"
                 backgroundPosition="32% 50%"
                 align="left"
@@ -26,7 +26,7 @@ export default function HideoutPage() {
                     size="lg"
                     className="h-12 border-white/25 bg-white px-8 text-stone-950 hover:bg-stone-200 gap-2"
                 >
-                    Consultar fechas
+                    Check dates
                 </ConsultationLink>
             </Hero>
 
@@ -34,19 +34,19 @@ export default function HideoutPage() {
             <section className="py-24 container mx-auto px-4">
                 <FadeIn>
                     <div className="max-w-4xl mx-auto text-center space-y-8">
-                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">Bajar el ritmo</h2>
+                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">Slow the rhythm</h2>
                         <div className="mx-auto h-px w-24 bg-lime-300/40" />
                         <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
-                            Hideout es para quienes quieren despertar con montaña cerca, moverse al lago sin prisa y volver a una noche más tranquila.
+                            Hideout is for travelers who want to wake up near the mountains, move toward the lake slowly, and return to a quieter night.
                         </p>
                         <StaggerReveal className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8" delay={0.2}>
                             {[
-                                { icon: Waves, label: "Lago a pie" },
-                                { icon: Bike, label: "Bicis gratis" },
-                                { icon: Utensils, label: "Cocina equipada" },
-                                { icon: Wifi, label: "WiFi gratis" },
-                                { icon: Moon, label: "Noches en calma" },
-                                { icon: Sprout, label: "Fuera del centro" },
+                                { icon: Waves, label: "Walk to lake" },
+                                { icon: Bike, label: "Free bikes" },
+                                { icon: Utensils, label: "Equipped kitchen" },
+                                { icon: Wifi, label: "Free WiFi" },
+                                { icon: Moon, label: "Quiet nights" },
+                                { icon: Sprout, label: "Outside center" },
                             ].map((feature, idx) => (
                                 <StaggerItem key={idx} className="flex flex-col items-center gap-4 text-muted-foreground/80 group">
                                     <feature.icon className="w-6 h-6 text-lime-600/80 stroke-[1.5px] group-hover:text-lime-500 transition-colors" />
@@ -64,24 +64,24 @@ export default function HideoutPage() {
                         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
                             <div>
                                 <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-lime-300/60">
-                                    Datos útiles
+                                    Good to know
                                 </p>
                                 <h2 className="font-heading text-3xl font-light uppercase leading-tight tracking-[0.14em] text-white md:text-4xl">
-                                    Tranquilo, pero resuelto
+                                    Quiet, but practical
                                 </h2>
                                 <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
-                                    Hideout funciona como refugio: más calma por la noche, acceso sencillo al lago y lo necesario para que el viaje no dependa siempre del centro.
+                                    Hideout works like a refuge: calmer nights, simple lake access, and what you need so the trip does not always depend on the center.
                                 </p>
                             </div>
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 {[
-                                    { icon: Waves, title: "Lago cerca", description: "A pocos minutos caminando de la orilla." },
-                                    { icon: Bike, title: "Bicicletas", description: "Bicis gratis para huéspedes, ideal para moverte al pueblo." },
-                                    { icon: Utensils, title: "Cocina", description: "Cocina equipada para preparar algo ligero durante la estadía." },
-                                    { icon: Clock, title: "Horarios", description: "Check-in 15:00-24:00. Check-out hasta las 10:00." },
-                                    { icon: Luggage, title: "Equipaje", description: "Consigna de equipaje gratuita disponible." },
-                                    { icon: MapPin, title: "Ubicación", description: "Aproximadamente 1.7 km del centro de San Pedro." },
+                                    { icon: Waves, title: "Lake nearby", description: "A few minutes walking from the shore." },
+                                    { icon: Bike, title: "Bikes", description: "Free bikes for guests, useful for moving into town." },
+                                    { icon: Utensils, title: "Kitchen", description: "Equipped kitchen for preparing something light during your stay." },
+                                    { icon: Clock, title: "Hours", description: "Check-in 15:00-24:00. Check-out until 10:00." },
+                                    { icon: Luggage, title: "Luggage", description: "Free luggage storage available." },
+                                    { icon: MapPin, title: "Location", description: "About 1.7 km from the center of San Pedro." },
                                 ].map((detail) => (
                                     <div key={detail.title} className="border-t border-white/10 py-5">
                                         <detail.icon className="mb-4 h-5 w-5 text-lime-300/70" />
@@ -101,115 +101,115 @@ export default function HideoutPage() {
 
             <PropertyGallery
                 id="galeria"
-                eyebrow="El lugar"
-                title="Montaña cerca, noches suaves"
-                description="Hideout se entiende mejor por sus contrastes: la entrada frente al volcán, una terraza para bajar revoluciones y espacios comunes que se sienten más pausados que el centro."
+                eyebrow="The place"
+                title="Mountains nearby, softer nights"
+                description="Hideout is best understood by its contrasts: a volcano-facing entrance, a terrace for slowing down, and common spaces that feel gentler than the center."
                 accent="lime"
                 images={[
                     {
                         src: "/images/mandalas/hostelworld/hideout-terrace-dusk.jpg",
-                        alt: "Terraza de Mandalas Hideout al atardecer",
-                        label: "Terraza",
+                        alt: "Mandalas Hideout terrace at dusk",
+                        label: "Terrace",
                     },
                     {
                         src: "/images/mandalas/hostelworld/hideout-courtyard-night.jpg",
-                        alt: "Patio nocturno de Mandalas Hideout",
-                        label: "Patio",
+                        alt: "Mandalas Hideout courtyard at night",
+                        label: "Courtyard",
                     },
                     {
                         src: "/images/mandalas/hostelworld/hideout-exterior-volcano.jpg",
-                        alt: "Entrada de Mandalas Hideout con volcán al fondo",
-                        label: "Entrada",
+                        alt: "Mandalas Hideout entrance with volcano in the background",
+                        label: "Entrance",
                     },
                 ]}
             />
 
             <ExperienceSection
-                eyebrow="Más calma"
-                title="Cerca del lago, lejos del ruido"
-                description="Hideout no intenta competir con el centro. Su valor está en darte aire, pausa y una vuelta más suave después de explorar."
+                eyebrow="More quiet"
+                title="Near the lake, away from the noise"
+                description="Hideout does not try to compete with the center. Its value is giving you air, pause, and a softer return after exploring."
                 accent="lime"
                 items={[
                     {
                         icon: Cloud,
-                        title: "Mañanas de lago",
-                        description: "Salir temprano, caminar al agua o empezar el día sin entrar directo al ruido.",
+                        title: "Lake mornings",
+                        description: "Go out early, walk to the water, or start the day without stepping straight into the noise.",
                     },
                     {
                         icon: Sprout,
-                        title: "Barrio tranquilo",
-                        description: "Un entorno más local para resolver lo necesario y guardar energía.",
+                        title: "Quiet neighborhood",
+                        description: "A more local setting for handling the essentials and saving energy.",
                     },
                     {
                         icon: Moon,
-                        title: "Noches suaves",
-                        description: "Social cuando quieres, descansado cuando lo necesitas.",
+                        title: "Soft nights",
+                        description: "Social when you want it, restful when you need it.",
                     },
                 ]}
             />
 
             <PracticalDetails
-                eyebrow="Cómo se siente"
-                title="Una estadía con pausa"
-                description="Elige Hideout si prefieres dormir con más calma, moverte al lago y volver a un lugar menos cargado."
+                eyebrow="How it feels"
+                title="A stay with pause"
+                description="Choose Hideout if you prefer calmer sleep, lake movement, and returning to a less crowded place."
                 accent="lime"
                 details={[
                     {
                         icon: Sprout,
-                        title: "Fuera del centro",
-                        description: "Ideal si priorizas calma y prefieres no dormir en medio del movimiento.",
+                        title: "Outside the center",
+                        description: "Ideal if you prioritize calm and prefer not to sleep in the middle of the movement.",
                     },
                     {
                         icon: Waves,
-                        title: "Lago cerca",
-                        description: "A pocos minutos a pie para caminar, nadar, hacer kayak o empezar el día más despacio.",
+                        title: "Lake nearby",
+                        description: "A few minutes on foot for walking, swimming, kayaking, or starting the day more slowly.",
                     },
                     {
                         icon: Bike,
-                        title: "Movimiento fácil",
-                        description: "Las bicicletas ayudan a llegar al centro sin tener que quedarte encima de él.",
+                        title: "Easy movement",
+                        description: "The bikes help you reach the center without having to sleep right on top of it.",
                     },
                     {
                         icon: MapPin,
-                        title: "San Pedro sigue cerca",
-                        description: "La sede está aproximadamente a 1.7 km del centro, suficiente para sentir otra energía.",
+                        title: "San Pedro stays close",
+                        description: "The stay is about 1.7 km from the center, enough to feel a different energy.",
                     },
                 ]}
             />
 
             <StayOptions
-                eyebrow="Dormir en Hideout"
-                title="Formas de dormir con más calma"
-                description="Opciones compartidas y privadas para bajar el ritmo, con tarifa final y disponibilidad confirmadas por mensaje."
+                eyebrow="Sleep at Hideout"
+                title="Ways to sleep with more quiet"
+                description="Shared and private options for slowing down, with final rates and availability confirmed by message."
                 location="Mandalas Hideout"
                 accent="lime"
                 options={[
                     {
                         icon: ShieldCheck,
-                        title: "Dormitorio Solo Chicas",
-                        subtitle: "calmado",
-                        description: "Para viajeras que buscan una base compartida con una energía más suave.",
-                        details: ["Solo chicas", "Más calma", "Lago cerca"],
-                        price: "Según fecha",
-                        roomName: "Dormitorio Solo Chicas",
+                        title: "Female Dorm",
+                        subtitle: "calm",
+                        description: "For women travelers looking for a shared base with softer energy.",
+                        details: ["Female only", "More quiet", "Lake nearby"],
+                        price: "By date",
+                        roomName: "Female Dorm",
                     },
                     {
                         icon: BedDouble,
-                        title: "Dormitorio Mixto",
-                        subtitle: "social suave",
-                        description: "Para compartir el viaje sin estar encima del ruido del centro.",
-                        details: ["Compartido", "Lago cerca", "Caminatas"],
-                        price: "Según fecha",
-                        roomName: "Dormitorio Mixto",
+                        title: "Mixed Dorm",
+                        subtitle: "soft social",
+                        description: "For sharing the trip without sleeping on top of the center's noise.",
+                        details: ["Shared", "Lake nearby", "Walks"],
+                        price: "By date",
+                        roomName: "Mixed Dorm",
                     },
                     {
                         icon: DoorClosed,
-                        title: "Habitación Privada",
-                        subtitle: "pausa",
-                        description: "Para parejas o viajeros lentos que quieren más privacidad para descansar.",
-                        details: ["Privacidad", "Más calma", "Viaje lento"],
-                        price: "Según fecha",
-                        roomName: "Habitación Privada",
+                        title: "Private Room",
+                        subtitle: "pause",
+                        description: "For couples or slower travelers who want more privacy to rest.",
+                        details: ["Privacy", "More quiet", "Slow travel"],
+                        price: "By date",
+                        roomName: "Private Room",
                     },
                 ]}
             />
@@ -217,14 +217,14 @@ export default function HideoutPage() {
             {/* CTA */}
             <section className="py-24 bg-stone-900 text-white text-center">
                 <FadeIn>
-                    <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Baja el ritmo</h2>
-                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Comparte tus fechas y te orientamos hacia la opción más tranquila disponible.</p>
+                    <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Slow down</h2>
+                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Share your dates and we will guide you toward the quietest available option.</p>
                     <ConsultationLink
                         location="Mandalas Hideout"
                         size="lg"
                         className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
                     >
-                        Consultar disponibilidad
+                        Check availability
                     </ConsultationLink>
                     <a
                         href={publicContact.instagram.hideout}
@@ -233,7 +233,7 @@ export default function HideoutPage() {
                         className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-lime-200"
                     >
                         <Instagram className="h-4 w-4" />
-                        Ver Hideout en Instagram
+                        View Hideout on Instagram
                     </a>
                 </FadeIn>
             </section>

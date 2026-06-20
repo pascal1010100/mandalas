@@ -16,7 +16,7 @@ export function Footer() {
                             MANDALAS<span className="text-amber-400">.</span>
                         </h3>
                         <p className="text-sm leading-relaxed max-w-xs text-stone-500 font-light">
-                            Dos formas sencillas de quedarse en San Pedro: cerca del movimiento o con más calma junto al lago.
+                            Two easy ways to stay in San Pedro: close to the movement or quieter near the lake.
                         </p>
                         <SocialLinks
                             className="gap-2"
@@ -25,7 +25,7 @@ export function Footer() {
                     </div>
 
                     <div>
-                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Explorar</h4>
+                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Explore</h4>
                         <ul className="space-y-4 text-sm font-medium">
                             <li>
                                 <Link href="/pueblo" className="hover:text-amber-500 transition-colors flex items-center gap-2 group">
@@ -43,11 +43,11 @@ export function Footer() {
                     </div>
 
                     <div>
-                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Contacto</h4>
+                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Contact</h4>
                         <ul className="space-y-4 text-sm font-light">
                             <li className="flex items-center gap-3">
                                 <Phone className="h-4 w-4 text-stone-600" />
-                                <a href={buildContactHref("Hola Mandalas, quiero consultar disponibilidad")} className="hover:text-amber-300 transition-colors">
+                                <a href={buildContactHref("Hi Mandalas, I would like to check availability")} className="hover:text-amber-300 transition-colors">
                                     {displayPhone}
                                 </a>
                             </li>
@@ -59,24 +59,24 @@ export function Footer() {
                             </li>
                             <li className="flex items-start gap-3">
                                 <MapPin className="h-4 w-4 mt-1 text-stone-600" />
-                                <span>San Pedro La Laguna, Sololá</span>
+                                <span>San Pedro La Laguna, Solola</span>
                             </li>
                         </ul>
                     </div>
 
                     <div>
-                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Reserva Directa</h4>
+                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Direct Inquiry</h4>
                         <p className="text-sm leading-relaxed text-stone-500 font-light mb-5">
-                            Comparte fechas y estilo de viaje. Te orientamos hacia la sede correcta.
+                            Share your dates and travel style. We will guide you toward the right stay.
                         </p>
                         <ConsultationLink className="border-white/20 bg-white text-stone-950 hover:bg-stone-200">
-                            Consultar
+                            Inquire
                         </ConsultationLink>
                     </div>
                 </div>
 
                 <div className="border-t border-stone-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-stone-600">
-                    <p>&copy; {new Date().getFullYear()} Mandalas Hostal. San Pedro La Laguna, Lago Atitlan.</p>
+                    <p>&copy; {new Date().getFullYear()} Mandalas Hostal. San Pedro La Laguna, Lake Atitlan.</p>
                 </div>
             </div>
         </footer>

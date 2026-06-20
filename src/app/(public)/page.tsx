@@ -41,10 +41,10 @@ export default function LandingPage() {
         <HomePanel
           href="/pueblo"
           label="Mandalas"
-          kicker="Centro turistico"
+          kicker="Town center"
           title="Mandalas"
-          description="Para estar en el centro, subir a la terraza y dejar que San Pedro suceda caminando."
-          meta="Rooftop / Centro / Lago"
+          description="Stay in town, head up to the rooftop, and let San Pedro unfold on foot."
+          meta="Rooftop / Center / Lake"
           background={BACKGROUNDS.pueblo}
           accent="amber"
           isActive={hovered === "pueblo"}
@@ -57,10 +57,10 @@ export default function LandingPage() {
         <HomePanel
           href="/hideout"
           label="Mandalas Hideout"
-          kicker="Camino a la finca"
+          kicker="Toward the lake"
           title="Hideout"
-          description="Para bajar el volumen, tener montaña alrededor y volver a noches más tranquilas."
-          meta="Volcán / Lago / Pausa"
+          description="Lower the volume, keep the mountains close, and come back to quieter nights."
+          meta="Volcano / Lake / Slow"
           background={BACKGROUNDS.hideout}
           accent="lime"
           isActive={hovered === "hideout"}
@@ -83,16 +83,16 @@ export default function LandingPage() {
           <div className="relative grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
             <div className="max-w-3xl">
               <p className="mb-6 text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-                El mapa emocional
+                The Feel Of The Stay
               </p>
               <h1 className="max-w-3xl font-heading text-4xl font-light uppercase leading-[1.05] tracking-[0.1em] text-white md:text-6xl md:tracking-[0.14em]">
-                Una casa para el movimiento. Otra para volver a respirar.
+                One stay for movement. One stay to breathe again.
               </h1>
             </div>
 
             <div className="max-w-xl lg:justify-self-end lg:pb-2">
               <p className="text-lg leading-relaxed text-white/62">
-                Mandalas no se vende como una sola experiencia. Se entiende mejor como dos ritmos conectados por el mismo lago: el centro para salir, Hideout para bajar la velocidad.
+                Mandalas works best as two rhythms connected by the same lake: town for going out, Hideout for slowing down.
               </p>
             </div>
           </div>
@@ -103,30 +103,30 @@ export default function LandingPage() {
                 <RhythmPoint
                   icon={SunMedium}
                   eyebrow="Mandalas"
-                  title="Centro vivo"
-                  description="Rooftop, cocina, movimiento a pie y una energía más social para entrar al pueblo sin pedir permiso."
+                  title="Town energy"
+                  description="Rooftop, kitchen, walkable plans, and a more social base for stepping straight into San Pedro."
                 />
                 <RhythmPoint
                   icon={Waves}
                   eyebrow="Hideout"
-                  title="Lago y pausa"
-                  description="Una base más tranquila para dormir mejor, caminar al agua y regresar sin cargar el ruido del centro."
+                  title="Lake and quiet"
+                  description="A calmer base for better sleep, easy lake walks, and returning without carrying the center's noise."
                 />
                 <RhythmPoint
                   icon={MessageCircle}
-                  eyebrow="Consulta guiada"
-                  title="El ritmo correcto"
-                  description="Envías fechas y el tipo de viaje que buscas. Te orientamos hacia la sede que tiene más sentido."
+                  eyebrow="Guided inquiry"
+                  title="The right rhythm"
+                  description="Send your dates and travel style. We will guide you toward the stay that makes the most sense."
                 />
               </div>
 
               <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 <ConsultationLink className="h-12 border-white/20 bg-white px-8 text-stone-950 hover:bg-stone-200">
-                  Consultar fechas
+                  Check dates
                 </ConsultationLink>
                 <Link href="/contact">
                   <Button variant="outline" className="h-12 w-full rounded-full border-white/20 bg-transparent px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-none hover:bg-white hover:text-stone-950">
-                    Contacto
+                    Contact
                   </Button>
                 </Link>
               </div>
@@ -143,7 +143,7 @@ export default function LandingPage() {
                 <div className="relative flex h-full min-h-[22rem] flex-col justify-between p-6 md:p-8">
                   <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">
                     <span>01</span>
-                    <span>Centro</span>
+                    <span>Center</span>
                   </div>
                   <div>
                     <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-200/75">
@@ -153,7 +153,7 @@ export default function LandingPage() {
                       Social
                     </h2>
                     <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/68">
-                      Para caminar, subir a la terraza y estar cerca de lo que pasa.
+                      For walking, rooftop sunsets, and being close to what is happening.
                     </p>
                   </div>
                 </div>
@@ -172,10 +172,10 @@ export default function LandingPage() {
                       Hideout
                     </p>
                     <h2 className="font-heading text-3xl font-light uppercase tracking-[0.12em] text-white md:text-4xl">
-                      Pausa
+                      Slow
                     </h2>
                     <p className="mt-4 text-sm leading-relaxed text-white/64">
-                      Más silencio, lago cerca y noches suaves.
+                      More quiet, lake nearby, softer nights.
                     </p>
                   </div>
                 </Link>
@@ -186,7 +186,7 @@ export default function LandingPage() {
                     San Pedro La Laguna
                   </p>
                   <p className="mt-4 text-2xl font-light leading-snug text-white md:text-3xl">
-                    Elige por energía: ciudad de lago o refugio lento.
+                    Choose by energy: lake-town base or slower hideout.
                   </p>
                 </div>
               </div>
@@ -194,11 +194,11 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-10 grid border-t border-white/10 pt-6 text-xs uppercase tracking-[0.18em] text-white/42 md:grid-cols-4 md:gap-8">
-            <div className="py-3 md:py-0">Centro caminable</div>
-            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Rooftop y cocina</div>
-            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Lago cerca</div>
+            <div className="py-3 md:py-0">Walkable center</div>
+            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Rooftop and kitchen</div>
+            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Lake nearby</div>
             <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">
-              Dormitorios y privadas
+              Dorms and private rooms
             </div>
           </div>
         </div>
@@ -331,7 +331,7 @@ function HomePanel({
                 transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                 style={{ transformOrigin: "right" }}
               />
-              Entrar
+              Enter
             </motion.span>
           </div>
         </motion.div>

@@ -53,14 +53,14 @@ function ReservationInquiryForm() {
   const [name, setName] = useState("");
   const [dates, setDates] = useState("");
   const [guests, setGuests] = useState("");
-  const [location, setLocation] = useState("No estoy seguro");
-  const [roomType, setRoomType] = useState("No estoy seguro");
+  const [location, setLocation] = useState("Not sure yet");
+  const [roomType, setRoomType] = useState("Not sure yet");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const selectedLocation = searchParams.get("sede");
-    const selectedRoom = searchParams.get("habitacion");
+    const selectedLocation = searchParams.get("location") || searchParams.get("sede");
+    const selectedRoom = searchParams.get("room") || searchParams.get("habitacion");
     const normalizedLocation = normalizeLocation(selectedLocation);
 
     queueMicrotask(() => {
@@ -76,14 +76,14 @@ function ReservationInquiryForm() {
 
   const whatsappMessage = useMemo(() => {
     return [
-      "Hola Mandalas, quiero consultar una estadía.",
+      "Hi Mandalas, I would like to ask about a stay.",
       "",
-      `Nombre: ${name || "Pendiente"}`,
-      `Fechas: ${dates || "Pendiente"}`,
-      `Personas: ${guests || "Pendiente"}`,
-      `Sede preferida: ${location}`,
-      `Tipo de habitación: ${roomType}`,
-      message ? `Mensaje: ${message}` : "",
+      `Name: ${name || "Pending"}`,
+      `Dates: ${dates || "Pending"}`,
+      `Guests: ${guests || "Pending"}`,
+      `Preferred stay: ${location}`,
+      `Room type: ${roomType}`,
+      message ? `Message: ${message}` : "",
     ]
       .filter(Boolean)
       .join("\n");
@@ -100,28 +100,28 @@ function ReservationInquiryForm() {
 
   return (
     <form
-      id="consulta"
+      id="inquiry"
       onSubmit={handleSubmit}
-      className="relative scroll-mt-24 overflow-hidden border border-white/15 bg-[linear-gradient(145deg,rgba(255,255,255,0.1),rgba(255,255,255,0.045)_44%,rgba(255,255,255,0.025))] p-5 shadow-2xl shadow-black/30 sm:p-8 md:scroll-mt-28"
+      className="relative w-full max-w-full scroll-mt-24 overflow-hidden border border-white/15 bg-[linear-gradient(145deg,rgba(255,255,255,0.1),rgba(255,255,255,0.045)_44%,rgba(255,255,255,0.025))] p-5 shadow-2xl shadow-black/30 sm:p-8 md:scroll-mt-28"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-200/45 to-transparent" />
 
       <div className="mb-9 grid gap-6 border-b border-white/10 pb-7 sm:grid-cols-[1fr_auto] sm:items-end">
         <div>
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.26em] text-amber-200/70">
-            Consulta personalizada
+            Personal inquiry
           </p>
           <h2 className="max-w-xl font-heading text-2xl font-light uppercase leading-tight tracking-[0.14em] text-white md:text-3xl">
-            Diseña tu estadía
+            Shape your stay
           </h2>
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-stone-300">
-            Déjanos lo esencial y convertimos tu intención de viaje en un
-            mensaje claro: fechas, sede ideal y tipo de habitación.
+            Leave us the essentials and we turn your trip idea into a clear
+            message: dates, ideal stay, and room type.
           </p>
         </div>
 
         <p className="max-w-36 border-l border-white/15 pl-4 text-[0.65rem] font-semibold uppercase leading-relaxed tracking-[0.2em] text-white/50 max-sm:border-l-0 max-sm:border-t max-sm:pt-4 max-sm:pl-0">
-          Respuesta humana, sin pago automático.
+          Human reply, no automatic payment.
         </p>
       </div>
 
@@ -129,7 +129,7 @@ function ReservationInquiryForm() {
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <Label htmlFor="guest-name" className={formLabelClass}>
-              Nombre
+              Name
             </Label>
             <UserRound className="h-4 w-4 text-white/40" />
           </div>
@@ -137,7 +137,7 @@ function ReservationInquiryForm() {
             id="guest-name"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Tu nombre"
+            placeholder="Your name"
             className={fieldClass}
           />
         </div>
@@ -145,7 +145,7 @@ function ReservationInquiryForm() {
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <Label htmlFor="guest-count" className={formLabelClass}>
-              Personas
+              Guests
             </Label>
             <UsersRound className="h-4 w-4 text-white/40" />
           </div>
@@ -153,7 +153,7 @@ function ReservationInquiryForm() {
             id="guest-count"
             value={guests}
             onChange={(event) => setGuests(event.target.value)}
-            placeholder="2 personas"
+            placeholder="2 guests"
             className={fieldClass}
           />
         </div>
@@ -161,7 +161,7 @@ function ReservationInquiryForm() {
         <div className="space-y-3 sm:col-span-2">
           <div className="flex items-center justify-between gap-3">
             <Label htmlFor="travel-dates" className={formLabelClass}>
-              Fechas
+              Dates
             </Label>
             <CalendarDays className="h-4 w-4 text-white/40" />
           </div>
@@ -169,14 +169,14 @@ function ReservationInquiryForm() {
             id="travel-dates"
             value={dates}
             onChange={(event) => setDates(event.target.value)}
-            placeholder="12 al 15 de julio"
+            placeholder="July 12 to 15"
             className={fieldClass}
           />
         </div>
 
         <div className="space-y-3">
           <Label className={formLabelClass}>
-            Sede
+            Stay
           </Label>
           <Select value={location} onValueChange={setLocation}>
             <SelectTrigger className={selectTriggerClass}>
@@ -185,28 +185,28 @@ function ReservationInquiryForm() {
             <SelectContent className="border-white/10 bg-stone-950 text-white shadow-2xl shadow-black/40">
               <SelectItem value="Mandalas">Mandalas</SelectItem>
               <SelectItem value="Hideout">Hideout</SelectItem>
-              <SelectItem value="No estoy seguro">No estoy seguro</SelectItem>
+              <SelectItem value="Not sure yet">Not sure yet</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-3">
           <Label className={formLabelClass}>
-            Habitación
+            Room
           </Label>
           <Select value={roomType} onValueChange={setRoomType}>
             <SelectTrigger className={selectTriggerClass}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-stone-950 text-white shadow-2xl shadow-black/40">
-              <SelectItem value="Dormitorio Mixto">Dormitorio mixto</SelectItem>
-              <SelectItem value="Dormitorio Solo Chicas">
-                Dormitorio solo chicas
+              <SelectItem value="Mixed Dorm">Mixed dorm</SelectItem>
+              <SelectItem value="Female Dorm">
+                Female dorm
               </SelectItem>
-              <SelectItem value="Habitación Privada">
-                Habitación privada
+              <SelectItem value="Private Room">
+                Private room
               </SelectItem>
-              <SelectItem value="No estoy seguro">No estoy seguro</SelectItem>
+              <SelectItem value="Not sure yet">Not sure yet</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -216,13 +216,13 @@ function ReservationInquiryForm() {
             htmlFor="extra-message"
             className={formLabelClass}
           >
-            Detalles para cuidarte mejor
+            Helpful details
           </Label>
           <Textarea
             id="extra-message"
             value={message}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="Llegada tarde, cama privada, más calma, terraza, lago..."
+            placeholder="Late arrival, private room, quieter stay, rooftop, lake..."
             className={`${fieldClass} min-h-24 resize-none px-0`}
           />
         </div>
@@ -241,7 +241,7 @@ function ReservationInquiryForm() {
         className="mt-6 h-12 w-full rounded-full border border-amber-100/30 bg-white px-6 text-xs font-semibold uppercase tracking-[0.16em] text-stone-950 shadow-none transition-colors hover:bg-amber-100 hover:text-stone-950"
       >
         <Send className="h-4 w-4" />
-        Consultar por WhatsApp
+        Ask on WhatsApp
       </Button>
     </form>
   );
@@ -251,8 +251,8 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-stone-950 text-stone-200">
       <Hero
-        title="Contacto"
-        subtitle="Dinos tus fechas y el tipo de viaje que traes. Te orientamos hacia la sede que mejor encaja."
+        title="Contact"
+        subtitle="Tell us your dates and the kind of trip you are bringing. We will guide you toward the stay that fits best."
         backgroundImage="/images/mandalas/pueblo-dock-boat.jpg"
         backgroundPosition="center 58%"
         height="large"
@@ -263,28 +263,28 @@ export default function ContactPage() {
           size="lg"
           className="h-12 rounded-full border border-white/25 bg-white px-7 text-xs font-semibold uppercase tracking-[0.14em] text-stone-950 shadow-none hover:bg-stone-200 gap-2 sm:px-8 sm:tracking-[0.16em]"
         >
-          <a href="#consulta">
+          <a href="#inquiry">
             <ArrowDown className="h-4 w-4" />
-            Consultar fechas
+            Check dates
           </a>
         </Button>
       </Hero>
 
-      <section className="container mx-auto px-4 py-16 md:py-24">
+      <section className="mx-auto w-full max-w-7xl overflow-hidden px-4 py-16 md:py-24">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
           <FadeIn className="order-2 lg:order-1 lg:col-span-5">
-            <div className="space-y-8">
+            <div className="min-w-0 space-y-8">
               <div>
                 <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-white/40">
-                  Reserva con intención
+                  Intentional booking
                 </p>
                 <h2 className="mb-5 max-w-xl break-words font-heading text-[1.2rem] font-light uppercase leading-tight tracking-[0.08em] text-white [text-wrap:balance] sm:text-3xl sm:tracking-[0.1em] md:text-4xl md:tracking-[0.14em]">
-                  Una conversación, dos formas de quedarse
+                  One conversation, two ways to stay
                 </h2>
                 <p className="max-w-xl text-base leading-relaxed text-stone-400 md:text-lg">
-                  El sitio recoge lo importante antes de escribir: fechas,
-                  personas, sede y habitación. Así la respuesta llega más clara
-                  y la conversación empieza mejor.
+                  The site gathers the essentials before you write: dates,
+                  guests, stay, and room. That makes the reply clearer and the
+                  conversation easier.
                 </p>
               </div>
 
@@ -299,15 +299,15 @@ export default function ContactPage() {
                         WhatsApp
                       </h3>
                       <p className="mb-4 text-sm leading-relaxed text-stone-400">
-                        Para resolver fechas, tarifas finales, llegada y dudas
-                        puntuales con una persona del hostal.
+                        For dates, final rates, arrival details, and specific
+                        questions with a person from the hostel.
                       </p>
                       <BookingLink
                         location="Mandalas Hostal"
                         variant="outline"
                         className="border-white/15 bg-transparent text-white hover:bg-white hover:text-stone-950 gap-2"
                       >
-                        Enviar mensaje
+                        Send message
                       </BookingLink>
                     </div>
                   </div>
@@ -320,11 +320,11 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="mb-2 font-semibold text-white">
-                        Elige el ritmo
+                        Choose the rhythm
                       </h3>
                       <p className="mb-4 text-sm leading-relaxed text-stone-400">
-                        Mandalas para estar en el centro. Hideout para dormir
-                        más tranquilo cerca del lago.
+                        Mandalas for being in town. Hideout for sleeping more
+                        quietly near the lake.
                       </p>
                       <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
                         <span>Mandalas</span>
@@ -341,10 +341,10 @@ export default function ContactPage() {
                       <Mail className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="mb-2 font-semibold text-white">Correo</h3>
+                      <h3 className="mb-2 font-semibold text-white">Email</h3>
                       <p className="mb-4 text-sm leading-relaxed text-stone-400">
-                        Para grupos, colaboraciones o consultas que necesitan
-                        más detalle.
+                        For groups, collaborations, or questions that need more
+                        detail.
                       </p>
                       <a
                         href={`mailto:${publicContact.email}`}
@@ -366,7 +366,7 @@ export default function ContactPage() {
                         Instagram
                       </h3>
                       <p className="mb-4 text-sm leading-relaxed text-stone-400">
-                        Mira el ambiente reciente de cada sede antes de decidir.
+                        See the recent atmosphere of each stay before deciding.
                       </p>
                       <SocialLinks
                         className="gap-2"
@@ -379,13 +379,13 @@ export default function ContactPage() {
             </div>
           </FadeIn>
 
-          <div className="order-1 lg:order-2 lg:col-span-7">
+          <div className="order-1 min-w-0 lg:order-2 lg:col-span-7">
             <ReservationInquiryForm />
           </div>
         </div>
       </section>
 
-      <section className="container mx-auto px-4 pb-16 md:pb-24">
+      <section className="mx-auto w-full max-w-7xl overflow-hidden px-4 pb-16 md:pb-24">
         <FadeIn>
           <div className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
             <MapPin className="h-4 w-4" />
@@ -396,28 +396,28 @@ export default function ContactPage() {
             <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-inset ring-white/10" />
           </div>
           <p className="mt-5 max-w-2xl text-sm leading-relaxed text-stone-500">
-            Ambas sedes están en San Pedro La Laguna: una más céntrica para
-            moverte caminando y otra más calmada, camino al lago.
+            Both stays are in San Pedro La Laguna: one more central for moving
+            on foot, and one calmer on the way toward the lake.
           </p>
         </FadeIn>
       </section>
 
       <section className="border-t border-white/10 bg-stone-900/60 py-16">
-        <div className="container mx-auto px-4">
+        <div className="mx-auto w-full max-w-7xl px-4">
           <FadeIn>
             <div className="grid gap-6 md:grid-cols-3">
               {[
                 [
-                  "Respuesta directa",
-                  "El formulario prepara el mensaje y WhatsApp cierra la conversación.",
+                  "Direct reply",
+                  "The form prepares the message and WhatsApp carries the conversation.",
                 ],
                 [
-                  "Llegada clara",
-                  "Te orientamos con ubicación y recomendaciones antes de llegar.",
+                  "Clear arrival",
+                  "We guide you with location and recommendations before you arrive.",
                 ],
                 [
-                  "Dos ambientes",
-                  "Centro vivo o pausa cerca del lago, según tu viaje.",
+                  "Two atmospheres",
+                  "Town energy or lake-side pause, depending on your trip.",
                 ],
               ].map(([title, description]) => (
                 <div key={title} className="border-t border-white/10 pt-6">

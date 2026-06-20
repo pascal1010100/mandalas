@@ -4,7 +4,7 @@ import { MobileCTA } from "@/components/shared/mobile-cta"
 import Script from "next/script"
 import { publicContact } from "@/lib/public-contact"
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://mandalas-sigma.vercel.app"
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://mandalashostels.com"
 
 const siteJsonLd = {
     "@context": "https://schema.org",
@@ -14,7 +14,7 @@ const siteJsonLd = {
             "@id": `${siteUrl}/#website`,
             name: "Mandalas Hostal",
             url: siteUrl,
-            inLanguage: "es-GT",
+            inLanguage: "en",
             sameAs: [
                 publicContact.instagram.mandalas,
                 publicContact.instagram.hideout,
@@ -25,7 +25,7 @@ const siteJsonLd = {
             "@id": `${siteUrl}/#hostel`,
             name: "Mandalas Hostal",
             alternateName: ["Mandala's Hostal", "Mandalas Hideout"],
-            description: "Hostal en San Pedro La Laguna con dos sedes: Mandalas en el centro y Hideout cerca del Lago Atitlan.",
+            description: "A San Pedro La Laguna hostel with two stays: Mandalas in town and Hideout near Lake Atitlan.",
             url: siteUrl,
             telephone: publicContact.whatsappNumber ? `+${publicContact.whatsappNumber}` : undefined,
             email: publicContact.email,

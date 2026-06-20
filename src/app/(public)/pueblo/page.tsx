@@ -16,7 +16,7 @@ export default function PuebloPage() {
         <div className="bg-background min-h-screen">
             <Hero
                 title="Mandalas"
-                subtitle="Una base céntrica para caminar San Pedro, volver a la terraza y dejar que el viaje encuentre su ritmo."
+                subtitle="A central base for walking San Pedro, returning to the rooftop, and letting the trip find its rhythm."
                 backgroundImage="/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"
                 backgroundPosition="center center"
                 align="center"
@@ -26,7 +26,7 @@ export default function PuebloPage() {
                     size="lg"
                     className="h-12 border-white/25 bg-white px-8 text-stone-950 hover:bg-stone-200 gap-2"
                 >
-                    Consultar fechas
+                    Check dates
                 </ConsultationLink>
             </Hero>
 
@@ -34,19 +34,19 @@ export default function PuebloPage() {
             <section className="py-24 container mx-auto px-4">
                 <FadeIn>
                     <div className="max-w-4xl mx-auto text-center space-y-8">
-                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">El pulso del pueblo</h2>
+                        <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">The pulse of town</h2>
                         <div className="mx-auto h-px w-24 bg-amber-300/40" />
                         <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
-                            Aquí la estadía se siente caminable: llegas, dejas la mochila, subes a ver el lago y sales a encontrar el ritmo del pueblo.
+                            Here the stay feels walkable: arrive, drop your bag, head up to see the lake, and step out into the rhythm of town.
                         </p>
                         <StaggerReveal className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8" delay={0.2}>
                             {[
-                                { icon: Wifi, label: "WiFi Gratis" },
-                                { icon: Coffee, label: "Cocina Equipada" },
-                                { icon: Sun, label: "Rooftop con Vista" },
-                                { icon: LockKeyhole, label: "Lockers gratis" },
-                                { icon: WashingMachine, label: "Lavandería" },
-                                { icon: MapPin, label: "Centro a pie" },
+                                { icon: Wifi, label: "Free WiFi" },
+                                { icon: Coffee, label: "Equipped kitchen" },
+                                { icon: Sun, label: "Rooftop views" },
+                                { icon: LockKeyhole, label: "Free lockers" },
+                                { icon: WashingMachine, label: "Laundry" },
+                                { icon: MapPin, label: "Walkable center" },
                             ].map((feature, idx) => (
                                 <StaggerItem key={idx} className="flex flex-col items-center gap-4 text-muted-foreground/80 group">
                                     <feature.icon className="w-6 h-6 text-orange-500/80 stroke-[1.5px] group-hover:text-orange-500 transition-colors" />
@@ -64,24 +64,24 @@ export default function PuebloPage() {
                         <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
                             <div>
                                 <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-amber-300/60">
-                                    Datos útiles
+                                    Good to know
                                 </p>
                                 <h2 className="font-heading text-3xl font-light uppercase leading-tight tracking-[0.14em] text-white md:text-4xl">
-                                    Céntrico, ligero, con vista
+                                    Central, easy, with a view
                                 </h2>
                                 <p className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground">
-                                    Mandalas funciona como base social y práctica: llegas fácil, resuelves lo básico y tienes una terraza para volver cuando baja el sol.
+                                    Mandalas works as a social and practical base: easy arrival, simple essentials, and a rooftop to come back to when the sun drops.
                                 </p>
                             </div>
 
                             <div className="grid gap-4 sm:grid-cols-2">
                                 {[
-                                    { icon: Sun, title: "Rooftop", description: "Terraza en el cuarto piso con vista al lago y montañas volcánicas." },
-                                    { icon: Utensils, title: "Cocina", description: "Cocina completa para preparar comida durante tu estadía." },
-                                    { icon: WashingMachine, title: "Lavandería", description: "Servicio de lavandería disponible en el hostal." },
-                                    { icon: Route, title: "Tours", description: "Conexión con agencia de viajes asociada para moverte por Atitlán." },
-                                    { icon: Clock, title: "Horarios", description: "Check-in 14:00-24:00. Check-out hasta las 11:00." },
-                                    { icon: MapPin, title: "Ubicación", description: "Aproximadamente 0.3 km del centro de San Pedro." },
+                                    { icon: Sun, title: "Rooftop", description: "Fourth-floor terrace with lake and volcanic mountain views." },
+                                    { icon: Utensils, title: "Kitchen", description: "Full kitchen for preparing food during your stay." },
+                                    { icon: WashingMachine, title: "Laundry", description: "Laundry service available at the hostel." },
+                                    { icon: Route, title: "Tours", description: "Connection with a partner travel agency for getting around Atitlan." },
+                                    { icon: Clock, title: "Hours", description: "Check-in 14:00-24:00. Check-out until 11:00." },
+                                    { icon: MapPin, title: "Location", description: "About 0.3 km from the center of San Pedro." },
                                 ].map((detail) => (
                                     <div key={detail.title} className="border-t border-white/10 py-5">
                                         <detail.icon className="mb-4 h-5 w-5 text-amber-300/70" />
@@ -101,115 +101,115 @@ export default function PuebloPage() {
 
             <PropertyGallery
                 id="galeria"
-                eyebrow="El lugar"
-                title="Arquitectura blanca, luz cálida y lago"
-                description="Mandalas tiene una energía más urbana, pero su encanto está en los detalles: pasillos con plantas, hamacas, rincones de descanso y una vista que ordena el día."
+                eyebrow="The place"
+                title="White architecture, warm light, and lake views"
+                description="Mandalas has a more urban energy, but its charm lives in the details: plants, hammocks, quiet corners, and a view that settles the day."
                 accent="amber"
                 images={[
                     {
                         src: "/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg",
-                        alt: "Patio interior de Mandalas con hamacas y luz natural",
-                        label: "Patio",
+                        alt: "Mandalas interior courtyard with hammocks and natural light",
+                        label: "Courtyard",
                     },
                     {
                         src: "/images/mandalas/hostelworld/pueblo-lake-view.jpg",
-                        alt: "Vista al lago desde Mandalas",
-                        label: "Vista al lago",
+                        alt: "Lake view from Mandalas",
+                        label: "Lake view",
                     },
                     {
                         src: "/images/mandalas/hostelworld/pueblo-stair-detail.jpg",
-                        alt: "Escaleras y detalles arquitectónicos de Mandalas",
-                        label: "Detalles",
+                        alt: "Stairs and architectural details at Mandalas",
+                        label: "Details",
                     },
                 ]}
             />
 
             <ExperienceSection
-                eyebrow="Vida compartida"
-                title="Para estar cerca de todo"
-                description="Mandalas es para quienes quieren sentir San Pedro desde adentro: un lugar de paso, conversación y regreso fácil."
+                eyebrow="Shared life"
+                title="For staying close to everything"
+                description="Mandalas is for travelers who want to feel San Pedro from the inside: a place to pass through, talk, and come back easily."
                 accent="amber"
                 items={[
                     {
                         icon: Sun,
-                        title: "Terraza con atardecer",
-                        description: "El punto natural para cerrar el día antes de decidir qué sigue.",
+                        title: "Sunset rooftop",
+                        description: "The natural place to end the day before deciding what comes next.",
                     },
                     {
                         icon: Utensils,
-                        title: "Casa práctica",
-                        description: "Lo necesario para viajar ligero sin convertir la estadía en logística.",
+                        title: "Practical house",
+                        description: "The essentials for traveling light without turning the stay into logistics.",
                     },
                     {
                         icon: MapPin,
-                        title: "Todo queda a mano",
-                        description: "Sales a caminar y San Pedro empieza a aparecer sin planear demasiado.",
+                        title: "Everything nearby",
+                        description: "Walk out the door and San Pedro starts to appear without much planning.",
                     },
                 ]}
             />
 
             <PracticalDetails
-                eyebrow="Cómo se siente"
-                title="Una estadía con movimiento"
-                description="Elige Mandalas si quieres salir caminando, decidir planes al momento y tener una base social donde volver."
+                eyebrow="How it feels"
+                title="A stay with movement"
+                description="Choose Mandalas if you want to walk out, make plans as you go, and have a social base to return to."
                 accent="amber"
                 details={[
                     {
                         icon: MapPin,
-                        title: "Centro caminable",
-                        description: "Aproximadamente 0.3 km del centro, buena opción si quieres resolver todo a pie.",
+                        title: "Walkable center",
+                        description: "About 0.3 km from the center, a good option if you want to do things on foot.",
                     },
                     {
                         icon: ShipWheel,
-                        title: "Muelle cerca",
-                        description: "Práctico para moverte entre pueblos, tomar tours o salir temprano.",
+                        title: "Dock nearby",
+                        description: "Practical for moving between towns, joining tours, or leaving early.",
                     },
                     {
                         icon: Sun,
-                        title: "Terraza y áreas comunes",
-                        description: "El valor está en la vista, la cocina, la sala común y los cruces naturales entre viajeros.",
+                        title: "Rooftop and common areas",
+                        description: "The value is in the view, kitchen, lounge, and natural crossings between travelers.",
                     },
                     {
                         icon: Route,
-                        title: "Tours y movimiento",
-                        description: "Puedes apoyarte en la conexión con agencia asociada para organizar planes alrededor del lago.",
+                        title: "Tours and movement",
+                        description: "Use the connection with a partner agency to plan movement around the lake.",
                     },
                 ]}
             />
 
             <StayOptions
-                eyebrow="Dormir en Mandalas"
-                title="Formas de quedarte cerca"
-                description="Dormitorios compartidos y privadas para viajar ligero, con la terraza como punto de encuentro y tarifa final confirmada por mensaje."
+                eyebrow="Sleep at Mandalas"
+                title="Ways to stay close"
+                description="Shared dorms and private rooms for traveling light, with the rooftop as a meeting point and final rates confirmed by message."
                 location="Mandalas"
                 accent="amber"
                 options={[
                     {
                         icon: BedDouble,
-                        title: "Dormitorio Mixto",
+                        title: "Mixed Dorm",
                         subtitle: "social",
-                        description: "Para viajar ligero, conocer gente y tener una base práctica cerca del movimiento de San Pedro.",
+                        description: "For traveling light, meeting people, and keeping a practical base near San Pedro's movement.",
                         details: ["Locker", "Luz de lectura", "Enchufe"],
-                        price: "Según fecha",
-                        roomName: "Dormitorio Mixto",
+                        price: "By date",
+                        roomName: "Mixed Dorm",
                     },
                     {
                         icon: ShieldCheck,
-                        title: "Dormitorio Solo Chicas",
-                        subtitle: "compartido",
-                        description: "Una opción compartida para viajeras que quieren una base tranquila, segura y bien ubicada.",
-                        details: ["Solo chicas", "Locker", "Áreas comunes"],
-                        price: "Según fecha",
-                        roomName: "Dormitorio Solo Chicas",
+                        title: "Female Dorm",
+                        subtitle: "shared",
+                        description: "A shared option for women travelers who want a calm, well-located base.",
+                        details: ["Female only", "Locker", "Common areas"],
+                        price: "By date",
+                        roomName: "Female Dorm",
                     },
                     {
                         icon: DoorClosed,
-                        title: "Habitación Privada",
-                        subtitle: "con o sin baño",
-                        description: "Más privacidad sin perder la cocina, la terraza y la facilidad de moverte caminando.",
-                        details: ["Privacidad", "Baño según opción", "Centro"],
-                        price: "Según fecha",
-                        roomName: "Habitación Privada",
+                        title: "Private Room",
+                        subtitle: "with or without bathroom",
+                        description: "More privacy without losing the kitchen, rooftop, and easy walkability.",
+                        details: ["Privacy", "Bathroom by option", "Center"],
+                        price: "By date",
+                        roomName: "Private Room",
                     },
                 ]}
             />
@@ -217,14 +217,14 @@ export default function PuebloPage() {
             {/* CTA */}
             <section className="py-24 bg-stone-900 text-white text-center">
                 <FadeIn>
-                    <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Quédate en Mandalas</h2>
-                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Comparte tus fechas y te orientamos hacia la habitación que mejor acompaña tu viaje.</p>
+                    <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Stay at Mandalas</h2>
+                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Share your dates and we will guide you toward the room that best fits your trip.</p>
                     <ConsultationLink
                         location="Mandalas"
                         size="lg"
                         className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
                     >
-                        Consultar disponibilidad
+                        Check availability
                     </ConsultationLink>
                     <a
                         href={publicContact.instagram.mandalas}
@@ -233,7 +233,7 @@ export default function PuebloPage() {
                         className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-amber-200"
                     >
                         <Instagram className="h-4 w-4" />
-                        Ver Mandalas en Instagram
+                        View Mandalas on Instagram
                     </a>
                 </FadeIn>
             </section>

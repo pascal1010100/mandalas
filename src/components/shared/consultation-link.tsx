@@ -21,23 +21,23 @@ function buildInquiryHref(location?: string, roomName?: string) {
     const contactLocation = getContactLocation(location)
 
     if (contactLocation) {
-        params.set("sede", contactLocation)
+        params.set("location", contactLocation)
     }
 
     if (roomName) {
-        params.set("habitacion", roomName)
+        params.set("room", roomName)
     }
 
     const query = params.toString()
 
-    return `/contact${query ? `?${query}` : ""}#consulta`
+    return `/contact${query ? `?${query}` : ""}#inquiry`
 }
 
 export function ConsultationLink({
     location,
     roomName,
     showIcon = true,
-    children = "Consultar fechas",
+    children = "Check dates",
     className,
     ...props
 }: ConsultationLinkProps) {

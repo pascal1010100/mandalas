@@ -74,7 +74,7 @@ export function StayOptions({
 
             <div className="border-y border-white/10">
               {options.map((option) => {
-                const href = `/contact?sede=${encodeURIComponent(contactLocation)}&habitacion=${encodeURIComponent(option.roomName)}#consulta`;
+                const href = `/contact?location=${encodeURIComponent(contactLocation)}&room=${encodeURIComponent(option.roomName)}#inquiry`;
 
                 return (
                   <div
@@ -118,14 +118,14 @@ export function StayOptions({
                           {option.price}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          tarifa final por mensaje
+                          final rate by message
                         </p>
                       </div>
                       <Button
                         asChild
                         className={`rounded-full px-6 text-xs font-semibold uppercase tracking-[0.16em] shadow-none ${style.button}`}
                       >
-                        <Link href={href}>Consultar</Link>
+                        <Link href={href}>Inquire</Link>
                       </Button>
                     </div>
                   </div>

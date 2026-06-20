@@ -17,14 +17,14 @@ export function BookingLink({
     location,
     roomName,
     showIcon = true,
-    children = "Consultar disponibilidad",
+    children = "Check availability",
     className,
     ...props
 }: BookingLinkProps) {
     const message = [
-        "Hola Mandalas, quiero consultar disponibilidad",
-        roomName ? `para ${roomName}` : "",
-        location ? `en ${location}` : "",
+        "Hi Mandalas, I would like to check availability",
+        roomName ? `for ${roomName}` : "",
+        location ? `at ${location}` : "",
     ].filter(Boolean).join(" ")
 
     const href = buildContactHref(message)

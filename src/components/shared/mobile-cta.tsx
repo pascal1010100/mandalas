@@ -21,7 +21,7 @@ export function MobileCTA() {
                 showIcon={false}
                 className="h-12 w-full animate-in border-white/20 bg-white text-stone-950 duration-500 slide-in-from-bottom hover:bg-stone-200 gap-2"
             >
-                Consultar fechas
+                Check dates
             </ConsultationLink>
         </div>
     )
