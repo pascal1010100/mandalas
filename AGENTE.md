@@ -50,12 +50,11 @@ Evitar traducciones literales desde español. El tono debe sentirse natural para
 
 ## Dominio y producción
 
-El dominio previsto es `mandalashostels.com`. Todavía no está comprado, pero la app debe estar preparada para usarlo cuando se confirme.
+El dominio de producción es `https://www.mandalashostels.com`; `mandalashostels.com` redirige a esta URL canónica.
 
 Checklist de producción:
 
-*   Usar `NEXT_PUBLIC_APP_URL=https://mandalashostels.com` cuando el dominio esté listo.
-*   Decidir si se usará también `www.mandalashostels.com`.
+*   Usar `NEXT_PUBLIC_APP_URL=https://www.mandalashostels.com`.
 *   Configurar canonical URL.
 *   Revisar Open Graph para WhatsApp, Facebook y previews sociales.
 *   Confirmar metadata básica: title, description, image y site name.

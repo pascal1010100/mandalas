@@ -6,7 +6,7 @@ A boutique public website for **Mandalas Hostal** in San Pedro La Laguna. Phase 
 *   **Mandalas**: central, walkable and social.
 *   **Hideout**: quieter, closer to the lake and outside the center.
 
-Phase 1 should be delivered in English and prepared for the planned domain `mandalashostels.com`.
+Phase 1 is delivered in English at `https://www.mandalashostels.com`.
 
 The repository still contains an older operational app/admin area for a possible phase 2. It is disabled by default unless explicitly enabled with environment flags.
 
@@ -78,11 +78,11 @@ El proyecto incluye pipelines automáticos:
 ### Variables de Entorno
 
 ```bash
-NEXT_PUBLIC_APP_URL=https://your-domain.com
+NEXT_PUBLIC_APP_URL=https://www.mandalashostels.com
 NEXT_PUBLIC_WHATSAPP_NUMBER=502XXXXXXXX
 NEXT_PUBLIC_CONTACT_EMAIL=info@example.com
-SUPABASE_URL=your-supabase-url
-SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 RESEND_API_KEY=your-resend-api-key
 ENABLE_ADMIN=false
 ENABLE_GUEST_PORTAL=false

@@ -1,76 +1,37 @@
-# 🚀 Deploy Status
+# Deploy
 
-## Current Deployment
+## Production
 
 - **Branch**: `main`
-- **Commit**: `d6348a7` - "trigger: deploy to production"
-- **Status**: 🔄 In Progress
-- **Environment**: Production
+- **Public URL**: https://www.mandalashostels.com
+- **Canonical redirect**: `mandalashostels.com` redirects to `www.mandalashostels.com`
+- **Platform**: Vercel
 
-## CI/CD Pipeline Status
+Pushes to `main` trigger the production CI/CD workflow. A deployment can also be created manually with `vercel --prod`.
 
-### ✅ Completed Steps
-- [x] Code checkout
-- [x] Node.js 20 setup
-- [x] Dependencies installation (pnpm)
-- [x] Linting
-- [x] Tests
-- [x] Build
+## Deployment commands
 
-### 🔄 Running Steps
-- [ ] Deploy to production
-
-## Monitoring
-
-### GitHub Actions
-- **URL**: https://github.com/pascal1010100/mandalas/actions
-- **Workflow**: CI/CD Pipeline
-- **Trigger**: Push to `main` branch
-
-### Production URL
-- **Target**: https://mandalas.com (when configured)
-- **Health Check**: https://mandalas.com/api/health
-
-## Deployment Commands
-
-### Manual Deploy (if needed)
 ```bash
-# Build for production
 pnpm build
-
-# Start production server
 pnpm start
-
-# Or with Docker
-docker-compose up -d
 ```
 
-### Environment Variables Required
+## Environment variables
+
 ```bash
-NEXT_PUBLIC_APP_URL=https://mandalas.com
-SUPABASE_URL=your-supabase-url
-SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_APP_URL=https://www.mandalashostels.com
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 RESEND_API_KEY=your-resend-api-key
+ENABLE_ADMIN=false
+ENABLE_GUEST_PORTAL=false
 ```
 
-## Rollback Plan
-
-If deployment fails:
-```bash
-# Rollback to previous commit
-git checkout 2332889
-git push origin main --force
-```
-
-## Health Checks
+## Health checks
 
 After deployment, verify:
-- [ ] Homepage loads correctly
-- [ ] Admin dashboard accessible
-- [ ] Booking system functional
-- [ ] Database connections working
-- [ ] API endpoints responding
 
-## Last Updated
-- **Timestamp**: $(date)
-- **Status**: Deployment initiated
+- [ ] Homepage, `/pueblo`, `/hideout`, and `/contact` load correctly.
+- [ ] WhatsApp links open with the correct number.
+- [ ] `robots.txt` and `sitemap.xml` respond successfully.
+- [ ] `/admin` and `/my-booking` redirect to the public homepage.
