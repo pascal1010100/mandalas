@@ -4,7 +4,7 @@ import { MobileCTA } from "@/components/shared/mobile-cta"
 import Script from "next/script"
 import { publicContact } from "@/lib/public-contact"
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://mandalashostels.com"
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.mandalashostels.com"
 
 const siteJsonLd = {
     "@context": "https://schema.org",

@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://mandalashostels.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.mandalashostels.com"),
   title: {
     default: "Mandalas Hostal | San Pedro La Laguna Hostel",
     template: "%s | Mandalas Hostal",
@@ -37,6 +37,9 @@ export const metadata: Metadata = {
   authors: [{ name: "Mandalas Hostal" }],
   creator: "Mandalas Hostal",
   publisher: "Mandalas Hostal",
+  verification: {
+    google: "P_umI9VQ3JAZ9YH-PIWi75Brvqw-8i0MGTRoNh_GZZ4",
+  },
   alternates: {
     canonical: "/",
   },
