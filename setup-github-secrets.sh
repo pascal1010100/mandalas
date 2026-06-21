@@ -17,7 +17,7 @@ VERCEL_ORG_ID="team_eBliS0vkDcxbdpVnwaiQB2OO"
 VERCEL_PROJECT_ID="prj_c7gk9h1FRmXJpGepL5zsm0k7Nf5i"
 
 # URLs del proyecto
-PRODUCTION_URL="https://mandalas-sigma.vercel.app"
+PRODUCTION_URL="https://mandalashostels.com"
 STAGING_URL="https://mandalas-sigma.vercel.app"
 
 echo "📋 Secrets a configurar:"
@@ -43,7 +43,7 @@ echo ""
 cat << 'EOF'
 VERCEL_ORG_ID=team_eBliS0vkDcxbdpVnwaiQB2OO
 VERCEL_PROJECT_ID=prj_c7gk9h1FRmXJpGepL5zsm0k7Nf5i
-PRODUCTION_URL=https://mandalas-sigma.vercel.app
+PRODUCTION_URL=https://mandalashostels.com
 STAGING_URL=https://mandalas-sigma.vercel.app
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your-supabase-anon-key
