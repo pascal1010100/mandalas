@@ -44,14 +44,14 @@ export function LocationMap() {
                 <Marker position={puebloCoords}>
                     <Popup>
                         <strong>Mandalas</strong><br />
-                        El corazón de la acción.
+                        In the heart of town.
                     </Popup>
                 </Marker>
 
                 <Marker position={hideoutCoords}>
                     <Popup>
                         <strong>Mandalas Hideout</strong><br />
-                        Tu refugio natural.
+                        Your quieter retreat.
                     </Popup>
                 </Marker>
             </MapContainer>

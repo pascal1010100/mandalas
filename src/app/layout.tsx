@@ -43,6 +43,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  icons: {
+    icon: [{ url: "/mandalas-favicon.png", type: "image/png", sizes: "512x512" }],
+    shortcut: "/mandalas-favicon.png",
+  },
   openGraph: {
     title: "Mandalas Hostal | San Pedro La Laguna Hostel",
     description: "Mandalas in town and Hideout near Lake Atitlan, with personal booking inquiries on WhatsApp.",
