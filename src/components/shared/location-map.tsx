@@ -31,7 +31,7 @@ export function LocationMap() {
     if (!isMounted) return <div className="h-full min-h-[320px] w-full animate-pulse rounded-lg bg-stone-900" />
 
     const puebloCoords: [number, number] = [14.693, -91.274] // Approximate
-    const hideoutCoords: [number, number] = [14.688, -91.270] // Approximate (further along shore)
+    const hideoutCoords: [number, number] = [14.682795, -91.259236]
 
     return (
         <div className="h-full min-h-[320px] w-full overflow-hidden rounded-lg border border-white/10 bg-stone-950">

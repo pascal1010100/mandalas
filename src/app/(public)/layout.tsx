@@ -5,6 +5,9 @@ import Script from "next/script"
 import { publicContact } from "@/lib/public-contact"
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.mandalashostels.com"
+const primaryImageUrl = `${siteUrl}/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg`
+const hideoutImageUrl = `${siteUrl}/images/mandalas/hostelworld/hideout-terrace-dusk.jpg`
+const logoUrl = `${siteUrl}/mandalas-favicon.png`
 
 const siteJsonLd = {
     "@context": "https://schema.org",
@@ -21,12 +24,31 @@ const siteJsonLd = {
             ],
         },
         {
+            "@type": "WebPage",
+            "@id": `${siteUrl}/#webpage`,
+            url: siteUrl,
+            name: "Mandalas Hostal | San Pedro La Laguna Hostel",
+            inLanguage: "en",
+            isPartOf: { "@id": `${siteUrl}/#website` },
+            primaryImageOfPage: { "@id": `${primaryImageUrl}#image` },
+        },
+        {
+            "@type": "ImageObject",
+            "@id": `${primaryImageUrl}#image`,
+            url: primaryImageUrl,
+            contentUrl: primaryImageUrl,
+            width: 1600,
+            height: 1067,
+            caption: "Hammocks and courtyard at Mandalas Hostal in San Pedro La Laguna",
+        },
+        {
             "@type": "Hostel",
             "@id": `${siteUrl}/#hostel`,
             name: "Mandalas Hostal",
             alternateName: ["Mandala's Hostal", "Mandalas Hideout"],
             description: "A San Pedro La Laguna hostel with two stays: Mandalas in town and Hideout near Lake Atitlan.",
             url: siteUrl,
+            logo: logoUrl,
             telephone: publicContact.whatsappNumber ? `+${publicContact.whatsappNumber}` : undefined,
             email: publicContact.email,
             sameAs: [
@@ -34,8 +56,8 @@ const siteJsonLd = {
                 publicContact.instagram.hideout,
             ],
             image: [
-                `${siteUrl}/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg`,
-                `${siteUrl}/images/mandalas/hostelworld/hideout-terrace-dusk.jpg`,
+                primaryImageUrl,
+                hideoutImageUrl,
             ],
             address: {
                 "@type": "PostalAddress",
@@ -55,7 +77,7 @@ const siteJsonLd = {
                     name: "Mandalas Hostal",
                     url: `${siteUrl}/pueblo`,
                     sameAs: publicContact.instagram.mandalas,
-                    image: `${siteUrl}/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg`,
+                    image: primaryImageUrl,
                     address: {
                         "@type": "PostalAddress",
                         addressLocality: "San Pedro La Laguna",
@@ -68,7 +90,7 @@ const siteJsonLd = {
                     name: "Mandalas Hideout",
                     url: `${siteUrl}/hideout`,
                     sameAs: publicContact.instagram.hideout,
-                    image: `${siteUrl}/images/mandalas/hostelworld/hideout-terrace-dusk.jpg`,
+                    image: hideoutImageUrl,
                     address: {
                         "@type": "PostalAddress",
                         addressLocality: "San Pedro La Laguna",
