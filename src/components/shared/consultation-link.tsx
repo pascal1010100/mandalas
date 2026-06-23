@@ -3,6 +3,7 @@ import type * as React from "react"
 import { CalendarDays } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { getBookingEngineUrl } from "@/lib/booking-engine"
 import { cn } from "@/lib/utils"
 
 type ConsultationLinkProps = React.ComponentProps<typeof Button> & {
@@ -41,6 +42,8 @@ export function ConsultationLink({
     className,
     ...props
 }: ConsultationLinkProps) {
+    const bookingEngineUrl = getBookingEngineUrl(location)
+
     return (
         <Button
             asChild
@@ -50,10 +53,17 @@ export function ConsultationLink({
             )}
             {...props}
         >
-            <Link href={buildInquiryHref(location, roomName)}>
-                {showIcon && <CalendarDays className="h-4 w-4" />}
-                {children}
-            </Link>
+            {bookingEngineUrl ? (
+                <a href={bookingEngineUrl}>
+                    {showIcon && <CalendarDays className="h-4 w-4" />}
+                    {children}
+                </a>
+            ) : (
+                <Link href={buildInquiryHref(location, roomName)}>
+                    {showIcon && <CalendarDays className="h-4 w-4" />}
+                    {children}
+                </Link>
+            )}
         </Button>
     )
 }

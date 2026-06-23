@@ -26,7 +26,7 @@ export default function HideoutPage() {
                     size="lg"
                     className="h-12 border-white/25 bg-white px-8 text-stone-950 hover:bg-stone-200 gap-2"
                 >
-                    Check dates
+                    Book Hideout
                 </ConsultationLink>
             </Hero>
 
@@ -180,7 +180,7 @@ export default function HideoutPage() {
             <StayOptions
                 eyebrow="Sleep at Hideout"
                 title="Ways to sleep with more quiet"
-                description="Shared and private options for slowing down, with final rates and availability confirmed by message."
+                description="Shared and private options for slowing down, with live availability and final prices in the booking engine."
                 location="Mandalas Hideout"
                 accent="lime"
                 options={[
@@ -218,13 +218,13 @@ export default function HideoutPage() {
             <section className="py-24 bg-stone-900 text-white text-center">
                 <FadeIn>
                     <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Slow down</h2>
-                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Share your dates and we will guide you toward the quietest available option.</p>
+                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Choose your dates and book the quieter side of San Pedro directly.</p>
                     <ConsultationLink
                         location="Mandalas Hideout"
                         size="lg"
                         className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
                     >
-                        Check availability
+                        Book Hideout
                     </ConsultationLink>
                     <a
                         href={publicContact.instagram.hideout}

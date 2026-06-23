@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
-  ArrowDown,
+  ArrowUpRight,
   CalendarDays,
   Instagram,
   Mail,
@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { getBookingEngineUrl } from "@/lib/booking-engine";
 import { buildContactHref, publicContact } from "@/lib/public-contact";
 
 const fieldClass =
@@ -109,19 +110,19 @@ function ReservationInquiryForm() {
       <div className="mb-9 grid gap-6 border-b border-white/10 pb-7 sm:grid-cols-[1fr_auto] sm:items-end">
         <div>
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.26em] text-amber-200/70">
-            Personal inquiry
+            Personal help
           </p>
           <h2 className="max-w-xl font-heading text-2xl font-light uppercase leading-tight tracking-[0.14em] text-white md:text-3xl">
-            Shape your stay
+            Need a hand choosing?
           </h2>
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-stone-300">
-            Leave us the essentials and we turn your trip idea into a clear
-            message: dates, ideal stay, and room type.
+            For groups, special plans, or a recommendation between the two
+            stays, leave us the essentials and we will help personally.
           </p>
         </div>
 
         <p className="max-w-36 border-l border-white/15 pl-4 text-[0.65rem] font-semibold uppercase leading-relaxed tracking-[0.2em] text-white/50 max-sm:border-l-0 max-sm:border-t max-sm:pt-4 max-sm:pl-0">
-          Human reply, no automatic payment.
+          Groups, special requests, and personal advice.
         </p>
       </div>
 
@@ -247,7 +248,71 @@ function ReservationInquiryForm() {
   );
 }
 
+type BookingEngineCardProps = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  href?: string;
+  image: string;
+  buttonLabel: string;
+  accent: "amber" | "lime";
+};
+
+function BookingEngineCard({
+  eyebrow,
+  title,
+  description,
+  href,
+  image,
+  buttonLabel,
+  accent,
+}: BookingEngineCardProps) {
+  const accentClass = accent === "amber" ? "text-amber-200" : "text-lime-200";
+
+  return (
+    <article className="group relative min-h-80 overflow-hidden border border-white/10 bg-stone-950 p-6 sm:p-8">
+      <div
+        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+        style={{ backgroundImage: `url('${image}')` }}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(12,10,9,0.94),rgba(12,10,9,0.62)_58%,rgba(12,10,9,0.28))]" />
+
+      <div className="relative flex h-full min-h-64 flex-col items-start">
+        <p className={`text-xs font-semibold uppercase tracking-[0.24em] ${accentClass}`}>
+          {eyebrow}
+        </p>
+        <h3 className="mt-4 font-heading text-4xl font-light uppercase tracking-[0.14em] text-white">
+          {title}
+        </h3>
+        <p className="mt-4 max-w-sm text-sm leading-relaxed text-stone-300">
+          {description}
+        </p>
+
+        <div className="mt-auto pt-8">
+          <Button
+            asChild
+            className="h-11 rounded-full border border-white/20 bg-white px-6 text-xs font-semibold uppercase tracking-[0.15em] text-stone-950 shadow-none hover:bg-stone-200"
+          >
+            <a href={href ?? "#inquiry"}>
+              <CalendarDays className="h-4 w-4" />
+              {buttonLabel}
+              <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </Button>
+          <p className="mt-3 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-white/50">
+            Live availability · secure booking
+          </p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export default function ContactPage() {
+  const mandalasBookingUrl = getBookingEngineUrl("Mandalas");
+  const hideoutBookingUrl = getBookingEngineUrl("Hideout");
+
   return (
     <div className="min-h-screen bg-stone-950 text-stone-200">
       <Hero
@@ -263,12 +328,51 @@ export default function ContactPage() {
           size="lg"
           className="h-12 rounded-full border border-white/25 bg-white px-7 text-xs font-semibold uppercase tracking-[0.14em] text-stone-950 shadow-none hover:bg-stone-200 gap-2 sm:px-8 sm:tracking-[0.16em]"
         >
-          <a href="#inquiry">
-            <ArrowDown className="h-4 w-4" />
-            Check dates
+          <a href="#book-directly">
+            <CalendarDays className="h-4 w-4" />
+            Book your stay
           </a>
         </Button>
       </Hero>
+
+      <section id="book-directly" className="scroll-mt-24 border-y border-white/10 bg-stone-900/60 py-16 md:scroll-mt-28 md:py-20">
+        <div className="mx-auto w-full max-w-7xl px-4">
+          <FadeIn>
+            <div className="mb-9 max-w-2xl">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.26em] text-amber-200/70">
+                Direct booking
+              </p>
+              <h2 className="font-heading text-3xl font-light uppercase tracking-[0.12em] text-white md:text-5xl">
+                Already know your stay?
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-stone-400 md:text-lg">
+                Check live availability, final prices, and reserve directly with the stay that fits your trip.
+              </p>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              <BookingEngineCard
+                eyebrow="Town center"
+                title="Mandalas"
+                description="For rooftop sunsets, walkable plans, and being close to San Pedro's energy."
+                href={mandalasBookingUrl}
+                image="/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"
+                buttonLabel="Book Mandalas"
+                accent="amber"
+              />
+              <BookingEngineCard
+                eyebrow="Near the lake"
+                title="Hideout"
+                description="For quieter nights, slower mornings, and a calmer base outside the center."
+                href={hideoutBookingUrl}
+                image="/images/mandalas/hostelworld/hideout-terrace-dusk.jpg"
+                buttonLabel="Book Hideout"
+                accent="lime"
+              />
+            </div>
+          </FadeIn>
+        </div>
+      </section>
 
       <section className="mx-auto w-full max-w-7xl overflow-hidden px-4 py-16 md:py-24">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
@@ -276,15 +380,14 @@ export default function ContactPage() {
             <div className="min-w-0 space-y-8">
               <div>
                 <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-white/40">
-                  Intentional booking
+                  Personal help
                 </p>
                 <h2 className="mb-5 max-w-xl break-words font-heading text-[1.2rem] font-light uppercase leading-tight tracking-[0.08em] text-white [text-wrap:balance] sm:text-3xl sm:tracking-[0.1em] md:text-4xl md:tracking-[0.14em]">
-                  One conversation, two ways to stay
+                  Not sure which stay fits?
                 </h2>
                 <p className="max-w-xl text-base leading-relaxed text-stone-400 md:text-lg">
-                  The site gathers the essentials before you write: dates,
-                  guests, stay, and room. That makes the reply clearer and the
-                  conversation easier.
+                  Tell us about your dates, group, or travel style. We are here
+                  for personal advice, special plans, and questions before you book.
                 </p>
               </div>
 
@@ -299,7 +402,7 @@ export default function ContactPage() {
                         WhatsApp
                       </h3>
                       <p className="mb-4 text-sm leading-relaxed text-stone-400">
-                        For dates, final rates, arrival details, and specific
+                        For groups, arrival details, special requests, and
                         questions with a person from the hostel.
                       </p>
                       <BookingLink

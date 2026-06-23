@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 
 import { FadeIn } from "@/components/animations/fade-in";
 import { Button } from "@/components/ui/button";
+import { getBookingEngineUrl } from "@/lib/booking-engine";
 
 type StayOption = {
   icon: LucideIcon;
@@ -51,7 +51,8 @@ export function StayOptions({
   options,
 }: StayOptionsProps) {
   const style = accentStyles[accent];
-  const contactLocation = location.includes("Hideout") ? "Hideout" : "Mandalas";
+  const bookingEngineUrl = getBookingEngineUrl(location);
+  const bookingLabel = location.includes("Hideout") ? "Book Hideout" : "Book Mandalas";
 
   return (
     <section className="bg-stone-950/50 py-24">
@@ -74,8 +75,6 @@ export function StayOptions({
 
             <div className="border-y border-white/10">
               {options.map((option) => {
-                const href = `/contact?location=${encodeURIComponent(contactLocation)}&room=${encodeURIComponent(option.roomName)}#inquiry`;
-
                 return (
                   <div
                     key={option.title}
@@ -118,14 +117,14 @@ export function StayOptions({
                           {option.price}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          final rate by message
+                          final price in booking engine
                         </p>
                       </div>
                       <Button
                         asChild
                         className={`rounded-full px-6 text-xs font-semibold uppercase tracking-[0.16em] shadow-none ${style.button}`}
                       >
-                        <Link href={href}>Inquire</Link>
+                        <a href={bookingEngineUrl}>{bookingLabel}</a>
                       </Button>
                     </div>
                   </div>

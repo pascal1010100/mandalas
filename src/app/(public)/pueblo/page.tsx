@@ -26,7 +26,7 @@ export default function PuebloPage() {
                     size="lg"
                     className="h-12 border-white/25 bg-white px-8 text-stone-950 hover:bg-stone-200 gap-2"
                 >
-                    Check dates
+                    Book Mandalas
                 </ConsultationLink>
             </Hero>
 
@@ -180,7 +180,7 @@ export default function PuebloPage() {
             <StayOptions
                 eyebrow="Sleep at Mandalas"
                 title="Ways to stay close"
-                description="Shared dorms and private rooms for traveling light, with the rooftop as a meeting point and final rates confirmed by message."
+                description="Shared dorms and private rooms for traveling light, with the rooftop as a meeting point and live availability in the booking engine."
                 location="Mandalas"
                 accent="amber"
                 options={[
@@ -218,13 +218,13 @@ export default function PuebloPage() {
             <section className="py-24 bg-stone-900 text-white text-center">
                 <FadeIn>
                     <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Stay at Mandalas</h2>
-                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Share your dates and we will guide you toward the room that best fits your trip.</p>
+                    <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Choose your dates and book your stay in the center directly.</p>
                     <ConsultationLink
                         location="Mandalas"
                         size="lg"
                         className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
                     >
-                        Check availability
+                        Book Mandalas
                     </ConsultationLink>
                     <a
                         href={publicContact.instagram.mandalas}

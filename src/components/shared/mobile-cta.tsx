@@ -6,7 +6,7 @@ import { ConsultationLink } from "@/components/shared/consultation-link"
 export function MobileCTA() {
     const pathname = usePathname()
 
-    if (pathname === "/") return null
+    if (pathname === "/" || pathname === "/contact") return null
 
     const location = pathname.includes("/hideout")
         ? "Mandalas Hideout"
@@ -21,7 +21,7 @@ export function MobileCTA() {
                 showIcon={false}
                 className="h-12 w-full animate-in border-white/20 bg-white text-stone-950 duration-500 slide-in-from-bottom hover:bg-stone-200 gap-2"
             >
-                Check dates
+                {location.includes("Hideout") ? "Book Hideout" : "Book Mandalas"}
             </ConsultationLink>
         </div>
     )
