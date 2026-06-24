@@ -60,6 +60,7 @@ export function PropertyGallery({ id, eyebrow, title, description, images, accen
                                     src={image.src}
                                     alt={image.alt}
                                     fill
+                                    unoptimized
                                     sizes={index === 0 ? "(min-width: 1024px) 58vw, 100vw" : "(min-width: 1024px) 42vw, 100vw"}
                                     className="object-cover transition duration-[1400ms] ease-out group-hover:scale-105"
                                 />
