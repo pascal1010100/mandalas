@@ -189,7 +189,7 @@ export default function PuebloPage() {
                         title: "Mixed Dorm",
                         subtitle: "social",
                         description: "For traveling light, meeting people, and keeping a practical base near San Pedro's movement.",
-                        details: ["Locker", "Luz de lectura", "Enchufe"],
+                        details: ["Locker", "Reading light", "Power outlet"],
                         price: "By date",
                         roomName: "Mixed Dorm",
                     },
@@ -219,22 +219,24 @@ export default function PuebloPage() {
                 <FadeIn>
                     <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Stay at Mandalas</h2>
                     <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Choose your dates and book your stay in the center directly.</p>
-                    <ConsultationLink
-                        location="Mandalas"
-                        size="lg"
-                        className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
-                    >
-                        Book Mandalas
-                    </ConsultationLink>
-                    <a
-                        href={publicContact.instagram.mandalas}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-amber-200"
-                    >
-                        <Instagram className="h-4 w-4" />
-                        View Mandalas on Instagram
-                    </a>
+                    <div className="flex flex-col items-center gap-5">
+                        <ConsultationLink
+                            location="Mandalas"
+                            size="lg"
+                            className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
+                        >
+                            Book Mandalas
+                        </ConsultationLink>
+                        <a
+                            href={publicContact.instagram.mandalas}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.08em] text-stone-500 transition-colors hover:text-amber-200"
+                        >
+                            <Instagram className="h-4 w-4" />
+                            @mandalas_hostal
+                        </a>
+                    </div>
                 </FadeIn>
             </section>
         </div>

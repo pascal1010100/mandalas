@@ -65,12 +65,12 @@ export function Footer() {
                     </div>
 
                     <div>
-                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Direct Inquiry</h4>
+                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Book direct</h4>
                         <p className="text-sm leading-relaxed text-stone-500 font-light mb-5">
-                            Share your dates and travel style. We will guide you toward the right stay.
+                            Choose Mandalas or Hideout, then check live availability and final prices in Cloudbeds.
                         </p>
                         <ConsultationLink className="border-white/20 bg-white text-stone-950 hover:bg-stone-200">
-                            Inquire
+                            Book your stay
                         </ConsultationLink>
                     </div>
                 </div>

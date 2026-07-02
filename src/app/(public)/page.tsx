@@ -122,7 +122,7 @@ export default function LandingPage() {
 
               <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 <ConsultationLink className="h-12 border-white/20 bg-white px-8 text-stone-950 hover:bg-stone-200">
-                  Check dates
+                  Book your stay
                 </ConsultationLink>
                 <Link href="/contact">
                   <Button variant="outline" className="h-12 w-full rounded-full border-white/20 bg-transparent px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-none hover:bg-white hover:text-stone-950">

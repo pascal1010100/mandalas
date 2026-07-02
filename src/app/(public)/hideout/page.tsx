@@ -219,22 +219,24 @@ export default function HideoutPage() {
                 <FadeIn>
                     <h2 className="text-3xl md:text-5xl font-light font-heading uppercase tracking-[0.12em] mb-6">Slow down</h2>
                     <p className="text-xl text-stone-400 mb-8 max-w-xl mx-auto">Choose your dates and book the quieter side of San Pedro directly.</p>
-                    <ConsultationLink
-                        location="Mandalas Hideout"
-                        size="lg"
-                        className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
-                    >
-                        Book Hideout
-                    </ConsultationLink>
-                    <a
-                        href={publicContact.instagram.hideout}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 transition-colors hover:text-lime-200"
-                    >
-                        <Instagram className="h-4 w-4" />
-                        View Hideout on Instagram
-                    </a>
+                    <div className="flex flex-col items-center gap-5">
+                        <ConsultationLink
+                            location="Mandalas Hideout"
+                            size="lg"
+                            className="h-12 border-white/20 bg-white px-10 text-stone-950 hover:bg-stone-200 gap-2"
+                        >
+                            Book Hideout
+                        </ConsultationLink>
+                        <a
+                            href={publicContact.instagram.hideout}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.08em] text-stone-500 transition-colors hover:text-lime-200"
+                        >
+                            <Instagram className="h-4 w-4" />
+                            @mandalashideout
+                        </a>
+                    </div>
                 </FadeIn>
             </section>
         </div>

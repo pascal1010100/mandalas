@@ -8,12 +8,15 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "cloudbeds:verify": "tsx scripts/cloudbeds/verify.ts",
+    "cloudbeds:rooms": "tsx scripts/cloudbeds/list-rooms.ts",
+    "cloudbeds:reservations": "tsx scripts/cloudbeds/reservation-summary.ts",
     "prepare": "husky"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",
-      "bash -c 'pnpm run build'"
+      "bash -c 'corepack pnpm run build'"
     ]
   },
   "dependencies": {
@@ -32,6 +35,8 @@
     "@react-email/render": "^2.0.0",
     "@react-email/tailwind": "^2.0.2",
     "@supabase/supabase-js": "^2.87.1",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

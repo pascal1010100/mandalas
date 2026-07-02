@@ -18,6 +18,10 @@ function getContactLocation(location?: string) {
 }
 
 function buildInquiryHref(location?: string, roomName?: string) {
+    if (!location && !roomName) {
+        return "/contact#book-directly"
+    }
+
     const params = new URLSearchParams()
     const contactLocation = getContactLocation(location)
 
@@ -38,7 +42,7 @@ export function ConsultationLink({
     location,
     roomName,
     showIcon = true,
-    children = "Check dates",
+    children = "Book now",
     className,
     ...props
 }: ConsultationLinkProps) {

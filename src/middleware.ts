@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server'
 const COOKIE_NAME = 'mandalas_admin_session'
 const ENABLE_ADMIN = process.env.ENABLE_ADMIN === 'true'
 const ENABLE_GUEST_PORTAL = process.env.ENABLE_GUEST_PORTAL === 'true'
+const ADMIN_BYPASS_AUTH = process.env.NODE_ENV !== 'production' && process.env.ADMIN_BYPASS_AUTH === 'true'
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
@@ -22,6 +23,11 @@ export function middleware(request: NextRequest) {
 
     if (isGuestPortalPath && !ENABLE_GUEST_PORTAL) {
         return NextResponse.redirect(new URL('/', request.url))
+    }
+
+    // Local development preview only. This can never bypass auth in production.
+    if (ADMIN_BYPASS_AUTH && (isAdminPath || isAdminApiPath)) {
+        return NextResponse.next()
     }
 
     const isPublicPath = pathname === '/admin/login'

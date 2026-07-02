@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
-import { BookingLink } from "@/components/shared/booking-link"
+import { ConsultationLink } from "@/components/shared/consultation-link"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
 
 export function Navbar() {
@@ -80,7 +80,7 @@ export function Navbar() {
                         "text-[10px] font-medium tracking-wide uppercase transition-all duration-300 mt-0.5",
                         scrolled ? "text-stone-400" : "text-white/70"
                     )}>
-                        Hostel · San Pedro
+                        Hostels · Lake Atitlán
                     </span>
                 </Link>
 
@@ -132,15 +132,15 @@ export function Navbar() {
                         )}
                     </Link>
 
-                    <BookingLink
-                        location={isHideout ? "Mandalas Hideout" : "Mandalas"}
+                    <ConsultationLink
+                        location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}
                         className={cn(
                             "h-10 px-6 gap-2",
                             theme.button
                         )}
                     >
-                        WhatsApp
-                    </BookingLink>
+                        Book now
+                    </ConsultationLink>
                 </div>
 
                 <Sheet>
@@ -158,7 +158,7 @@ export function Navbar() {
                                             MANDALAS
                                         </span>
                                         <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-400 dark:text-stone-500 mt-1">
-                                            Hostel · San Pedro
+                                            Hostels · Lake Atitlán
                                         </span>
                                     </div>
                                 </SheetTitle>
@@ -208,12 +208,12 @@ export function Navbar() {
                                 </StaggerItem>
                                 <div className="mt-auto mb-8 space-y-8">
                                     <StaggerItem>
-                                        <BookingLink
-                                            location={isHideout ? "Mandalas Hideout" : "Mandalas"}
+                                        <ConsultationLink
+                                            location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}
                                             className={cn("h-14 w-full gap-2", theme.button)}
                                         >
-                                            ASK ON WHATSAPP
-                                        </BookingLink>
+                                            BOOK NOW
+                                        </ConsultationLink>
                                     </StaggerItem>
                                 </div>
                             </StaggerReveal>
