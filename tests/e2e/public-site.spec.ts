@@ -58,3 +58,17 @@ test("mobile navigation exposes the essential destinations", async ({ page }, te
         "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
     )
 })
+
+test("navbar booking control reveals the booking choices on contact", async ({ page }, testInfo) => {
+    await page.goto("/contact")
+
+    if (testInfo.project.name === "mobile-chromium") {
+        await page.getByRole("button", { name: "Open navigation menu" }).click()
+        await page.getByRole("link", { name: "BOOK NOW", exact: true }).click()
+    } else {
+        await page.locator("nav").getByRole("link", { name: "Book now", exact: true }).click()
+    }
+
+    await expect(page).toHaveURL(/\/contact#book-directly$/)
+    await expect(page.locator("#book-directly")).toBeInViewport()
+})

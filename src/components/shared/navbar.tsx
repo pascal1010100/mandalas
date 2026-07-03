@@ -12,6 +12,7 @@ import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reve
 
 export function Navbar() {
     const [scrolled, setScrolled] = React.useState(false)
+    const [menuOpen, setMenuOpen] = React.useState(false)
     const pathname = usePathname()
     React.useEffect(() => {
         const handleScroll = () => {
@@ -54,6 +55,7 @@ export function Navbar() {
     const theme = getNavTheme()
     const isPueblo = pathname.includes("/pueblo")
     const isHideout = pathname.includes("/hideout")
+    const bookingSectionHref = pathname === "/contact" ? "#book-directly" : undefined
 
     return (
         <nav
@@ -134,6 +136,7 @@ export function Navbar() {
 
                     <ConsultationLink
                         location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}
+                        href={bookingSectionHref}
                         className={cn(
                             "h-10 px-6 gap-2",
                             theme.button
@@ -143,7 +146,7 @@ export function Navbar() {
                     </ConsultationLink>
                 </div>
 
-                <Sheet>
+                <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
                     <SheetTrigger asChild className="md:hidden">
                         <Button
                             variant="ghost"
@@ -216,6 +219,8 @@ export function Navbar() {
                                     <StaggerItem>
                                         <ConsultationLink
                                             location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}
+                                            href={bookingSectionHref}
+                                            onClick={() => setMenuOpen(false)}
                                             className={cn("h-14 w-full gap-2", theme.button)}
                                         >
                                             BOOK NOW

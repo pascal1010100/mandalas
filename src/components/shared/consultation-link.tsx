@@ -10,6 +10,7 @@ type ConsultationLinkProps = React.ComponentProps<typeof Button> & {
     location?: string
     roomName?: string
     showIcon?: boolean
+    href?: string
 }
 
 function getContactLocation(location?: string) {
@@ -42,11 +43,14 @@ export function ConsultationLink({
     location,
     roomName,
     showIcon = true,
+    href,
     children = "Book now",
     className,
     ...props
 }: ConsultationLinkProps) {
     const bookingEngineUrl = getBookingEngineUrl(location)
+    const destination = href || bookingEngineUrl || buildInquiryHref(location, roomName)
+    const useNativeAnchor = destination.startsWith("http") || destination.startsWith("#")
 
     return (
         <Button
@@ -57,13 +61,13 @@ export function ConsultationLink({
             )}
             {...props}
         >
-            {bookingEngineUrl ? (
-                <a href={bookingEngineUrl}>
+            {useNativeAnchor ? (
+                <a href={destination}>
                     {showIcon && <CalendarDays className="h-4 w-4" />}
                     {children}
                 </a>
             ) : (
-                <Link href={buildInquiryHref(location, roomName)}>
+                <Link href={destination}>
                     {showIcon && <CalendarDays className="h-4 w-4" />}
                     {children}
                 </Link>
