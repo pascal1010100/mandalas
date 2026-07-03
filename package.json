@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "cloudbeds:verify": "tsx scripts/cloudbeds/verify.ts",
     "cloudbeds:rooms": "tsx scripts/cloudbeds/list-rooms.ts",
     "cloudbeds:reservations": "tsx scripts/cloudbeds/reservation-summary.ts",
@@ -59,6 +61,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.0",

@@ -145,7 +145,13 @@ export function Navbar() {
 
                 <Sheet>
                     <SheetTrigger asChild className="md:hidden">
-                        <Button variant="ghost" size="icon" className={cn("transition-colors", scrolled ? "text-stone-100 hover:text-white" : "text-white hover:text-white/80")} suppressHydrationWarning>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Open navigation menu"
+                            className={cn("transition-colors", scrolled ? "text-stone-100 hover:text-white" : "text-white hover:text-white/80")}
+                            suppressHydrationWarning
+                        >
                             <Menu className="h-6 w-6" />
                         </Button>
                     </SheetTrigger>
