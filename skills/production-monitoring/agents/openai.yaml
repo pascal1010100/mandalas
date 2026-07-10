@@ -1,0 +1,4 @@
+interface:
+  display_name: "Production Monitoring"
+  short_description: "Comprueba salud, rendimiento y reservas"
+  default_prompt: "Usa $production-monitoring para comprobar la salud de producción."

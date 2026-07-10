@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import { FadeIn } from "@/components/animations/fade-in";
 import { Button } from "@/components/ui/button";
 import { getBookingEngineUrl } from "@/lib/booking-engine";
+import { normalizePublicProperty, trackBookingIntent } from "@/lib/analytics";
 
 type StayOption = {
   icon: LucideIcon;
@@ -124,7 +125,17 @@ export function StayOptions({
                         asChild
                         className={`rounded-full px-6 text-xs font-semibold uppercase tracking-[0.16em] shadow-none ${style.button}`}
                       >
-                        <a href={bookingEngineUrl}>{bookingLabel}</a>
+                        <a
+                          href={bookingEngineUrl}
+                          onClick={() =>
+                            trackBookingIntent(
+                              normalizePublicProperty(location),
+                              "stay_options",
+                            )
+                          }
+                        >
+                          {bookingLabel}
+                        </a>
                       </Button>
                     </div>
                   </div>

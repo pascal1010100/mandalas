@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vercel Operations"
+  short_description: "Inspecciona Vercel con controles seguros"
+  default_prompt: "Usa $vercel-operations para inspeccionar Vercel sin modificar producción."

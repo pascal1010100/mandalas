@@ -1,8 +1,11 @@
+"use client"
+
 import Link from "next/link"
 import type * as React from "react"
 import { CalendarDays } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { normalizePublicProperty, trackBookingIntent } from "@/lib/analytics"
 import { getBookingEngineUrl } from "@/lib/booking-engine"
 import { cn } from "@/lib/utils"
 
@@ -11,6 +14,7 @@ type ConsultationLinkProps = React.ComponentProps<typeof Button> & {
     roomName?: string
     showIcon?: boolean
     href?: string
+    trackingSource?: string
 }
 
 function getContactLocation(location?: string) {
@@ -44,6 +48,7 @@ export function ConsultationLink({
     roomName,
     showIcon = true,
     href,
+    trackingSource = "consultation_link",
     children = "Book now",
     className,
     ...props
@@ -51,6 +56,11 @@ export function ConsultationLink({
     const bookingEngineUrl = getBookingEngineUrl(location)
     const destination = href || bookingEngineUrl || buildInquiryHref(location, roomName)
     const useNativeAnchor = destination.startsWith("http") || destination.startsWith("#")
+    const handleClick = () => {
+        if (destination.startsWith("http")) {
+            trackBookingIntent(normalizePublicProperty(location), trackingSource)
+        }
+    }
 
     return (
         <Button
@@ -62,7 +72,7 @@ export function ConsultationLink({
             {...props}
         >
             {useNativeAnchor ? (
-                <a href={destination}>
+                <a href={destination} onClick={handleClick}>
                     {showIcon && <CalendarDays className="h-4 w-4" />}
                     {children}
                 </a>

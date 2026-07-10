@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cloudbeds Safety"
+  short_description: "Protege operaciones y datos de Cloudbeds"
+  default_prompt: "Usa $cloudbeds-safety para revisar una tarea Cloudbeds de forma segura."

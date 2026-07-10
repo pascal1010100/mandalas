@@ -1,0 +1,4 @@
+interface:
+  display_name: "SEO Audit"
+  short_description: "Audita SEO técnico y contenido crítico"
+  default_prompt: "Usa $seo-audit para auditar el SEO de Mandalas y priorizar hallazgos."

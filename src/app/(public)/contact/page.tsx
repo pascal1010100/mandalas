@@ -31,6 +31,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { getBookingEngineUrl } from "@/lib/booking-engine";
+import {
+  normalizePublicProperty,
+  trackBookingIntent,
+  trackWhatsAppIntent,
+} from "@/lib/analytics";
 import { buildContactHref, publicContact } from "@/lib/public-contact";
 
 const fieldClass =
@@ -92,6 +97,7 @@ function ReservationInquiryForm() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    trackWhatsAppIntent(normalizePublicProperty(location), "contact_form");
     window.open(
       buildContactHref(whatsappMessage),
       "_blank",
@@ -294,7 +300,14 @@ function BookingEngineCard({
             asChild
             className="h-11 rounded-full border border-white/20 bg-white px-6 text-xs font-semibold uppercase tracking-[0.15em] text-stone-950 shadow-none hover:bg-stone-200"
           >
-            <a href={href ?? "#inquiry"}>
+            <a
+              href={href ?? "#inquiry"}
+              onClick={() => {
+                if (href) {
+                  trackBookingIntent(normalizePublicProperty(title), "contact_card");
+                }
+              }}
+            >
               <CalendarDays className="h-4 w-4" />
               {buttonLabel}
               <ArrowUpRight className="h-4 w-4" />

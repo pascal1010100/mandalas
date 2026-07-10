@@ -4,6 +4,7 @@ import * as React from "react"
 import { MessageCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { normalizePublicProperty, trackWhatsAppIntent } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
 import { buildContactHref } from "@/lib/public-contact"
 
@@ -39,7 +40,14 @@ export function BookingLink({
             )}
             {...props}
         >
-            <a href={href} target="_blank" rel="noreferrer">
+            <a
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() =>
+                    trackWhatsAppIntent(normalizePublicProperty(location), "booking_link")
+                }
+            >
                 {showIcon && <MessageCircle className="h-4 w-4" />}
                 {children}
             </a>
