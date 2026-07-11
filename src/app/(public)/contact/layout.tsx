@@ -29,9 +29,9 @@ export const metadata: Metadata = {
         url: "/contact",
         images: [
             {
-                url: "/images/mandalas/pueblo-dock-boat.jpg",
-                width: 1200,
-                height: 630,
+                url: "/images/mandalas/pueblo-dock-boat.webp",
+                width: 1920,
+                height: 1280,
                 alt: "San Pedro La Laguna by Lake Atitlan",
             },
         ],
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Contact and Stay Inquiry | Mandalas Hostal",
         description: "Check dates and your ideal stay on WhatsApp.",
-        images: ["/images/mandalas/pueblo-dock-boat.jpg"],
+        images: ["/images/mandalas/pueblo-dock-boat.webp"],
     },
 }
 

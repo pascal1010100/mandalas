@@ -331,7 +331,7 @@ export default function ContactPage() {
       <Hero
         title="Contact"
         subtitle="Tell us your dates and the kind of trip you are bringing. We will guide you toward the stay that fits best."
-        backgroundImage="/images/mandalas/pueblo-dock-boat.jpg"
+        backgroundImage="/images/mandalas/pueblo-dock-boat.webp"
         backgroundPosition="center 58%"
         height="large"
         align="center"
