@@ -1,4 +1,19 @@
 import type { Metadata } from "next"
+import Script from "next/script"
+
+const siteUrl = "https://www.mandalashostels.com"
+const pageUrl = `${siteUrl}/contact`
+
+const contactJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "@id": `${pageUrl}#webpage`,
+    url: pageUrl,
+    name: "Contact and Stay Inquiry | Mandalas Hostal",
+    description: "Contact Mandalas Hostal to check dates and choose between Mandalas in town or Hideout near the lake in San Pedro La Laguna.",
+    inLanguage: "en",
+    isPartOf: { "@id": `${siteUrl}/#website` },
+}
 
 export const metadata: Metadata = {
     title: "Contact and Stay Inquiry",
@@ -30,5 +45,14 @@ export const metadata: Metadata = {
 }
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {
-    return children
+    return (
+        <>
+            <Script
+                id="contact-structured-data"
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }}
+            />
+            {children}
+        </>
+    )
 }

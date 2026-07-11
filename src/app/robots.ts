@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next"
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.mandalashostels.com"
+const siteUrl = "https://www.mandalashostels.com"
 
 export default function robots(): MetadataRoute.Robots {
     return {
@@ -10,5 +10,6 @@ export default function robots(): MetadataRoute.Robots {
             disallow: ["/admin", "/api", "/my-booking"],
         },
         sitemap: `${siteUrl}/sitemap.xml`,
+        host: siteUrl,
     }
 }
