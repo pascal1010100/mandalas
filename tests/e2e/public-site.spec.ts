@@ -22,6 +22,12 @@ test("home presents both stays", async ({ page }) => {
 
     expect(response?.ok()).toBeTruthy()
     await expect(page).toHaveTitle(/Mandalas Hostal/)
+    await expect(page.locator("h1")).toHaveCount(1)
+    await expect(page.getByRole("heading", {
+        level: 1,
+        name: "Choose your stay in San Pedro La Laguna",
+        exact: true,
+    })).toBeVisible()
     await expect(page.locator('main a[href="/pueblo"]').first()).toBeVisible()
     await expect(page.locator('main a[href="/hideout"]').first()).toBeVisible()
 })
