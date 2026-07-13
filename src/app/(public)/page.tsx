@@ -23,9 +23,9 @@ export default function LandingPage() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">
               San Pedro La Laguna
             </p>
-            <h1 className="mt-3 font-heading text-2xl font-light uppercase tracking-[0.28em] text-white/90">
+            <p className="mt-3 font-heading text-2xl font-light uppercase tracking-[0.28em] text-white/90">
               Mandalas
-            </h1>
+            </p>
           </div>
         </div>
 
@@ -86,8 +86,11 @@ export default function LandingPage() {
                 The Feel Of The Stay
               </p>
               <h1 className="max-w-3xl font-heading text-4xl font-light uppercase leading-[1.05] tracking-[0.1em] text-white md:text-6xl md:tracking-[0.14em]">
-                One stay for movement. One stay to breathe again.
+                Choose your stay in San Pedro La Laguna
               </h1>
+              <h2 className="mt-5 max-w-2xl font-heading text-xl font-light uppercase leading-relaxed tracking-[0.12em] text-white/55 md:text-2xl">
+                One stay for movement. One stay to breathe again.
+              </h2>
             </div>
 
             <div className="max-w-xl lg:justify-self-end lg:pb-2">

@@ -6,6 +6,11 @@ export const metadata: Metadata = {
         index: false,
         follow: false,
     },
+    alternates: {
+        canonical: null,
+    },
+    openGraph: null,
+    twitter: null,
 }
 
 export default function MyBookingLayout({ children }: { children: React.ReactNode }) {

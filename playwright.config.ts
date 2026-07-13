@@ -19,6 +19,11 @@ export default defineConfig({
         : {
             command: "corepack pnpm dev --hostname 127.0.0.1",
             url: baseURL,
+            env: {
+                ENABLE_ADMIN: "true",
+                ENABLE_GUEST_PORTAL: "true",
+                ADMIN_BYPASS_AUTH: "true",
+            },
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
         },
