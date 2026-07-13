@@ -42,16 +42,18 @@ const puebloJsonLd = {
 }
 
 export const metadata: Metadata = {
-    title: "Mandalas Hostal in San Pedro La Laguna",
+    title: {
+        absolute: "Central Hostel in San Pedro La Laguna | Mandalas",
+    },
     description:
-        "Mandalas Hostal is the central San Pedro La Laguna stay: rooftop, kitchen, shared dorms, simple private rooms, and WhatsApp inquiries.",
+        "Stay in central San Pedro La Laguna at Mandalas Hostal, with a rooftop, shared kitchen, dorms and private rooms. Check live availability and book direct.",
     alternates: {
         canonical: "/pueblo",
     },
     openGraph: {
-        title: "Mandalas Hostal in San Pedro La Laguna",
+        title: "Central Hostel in San Pedro La Laguna | Mandalas",
         description:
-            "A central San Pedro La Laguna hostel with a rooftop, social energy, and personal WhatsApp inquiries.",
+            "Stay in central San Pedro La Laguna at Mandalas Hostal, with a rooftop, shared kitchen, dorms and private rooms. Check live availability and book direct.",
         url: "/pueblo",
         images: [
             {
@@ -64,8 +66,9 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "Mandalas Hostal in San Pedro La Laguna",
-        description: "A central hostel with a rooftop, kitchen, and WhatsApp inquiries.",
+        title: "Central Hostel in San Pedro La Laguna | Mandalas",
+        description:
+            "Stay in central San Pedro La Laguna at Mandalas Hostal, with a rooftop, shared kitchen, dorms and private rooms. Check live availability and book direct.",
         images: ["/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"],
     },
 }

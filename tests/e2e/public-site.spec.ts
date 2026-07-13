@@ -21,7 +21,7 @@ test("home presents both stays", async ({ page }) => {
     const response = await page.goto("/")
 
     expect(response?.ok()).toBeTruthy()
-    await expect(page).toHaveTitle(/Mandalas Hostal/)
+    await expect(page).toHaveTitle("Mandalas Hostels | San Pedro La Laguna, Atitlán")
     await expect(page.locator("h1")).toHaveCount(1)
     await expect(page.getByRole("heading", {
         level: 1,
