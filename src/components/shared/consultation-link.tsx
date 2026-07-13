@@ -5,7 +5,11 @@ import type * as React from "react"
 import { CalendarDays } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { normalizePublicProperty, trackBookingIntent } from "@/lib/analytics"
+import {
+    normalizePublicProperty,
+    trackBookingIntent,
+    type AnalyticsSource,
+} from "@/lib/analytics"
 import { getBookingEngineUrl } from "@/lib/booking-engine"
 import { cn } from "@/lib/utils"
 
@@ -14,7 +18,7 @@ type ConsultationLinkProps = React.ComponentProps<typeof Button> & {
     roomName?: string
     showIcon?: boolean
     href?: string
-    trackingSource?: string
+    trackingSource?: AnalyticsSource
 }
 
 function getContactLocation(location?: string) {
