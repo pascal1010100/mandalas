@@ -78,3 +78,54 @@ test("navbar booking control reveals the booking choices on contact", async ({ p
     await expect(page).toHaveURL(/\/contact#book-directly$/)
     await expect(page.locator("#book-directly")).toBeInViewport()
 })
+
+test("contact preserves direct booking and the prefilled WhatsApp inquiry", async ({ page }) => {
+    await page.addInitScript(() => {
+        window.open = ((url?: string | URL) => {
+            window.sessionStorage.setItem("mandalas-test-window-open", String(url))
+            return null
+        }) as typeof window.open
+    })
+
+    await page.goto("/contact?location=Hideout&room=Private%20Room#inquiry")
+
+    const directBooking = page.locator("#book-directly")
+    await expect(directBooking.getByRole("link", { name: "Book Mandalas", exact: true })).toHaveAttribute(
+        "href",
+        "https://hotels.cloudbeds.com/en/reservation/5VReHj?currency=gtq",
+    )
+    await expect(directBooking.getByRole("link", { name: "Book Hideout", exact: true })).toHaveAttribute(
+        "href",
+        "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
+    )
+
+    const inquiry = page.locator("#inquiry")
+    await expect(inquiry.getByRole("combobox").nth(0)).toContainText("Hideout")
+    await expect(inquiry.getByRole("combobox").nth(1)).toContainText("Private room")
+
+    await inquiry.getByLabel("Name").fill("Test Guest")
+    await inquiry.getByLabel("Guests").fill("2")
+    await inquiry.getByLabel("Dates").fill("July 12 to 15")
+    await inquiry.getByRole("button", { name: "Ask on WhatsApp" }).click()
+
+    const openedUrl = await page.evaluate(() =>
+        window.sessionStorage.getItem("mandalas-test-window-open"),
+    )
+
+    expect(openedUrl).toMatch(/^https:\/\/wa\.me\//)
+    expect(openedUrl).toContain("Test%20Guest")
+    expect(openedUrl).toContain("Private%20Room")
+})
+
+test("contact defers the map until the visitor scrolls near it", async ({ page }) => {
+    await page.goto("/contact")
+
+    const loadingMap = page.getByRole("status", { name: "Interactive map loading" })
+
+    await expect(loadingMap).toBeAttached()
+    await expect(page.locator(".leaflet-container")).toHaveCount(0)
+
+    await loadingMap.scrollIntoViewIfNeeded()
+
+    await expect(page.locator(".leaflet-container")).toBeVisible()
+})

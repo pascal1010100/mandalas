@@ -6,7 +6,7 @@ const ENABLE_ADMIN = process.env.ENABLE_ADMIN === 'true'
 const ENABLE_GUEST_PORTAL = process.env.ENABLE_GUEST_PORTAL === 'true'
 const ADMIN_BYPASS_AUTH = process.env.NODE_ENV !== 'production' && process.env.ADMIN_BYPASS_AUTH === 'true'
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl
     const isAdminPath = pathname.startsWith('/admin')
     const isAdminApiPath = pathname.startsWith('/api/admin')
@@ -49,7 +49,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
 }
 
-// Configure which paths the middleware runs on
+// Configure which paths the proxy runs on
 export const config = {
     matcher: [
         '/admin/:path*',
@@ -58,4 +58,4 @@ export const config = {
     ],
 }
 
-export default middleware
+export default proxy
