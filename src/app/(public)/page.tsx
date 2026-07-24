@@ -50,7 +50,7 @@ export default function LandingPage() {
           label="Mandalas Hideout"
           kicker="Toward the lake"
           title="Hideout"
-          description="Lower the volume, keep the mountains close, and come back to quieter nights."
+          description="Lower the volume, keep nature close, and come back to quiet nights."
           meta="Volcano / Lake / Slow"
           background={BACKGROUNDS.hideout}
           accent="lime"

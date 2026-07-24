@@ -40,3 +40,28 @@ Create a funnel with:
 2. `booking_intent` or `whatsapp_intent`
 
 Break down `booking_intent` by `property` and `source` to see which stay and placement produce the most outbound booking clicks.
+
+## Operations dashboard
+
+The primary dashboard is [Reservas — Mandalas Hostels](https://us.posthog.com/project/507190/dashboard/1846244). It was organized and reviewed on 2026-07-14 and uses a seven-day window unless an operator overrides the date range.
+
+It answers these operating questions:
+
+- Which public pages receive visits?
+- How many anonymous sessions and pageviews occur?
+- Which approximate countries and referral channels generate visits?
+- Which device types and browsers are used?
+- Where do visitors click to book?
+- Which property, Mandalas or Hideout, receives booking interest?
+
+The dashboard is intentionally anonymous. The person value shown in PostHog Activity is an anonymous technical identifier, not a guest identity. Country is an approximate network-derived location and must not be treated as a precise guest location.
+
+`booking_intent` means that a visitor clicked an outbound booking action. It does **not** prove that the visitor completed or paid for a reservation in Cloudbeds. Confirmed reservations and revenue must continue to come from Cloudbeds.
+
+When reviewing results:
+
+1. Keep internal and test users filtered out.
+2. Use at least one to two weeks of data before drawing conclusions from a new installation.
+3. Compare booking intent by `property` and `source`, not by anonymous person identifier.
+4. Check the Activity view when a dashboard value looks unexpected.
+5. Do not enable person identification, persistence, autocapture, session replay or heatmaps without the privacy review and human approval required by `AGENTS.md`.

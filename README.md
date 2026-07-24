@@ -1,166 +1,149 @@
-# Mandalas Hostal Website
+# Mandalas Hostels
 
-![Mandalas Hostal](https://via.placeholder.com/1200x600?text=Mandalas+Hostal+Preview)
+Sitio público y herramientas de integración para **Mandalas** y **Hideout** en San Pedro La Laguna, Lake Atitlán.
 
-A boutique public website for **Mandalas Hostal** in San Pedro La Laguna. Phase 1 focuses on direct WhatsApp inquiries and a clear presentation of two stays:
-*   **Mandalas**: central, walkable and social.
-*   **Hideout**: quieter, closer to the lake and outside the center.
+Producción: [www.mandalashostels.com](https://www.mandalashostels.com)
 
-Phase 1 is delivered in English at `https://www.mandalashostels.com`.
+## Propiedades
 
-The repository still contains an older operational app/admin area for a possible phase 2. It is disabled by default unless explicitly enabled with environment flags.
+- **Mandalas:** ubicación céntrica, caminable y social.
+- **Hideout:** estancia más tranquila, cerca del lago y fuera del centro.
 
-## 🚀 Tecnologías
+El sitio público presenta ambas experiencias y dirige las reservas a los motores oficiales de Cloudbeds. Cloudbeds continúa siendo la fuente principal para administrar disponibilidad, precios y reservas.
 
-*   **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
-*   **Language**: TypeScript
-*   **Package Manager**: pnpm
-*   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-*   **UI Components**: [Shadcn/UI](https://ui.shadcn.com/)
-*   **Animations**: [Framer Motion](https://www.framer.com/motion/)
-*   **Maps**: [React Leaflet](https://react-leaflet.js.org/)
-*   **Database**: Supabase
-*   **State Management**: Zustand
-*   **Architecture**: Public website plus archived operational modules for future phases
+## Tecnologías
 
-## 🛠️ Instalación
+- Next.js 16 y React 19
+- TypeScript
+- Tailwind CSS
+- Radix UI / shadcn
+- Framer Motion
+- React Leaflet
+- Cloudbeds PMS API
+- Vercel Web Analytics
+- PostHog para eventos de conversión anónimos
+- Vitest y Playwright
+- Supabase para módulos operativos heredados o futuros
 
-1.  Clonar el repositorio:
-    ```bash
-    git clone https://github.com/pascal1010100/mandalas.git
-    cd mandalas
-    ```
-2.  Instalar dependencias:
-    ```bash
-    pnpm install
-    ```
-3.  Configurar variables de entorno:
-    ```bash
-    cp .env.example .env.local
-    # Editar .env.local con tus credenciales de Supabase
-    ```
-4.  Ejecutar en desarrollo:
-    ```bash
-    pnpm dev
-    ```
-5.  Abrir [http://localhost:3000](http://localhost:3000)
-
-## 🚀 Deploy
-
-### Docker (Recomendado)
+## Instalación local
 
 ```bash
-# Construir imagen
-docker build -t mandalas-app .
-
-# Ejecutar con docker-compose
-docker-compose up -d
+git clone https://github.com/pascal1010100/mandalas.git
+cd mandalas
+corepack pnpm install
+cp .env.example .env.local
+corepack pnpm dev
 ```
 
-### Manual
+Abrir [http://localhost:3000](http://localhost:3000).
 
-```bash
-# Construir para producción
-pnpm build
-
-# Iniciar servidor de producción
-pnpm start
-```
-
-### CI/CD
-
-El proyecto incluye pipelines automáticos:
-
-- **Staging**: Se despliega automáticamente al hacer push a `develop` o `staging`
-- **Producción**: Se despliega automáticamente al hacer push a `main`
-- **Docker Images**: Se construyen y publican en Docker Hub para cada tag y push
-
-### Variables de Entorno
+## Variables principales
 
 ```bash
 NEXT_PUBLIC_APP_URL=https://www.mandalashostels.com
 NEXT_PUBLIC_WHATSAPP_NUMBER=502XXXXXXXX
 NEXT_PUBLIC_CONTACT_EMAIL=info@example.com
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-RESEND_API_KEY=your-resend-api-key
+
+NEXT_PUBLIC_CLOUDBEDS_MANDALAS_URL=
+NEXT_PUBLIC_CLOUDBEDS_HIDEOUT_URL=
+
+NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=
+NEXT_PUBLIC_POSTHOG_HOST=
+
+CLOUDBEDS_API_BASE_URL=https://api.cloudbeds.com/api/v1.3
+CLOUDBEDS_HIDEOUT_API_KEY=
+CLOUDBEDS_HIDEOUT_PROPERTY_ID=
+CLOUDBEDS_MANDALAS_API_KEY=
+CLOUDBEDS_MANDALAS_PROPERTY_ID=
+
 ENABLE_ADMIN=false
 ENABLE_GUEST_PORTAL=false
+ADMIN_BYPASS_AUTH=false
+
+# Módulos operativos heredados u opcionales
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-## 🌳 Ramas (Gitflow)
+Las API keys de Cloudbeds y la clave de servicio de Supabase son privadas y nunca deben usar el prefijo `NEXT_PUBLIC_`. El token público de proyecto de PostHog sí se utiliza en el navegador, pero nunca debe sustituirse por una personal API key. No se debe guardar `.env.local` en Git.
 
-*   `main`: Producción (Estable)
-*   `develop`: Desarrollo (Integración)
+## Comandos
 
-## Cloudbeds PMS API
+```bash
+# Desarrollo
+corepack pnpm dev
 
-Esta sección documenta la investigación inicial para una posible integración entre Mandalas Hostal y Cloudbeds. Cloudbeds pertenece a fase 2; por ahora no hay código de integración activo en el proyecto.
+# Calidad
+corepack pnpm lint
+corepack pnpm test
+corepack pnpm test:e2e
+corepack pnpm build
 
-### Qué queremos conseguir
+# Cloudbeds, solo lectura
+corepack pnpm cloudbeds:verify
+corepack pnpm cloudbeds:rooms
+corepack pnpm cloudbeds:reservations
+```
 
-El objetivo es conectar el sitio y, más adelante, las áreas operativas del proyecto con Cloudbeds para reducir trabajo manual y mantener datos más confiables entre sistemas.
+## Reservas y Cloudbeds
 
-Posibles resultados:
+- `/pueblo` abre el motor Cloudbeds de Mandalas.
+- `/hideout` abre el motor Cloudbeds de Hideout.
+- `/contact#book-directly` permite elegir entre las dos propiedades.
+- Hideout tiene una integración API de lectura.
+- Mandalas necesita una API key independiente antes de conectarse.
+- El webhook de reservas está preparado, pero no debe activarse hasta configurar y probar el secreto y el canal de alertas.
 
-*   Consultar propiedades, habitaciones, huéspedes y reservas desde Cloudbeds.
-*   Sincronizar disponibilidad o información operativa cuando tenga sentido para Mandalas.
-*   Recibir eventos mediante webhooks, por ejemplo nuevas reservas o cambios relevantes.
-*   Preparar una base para automatizaciones futuras: reportes, CRM, comunicación con huéspedes, check-in, housekeeping o contabilidad.
-*   Evitar duplicar datos sensibles en el proyecto si Cloudbeds ya debe ser la fuente principal.
+Configuración detallada: [docs/CLOUDBEDS_API_SETUP.md](docs/CLOUDBEDS_API_SETUP.md).
 
-### Tipos de integración compatibles
+## Panel interno
 
-Cloudbeds permite varios enfoques de integración. Para este proyecto conviene avanzar de menor a mayor complejidad:
+El panel interno funciona como un **Automation Studio** para lectura de Cloudbeds y automatizaciones pequeñas. No pretende reemplazar el panel de Cloudbeds.
 
-*   **API key a nivel propiedad**: útil para pruebas iniciales y desarrollo rápido con una propiedad concreta.
-*   **API key a nivel partner / Marketplace**: necesaria si la integración quiere convertirse en una app conectable por propiedades desde Cloudbeds Marketplace. Cloudbeds recomienda automatizar la entrega de API keys para partners.
-*   **Webhooks**: Cloudbeds puede enviar eventos a un endpoint del proyecto cuando ocurren cambios, como reservas creadas o modificaciones de datos.
-*   **PMS API**: API principal para recursos frecuentes como reservas, huéspedes, habitaciones, house accounts y propiedades.
-*   **Accounting API**: integración especializada para transacciones, folios, balances, trial balance y reportes contables.
-*   **Data Insights API**: integración orientada a reportes avanzados y análisis.
-*   **Blueprints por caso de uso**: Cloudbeds documenta guías para áreas como booking engine, CRM, housekeeping, point of sale, access management, revenue management y más.
+Está deshabilitado por defecto. Para desarrollo local:
 
-### Enfoque recomendado para Mandalas
+```bash
+ENABLE_ADMIN=true
+ADMIN_BYPASS_AUTH=true
+```
 
-1.  **Fase 0: documentación y alcance**
-    *   Definir qué problema resolvemos primero.
-    *   Confirmar si se trabajará con sandbox, API key real de propiedad o flujo partner.
-    *   Registrar endpoints, scopes y reglas de seguridad.
+`ADMIN_BYPASS_AUTH` nunca omite autenticación en producción.
 
-2.  **Fase 1: lectura segura**
-    *   Probar autenticación.
-    *   Leer información básica de propiedad/hotel.
-    *   Leer reservas, habitaciones y huéspedes con permisos mínimos.
+## Pruebas
 
-3.  **Fase 2: eventos**
-    *   Configurar webhooks para eventos importantes.
-    *   Guardar logs mínimos e idempotentes.
-    *   Consultar la API después de recibir un evento si hace falta más detalle.
+Vitest cubre lógica de dominio, analítica e integración Cloudbeds. Playwright cubre escritorio y móvil, incluyendo navegación pública, metadatos SEO, motores de reserva, WhatsApp, carga diferida del mapa, robots y sitemap.
 
-4.  **Fase 3: automatización**
-    *   Decidir si el proyecto solo lee datos o también escribe en Cloudbeds.
-    *   Implementar sincronizaciones puntuales.
-    *   Agregar pruebas, auditoría y manejo de errores.
+```bash
+corepack pnpm test
+corepack pnpm test:e2e
+```
 
-### Pendientes antes de escribir código
+GitHub Actions ejecuta lint, pruebas unitarias, Playwright y build.
 
-*   Conseguir acceso sandbox o credenciales de API.
-*   Definir si Mandalas usará API key de propiedad o app partner.
-*   Listar scopes mínimos necesarios.
-*   Elegir primer caso de uso: lectura de reservas, disponibilidad, contacto con huésped, reportes u otro.
-*   Crear variables de entorno para Cloudbeds sin guardar secretos en Git.
-*   Revisar límites, errores comunes y requisitos de seguridad.
+## Despliegue
 
-### Fuentes oficiales
+La producción se aloja en Vercel. Antes de considerar un cambio terminado:
 
-*   Cloudbeds PMS API: https://developers.cloudbeds.com/reference/about-pms-api
-*   About Cloudbeds APIs: https://developers.cloudbeds.com/docs/about-cloudbeds-api
-*   Authentication: https://developers.cloudbeds.com/docs/authentication-1
-*   API Keys for Technology Partners: https://developers.cloudbeds.com/docs/api-keys-authentication-guide-for-technology-partners
-*   Quickstart API Authentication: https://developers.cloudbeds.com/docs/quickstart-guide-api-authentication-for-property-level-users
-*   Webhooks: https://developers.cloudbeds.com/docs/webhooks-1
-*   LLM documentation index: https://developers.cloudbeds.com/llms.txt
+```bash
+corepack pnpm test
+corepack pnpm test:e2e
+corepack pnpm build
+```
 
----
-Developed with ❤️ for Mandalas Hostal.
+Los pushes a `main` activan la integración Git de Vercel, que es el mecanismo que publica actualmente el sitio. El workflow de GitHub contiene un segundo despliegue redundante mediante Vercel CLI; ese job seguirá fallando mientras `VERCEL_PROJECT_ID` no esté configurado y conviene configurarlo o retirarlo.
+
+El workflow Docker es independiente de la producción en Vercel. Para volverlo operativo necesita credenciales válidas de Docker Hub y las variables públicas de Supabase durante el build, o debe retirarse si Docker ya no forma parte de la estrategia.
+
+## Documentación
+
+- [Resumen de mejoras de julio de 2026](docs/MEJORAS_JULIO_2026.md)
+- [Configuración de Cloudbeds](docs/CLOUDBEDS_API_SETUP.md)
+- [Configuración y operación de PostHog](docs/POSTHOG_SETUP.md)
+- [Guía de sincronización iCal](docs/ICAL_SYNC_GUIDE.md)
+- [Arquitectura de base de datos](docs/mandalas-arquitectura-db.md)
+
+## Ramas
+
+- `main`: producción.
+- `develop`: integración y staging, cuando se utilice ese flujo.
