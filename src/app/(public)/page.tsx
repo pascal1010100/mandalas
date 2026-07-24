@@ -1,22 +1,17 @@
-"use client"
-
-import { useState } from "react"
+import Image from "next/image"
 import Link from "next/link"
-import { motion } from "framer-motion"
 import { ArrowUpRight, MapPin, MessageCircle, SunMedium, Waves } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ConsultationLink } from "@/components/shared/consultation-link"
 
 const BACKGROUNDS = {
-  pueblo: "linear-gradient(rgba(120, 53, 15, 0.22), rgba(28, 25, 23, 0.68)), url('/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg')",
-  hideout: "linear-gradient(rgba(63, 98, 18, 0.18), rgba(20, 83, 45, 0.72)), url('/images/mandalas/hostelworld/hideout-terrace-dusk.jpg')"
+  pueblo: "/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg",
+  hideout: "/images/mandalas/hostelworld/hideout-terrace-dusk.jpg",
 }
 
 export default function LandingPage() {
-  const [hovered, setHovered] = useState<"pueblo" | "hideout" | null>(null)
-
   return (
-    <main className="bg-background">
+    <div className="bg-background">
       <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black md:min-h-screen md:flex-row">
         <div className="absolute inset-x-0 top-24 z-30 flex justify-center px-4 pointer-events-none">
           <div className="hidden md:flex flex-col items-center text-white">
@@ -47,10 +42,6 @@ export default function LandingPage() {
           meta="Rooftop / Center / Lake"
           background={BACKGROUNDS.pueblo}
           accent="amber"
-          isActive={hovered === "pueblo"}
-          isDimmed={hovered === "hideout"}
-          onMouseEnter={() => setHovered("pueblo")}
-          onMouseLeave={() => setHovered(null)}
           borderClass="border-b md:border-b-0 md:border-r"
         />
 
@@ -63,10 +54,6 @@ export default function LandingPage() {
           meta="Volcano / Lake / Slow"
           background={BACKGROUNDS.hideout}
           accent="lime"
-          isActive={hovered === "hideout"}
-          isDimmed={hovered === "pueblo"}
-          onMouseEnter={() => setHovered("hideout")}
-          onMouseLeave={() => setHovered(null)}
         />
       </section>
 
@@ -137,10 +124,12 @@ export default function LandingPage() {
 
             <div className="order-1 grid min-h-[38rem] gap-4 lg:order-2 lg:grid-cols-[0.58fr_0.42fr]">
               <Link href="/pueblo" className="group relative overflow-hidden border border-white/10 bg-stone-900">
-                <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                  style={{ backgroundImage: "url('/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg')" }}
-                  aria-hidden="true"
+                <Image
+                  src={BACKGROUNDS.pueblo}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 58vw, 100vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/28 to-black/5" />
                 <div className="relative flex h-full min-h-[22rem] flex-col justify-between p-6 md:p-8">
@@ -164,10 +153,12 @@ export default function LandingPage() {
 
               <div className="grid gap-4">
                 <Link href="/hideout" className="group relative overflow-hidden border border-white/10 bg-stone-900">
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                    style={{ backgroundImage: "url('/images/mandalas/hostelworld/hideout-terrace-dusk.jpg')" }}
-                    aria-hidden="true"
+                  <Image
+                    src={BACKGROUNDS.hideout}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1024px) 42vw, 100vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10" />
                   <div className="relative flex min-h-[18rem] flex-col justify-end p-6 md:p-7">
@@ -206,7 +197,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   )
 }
 
@@ -219,10 +210,6 @@ type HomePanelProps = {
   meta: string
   background: string
   accent: "amber" | "lime"
-  isActive: boolean
-  isDimmed: boolean
-  onMouseEnter: () => void
-  onMouseLeave: () => void
   borderClass?: string
 }
 
@@ -235,65 +222,33 @@ function HomePanel({
   meta,
   background,
   accent,
-  isActive,
-  isDimmed,
-  onMouseEnter,
-  onMouseLeave,
   borderClass,
 }: HomePanelProps) {
   const accentClass = accent === "amber" ? "bg-amber-300/80" : "bg-lime-300/80"
   const lightClass = accent === "amber" ? "bg-amber-200/10" : "bg-lime-200/10"
-  const panelState = isActive
-    ? { scale: 1.006, y: -2 }
-    : isDimmed
-      ? { scale: 0.994, y: 0 }
-      : { scale: 1, y: 0 }
+  const overlayClass = accent === "amber"
+    ? "from-amber-950/35 via-black/20 to-black/85"
+    : "from-lime-950/30 via-black/20 to-black/85"
 
   return (
-    <motion.div
-      className={`relative flex-1 group overflow-hidden cursor-pointer border-white/10 ${isActive ? "z-20" : "z-10"} ${borderClass || ""}`}
-      animate={panelState}
-      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+    <article
+      className={`group relative z-10 flex-1 overflow-hidden border-white/10 transition-transform duration-700 ease-out hover:z-20 md:hover:-translate-y-0.5 md:hover:scale-[1.006] ${borderClass || ""}`}
     >
-      <motion.div
-        className="absolute inset-0 bg-cover bg-center"
-        animate={{
-          scale: isActive ? 1.09 : isDimmed ? 1.025 : 1.04,
-          filter: isActive
-            ? "saturate(1.08) brightness(1.04)"
-            : isDimmed
-              ? "saturate(0.72) brightness(0.72) blur(1.5px)"
-              : "saturate(0.95) brightness(0.92)",
-        }}
-        transition={{ duration: 1.25, ease: [0.22, 1, 0.36, 1] }}
-        style={{ backgroundImage: background }}
+      <Image
+        src={background}
+        alt=""
+        fill
+        priority
+        sizes="(min-width: 768px) 50vw, 100vw"
+        className="scale-[1.04] object-cover brightness-[0.92] saturate-[0.95] transition duration-[1250ms] ease-out group-hover:scale-[1.09] group-hover:brightness-100 group-hover:saturate-[1.08]"
       />
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/85"
-        animate={{ opacity: isActive ? 0.82 : isDimmed ? 1.16 : 1 }}
-        transition={{ duration: 0.7 }}
-      />
-      <motion.div
-        className={`absolute inset-0 ${lightClass}`}
-        animate={{ opacity: isActive ? 1 : 0 }}
-        transition={{ duration: 0.7 }}
-      />
+      <div className={`absolute inset-0 bg-gradient-to-b ${overlayClass}`} />
+      <div className={`absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 ${lightClass}`} />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,transparent_0%,rgba(0,0,0,0.16)_45%,rgba(0,0,0,0.65)_100%)]" />
-      <motion.div
-        className={`absolute bottom-0 left-0 h-px w-full ${accentClass}`}
-        animate={{ opacity: isActive ? 1 : isDimmed ? 0.22 : 0.5, scaleX: isActive ? 1 : 0.72 }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        style={{ transformOrigin: "left" }}
-      />
+      <div className={`absolute bottom-0 left-0 h-px w-full origin-left scale-x-[0.72] opacity-50 transition duration-500 group-hover:scale-x-100 group-hover:opacity-100 ${accentClass}`} />
 
       <Link href={href} className="relative z-10 flex h-full min-h-[54svh] flex-col justify-end p-6 text-white sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-9 lg:p-12 xl:p-16">
-        <motion.div
-          className="mb-auto flex items-center justify-between gap-5 pt-16 md:pt-24"
-          animate={{ opacity: isDimmed ? 0.55 : 1 }}
-          transition={{ duration: 0.45 }}
-        >
+        <div className="mb-auto flex items-center justify-between gap-5 pt-16 md:pt-24">
           <div className="inline-flex max-w-[16rem] items-center gap-3 border border-white/15 bg-black/20 px-3 py-2 backdrop-blur-md">
             <span className={`h-px w-6 ${accentClass}`} />
             <div className="min-w-0">
@@ -306,13 +261,9 @@ function HomePanel({
             </div>
           </div>
           <ArrowUpRight className="h-5 w-5 text-white/50 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-white" />
-        </motion.div>
+        </div>
 
-        <motion.div
-          className="max-w-xl"
-          animate={{ y: isActive ? -8 : 0, opacity: isDimmed ? 0.72 : 1 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        >
+        <div className="max-w-xl transition-transform duration-500 ease-out group-hover:-translate-y-2">
           <h2 className="font-heading max-w-full text-[2rem] font-light uppercase leading-none tracking-[0.06em] text-white sm:text-5xl sm:tracking-[0.12em] md:text-[3.6rem] md:tracking-[0.08em] lg:text-[4.25rem] xl:text-[5.25rem] xl:tracking-[0.12em] 2xl:text-8xl 2xl:tracking-[0.16em]">
             {title}
           </h2>
@@ -323,23 +274,14 @@ function HomePanel({
             <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45 sm:tracking-[0.22em]">
               {meta}
             </span>
-            <motion.span
-              className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/75"
-              animate={{ opacity: isActive ? 1 : 0.72 }}
-              transition={{ duration: 0.4 }}
-            >
-              <motion.span
-                className={`hidden h-px w-8 sm:block ${accentClass}`}
-                animate={{ scaleX: isActive ? 1 : 0.35 }}
-                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                style={{ transformOrigin: "right" }}
-              />
+            <span className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/75">
+              <span className={`hidden h-px w-8 origin-right scale-x-[0.35] transition-transform duration-500 group-hover:scale-x-100 sm:block ${accentClass}`} />
               Enter
-            </motion.span>
+            </span>
           </div>
-        </motion.div>
+        </div>
       </Link>
-    </motion.div>
+    </article>
   )
 }
 

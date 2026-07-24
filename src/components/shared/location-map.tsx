@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import "leaflet/dist/leaflet.css"
 
@@ -11,6 +11,44 @@ const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), 
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false })
 
 export function LocationMap() {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const [shouldLoad, setShouldLoad] = useState(false)
+
+    useEffect(() => {
+        const container = containerRef.current
+        if (!container) return
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setShouldLoad(true)
+                    observer.disconnect()
+                }
+            },
+            { rootMargin: "300px" },
+        )
+
+        observer.observe(container)
+
+        return () => observer.disconnect()
+    }, [])
+
+    return (
+        <div ref={containerRef} className="h-full min-h-[320px] w-full">
+            {shouldLoad ? (
+                <InteractiveMap />
+            ) : (
+                <div
+                    className="h-full min-h-[320px] w-full animate-pulse rounded-lg bg-stone-900"
+                    aria-label="Interactive map loading"
+                    role="status"
+                />
+            )}
+        </div>
+    )
+}
+
+function InteractiveMap() {
     const [isMounted, setIsMounted] = useState(false)
 
     useEffect(() => {
