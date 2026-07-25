@@ -20,7 +20,7 @@ export default function PuebloPage() {
                 backgroundPositionMobile="74% 50%"
                 overlayClassName="bg-gradient-to-b from-black/34 via-black/16 to-black/54"
                 radialOverlayClassName="bg-[radial-gradient(circle_at_55%_35%,transparent_0%,rgba(0,0,0,0.1)_44%,rgba(0,0,0,0.56)_100%)]"
-                mobileHeight="large"
+                mobileHeight="full"
                 align="center"
             >
                 <ConsultationLink
