@@ -15,12 +15,18 @@ export default function LandingPage() {
   return (
     <div className="bg-background">
       <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black md:min-h-screen md:flex-row">
-        <div className="absolute inset-x-0 top-24 z-30 flex justify-center px-4 pointer-events-none">
-          <div className="flex w-[min(100%,220px)] flex-col items-center text-center text-white sm:w-auto sm:max-w-none">
-            <p className="max-w-full text-[8px] font-semibold uppercase leading-tight tracking-[0.08em] text-white/65 sm:text-[10px] sm:tracking-[0.32em]">
+        <div className="relative z-30 flex h-16 shrink-0 items-center justify-center border-b border-white/10 bg-black/35 px-4 text-center text-white md:hidden">
+          <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/75">
+            Two stays · One lake
+          </p>
+        </div>
+
+        <div className="absolute inset-x-0 top-24 z-30 hidden justify-center px-4 pointer-events-none md:flex">
+          <div className="flex flex-col items-center text-center text-white">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/65">
               Two stays · One lake
             </p>
-            <p className="mt-2 max-w-full font-heading text-sm font-light uppercase leading-tight tracking-[0.06em] text-white/90 sm:mt-3 sm:text-2xl sm:tracking-[0.28em]">
+            <p className="mt-3 font-heading text-2xl font-light uppercase tracking-[0.28em] text-white/90">
               Choose your rhythm
             </p>
           </div>
