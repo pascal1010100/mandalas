@@ -142,9 +142,10 @@ export default function LandingPage() {
                   alt=""
                   fill
                   sizes="(min-width: 1024px) 58vw, 100vw"
+                  style={{ objectPosition: "center 45%" }}
                   className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/28 to-black/5" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/18 to-black/5" />
                 <div className="relative flex h-full min-h-[22rem] flex-col justify-between p-6 md:p-8">
                   <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-white/70 sm:text-[10px] sm:tracking-[0.22em]">
                     <span>01</span>
