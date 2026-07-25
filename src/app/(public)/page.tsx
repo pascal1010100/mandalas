@@ -138,11 +138,11 @@ export default function LandingPage() {
             <div className="order-1 grid min-h-[38rem] gap-4 lg:order-2 lg:grid-cols-[0.58fr_0.42fr]">
               <Link href="/pueblo" className="group relative overflow-hidden border border-white/10 bg-stone-900">
                 <Image
-                  src={BACKGROUNDS.pueblo}
-                  alt=""
+                  src="/images/mandalas/hostelworld/pueblo-exterior.jpg"
+                  alt="Mandalas courtyard with hammocks and white architecture"
                   fill
                   sizes="(min-width: 1024px) 58vw, 100vw"
-                  style={{ objectPosition: "center 45%" }}
+                  style={{ objectPosition: "center 52%" }}
                   className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/18 to-black/5" />
