@@ -16,11 +16,11 @@ export default function LandingPage() {
     <div className="bg-background">
       <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black md:min-h-screen md:flex-row">
         <div className="absolute inset-x-0 top-24 z-30 flex justify-center px-4 pointer-events-none">
-          <div className="flex flex-col items-center text-center text-white">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/65 sm:tracking-[0.32em]">
+          <div className="flex max-w-[calc(100vw-2rem)] flex-col items-center text-center text-white">
+            <p className="whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.16em] text-white/65 sm:text-[10px] sm:tracking-[0.32em]">
               Two stays · One lake
             </p>
-            <p className="mt-2 font-heading text-lg font-light uppercase tracking-[0.16em] text-white/90 sm:mt-3 sm:text-2xl sm:tracking-[0.28em]">
+            <p className="whitespace-nowrap mt-2 font-heading text-base font-light uppercase tracking-[0.1em] text-white/90 sm:mt-3 sm:text-2xl sm:tracking-[0.28em]">
               Choose your rhythm
             </p>
           </div>
