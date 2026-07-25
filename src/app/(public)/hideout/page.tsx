@@ -40,14 +40,14 @@ export default function HideoutPage() {
                         <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">Slow the rhythm</h2>
                         <div className="mx-auto h-px w-24 bg-lime-300/40" />
                         <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
-                            Hideout is The Hideout Hub: a place to work remotely near the mountains, enjoy good music and a welcoming bar, and move toward the lake slowly. Guests staying at Mandalas Pueblo can enjoy it too.
+                            Hideout is The Hideout Hub: a place to work remotely near the mountains, enjoy good music and a welcoming bar, and move toward the lake slowly. Guests staying at either Mandalas property can enjoy it too.
                         </p>
                         <StaggerReveal className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8" delay={0.2}>
                             {[
                                 { icon: Waves, label: "Walk to lake" },
                                 { icon: Bike, label: "Free bikes" },
                                 { icon: Utensils, label: "Equipped kitchen" },
-                                { icon: Wifi, label: "High-speed WiFi" },
+                                { icon: Wifi, label: "Work-ready WiFi" },
                                 { icon: Moon, label: "Quiet nights" },
                                 { icon: Sprout, label: "Outside center" },
                             ].map((feature, idx) => (
@@ -136,7 +136,7 @@ export default function HideoutPage() {
                     {
                         icon: Wifi,
                         title: "Work remotely",
-                        description: "High-speed Wi-Fi and a relaxed base for getting work done between lake walks and mountain views.",
+                        description: "Two Wi-Fi networks, including a faster option that can exceed 100 Mbps depending on availability, plus a relaxed base for getting work done.",
                     },
                     {
                         icon: Music2,
@@ -180,7 +180,7 @@ export default function HideoutPage() {
                     {
                         icon: Waves,
                         title: "Hideout Hub access",
-                        description: "Guests from either property can use the Hideout bar, work-friendly spaces, and private lake access.",
+                        description: "Guests from either property can use the Hideout bar and work-friendly spaces. Ask reception about current lake access arrangements.",
                     },
                     {
                         icon: Bike,

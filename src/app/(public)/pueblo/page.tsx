@@ -151,7 +151,7 @@ export default function PuebloPage() {
                     {
                         icon: Route,
                         title: "The Hideout Hub",
-                        description: "Guests from either property can use Hideout's welcoming bar, work-friendly spaces, and private lake access.",
+                        description: "Guests from either property can use Hideout's welcoming bar and work-friendly spaces. Ask reception about current lake access arrangements.",
                     },
                 ]}
             />
