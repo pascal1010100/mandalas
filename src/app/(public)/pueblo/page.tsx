@@ -17,7 +17,7 @@ export default function PuebloPage() {
                 subtitle="A central base for walking San Pedro, returning to the rooftop, and letting the trip find its rhythm."
                 backgroundImage="/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"
                 backgroundPosition="center center"
-                backgroundPositionMobile="94% 50%"
+                backgroundPositionMobile="80% 50%"
                 overlayClassName="bg-gradient-to-b from-black/34 via-black/16 to-black/54"
                 radialOverlayClassName="bg-[radial-gradient(circle_at_55%_35%,transparent_0%,rgba(0,0,0,0.1)_44%,rgba(0,0,0,0.56)_100%)]"
                 mobileHeight="large"
