@@ -113,10 +113,19 @@ export default function LandingPage() {
               </div>
 
               <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                <ConsultationLink className="h-12 border-white/20 bg-white px-8 text-stone-950 hover:bg-stone-200">
-                  Choose your stay
+                <ConsultationLink
+                  location="Mandalas"
+                  className="h-12 border-white/20 bg-white px-8 text-stone-950 hover:bg-stone-200"
+                >
+                  Book Mandalas
                 </ConsultationLink>
-                <Button asChild variant="outline" className="h-12 w-full rounded-full border-white/20 bg-transparent px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-none hover:bg-white hover:text-stone-950">
+                <ConsultationLink
+                  location="Mandalas Hideout"
+                  className="h-12 border-lime-200/30 bg-lime-200 px-8 text-stone-950 hover:bg-lime-100"
+                >
+                  Book Hideout
+                </ConsultationLink>
+                <Button asChild variant="outline" className="h-12 w-full rounded-full border-white/20 bg-transparent px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-none hover:bg-white hover:text-stone-950 sm:col-span-2 lg:col-span-1">
                   <Link href="/contact">
                     Contact
                   </Link>
