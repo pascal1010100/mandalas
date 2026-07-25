@@ -8,6 +8,7 @@ interface HeroProps {
     title: string
     subtitle?: string
     backgroundImage?: string
+    backgroundImageMobile?: string
     backgroundGradient?: string
     backgroundPosition?: string
     backgroundPositionMobile?: string
@@ -24,6 +25,7 @@ export function Hero({
     title,
     subtitle,
     backgroundImage,
+    backgroundImageMobile,
     backgroundGradient = "var(--pueblo-gradient)", // Default to Pueblo Living Light
     backgroundPosition = "center",
     backgroundPositionMobile,
@@ -50,18 +52,33 @@ export function Hero({
         >
             {/* Background */}
             {backgroundImage ? (
-                <Image
-                    src={backgroundImage}
-                    alt=""
-                    fill
-                    priority
-                    sizes="100vw"
-                    className={cn("hero-background-image scale-105 object-cover transition-transform duration-[1.5s] motion-reduce:transform-none motion-reduce:transition-none", imageClassName)}
-                    style={{
-                        "--hero-position-mobile": backgroundPositionMobile ?? backgroundPosition,
-                        "--hero-position-desktop": backgroundPosition,
-                    } as React.CSSProperties}
-                />
+                <>
+                    {backgroundImageMobile && (
+                        <Image
+                            src={backgroundImageMobile}
+                            alt=""
+                            fill
+                            priority
+                            sizes="100vw"
+                            className={cn("hero-background-image scale-105 object-cover transition-transform duration-[1.5s] motion-reduce:transform-none motion-reduce:transition-none md:hidden", imageClassName)}
+                            style={{
+                                "--hero-position-mobile": backgroundPositionMobile ?? backgroundPosition,
+                            } as React.CSSProperties}
+                        />
+                    )}
+                    <Image
+                        src={backgroundImage}
+                        alt=""
+                        fill
+                        priority
+                        sizes="100vw"
+                        className={cn("hero-background-image scale-105 object-cover transition-transform duration-[1.5s] motion-reduce:transform-none motion-reduce:transition-none", backgroundImageMobile && "hidden md:block", imageClassName)}
+                        style={{
+                            "--hero-position-desktop": backgroundPosition,
+                            "--hero-position-mobile": backgroundPositionMobile ?? backgroundPosition,
+                        } as React.CSSProperties}
+                    />
+                </>
             ) : (
                 <div
                     className="absolute inset-0"
