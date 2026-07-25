@@ -56,6 +56,8 @@ export default function LandingPage() {
           meta="Volcano / Lake / Slow"
           background={BACKGROUNDS.hideout}
           accent="lime"
+          imageClassName="scale-100"
+          imagePosition="center center"
         />
       </section>
 
@@ -222,6 +224,8 @@ type HomePanelProps = {
   background: string
   accent: "amber" | "lime"
   borderClass?: string
+  imageClassName?: string
+  imagePosition?: string
 }
 
 function HomePanel({
@@ -234,6 +238,8 @@ function HomePanel({
   background,
   accent,
   borderClass,
+  imageClassName,
+  imagePosition,
 }: HomePanelProps) {
   const accentClass = accent === "amber" ? "bg-amber-300/80" : "bg-lime-300/80"
   const lightClass = accent === "amber" ? "bg-amber-200/10" : "bg-lime-200/10"
@@ -251,7 +257,8 @@ function HomePanel({
         fill
         priority
         sizes="(min-width: 768px) 50vw, 100vw"
-        className="scale-[1.04] object-cover brightness-[0.92] saturate-[0.95] transition duration-[1250ms] ease-out group-hover:scale-[1.09] group-hover:brightness-100 group-hover:saturate-[1.08] motion-reduce:transform-none motion-reduce:duration-0 motion-reduce:transition-none"
+        style={imagePosition ? { objectPosition: imagePosition } : undefined}
+        className={`${imageClassName || "scale-[1.04]"} object-cover brightness-[0.92] saturate-[0.95] transition duration-[1250ms] ease-out group-hover:scale-[1.09] group-hover:brightness-100 group-hover:saturate-[1.08] motion-reduce:transform-none motion-reduce:duration-0 motion-reduce:transition-none`}
       />
       <div className={`absolute inset-0 bg-gradient-to-b ${overlayClass}`} />
       <div className={`absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none ${lightClass}`} />
