@@ -130,7 +130,7 @@ export default function PuebloPage() {
             <ExperienceSection
                 eyebrow="Shared life"
                 title="For staying close to everything"
-                description="Mandalas is for travelers who want to feel San Pedro from the inside: a place to pass through, talk, and come back easily."
+                description="Mandalas is for travelers who want to feel San Pedro from the inside, with access to a second rhythm by the lake at The Hideout Hub."
                 accent="amber"
                 items={[
                     {
@@ -147,6 +147,11 @@ export default function PuebloPage() {
                         icon: MapPin,
                         title: "Everything nearby",
                         description: "Walk out the door and San Pedro starts to appear without much planning.",
+                    },
+                    {
+                        icon: Route,
+                        title: "The Hideout Hub",
+                        description: "As a Mandalas guest, use Hideout's welcoming bar, work-friendly spaces, and private lake access.",
                     },
                 ]}
             />

@@ -40,7 +40,7 @@ export default function HideoutPage() {
                         <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">Slow the rhythm</h2>
                         <div className="mx-auto h-px w-24 bg-lime-300/40" />
                         <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
-                            Hideout is for travelers who want to work remotely near the mountains, move toward the lake slowly, and return to a night with good music and a welcoming atmosphere.
+                            Hideout is The Hideout Hub: a place to work remotely near the mountains, enjoy good music and a welcoming bar, and move toward the lake slowly. Guests staying at Mandalas Pueblo can enjoy it too.
                         </p>
                         <StaggerReveal className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8" delay={0.2}>
                             {[
@@ -130,7 +130,7 @@ export default function HideoutPage() {
             <ExperienceSection
                 eyebrow="Work, music, lake time"
                 title="A better rhythm for the day"
-                description="Work when you need to, meet people over good music, and keep the lake and mountains close without staying in the middle of the town's noise."
+                description="Work when you need to, meet people over good music, and keep the lake and mountains close without staying in the middle of the town's noise. Access is included for registered guests from either Mandalas property."
                 accent="lime"
                 items={[
                     {
@@ -176,6 +176,11 @@ export default function HideoutPage() {
                         icon: MapPin,
                         title: "San Pedro stays close",
                         description: "The stay is about 1.7 km from the center, enough to feel a different energy.",
+                    },
+                    {
+                        icon: Waves,
+                        title: "Hideout Hub access",
+                        description: "Guests staying at Mandalas Pueblo can also use the Hideout bar, work-friendly spaces, and private lake access.",
                     },
                 ]}
             />
