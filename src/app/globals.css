@@ -155,4 +155,14 @@
   .leaflet-container {
     background: #0c0a09 !important;
   }
+
+  .hero-background-image {
+    object-position: var(--hero-position-mobile, center);
+  }
+
+  @media (min-width: 768px) {
+    .hero-background-image {
+      object-position: var(--hero-position-desktop, center);
+    }
+  }
 }

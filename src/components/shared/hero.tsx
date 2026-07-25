@@ -10,6 +10,10 @@ interface HeroProps {
     backgroundImage?: string
     backgroundGradient?: string
     backgroundPosition?: string
+    backgroundPositionMobile?: string
+    overlayClassName?: string
+    radialOverlayClassName?: string
+    imageClassName?: string
     align?: "center" | "left"
     height?: "full" | "large"
     children?: React.ReactNode
@@ -21,6 +25,10 @@ export function Hero({
     backgroundImage,
     backgroundGradient = "var(--pueblo-gradient)", // Default to Pueblo Living Light
     backgroundPosition = "center",
+    backgroundPositionMobile,
+    overlayClassName = "bg-gradient-to-b from-black/45 via-black/30 to-black/75",
+    radialOverlayClassName = "bg-[radial-gradient(circle_at_50%_35%,transparent_0%,rgba(0,0,0,0.18)_42%,rgba(0,0,0,0.72)_100%)]",
+    imageClassName = "",
     align = "center",
     height = "full",
     children
@@ -42,8 +50,11 @@ export function Hero({
                     fill
                     priority
                     sizes="100vw"
-                    className="scale-105 object-cover transition-transform duration-[1.5s] motion-reduce:transform-none motion-reduce:transition-none"
-                    style={{ objectPosition: backgroundPosition }}
+                    className={cn("hero-background-image scale-105 object-cover transition-transform duration-[1.5s] motion-reduce:transform-none motion-reduce:transition-none", imageClassName)}
+                    style={{
+                        "--hero-position-mobile": backgroundPositionMobile ?? backgroundPosition,
+                        "--hero-position-desktop": backgroundPosition,
+                    } as React.CSSProperties}
                 />
             ) : (
                 <div
@@ -59,8 +70,8 @@ export function Hero({
                     backgroundImage: `url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIxIi8+PC9zdmc+")`
                 }}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-black/75" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,transparent_0%,rgba(0,0,0,0.18)_42%,rgba(0,0,0,0.72)_100%)]" />
+            <div className={cn("absolute inset-0", overlayClassName)} />
+            <div className={cn("absolute inset-0", radialOverlayClassName)} />
             {align === "left" && (
                 <div className="absolute inset-0 bg-gradient-to-r from-black/78 via-black/38 to-transparent" />
             )}

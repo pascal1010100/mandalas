@@ -17,6 +17,10 @@ export default function HideoutPage() {
                 subtitle="A quieter base for better sleep, lake walks, and turning down the volume of San Pedro."
                 backgroundImage="/images/mandalas/hostelworld/hideout-terrace-dusk.jpg"
                 backgroundPosition="32% 50%"
+                backgroundPositionMobile="58% 48%"
+                overlayClassName="bg-gradient-to-b from-black/28 via-black/12 to-black/58"
+                radialOverlayClassName="bg-[radial-gradient(circle_at_55%_35%,transparent_0%,rgba(0,0,0,0.08)_44%,rgba(0,0,0,0.48)_100%)]"
+                imageClassName="brightness-[1.08] saturate-[1.05]"
                 align="left"
             >
                 <ConsultationLink
