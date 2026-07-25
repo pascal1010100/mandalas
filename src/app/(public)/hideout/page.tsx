@@ -180,7 +180,12 @@ export default function HideoutPage() {
                     {
                         icon: Waves,
                         title: "Hideout Hub access",
-                        description: "Guests staying at Mandalas Pueblo can also use the Hideout bar, work-friendly spaces, and private lake access.",
+                        description: "Guests from either property can use the Hideout bar, work-friendly spaces, and private lake access.",
+                    },
+                    {
+                        icon: Bike,
+                        title: "Mandalas rooftop access",
+                        description: "Hideout guests can use the Mandalas rooftop terrace and leave their bikes there when going into town.",
                     },
                 ]}
             />

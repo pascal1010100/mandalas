@@ -151,7 +151,7 @@ export default function PuebloPage() {
                     {
                         icon: Route,
                         title: "The Hideout Hub",
-                        description: "As a Mandalas guest, use Hideout's welcoming bar, work-friendly spaces, and private lake access.",
+                        description: "Guests from either property can use Hideout's welcoming bar, work-friendly spaces, and private lake access.",
                     },
                 ]}
             />
@@ -181,6 +181,11 @@ export default function PuebloPage() {
                         icon: Route,
                         title: "Tours and movement",
                         description: "Use the connection with a partner agency to plan movement around the lake.",
+                    },
+                    {
+                        icon: Bike,
+                        title: "Shared guest access",
+                        description: "Hideout guests can use the Mandalas rooftop terrace and leave their bikes here when heading into town.",
                     },
                 ]}
             />
