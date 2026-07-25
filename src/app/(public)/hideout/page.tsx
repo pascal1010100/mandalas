@@ -1,7 +1,7 @@
 import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
-import { Waves, Cloud, Moon, Sprout, BedDouble, DoorClosed, ShieldCheck, MapPin, Bike, Utensils, Clock, Luggage, Wifi, Instagram } from "lucide-react"
+import { Waves, Moon, Sprout, BedDouble, DoorClosed, ShieldCheck, MapPin, Bike, Utensils, Clock, Luggage, Wifi, Music2, Instagram } from "lucide-react"
 import { ConsultationLink } from "@/components/shared/consultation-link"
 import { ExperienceSection } from "@/components/shared/experience-section"
 import { PracticalDetails } from "@/components/shared/practical-details"
@@ -40,14 +40,14 @@ export default function HideoutPage() {
                         <h2 className="text-3xl md:text-4xl font-light font-heading text-foreground uppercase tracking-[0.2em]">Slow the rhythm</h2>
                         <div className="mx-auto h-px w-24 bg-lime-300/40" />
                         <p className="text-lg text-muted-foreground leading-loose font-light tracking-wide max-w-2xl mx-auto">
-                            Hideout is for travelers who want to wake up near the mountains, move toward the lake slowly, and return to a quieter night.
+                            Hideout is for travelers who want to work remotely near the mountains, move toward the lake slowly, and return to a night with good music and a welcoming atmosphere.
                         </p>
                         <StaggerReveal className="grid grid-cols-2 md:grid-cols-3 gap-8 pt-8" delay={0.2}>
                             {[
                                 { icon: Waves, label: "Walk to lake" },
                                 { icon: Bike, label: "Free bikes" },
                                 { icon: Utensils, label: "Equipped kitchen" },
-                                { icon: Wifi, label: "Free WiFi" },
+                                { icon: Wifi, label: "High-speed WiFi" },
                                 { icon: Moon, label: "Quiet nights" },
                                 { icon: Sprout, label: "Outside center" },
                             ].map((feature, idx) => (
@@ -128,25 +128,25 @@ export default function HideoutPage() {
             />
 
             <ExperienceSection
-                eyebrow="More quiet"
-                title="Near the lake, away from the noise"
-                description="Hideout does not try to compete with the center. Its value is giving you air, pause, and a softer return after exploring."
+                eyebrow="Work, music, lake time"
+                title="A better rhythm for the day"
+                description="Work when you need to, meet people over good music, and keep the lake and mountains close without staying in the middle of the town's noise."
                 accent="lime"
                 items={[
                     {
-                        icon: Cloud,
-                        title: "Lake mornings",
-                        description: "Go out early, walk to the water, or start the day without stepping straight into the noise.",
+                        icon: Wifi,
+                        title: "Work remotely",
+                        description: "High-speed Wi-Fi and a relaxed base for getting work done between lake walks and mountain views.",
                     },
                     {
-                        icon: Sprout,
-                        title: "Quiet neighborhood",
-                        description: "A more local setting for handling the essentials and saving energy.",
+                        icon: Music2,
+                        title: "Bar and good music",
+                        description: "A welcoming bar with good music and a great atmosphere for easing into the afternoon or evening.",
                     },
                     {
-                        icon: Moon,
-                        title: "Soft nights",
-                        description: "Social when you want it, restful when you need it.",
+                        icon: Waves,
+                        title: "Lake and mountains",
+                        description: "Start slowly, head to the water, and return to a place that keeps nature part of the stay.",
                     },
                 ]}
             />
