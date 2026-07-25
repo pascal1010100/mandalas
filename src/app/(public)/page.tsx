@@ -8,7 +8,7 @@ const BACKGROUNDS = {
   pueblo: "/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg",
   // Keep the terrace image for the Hideout detail page; the home card uses
   // the warmer night interior to make the two properties feel distinct.
-  hideout: "/images/mandalas/hostelworld/hideout-courtyard-night.jpg",
+  hideout: "/images/mandalas/hostelworld/hideout-terrace-dusk.jpg",
 }
 
 export default function LandingPage() {
