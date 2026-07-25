@@ -16,6 +16,7 @@ interface HeroProps {
     imageClassName?: string
     align?: "center" | "left"
     height?: "full" | "large"
+    mobileHeight?: "full" | "large"
     children?: React.ReactNode
 }
 
@@ -31,6 +32,7 @@ export function Hero({
     imageClassName = "",
     align = "center",
     height = "full",
+    mobileHeight = height,
     children
 }: HeroProps) {
     return (
@@ -38,8 +40,12 @@ export function Hero({
             className={cn(
                 "relative flex w-full items-center overflow-hidden bg-stone-950",
                 height === "full"
-                    ? "min-h-[100svh] py-28 md:min-h-screen md:py-32"
-                    : "min-h-[72svh] py-24 md:min-h-[70vh] md:py-28"
+                    ? mobileHeight === "full"
+                        ? "min-h-[100svh] py-28 md:min-h-screen md:py-32"
+                        : "min-h-[78svh] py-24 md:min-h-screen md:py-32"
+                    : mobileHeight === "full"
+                        ? "min-h-[72svh] py-24 md:min-h-[70vh] md:py-28"
+                        : "min-h-[64svh] py-20 md:min-h-[70vh] md:py-28"
             )}
         >
             {/* Background */}

@@ -18,6 +18,7 @@ export default function PuebloPage() {
                 backgroundImage="/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"
                 backgroundPosition="center center"
                 backgroundPositionMobile="82% 50%"
+                mobileHeight="large"
                 align="center"
             >
                 <ConsultationLink
