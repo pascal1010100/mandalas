@@ -15,7 +15,7 @@ export default function LandingPage() {
   return (
     <div className="bg-background">
       <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black md:min-h-screen md:flex-row">
-        <div className="relative z-30 flex h-16 shrink-0 items-center justify-center border-b border-white/10 bg-black/35 px-4 text-center text-white md:hidden">
+        <div className="relative z-30 mt-20 flex h-16 shrink-0 items-center justify-center border-b border-white/10 bg-black/35 px-4 text-center text-white md:hidden">
           <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/75">
             Two stays · One lake
           </p>
