@@ -70,7 +70,7 @@ export function Footer() {
                             Choose Mandalas or Hideout, then check live availability and final prices in Cloudbeds.
                         </p>
                         <ConsultationLink className="border-white/20 bg-white text-stone-950 hover:bg-stone-200">
-                            Book your stay
+                            Choose your stay
                         </ConsultationLink>
                     </div>
                 </div>

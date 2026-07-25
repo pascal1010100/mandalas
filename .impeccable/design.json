@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-25T13:17:33Z",
+  "title": "Design System: Mandalas Hostels",
+  "extensions": {
+    "colorMeta": {
+      "atitlan-night": {
+        "role": "neutral",
+        "displayName": "Atitlán Night",
+        "tonalRamp": [
+          "oklch(14.7% 0.004 49.25)",
+          "oklch(21.6% 0.006 56.043)",
+          "oklch(26.8% 0.007 34.298)",
+          "oklch(37.4% 0.01 67.558)",
+          "oklch(55.3% 0.013 58.071)",
+          "oklch(70.9% 0.01 56.259)",
+          "oklch(92.3% 0.003 48.717)",
+          "oklch(98.5% 0.001 106.423)"
+        ]
+      },
+      "night-surface": {
+        "role": "neutral",
+        "displayName": "Night Surface",
+        "tonalRamp": [
+          "oklch(14.7% 0.004 49.25)",
+          "oklch(21.6% 0.006 56.043)",
+          "oklch(26.8% 0.007 34.298)",
+          "oklch(37.4% 0.01 67.558)",
+          "oklch(55.3% 0.013 58.071)",
+          "oklch(70.9% 0.01 56.259)",
+          "oklch(92.3% 0.003 48.717)",
+          "oklch(98.5% 0.001 106.423)"
+        ]
+      },
+      "cloud-white": {
+        "role": "neutral",
+        "displayName": "Cloud White",
+        "tonalRamp": [
+          "oklch(14.7% 0.004 49.25)",
+          "oklch(21.6% 0.006 56.043)",
+          "oklch(26.8% 0.007 34.298)",
+          "oklch(37.4% 0.01 67.558)",
+          "oklch(55.3% 0.013 58.071)",
+          "oklch(70.9% 0.01 56.259)",
+          "oklch(92.3% 0.003 48.717)",
+          "oklch(98.5% 0.001 106.423)"
+        ]
+      },
+      "soft-stone": {
+        "role": "neutral",
+        "displayName": "Soft Stone",
+        "tonalRamp": [
+          "oklch(14.7% 0.004 49.25)",
+          "oklch(21.6% 0.006 56.043)",
+          "oklch(26.8% 0.007 34.298)",
+          "oklch(37.4% 0.01 67.558)",
+          "oklch(55.3% 0.013 58.071)",
+          "oklch(70.9% 0.01 56.259)",
+          "oklch(92.3% 0.003 48.717)",
+          "oklch(98.5% 0.001 106.423)"
+        ]
+      },
+      "warm-stone": {
+        "role": "neutral",
+        "displayName": "Warm Stone",
+        "tonalRamp": [
+          "oklch(14.7% 0.004 49.25)",
+          "oklch(21.6% 0.006 56.043)",
+          "oklch(26.8% 0.007 34.298)",
+          "oklch(37.4% 0.01 67.558)",
+          "oklch(55.3% 0.013 58.071)",
+          "oklch(70.9% 0.01 56.259)",
+          "oklch(92.3% 0.003 48.717)",
+          "oklch(98.5% 0.001 106.423)"
+        ]
+      },
+      "golden-rooftop": {
+        "role": "primary",
+        "displayName": "Golden Rooftop",
+        "tonalRamp": [
+          "oklch(27.9% 0.077 45.635)",
+          "oklch(41.4% 0.112 45.904)",
+          "oklch(47.3% 0.137 46.201)",
+          "oklch(55.5% 0.163 48.998)",
+          "oklch(66.6% 0.179 58.318)",
+          "oklch(76.9% 0.188 70.08)",
+          "oklch(87.9% 0.169 91.605)",
+          "oklch(96.2% 0.059 95.617)"
+        ]
+      },
+      "lake-moss": {
+        "role": "secondary",
+        "displayName": "Lake Moss",
+        "tonalRamp": [
+          "oklch(27.4% 0.072 132.109)",
+          "oklch(40.5% 0.101 131.063)",
+          "oklch(45.3% 0.124 130.933)",
+          "oklch(53.2% 0.157 131.589)",
+          "oklch(64.8% 0.2 131.684)",
+          "oklch(76.8% 0.233 130.85)",
+          "oklch(89.7% 0.196 126.665)",
+          "oklch(96.7% 0.067 122.328)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero titles and property names."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Editorial section titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Descriptions, practical details, and forms."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Eyebrows, metadata, navigation, and compact actions."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-low",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Scrolled navigation and restrained floating elements."
+      },
+      {
+        "name": "atmospheric-high",
+        "value": "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+        "purpose": "Heroic forms or panels that must separate from a dark photographic field."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-standard",
+        "value": "300ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Navigation, color, border, and small positional states."
+      },
+      {
+        "name": "image-reveal",
+        "value": "700ms cubic-bezier(0, 0, 0.2, 1)",
+        "purpose": "Standard photographic hover scaling."
+      },
+      {
+        "name": "image-cinematic",
+        "value": "1500ms cubic-bezier(0, 0, 0.2, 1)",
+        "purpose": "Slow gallery and hero-image movement."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      },
+      {
+        "name": "2xl",
+        "value": "1536px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Booking Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The canonical direct-booking action on dark and photographic surfaces.",
+      "html": "<button class=\"ds-btn-primary\">BOOK YOUR STAY</button>",
+      "css": ".ds-btn-primary { height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0 24px; border: 1px solid rgba(255,255,255,0.15); border-radius: 9999px; background: oklch(98.5% 0.001 106.423); color: oklch(14.7% 0.004 49.25); font: 600 12px/1.25 Inter, sans-serif; letter-spacing: 0.16em; text-transform: uppercase; transition: background-color 300ms, color 300ms; } .ds-btn-primary:hover { background: oklch(92.3% 0.003 48.717); } .ds-btn-primary:focus-visible { outline: 3px solid oklch(87.9% 0.169 91.605 / 0.55); outline-offset: 3px; } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Outline Contact Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "A quieter companion action when direct booking remains primary.",
+      "html": "<button class=\"ds-btn-outline\">CONTACT</button>",
+      "css": ".ds-btn-outline { height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0 24px; border: 1px solid rgba(255,255,255,0.2); border-radius: 9999px; background: transparent; color: oklch(98.5% 0.001 106.423); font: 600 12px/1.25 Inter, sans-serif; letter-spacing: 0.16em; text-transform: uppercase; transition: background-color 300ms, color 300ms; } .ds-btn-outline:hover { background: oklch(98.5% 0.001 106.423); color: oklch(14.7% 0.004 49.25); } .ds-btn-outline:focus-visible { outline: 3px solid rgba(255,255,255,0.45); outline-offset: 3px; } .ds-btn-outline:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Experience Card",
+      "kind": "card",
+      "refersTo": "experience-card",
+      "description": "A restrained supporting card for practical or experiential details.",
+      "html": "<article class=\"ds-experience-card\"><span class=\"ds-experience-icon\">✦</span><h3>Lake and quiet</h3><p>A calmer base for better sleep and easy lake walks.</p></article>",
+      "css": ".ds-experience-card { width: 280px; padding: 24px; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: rgba(255,255,255,0.04); color: oklch(98.5% 0.001 106.423); transition: transform 300ms, background-color 300ms, border-color 300ms; } .ds-experience-card:hover { transform: translateY(-4px); background: rgba(255,255,255,0.06); border-color: oklch(89.7% 0.196 126.665 / 0.4); } .ds-experience-card:focus-within { outline: 3px solid oklch(89.7% 0.196 126.665 / 0.4); outline-offset: 3px; } .ds-experience-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 20px; border-radius: 9999px; background: oklch(89.7% 0.196 126.665 / 0.1); color: oklch(89.7% 0.196 126.665); } .ds-experience-card h3 { margin: 0 0 12px; font: 600 18px/1.25 Inter, sans-serif; } .ds-experience-card p { margin: 0; color: oklch(70.9% 0.01 56.259); font: 400 14px/1.625 Inter, sans-serif; }"
+    },
+    {
+      "name": "Underline Field",
+      "kind": "input",
+      "refersTo": "input-dark",
+      "description": "The public-form field pattern on atmospheric dark surfaces.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-field\">DATES</label><input class=\"ds-field\" id=\"ds-field\" placeholder=\"July 12 to 15\">",
+      "css": ".ds-field-label { display: block; margin-bottom: 12px; color: rgba(255,255,255,0.6); font: 600 11px/1.25 Inter, sans-serif; letter-spacing: 0.22em; } .ds-field { width: 280px; height: 44px; padding: 4px 0; border: 0; border-bottom: 2px solid rgba(255,255,255,0.2); border-radius: 0; background: transparent; color: oklch(98.5% 0.001 106.423); font: 400 16px/1.625 Inter, sans-serif; transition: border-color 300ms; } .ds-field::placeholder { color: oklch(55.3% 0.013 58.071); } .ds-field:hover { border-bottom-color: rgba(255,255,255,0.4); } .ds-field:focus-visible { border-bottom-color: oklch(87.9% 0.169 91.605); outline: none; }"
+    },
+    {
+      "name": "Glass Navigation",
+      "kind": "nav",
+      "refersTo": "nav-glass",
+      "description": "The scrolled public navigation state.",
+      "html": "<nav class=\"ds-nav\"><span class=\"ds-nav-brand\">MANDALAS<small>HOSTELS · LAKE ATITLÁN</small></span><a href=\"#\">MANDALAS</a><a href=\"#\">HIDEOUT</a></nav>",
+      "css": ".ds-nav { height: 80px; display: flex; align-items: center; gap: 24px; padding: 0 24px; border-bottom: 1px solid rgba(255,255,255,0.1); background: oklch(14.7% 0.004 49.25 / 0.8); color: oklch(98.5% 0.001 106.423); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); backdrop-filter: blur(24px); } .ds-nav-brand { display: flex; flex-direction: column; margin-right: auto; font: 900 30px/0.9 Outfit, sans-serif; letter-spacing: -0.05em; } .ds-nav-brand small { margin-top: 5px; color: oklch(70.9% 0.01 56.259); font: 500 10px/1 Inter, sans-serif; letter-spacing: 0.05em; } .ds-nav a { color: oklch(92.3% 0.003 48.717); font: 500 14px/1 Inter, sans-serif; text-decoration: none; transition: color 300ms; } .ds-nav a:hover { color: oklch(87.9% 0.169 91.605); } .ds-nav a:focus-visible { outline: 2px solid oklch(87.9% 0.169 91.605); outline-offset: 6px; }"
+    },
+    {
+      "name": "Location Chip",
+      "kind": "chip",
+      "refersTo": "chip-location",
+      "description": "A compact context marker used over hero photography.",
+      "html": "<span class=\"ds-location-chip\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"12\" cy=\"10\" r=\"2.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/></svg>SAN PEDRO LA LAGUNA</span>",
+      "css": ".ds-location-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2); border-radius: 9999px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); font: 600 10px/1.25 Inter, sans-serif; letter-spacing: 0.16em; backdrop-filter: blur(12px); transition: background-color 300ms, border-color 300ms; } .ds-location-chip:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.32); } .ds-location-chip:focus-visible { outline: 2px solid white; outline-offset: 3px; } .ds-location-chip svg { width: 14px; height: 14px; }"
+    },
+    {
+      "name": "Image Panel",
+      "kind": "custom",
+      "description": "The signature editorial photograph container for property comparisons and galleries.",
+      "html": "<article class=\"ds-image-panel\"><div class=\"ds-image-field\"></div><div class=\"ds-image-copy\"><small>MANDALAS</small><h3>SOCIAL</h3><p>For walking, rooftop sunsets, and being close to what is happening.</p></div></article>",
+      "css": ".ds-image-panel { position: relative; width: 320px; min-height: 400px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: oklch(21.6% 0.006 56.043); color: white; } .ds-image-field { position: absolute; inset: 0; background: linear-gradient(145deg, oklch(55.5% 0.163 48.998), oklch(14.7% 0.004 49.25)); transform: scale(1.04); transition: transform 700ms cubic-bezier(0,0,0.2,1); } .ds-image-panel::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2), rgba(0,0,0,0.05)); } .ds-image-panel:hover .ds-image-field { transform: scale(1.09); } .ds-image-panel:focus-within { outline: 3px solid oklch(87.9% 0.169 91.605 / 0.5); outline-offset: 3px; } .ds-image-copy { position: absolute; z-index: 1; left: 24px; right: 24px; bottom: 24px; } .ds-image-copy small { color: oklch(87.9% 0.169 91.605); font: 600 10px/1 Inter, sans-serif; letter-spacing: 0.24em; } .ds-image-copy h3 { margin: 12px 0 16px; font: 300 42px/1 Outfit, sans-serif; letter-spacing: 0.14em; } .ds-image-copy p { margin: 0; color: rgba(255,255,255,0.68); font: 400 14px/1.625 Inter, sans-serif; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Two Rhythms, One Lake",
+    "overview": "Mandalas se siente cinematográfico, editorial, auténtico y sereno. La fotografía real ocupa el primer plano; las capas oscuras, la tipografía espaciada y el movimiento lento permiten que dos experiencias distintas se sientan parte de una sola marca.\n\nEl sistema contrapone la energía cálida y social de Mandalas con la calma vegetal de Hideout sin convertirlas en marcas separadas. La estructura compartida permanece sobria y nocturna; Golden Rooftop y Lake Moss aparecen como señales escasas que orientan al viajero hacia cada ritmo.",
+    "keyCharacteristics": [
+      "Fotografía inmersiva con encuadres amplios y tratamiento cinematográfico.",
+      "Base Atitlán Night con texto claro, bordes translúcidos y capas atmosféricas.",
+      "Titulares Outfit ligeros, en mayúsculas y con tracking generoso.",
+      "Golden Rooftop identifica Mandalas; Lake Moss identifica Hideout.",
+      "Acciones directas y legibles que conducen a elegir y reservar."
+    ],
+    "rules": [
+      {
+        "name": "The Two Signals Rule",
+        "body": "Golden Rooftop pertenece a Mandalas y Lake Moss pertenece a Hideout; no se mezclan en un mismo control salvo cuando la interfaz compara explícitamente ambas propiedades.",
+        "section": "colors"
+      },
+      {
+        "name": "The Air Around Type Rule",
+        "body": "Los titulares espaciados necesitan margen y contraste; no deben apilarse dentro de tarjetas densas ni competir con varias etiquetas de igual peso.",
+        "section": "typography"
+      },
+      {
+        "name": "The Atmospheric Layers Rule",
+        "body": "Primero se crea profundidad con imagen, tono, borde y transparencia; una sombra sólo entra cuando existe una separación funcional entre planos.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usar fotografía real de Mandalas, Hideout y Lago Atitlán como principal fuente de atmósfera.",
+      "Do mantener Golden Rooftop para Mandalas y Lake Moss para Hideout.",
+      "Do combinar paneles rectos con acciones pill para conservar contraste formal.",
+      "Do mantener suficiente espacio alrededor de titulares uppercase con tracking amplio.",
+      "Do usar movimiento lento y contenido: 300ms para estados y 700–1500ms para fotografía."
+    ],
+    "donts": [
+      "Don't convertir el sitio en una estética genérica de resort tropical.",
+      "Don't llenar las páginas de degradados brillantes o acentos simultáneos.",
+      "Don't repetir cuadrículas de tarjetas redondeadas cuando una composición editorial o una lista abierta comunica mejor.",
+      "Don't trasladar el estilo denso del panel administrativo al sitio público.",
+      "Don't usar sombras fuertes en todas las superficies ni sustituir fotografías reales por ilustraciones turísticas genéricas."
+    ]
+  }
+}

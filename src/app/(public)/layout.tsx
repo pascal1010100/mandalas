@@ -20,7 +20,7 @@ export default function PublicLayout({
     children: React.ReactNode
 }) {
     return (
-        <div className="dark flex min-h-screen flex-col bg-background pb-20 text-foreground md:pb-0">
+        <div className="dark flex min-h-screen flex-col bg-background text-foreground">
             <Script
                 id="mandalas-structured-data"
                 type="application/ld+json"

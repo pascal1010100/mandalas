@@ -69,7 +69,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="relative grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
             <div className="max-w-3xl">
-              <p className="mb-6 text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
+              <p className="mb-6 text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
                 The Feel Of The Stay
               </p>
               <h1 className="max-w-3xl font-heading text-4xl font-light uppercase leading-[1.05] tracking-[0.1em] text-white md:text-6xl md:tracking-[0.14em]">
@@ -112,13 +112,13 @@ export default function LandingPage() {
 
               <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 <ConsultationLink className="h-12 border-white/20 bg-white px-8 text-stone-950 hover:bg-stone-200">
-                  Book your stay
+                  Choose your stay
                 </ConsultationLink>
-                <Link href="/contact">
-                  <Button variant="outline" className="h-12 w-full rounded-full border-white/20 bg-transparent px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-none hover:bg-white hover:text-stone-950">
+                <Button asChild variant="outline" className="h-12 w-full rounded-full border-white/20 bg-transparent px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-none hover:bg-white hover:text-stone-950">
+                  <Link href="/contact">
                     Contact
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </div>
 
@@ -129,11 +129,11 @@ export default function LandingPage() {
                   alt=""
                   fill
                   sizes="(min-width: 1024px) 58vw, 100vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/28 to-black/5" />
                 <div className="relative flex h-full min-h-[22rem] flex-col justify-between p-6 md:p-8">
-                  <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] text-white/45">
+                  <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-white/70 sm:text-[10px] sm:tracking-[0.22em]">
                     <span>01</span>
                     <span>Center</span>
                   </div>
@@ -158,7 +158,7 @@ export default function LandingPage() {
                     alt=""
                     fill
                     sizes="(min-width: 1024px) 42vw, 100vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/10" />
                   <div className="relative flex min-h-[18rem] flex-col justify-end p-6 md:p-7">
@@ -175,8 +175,8 @@ export default function LandingPage() {
                 </Link>
 
                 <div className="relative overflow-hidden border border-white/10 bg-white/[0.035] p-6 md:p-7">
-                  <MapPin className="mb-8 h-5 w-5 text-white/35" />
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/35">
+                  <MapPin className="mb-8 h-5 w-5 text-white/70" />
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70 sm:text-[10px] sm:tracking-[0.24em]">
                     San Pedro La Laguna
                   </p>
                   <p className="mt-4 text-2xl font-light leading-snug text-white md:text-3xl">
@@ -187,7 +187,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-10 grid border-t border-white/10 pt-6 text-xs uppercase tracking-[0.18em] text-white/42 md:grid-cols-4 md:gap-8">
+          <div className="mt-10 grid border-t border-white/10 pt-6 text-xs uppercase tracking-[0.18em] text-white/70 md:grid-cols-4 md:gap-8">
             <div className="py-3 md:py-0">Walkable center</div>
             <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Rooftop and kitchen</div>
             <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Lake nearby</div>
@@ -232,7 +232,7 @@ function HomePanel({
 
   return (
     <article
-      className={`group relative z-10 flex-1 overflow-hidden border-white/10 transition-transform duration-700 ease-out hover:z-20 md:hover:-translate-y-0.5 md:hover:scale-[1.006] ${borderClass || ""}`}
+      className={`group relative z-10 flex-1 overflow-hidden border-white/10 transition-transform duration-700 ease-out hover:z-20 motion-reduce:transform-none motion-reduce:transition-none md:hover:-translate-y-0.5 md:hover:scale-[1.006] ${borderClass || ""}`}
     >
       <Image
         src={background}
@@ -240,43 +240,47 @@ function HomePanel({
         fill
         priority
         sizes="(min-width: 768px) 50vw, 100vw"
-        className="scale-[1.04] object-cover brightness-[0.92] saturate-[0.95] transition duration-[1250ms] ease-out group-hover:scale-[1.09] group-hover:brightness-100 group-hover:saturate-[1.08]"
+        className="scale-[1.04] object-cover brightness-[0.92] saturate-[0.95] transition duration-[1250ms] ease-out group-hover:scale-[1.09] group-hover:brightness-100 group-hover:saturate-[1.08] motion-reduce:transform-none motion-reduce:duration-0 motion-reduce:transition-none"
       />
       <div className={`absolute inset-0 bg-gradient-to-b ${overlayClass}`} />
-      <div className={`absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 ${lightClass}`} />
+      <div className={`absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none ${lightClass}`} />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,transparent_0%,rgba(0,0,0,0.16)_45%,rgba(0,0,0,0.65)_100%)]" />
-      <div className={`absolute bottom-0 left-0 h-px w-full origin-left scale-x-[0.72] opacity-50 transition duration-500 group-hover:scale-x-100 group-hover:opacity-100 ${accentClass}`} />
+      <div className={`absolute bottom-0 left-0 h-px w-full origin-left scale-x-[0.72] opacity-50 transition duration-500 group-hover:scale-x-100 group-hover:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${accentClass}`} />
 
-      <Link href={href} className="relative z-10 flex h-full min-h-[54svh] flex-col justify-end p-6 text-white sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-9 lg:p-12 xl:p-16">
+      <Link
+        href={href}
+        aria-label={`View ${label} details`}
+        className="relative z-10 flex h-full min-h-[50svh] flex-col justify-end p-5 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80 sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-9 lg:p-12 xl:p-16"
+      >
         <div className="mb-auto flex items-center justify-between gap-5 pt-16 md:pt-24">
           <div className="inline-flex max-w-[16rem] items-center gap-3 border border-white/15 bg-black/20 px-3 py-2 backdrop-blur-md">
             <span className={`h-px w-6 ${accentClass}`} />
             <div className="min-w-0">
-              <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-white/82 sm:tracking-[0.22em]">
+              <p className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-white/90 sm:text-[10px] sm:tracking-[0.22em]">
                 {label}
               </p>
-              <p className="mt-1 truncate text-[10px] font-medium uppercase tracking-[0.14em] text-white/48 sm:tracking-[0.18em]">
+              <p className="mt-1 truncate text-xs font-medium uppercase tracking-[0.12em] text-white/70 sm:text-[10px] sm:tracking-[0.18em]">
                 {kicker}
               </p>
             </div>
           </div>
-          <ArrowUpRight className="h-5 w-5 text-white/50 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-white" />
+          <ArrowUpRight className="h-5 w-5 text-white/70 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-white motion-reduce:transform-none motion-reduce:transition-none" />
         </div>
 
-        <div className="max-w-xl transition-transform duration-500 ease-out group-hover:-translate-y-2">
+        <div className="max-w-xl transition-transform duration-500 ease-out group-hover:-translate-y-2 motion-reduce:transform-none motion-reduce:transition-none">
           <h2 className="font-heading max-w-full text-[2rem] font-light uppercase leading-none tracking-[0.06em] text-white sm:text-5xl sm:tracking-[0.12em] md:text-[3.6rem] md:tracking-[0.08em] lg:text-[4.25rem] xl:text-[5.25rem] xl:tracking-[0.12em] 2xl:text-8xl 2xl:tracking-[0.16em]">
             {title}
           </h2>
-          <p className="mt-5 max-w-[20rem] text-sm font-light leading-relaxed text-white/70 sm:mt-6 sm:min-h-[4.5rem] sm:max-w-md sm:text-base">
+          <p className="mt-3 max-w-[20rem] text-sm font-light leading-relaxed text-white/75 sm:mt-6 sm:min-h-[4.5rem] sm:max-w-md sm:text-base">
             {description}
           </p>
-          <div className="mt-8 flex flex-col items-start gap-4 border-t border-white/15 pt-5 sm:mt-10 sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45 sm:tracking-[0.22em]">
+          <div className="mt-4 flex flex-col items-start gap-3 border-t border-white/15 pt-3 sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pt-5">
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70 sm:text-[10px] sm:tracking-[0.22em]">
               {meta}
             </span>
             <span className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/75">
-              <span className={`hidden h-px w-8 origin-right scale-x-[0.35] transition-transform duration-500 group-hover:scale-x-100 sm:block ${accentClass}`} />
-              Enter
+              <span className={`hidden h-px w-8 origin-right scale-x-[0.35] transition-transform duration-500 group-hover:scale-x-100 motion-reduce:transform-none motion-reduce:transition-none sm:block ${accentClass}`} />
+              View stay
             </span>
           </div>
         </div>
@@ -298,9 +302,9 @@ function RhythmPoint({
 }) {
   return (
     <div className="grid grid-cols-[auto_1fr] gap-5 border-t border-white/10 pt-6 first:border-t-0 first:pt-0">
-      <Icon className="mt-1 h-5 w-5 text-white/42" />
+      <Icon className="mt-1 h-5 w-5 text-white/70" />
       <div>
-        <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/38">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-white/70 sm:text-[10px] sm:tracking-[0.22em]">
           {eyebrow}
         </p>
         <h2 className="text-base font-semibold uppercase tracking-[0.14em] text-white">

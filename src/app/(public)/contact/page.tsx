@@ -50,7 +50,7 @@ function BookingEngineCard({
         alt=""
         fill
         sizes="(min-width: 768px) 50vw, 100vw"
-        className="object-cover transition-transform duration-700 group-hover:scale-105"
+        className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
       />
       <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(12,10,9,0.94),rgba(12,10,9,0.62)_58%,rgba(12,10,9,0.28))]" />
 
@@ -105,7 +105,7 @@ export default function ContactPage() {
         >
           <a href="#book-directly">
             <CalendarDays className="h-4 w-4" />
-            Book your stay
+            Choose your stay
           </a>
         </Button>
       </Hero>
@@ -156,7 +156,7 @@ export default function ContactPage() {
           <FadeIn className="order-2 lg:order-1 lg:col-span-5">
             <div className="min-w-0 space-y-8">
               <div>
-                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-white/40">
+                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
                   Personal help
                 </p>
                 <h2 className="mb-5 max-w-xl break-words font-heading text-[1.2rem] font-light uppercase leading-tight tracking-[0.08em] text-white [text-wrap:balance] sm:text-3xl sm:tracking-[0.1em] md:text-4xl md:tracking-[0.14em]">
@@ -267,7 +267,7 @@ export default function ContactPage() {
 
       <section className="mx-auto w-full max-w-7xl overflow-hidden px-4 pb-16 md:pb-24">
         <FadeIn>
-          <div className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
+          <div className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
             <MapPin className="h-4 w-4" />
             San Pedro La Laguna
           </div>

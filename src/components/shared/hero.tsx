@@ -42,7 +42,7 @@ export function Hero({
                     fill
                     priority
                     sizes="100vw"
-                    className="scale-105 object-cover transition-transform duration-[1.5s]"
+                    className="scale-105 object-cover transition-transform duration-[1.5s] motion-reduce:transform-none motion-reduce:transition-none"
                     style={{ objectPosition: backgroundPosition }}
                 />
             ) : (

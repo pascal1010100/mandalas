@@ -60,7 +60,7 @@ export function Navbar() {
     return (
         <nav
             className={cn(
-                "fixed top-0 w-full z-50 transition-all duration-300 border-b",
+                "fixed top-0 w-full z-50 border-b transition-all duration-300 motion-reduce:transition-none",
                 scrolled
                     ? "bg-stone-950/80 backdrop-blur-xl border-white/10 shadow-lg shadow-black/20 supports-[backdrop-filter]:bg-stone-950/60"
                     : "bg-transparent border-transparent text-white"
@@ -138,11 +138,11 @@ export function Navbar() {
                         location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}
                         href={bookingSectionHref}
                         className={cn(
-                            "h-10 px-6 gap-2",
+                            "h-10 gap-2 px-6",
                             theme.button
                         )}
                     >
-                        Book now
+                        {isPueblo ? "Book Mandalas" : isHideout ? "Book Hideout" : "Choose your stay"}
                     </ConsultationLink>
                 </div>
 
@@ -152,7 +152,7 @@ export function Navbar() {
                             variant="ghost"
                             size="icon"
                             aria-label="Open navigation menu"
-                            className={cn("transition-colors", scrolled ? "text-stone-100 hover:text-white" : "text-white hover:text-white/80")}
+                            className={cn("size-11 transition-colors motion-reduce:transition-none", scrolled ? "text-stone-100 hover:text-white" : "text-white hover:text-white/80")}
                             suppressHydrationWarning
                         >
                             <Menu className="h-6 w-6" />
@@ -223,7 +223,7 @@ export function Navbar() {
                                             onClick={() => setMenuOpen(false)}
                                             className={cn("h-14 w-full gap-2", theme.button)}
                                         >
-                                            BOOK NOW
+                                            {isPueblo ? "BOOK MANDALAS" : isHideout ? "BOOK HIDEOUT" : "CHOOSE YOUR STAY"}
                                         </ConsultationLink>
                                     </StaggerItem>
                                 </div>
