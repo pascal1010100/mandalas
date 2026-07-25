@@ -73,6 +73,7 @@ Las skills complementan este archivo; no pueden relajar sus restricciones.
 - Enlaces de reserva rotos, errores 5xx y canonical incorrecto son incidentes críticos.
 - Regresiones de accesibilidad, indexación o Core Web Vitals bloquean la promoción a producción.
 - Toda medición debe registrar fecha, URL, dispositivo, herramienta y baseline.
+- PostHog se configura según `docs/POSTHOG_SETUP.md`; no habilitar autocapture, session replay, heatmaps, identificación de personas o persistencia sin revisión de privacidad y aprobación humana.
 
 ## Calidad mínima
 

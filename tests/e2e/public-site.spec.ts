@@ -21,9 +21,22 @@ test("home presents both stays", async ({ page }) => {
     const response = await page.goto("/")
 
     expect(response?.ok()).toBeTruthy()
-    await expect(page).toHaveTitle(/Mandalas Hostal/)
+    await expect(page).toHaveTitle("Mandalas Hostels | San Pedro La Laguna, Atitlán")
+    await expect(page.locator("h1")).toHaveCount(1)
+    await expect(page.getByRole("heading", {
+        level: 1,
+        name: "Choose your stay in San Pedro La Laguna",
+        exact: true,
+    })).toBeVisible()
     await expect(page.locator('main a[href="/pueblo"]').first()).toBeVisible()
     await expect(page.locator('main a[href="/hideout"]').first()).toBeVisible()
+    await expect(page.locator("main").getByRole("link", {
+        name: "Choose your stay",
+        exact: true,
+    }).first()).toHaveAttribute("href", "/contact#book-directly")
+    await expect(page.locator("a button")).toHaveCount(0)
+    await expect(page.locator("body")).not.toHaveAttribute("translate", "no")
+    await expect(page.locator("body")).not.toHaveClass(/notranslate/)
 })
 
 for (const property of properties) {
@@ -53,10 +66,53 @@ test("mobile navigation exposes the essential destinations", async ({ page }, te
     await expect(page.getByRole("link", { name: /Mandalas in the center of San Pedro/i })).toBeVisible()
     await expect(page.getByRole("link", { name: /Hideout nature and slower nights/i })).toBeVisible()
     await expect(page.getByRole("link", { name: "Contact", exact: true })).toBeVisible()
-    await expect(page.getByRole("link", { name: "BOOK NOW", exact: true })).toHaveAttribute(
+    await expect(page.getByRole("link", { name: "BOOK HIDEOUT", exact: true })).toHaveAttribute(
         "href",
         "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
     )
+})
+
+test("mobile home keeps both stays in the first viewport", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile-chromium", "Mobile-only comparison check")
+
+    await page.goto("/")
+
+    const mandalas = page.locator('main a[aria-label="View Mandalas details"]')
+    const hideout = page.locator('main a[aria-label="View Mandalas Hideout details"]')
+    const mandalasBox = await mandalas.boundingBox()
+    const hideoutBox = await hideout.boundingBox()
+    const viewport = page.viewportSize()
+
+    expect(mandalasBox).not.toBeNull()
+    expect(hideoutBox).not.toBeNull()
+    expect(viewport).not.toBeNull()
+    expect(hideoutBox!.y).toBeLessThan(viewport!.height)
+    expect(hideoutBox!.y + hideoutBox!.height).toBeLessThanOrEqual(viewport!.height + 2)
+
+    const menuBox = await page.getByRole("button", { name: "Open navigation menu" }).boundingBox()
+    expect(menuBox).not.toBeNull()
+    expect(menuBox!.width).toBeGreaterThanOrEqual(44)
+    expect(menuBox!.height).toBeGreaterThanOrEqual(44)
+})
+
+test("reduced-motion preference disables cinematic transforms", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" })
+    await page.goto("/")
+
+    const heroImage = page
+        .locator("main article")
+        .filter({ has: page.getByRole("link", { name: "View Mandalas details" }) })
+        .locator("img")
+    const motion = await heroImage.evaluate((element) => {
+        const styles = window.getComputedStyle(element)
+        return {
+            transform: styles.transform,
+            transitionDuration: styles.transitionDuration,
+        }
+    })
+
+    expect(motion.transform).toBe("none")
+    expect(motion.transitionDuration).toBe("0s")
 })
 
 test("navbar booking control reveals the booking choices on contact", async ({ page }, testInfo) => {
@@ -64,11 +120,62 @@ test("navbar booking control reveals the booking choices on contact", async ({ p
 
     if (testInfo.project.name === "mobile-chromium") {
         await page.getByRole("button", { name: "Open navigation menu" }).click()
-        await page.getByRole("link", { name: "BOOK NOW", exact: true }).click()
+        await page.getByRole("link", { name: "CHOOSE YOUR STAY", exact: true }).click()
     } else {
-        await page.locator("nav").getByRole("link", { name: "Book now", exact: true }).click()
+        await page.locator("nav").getByRole("link", { name: "Choose your stay", exact: true }).click()
     }
 
     await expect(page).toHaveURL(/\/contact#book-directly$/)
     await expect(page.locator("#book-directly")).toBeInViewport()
+})
+
+test("contact preserves direct booking and the prefilled WhatsApp inquiry", async ({ page }) => {
+    await page.addInitScript(() => {
+        window.open = ((url?: string | URL) => {
+            window.sessionStorage.setItem("mandalas-test-window-open", String(url))
+            return null
+        }) as typeof window.open
+    })
+
+    await page.goto("/contact?location=Hideout&room=Private%20Room#inquiry")
+
+    const directBooking = page.locator("#book-directly")
+    await expect(directBooking.getByRole("link", { name: "Book Mandalas", exact: true })).toHaveAttribute(
+        "href",
+        "https://hotels.cloudbeds.com/en/reservation/5VReHj?currency=gtq",
+    )
+    await expect(directBooking.getByRole("link", { name: "Book Hideout", exact: true })).toHaveAttribute(
+        "href",
+        "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
+    )
+
+    const inquiry = page.locator("#inquiry")
+    await expect(inquiry.getByRole("combobox").nth(0)).toContainText("Hideout")
+    await expect(inquiry.getByRole("combobox").nth(1)).toContainText("Private room")
+
+    await inquiry.getByLabel("Name").fill("Test Guest")
+    await inquiry.getByLabel("Guests").fill("2")
+    await inquiry.getByLabel("Dates").fill("July 12 to 15")
+    await inquiry.getByRole("button", { name: "Ask on WhatsApp" }).click()
+
+    const openedUrl = await page.evaluate(() =>
+        window.sessionStorage.getItem("mandalas-test-window-open"),
+    )
+
+    expect(openedUrl).toMatch(/^https:\/\/wa\.me\//)
+    expect(openedUrl).toContain("Test%20Guest")
+    expect(openedUrl).toContain("Private%20Room")
+})
+
+test("contact defers the map until the visitor scrolls near it", async ({ page }) => {
+    await page.goto("/contact")
+
+    const loadingMap = page.getByRole("status", { name: "Interactive map loading" })
+
+    await expect(loadingMap).toBeAttached()
+    await expect(page.locator(".leaflet-container")).toHaveCount(0)
+
+    await loadingMap.scrollIntoViewIfNeeded()
+
+    await expect(page.locator(".leaflet-container")).toBeVisible()
 })

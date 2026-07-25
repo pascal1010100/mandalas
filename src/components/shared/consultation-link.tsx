@@ -5,7 +5,11 @@ import type * as React from "react"
 import { CalendarDays } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { normalizePublicProperty, trackBookingIntent } from "@/lib/analytics"
+import {
+    normalizePublicProperty,
+    trackBookingIntent,
+    type AnalyticsSource,
+} from "@/lib/analytics"
 import { getBookingEngineUrl } from "@/lib/booking-engine"
 import { cn } from "@/lib/utils"
 
@@ -14,7 +18,7 @@ type ConsultationLinkProps = React.ComponentProps<typeof Button> & {
     roomName?: string
     showIcon?: boolean
     href?: string
-    trackingSource?: string
+    trackingSource?: AnalyticsSource
 }
 
 function getContactLocation(location?: string) {
@@ -49,13 +53,20 @@ export function ConsultationLink({
     showIcon = true,
     href,
     trackingSource = "consultation_link",
-    children = "Book now",
+    children,
     className,
     ...props
 }: ConsultationLinkProps) {
     const bookingEngineUrl = getBookingEngineUrl(location)
     const destination = href || bookingEngineUrl || buildInquiryHref(location, roomName)
     const useNativeAnchor = destination.startsWith("http") || destination.startsWith("#")
+    const label = children ?? (
+        location?.toLowerCase().includes("hideout")
+            ? "Book Hideout"
+            : location
+                ? "Book Mandalas"
+                : "Choose your stay"
+    )
     const handleClick = () => {
         if (destination.startsWith("http")) {
             trackBookingIntent(normalizePublicProperty(location), trackingSource)
@@ -74,12 +85,12 @@ export function ConsultationLink({
             {useNativeAnchor ? (
                 <a href={destination} onClick={handleClick}>
                     {showIcon && <CalendarDays className="h-4 w-4" />}
-                    {children}
+                    {label}
                 </a>
             ) : (
                 <Link href={destination}>
                     {showIcon && <CalendarDays className="h-4 w-4" />}
-                    {children}
+                    {label}
                 </Link>
             )}
         </Button>

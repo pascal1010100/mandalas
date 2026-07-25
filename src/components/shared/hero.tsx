@@ -1,5 +1,4 @@
-"use client"
-
+import Image from "next/image"
 import { MapPin } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -36,13 +35,23 @@ export function Hero({
             )}
         >
             {/* Background */}
-            <div
-                className="absolute inset-0 scale-105 bg-cover transition-transform duration-[1.5s]"
-                style={{
-                    backgroundImage: backgroundImage ? `url(${backgroundImage})` : backgroundGradient,
-                    backgroundPosition
-                }}
-            />
+            {backgroundImage ? (
+                <Image
+                    src={backgroundImage}
+                    alt=""
+                    fill
+                    priority
+                    sizes="100vw"
+                    className="scale-105 object-cover transition-transform duration-[1.5s] motion-reduce:transform-none motion-reduce:transition-none"
+                    style={{ objectPosition: backgroundPosition }}
+                />
+            ) : (
+                <div
+                    className="absolute inset-0"
+                    style={{ background: backgroundGradient }}
+                    aria-hidden="true"
+                />
+            )}
             {/* Cinematic Noise & Overlay */}
             <div
                 className="absolute inset-0 z-10 pointer-events-none opacity-[0.05] mix-blend-overlay"

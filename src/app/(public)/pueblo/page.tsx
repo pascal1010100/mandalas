@@ -1,5 +1,3 @@
-"use client"
-
 import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"

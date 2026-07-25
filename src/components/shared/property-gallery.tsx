@@ -1,5 +1,3 @@
-"use client"
-
 import Image from "next/image"
 
 import { FadeIn } from "@/components/animations/fade-in"
@@ -60,9 +58,8 @@ export function PropertyGallery({ id, eyebrow, title, description, images, accen
                                     src={image.src}
                                     alt={image.alt}
                                     fill
-                                    unoptimized
                                     sizes={index === 0 ? "(min-width: 1024px) 58vw, 100vw" : "(min-width: 1024px) 42vw, 100vw"}
-                                    className="object-cover transition duration-[1400ms] ease-out group-hover:scale-105"
+                                    className="object-cover transition duration-[1400ms] ease-out group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                                 <figcaption className="absolute bottom-0 left-0 right-0 p-5">

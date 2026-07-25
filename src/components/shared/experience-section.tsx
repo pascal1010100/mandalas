@@ -1,5 +1,3 @@
-"use client"
-
 import type { LucideIcon } from "lucide-react"
 
 import { StaggerItem, StaggerReveal } from "@/components/animations/stagger-reveal"
