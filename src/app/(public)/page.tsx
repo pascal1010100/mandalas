@@ -126,8 +126,8 @@ export default function LandingPage() {
                   Book Hideout
                 </ConsultationLink>
                 <Button asChild variant="outline" className="h-12 w-full rounded-full border-white/20 bg-transparent px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-none hover:bg-white hover:text-stone-950 sm:col-span-2 lg:col-span-1">
-                  <Link href="/contact">
-                    Contact
+                  <Link href="/contact#book-directly">
+                    Choose your stay
                   </Link>
                 </Button>
               </div>
