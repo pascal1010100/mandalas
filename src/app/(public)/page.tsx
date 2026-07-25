@@ -16,12 +16,12 @@ export default function LandingPage() {
     <div className="bg-background">
       <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black md:min-h-screen md:flex-row">
         <div className="absolute inset-x-0 top-24 z-30 flex justify-center px-4 pointer-events-none">
-          <div className="hidden md:flex flex-col items-center text-white">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55">
-              San Pedro La Laguna
+          <div className="flex flex-col items-center text-center text-white">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/65 sm:tracking-[0.32em]">
+              Two stays · One lake
             </p>
-            <p className="mt-3 font-heading text-2xl font-light uppercase tracking-[0.28em] text-white/90">
-              Mandalas
+            <p className="mt-2 font-heading text-lg font-light uppercase tracking-[0.16em] text-white/90 sm:mt-3 sm:text-2xl sm:tracking-[0.28em]">
+              Choose your rhythm
             </p>
           </div>
         </div>
@@ -38,10 +38,10 @@ export default function LandingPage() {
         <HomePanel
           href="/pueblo"
           label="Mandalas"
-          kicker="Town center"
+          kicker="Social base in town"
           title="Mandalas"
           description="Stay in town, head up to the rooftop, and let San Pedro unfold on foot."
-          meta="Rooftop / Center / Lake"
+          meta="Rooftop / Center / Social"
           background={BACKGROUNDS.pueblo}
           accent="amber"
           borderClass="border-b md:border-b-0 md:border-r"
@@ -50,10 +50,10 @@ export default function LandingPage() {
         <HomePanel
           href="/hideout"
           label="Mandalas Hideout"
-          kicker="Toward the lake"
+          kicker="Work + lake hub"
           title="Hideout"
-          description="Lower the volume, keep nature close, and come back to quiet nights."
-          meta="Volcano / Lake / Slow"
+          description="Work remotely, enjoy good music, and keep the lake close without giving up a welcoming atmosphere."
+          meta="WiFi / Music / Lake"
           background={BACKGROUNDS.hideout}
           accent="lime"
           imageClassName="scale-100"
