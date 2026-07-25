@@ -1,7 +1,7 @@
 import { Hero } from "@/components/shared/hero"
 import { FadeIn } from "@/components/animations/fade-in"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
-import { Wifi, Coffee, Sun, MapPin, Utensils, BedDouble, DoorClosed, ShieldCheck, ShipWheel, Clock, WashingMachine, Route, LockKeyhole, Instagram } from "lucide-react"
+import { Wifi, Coffee, Sun, MapPin, Utensils, BedDouble, DoorClosed, ShieldCheck, ShipWheel, Clock, WashingMachine, Route, LockKeyhole, Instagram, Bike } from "lucide-react"
 import { ConsultationLink } from "@/components/shared/consultation-link"
 import { ExperienceSection } from "@/components/shared/experience-section"
 import { PracticalDetails } from "@/components/shared/practical-details"
