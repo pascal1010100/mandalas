@@ -15,7 +15,7 @@ export default function HideoutPage() {
             <Hero
                 title="Hideout"
                 subtitle="A quieter base for better sleep, lake walks, and turning down the volume of San Pedro."
-                backgroundImage="/images/mandalas/hostelworld/hideout-exterior-volcano.jpg"
+                backgroundImage="/images/mandalas/hostelworld/hideout-terrace-dusk.jpg"
                 backgroundImageMobile="/images/mandalas/hostelworld/hideout-exterior-volcano.jpg"
                 backgroundPosition="32% 50%"
                 backgroundPositionMobile="center 44%"
