@@ -36,5 +36,30 @@ export default defineConfig({
             name: "mobile-chromium",
             use: { ...devices["Pixel 7"] },
         },
+        {
+            name: "mobile-landscape-chromium",
+            use: {
+                ...devices["Desktop Chrome"],
+                viewport: { width: 667, height: 375 },
+                isMobile: true,
+                hasTouch: true,
+            },
+        },
+        {
+            name: "tablet-portrait-chromium",
+            use: {
+                ...devices["Desktop Chrome"],
+                viewport: { width: 768, height: 1024 },
+                hasTouch: true,
+            },
+        },
+        {
+            name: "tablet-landscape-chromium",
+            use: {
+                ...devices["Desktop Chrome"],
+                viewport: { width: 1024, height: 768 },
+                hasTouch: true,
+            },
+        },
     ],
 })

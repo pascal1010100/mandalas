@@ -27,7 +27,7 @@ const selectTriggerClass =
   "h-11 w-full rounded-none border-x-0 border-t-0 border-b-2 border-white/20 bg-transparent px-0 text-base text-white shadow-none focus:ring-0 focus:ring-offset-0 data-[placeholder]:text-stone-500 md:text-base";
 
 const formLabelClass =
-  "text-[0.68rem] uppercase tracking-[0.22em] text-white/60";
+  "text-xs uppercase tracking-[0.18em] text-white/65";
 
 function normalizeLocation(value: string | null) {
   if (!value) return null;
@@ -109,7 +109,7 @@ export function ReservationInquiryForm() {
           </p>
         </div>
 
-        <p className="max-w-36 border-l border-white/15 pl-4 text-[0.65rem] font-semibold uppercase leading-relaxed tracking-[0.2em] text-white/50 max-sm:border-l-0 max-sm:border-t max-sm:pt-4 max-sm:pl-0">
+        <p className="max-w-36 border-l border-white/15 pl-4 text-xs font-semibold uppercase leading-relaxed tracking-[0.16em] text-white/55 max-sm:border-l-0 max-sm:border-t max-sm:pt-4 max-sm:pl-0">
           Groups, special requests, and personal advice.
         </p>
       </div>
@@ -164,9 +164,19 @@ export function ReservationInquiryForm() {
         </div>
 
         <div className="space-y-3">
-          <Label className={formLabelClass}>Stay</Label>
+          <Label
+            id="preferred-stay-label"
+            htmlFor="preferred-stay"
+            className={formLabelClass}
+          >
+            Stay
+          </Label>
           <Select value={location} onValueChange={setLocation}>
-            <SelectTrigger className={selectTriggerClass}>
+            <SelectTrigger
+              id="preferred-stay"
+              aria-labelledby="preferred-stay-label"
+              className={selectTriggerClass}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-stone-950 text-white shadow-2xl shadow-black/40">
@@ -178,9 +188,19 @@ export function ReservationInquiryForm() {
         </div>
 
         <div className="space-y-3">
-          <Label className={formLabelClass}>Room</Label>
+          <Label
+            id="room-type-label"
+            htmlFor="room-type"
+            className={formLabelClass}
+          >
+            Room
+          </Label>
           <Select value={roomType} onValueChange={setRoomType}>
-            <SelectTrigger className={selectTriggerClass}>
+            <SelectTrigger
+              id="room-type"
+              aria-labelledby="room-type-label"
+              className={selectTriggerClass}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-stone-950 text-white shadow-2xl shadow-black/40">
@@ -207,7 +227,7 @@ export function ReservationInquiryForm() {
       </div>
 
       <div className="mt-8 border-y border-white/15 py-4">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-white/55">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/60">
           <span>{location}</span>
           <span className="h-px w-8 bg-amber-200/45" />
           <span>{roomType}</span>

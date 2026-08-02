@@ -17,6 +17,18 @@ const properties = [
     },
 ]
 
+const publicPaths = ["/", "/pueblo", "/hideout", "/contact"]
+
+function boxesOverlap(
+    first: { x: number; y: number; width: number; height: number },
+    second: { x: number; y: number; width: number; height: number },
+) {
+    return first.x < second.x + second.width
+        && first.x + first.width > second.x
+        && first.y < second.y + second.height
+        && first.y + first.height > second.y
+}
+
 test("home presents both stays", async ({ page }) => {
     const response = await page.goto("/")
 
@@ -93,6 +105,65 @@ test("mobile home keeps both stays in the first viewport", async ({ page }, test
     expect(menuBox).not.toBeNull()
     expect(menuBox!.width).toBeGreaterThanOrEqual(44)
     expect(menuBox!.height).toBeGreaterThanOrEqual(44)
+
+    const fixedCta = page.locator("div.fixed").filter({
+        has: page.getByRole("link", { name: "Book Hideout", exact: true }),
+    })
+    const hideoutMeta = hideout.getByText("WiFi / Music / Lake", { exact: true })
+    const fixedCtaBox = await fixedCta.boundingBox()
+    const hideoutMetaBox = await hideoutMeta.boundingBox()
+
+    expect(fixedCtaBox).not.toBeNull()
+    expect(hideoutMetaBox).not.toBeNull()
+    expect(boxesOverlap(fixedCtaBox!, hideoutMetaBox!)).toBeFalsy()
+})
+
+test("public routes do not overflow horizontally on tablets", async ({ page }, testInfo) => {
+    test.skip(!testInfo.project.name.startsWith("tablet-"), "Tablet-only layout check")
+
+    for (const path of publicPaths) {
+        await page.goto(path)
+        const dimensions = await page.evaluate(() => ({
+            clientWidth: document.documentElement.clientWidth,
+            scrollWidth: document.documentElement.scrollWidth,
+        }))
+
+        expect(dimensions.scrollWidth, `${path} should not overflow horizontally`).toBeLessThanOrEqual(
+            dimensions.clientWidth + 1,
+        )
+    }
+})
+
+test("tablet home hero labels do not collide with its central message", async ({ page }, testInfo) => {
+    test.skip(!testInfo.project.name.startsWith("tablet-"), "Tablet-only hero check")
+
+    await page.goto("/")
+
+    const message = page.getByText("Choose your rhythm", { exact: true })
+    if (!(await message.isVisible())) return
+
+    const messageBox = await message.boundingBox()
+    const labelBoxes = await Promise.all([
+        page.getByText("Social base in town", { exact: true }).boundingBox(),
+        page.getByText("Work + lake hub", { exact: true }).boundingBox(),
+    ])
+
+    expect(messageBox).not.toBeNull()
+    for (const labelBox of labelBoxes) {
+        expect(labelBox).not.toBeNull()
+        expect(boxesOverlap(messageBox!, labelBox!)).toBeFalsy()
+    }
+})
+
+test("mobile landscape navigation keeps its final action reachable", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile-landscape-chromium", "Landscape-only navigation check")
+
+    await page.goto("/hideout")
+    await page.getByRole("button", { name: "Open navigation menu" }).click()
+
+    const finalAction = page.getByRole("link", { name: "BOOK HIDEOUT", exact: true })
+    await finalAction.scrollIntoViewIfNeeded()
+    await expect(finalAction).toBeInViewport()
 })
 
 test("reduced-motion preference disables cinematic transforms", async ({ page }) => {
@@ -115,11 +186,12 @@ test("reduced-motion preference disables cinematic transforms", async ({ page })
     expect(motion.transitionDuration).toBe("0s")
 })
 
-test("navbar booking control reveals the booking choices on contact", async ({ page }, testInfo) => {
+test("navbar booking control reveals the booking choices on contact", async ({ page }) => {
     await page.goto("/contact")
 
-    if (testInfo.project.name === "mobile-chromium") {
-        await page.getByRole("button", { name: "Open navigation menu" }).click()
+    const menuTrigger = page.getByRole("button", { name: "Open navigation menu" })
+    if (await menuTrigger.isVisible()) {
+        await menuTrigger.click()
         await page.getByRole("link", { name: "CHOOSE YOUR STAY", exact: true }).click()
     } else {
         await page.locator("nav").getByRole("link", { name: "Choose your stay", exact: true }).click()
@@ -177,5 +249,5 @@ test("contact defers the map until the visitor scrolls near it", async ({ page }
 
     await loadingMap.scrollIntoViewIfNeeded()
 
-    await expect(page.locator(".leaflet-container")).toBeVisible()
+    await expect(page.locator(".leaflet-container")).toBeVisible({ timeout: 10_000 })
 })

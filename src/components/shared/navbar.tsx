@@ -67,7 +67,7 @@ export function Navbar() {
             )}
         >
             <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-                <Link href="/" className="group flex flex-col leading-none">
+                <Link href="/" className="group flex min-h-11 flex-col justify-center leading-none">
                     {/* Main Brand */}
                     <span className={cn(
                         "text-3xl font-black tracking-tighter transition-all duration-300 font-heading",
@@ -87,11 +87,11 @@ export function Navbar() {
                 </Link>
 
                 {/* Desktop Menu */}
-                <div className="hidden md:flex gap-2 items-center font-medium">
+                <div className="hidden items-center gap-2 font-medium lg:flex">
                     <Link
                         href="/pueblo"
                         className={cn(
-                            "relative px-3 py-2 transition-colors duration-300",
+                            "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
                             "hover:text-amber-300",
                             pathname === "/pueblo"
                                 ? "text-amber-300"
@@ -106,7 +106,7 @@ export function Navbar() {
                     <Link
                         href="/hideout"
                         className={cn(
-                            "relative px-3 py-2 transition-colors duration-300",
+                            "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
                             "hover:text-lime-300",
                             pathname === "/hideout"
                                 ? "text-lime-300"
@@ -121,7 +121,7 @@ export function Navbar() {
                     <Link
                         href="/contact"
                         className={cn(
-                            "relative px-3 py-2 transition-colors duration-300",
+                            "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
                             "hover:text-white",
                             pathname === "/contact"
                                 ? "text-white"
@@ -138,7 +138,7 @@ export function Navbar() {
                         location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}
                         href={bookingSectionHref}
                         className={cn(
-                            "h-10 gap-2 px-6",
+                            "h-11 gap-2 px-6",
                             theme.button
                         )}
                     >
@@ -147,7 +147,7 @@ export function Navbar() {
                 </div>
 
                 <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-                    <SheetTrigger asChild className="md:hidden">
+                    <SheetTrigger asChild className="lg:hidden">
                         <Button
                             variant="ghost"
                             size="icon"
@@ -158,12 +158,12 @@ export function Navbar() {
                             <Menu className="h-6 w-6" />
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="right" className="w-full sm:w-[400px] border-l border-white/10 bg-stone-950/95 backdrop-blur-3xl p-0 overflow-hidden">
-                        <div className="h-full flex flex-col p-8 relative z-10">
-                            <SheetHeader className="mb-8">
+                    <SheetContent side="right" className="max-h-dvh w-full overflow-y-auto overscroll-contain border-l border-white/10 bg-stone-950/95 p-0 backdrop-blur-3xl sm:w-[400px]">
+                        <div className="relative z-10 flex min-h-full flex-col px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-8">
+                            <SheetHeader className="mb-4 sm:mb-8">
                                 <SheetTitle className="text-left">
                                     <div className="flex flex-col leading-none">
-                                        <span className="text-4xl font-black tracking-tighter text-stone-800 dark:text-stone-100 font-heading">
+                                        <span className="font-heading text-3xl font-black tracking-tighter text-stone-800 dark:text-stone-100 sm:text-4xl">
                                             MANDALAS
                                         </span>
                                         <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-400 dark:text-stone-500 mt-1">
@@ -179,7 +179,7 @@ export function Navbar() {
                                         <Link
                                             href="/pueblo"
                                             className={cn(
-                                                "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-amber-200 dark:hover:border-amber-900 group",
+                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-2xl font-light uppercase tracking-widest transition-all duration-300 hover:border-amber-200 dark:hover:border-amber-900 sm:py-3 sm:text-3xl",
                                                 pathname === "/pueblo" ? "text-amber-300 pl-4 border-amber-300/30" : "text-stone-200 hover:pl-4 hover:text-amber-300"
                                             )}
                                         >
@@ -193,7 +193,7 @@ export function Navbar() {
                                         <Link
                                             href="/hideout"
                                             className={cn(
-                                                "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-lime-200 dark:hover:border-lime-900 group",
+                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-2xl font-light uppercase tracking-widest transition-all duration-300 hover:border-lime-200 dark:hover:border-lime-900 sm:py-3 sm:text-3xl",
                                                 pathname === "/hideout" ? "text-lime-300 pl-4 border-lime-300/30" : "text-stone-200 hover:pl-4 hover:text-lime-300"
                                             )}
                                         >
@@ -207,7 +207,7 @@ export function Navbar() {
                                         <Link
                                             href="/contact"
                                             className={cn(
-                                                "block text-3xl font-light font-heading uppercase tracking-widest py-3 transition-all duration-300 border-b border-transparent hover:border-stone-200 dark:hover:border-stone-800 group",
+                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-2xl font-light uppercase tracking-widest transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 sm:py-3 sm:text-3xl",
                                                 pathname === "/contact" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
                                             )}
                                         >
@@ -215,7 +215,7 @@ export function Navbar() {
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
-                                <div className="mt-auto mb-8 space-y-8">
+                                <div className="mt-auto space-y-4 pt-4 sm:mb-8 sm:space-y-8">
                                     <StaggerItem>
                                         <ConsultationLink
                                             location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}

@@ -98,7 +98,7 @@ export function StayOptions({
                           {option.details.map((detail) => (
                             <span
                               key={detail}
-                              className="text-xs uppercase tracking-[0.16em] text-muted-foreground/80"
+                              className="text-xs uppercase tracking-[0.14em] text-muted-foreground"
                             >
                               {detail}
                             </span>
@@ -120,7 +120,7 @@ export function StayOptions({
                         location={location}
                         showIcon={false}
                         trackingSource="stay_options"
-                        className={`rounded-full px-6 text-xs font-semibold uppercase tracking-[0.16em] shadow-none ${style.button}`}
+                        className={`min-h-11 rounded-full px-6 text-xs font-semibold uppercase tracking-[0.16em] shadow-none ${style.button}`}
                       >
                         {bookingLabel}
                       </ConsultationLink>

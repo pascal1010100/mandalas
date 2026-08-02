@@ -58,6 +58,7 @@ export default function LandingPage() {
           accent="lime"
           imageClassName="scale-100"
           imagePosition="center center"
+          reserveMobileCtaSpace
         />
       </section>
 
@@ -71,7 +72,7 @@ export default function LandingPage() {
           aria-hidden="true"
         />
         <div className="container mx-auto px-4">
-          <div className="relative grid gap-12 lg:grid-cols-[0.82fr_1.18fr] lg:items-end">
+          <div className="relative grid gap-12 xl:grid-cols-[1.1fr_0.9fr] xl:items-end">
             <div className="max-w-3xl">
               <p className="mb-6 text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
                 The Feel Of The Stay
@@ -84,7 +85,7 @@ export default function LandingPage() {
               </h2>
             </div>
 
-            <div className="max-w-xl lg:justify-self-end lg:pb-2">
+            <div className="max-w-xl xl:justify-self-end xl:pb-2">
               <p className="text-lg leading-relaxed text-white/62">
                 Mandalas works best as two rhythms connected by the same lake: town for going out, Hideout for slowing down.
               </p>
@@ -227,6 +228,7 @@ type HomePanelProps = {
   borderClass?: string
   imageClassName?: string
   imagePosition?: string
+  reserveMobileCtaSpace?: boolean
 }
 
 function HomePanel({
@@ -241,6 +243,7 @@ function HomePanel({
   borderClass,
   imageClassName,
   imagePosition,
+  reserveMobileCtaSpace = false,
 }: HomePanelProps) {
   const accentClass = accent === "amber" ? "bg-amber-300/80" : "bg-lime-300/80"
   const lightClass = accent === "amber" ? "bg-amber-200/10" : "bg-lime-200/10"
@@ -269,9 +272,9 @@ function HomePanel({
       <Link
         href={href}
         aria-label={`View ${label} details`}
-        className="relative z-10 flex h-full min-h-[50svh] flex-col justify-end p-5 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80 sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-9 lg:p-12 xl:p-16"
+        className={`relative z-10 flex h-full min-h-[50svh] flex-col justify-end p-5 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80 sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-9 lg:p-12 xl:p-16 ${reserveMobileCtaSpace ? "pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-9 lg:pb-12 xl:pb-16" : ""}`}
       >
-        <div className="mb-auto flex items-center justify-between gap-5 pt-16 md:pt-24">
+        <div className="mb-auto flex items-center justify-between gap-5 pt-16 md:pt-40 xl:pt-24">
           <div className="inline-flex max-w-[16rem] items-center gap-3 border border-white/15 bg-black/20 px-3 py-2 backdrop-blur-md">
             <span className={`h-px w-6 ${accentClass}`} />
             <div className="min-w-0">

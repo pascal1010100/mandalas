@@ -11,8 +11,8 @@ export function MobileCTA() {
     if (pathname === "/") {
         return (
             <>
-                <div className="h-20 md:hidden" aria-hidden="true" />
-                <div className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-2 gap-2 border-t border-white/10 bg-stone-950/90 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden">
+                <div className="h-[calc(3.75rem+max(0.75rem,env(safe-area-inset-bottom)))] md:hidden" aria-hidden="true" />
+                <div className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-2 gap-2 border-t border-white/10 bg-stone-950/90 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden">
                     <ConsultationLink
                         location="Mandalas"
                         showIcon={false}
@@ -40,8 +40,8 @@ export function MobileCTA() {
 
     return (
         <>
-            <div className="h-20 md:hidden" aria-hidden="true" />
-            <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-stone-950/88 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden">
+            <div className="h-[calc(4rem+max(1rem,env(safe-area-inset-bottom)))] md:hidden" aria-hidden="true" />
+            <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-stone-950/88 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden">
                 <ConsultationLink
                     location={location}
                     showIcon={false}
