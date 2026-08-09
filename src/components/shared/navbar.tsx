@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { ConsultationLink } from "@/components/shared/consultation-link"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
@@ -13,6 +13,7 @@ import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reve
 export function Navbar() {
     const [scrolled, setScrolled] = React.useState(false)
     const [menuOpen, setMenuOpen] = React.useState(false)
+    const menuTriggerRef = React.useRef<HTMLButtonElement>(null)
     const pathname = usePathname()
     React.useEffect(() => {
         const handleScroll = () => {
@@ -161,9 +162,16 @@ export function Navbar() {
                     </ConsultationLink>
                 </div>
 
-                <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+                <Sheet
+                    open={menuOpen}
+                    onOpenChange={(open) => {
+                        setMenuOpen(open)
+                        if (!open) requestAnimationFrame(() => menuTriggerRef.current?.focus())
+                    }}
+                >
                     <SheetTrigger asChild className="lg:hidden">
                         <Button
+                            ref={menuTriggerRef}
                             variant="ghost"
                             size="icon"
                             aria-label="Open navigation menu"
@@ -189,6 +197,9 @@ export function Navbar() {
                                         </span>
                                     </div>
                                 </SheetTitle>
+                                <SheetDescription className="sr-only">
+                                    Navigate to a Mandalas property, contact the team, or read the travel guide.
+                                </SheetDescription>
                             </SheetHeader>
 
                             <StaggerReveal className="flex flex-1 flex-col gap-1">
@@ -200,6 +211,7 @@ export function Navbar() {
                                                 "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-amber-200 dark:hover:border-amber-900 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
                                                 pathname === "/pueblo" ? "text-amber-300 pl-4 border-amber-300/30" : "text-stone-200 hover:pl-4 hover:text-amber-300"
                                             )}
+                                            aria-current={pathname === "/pueblo" ? "page" : undefined}
                                         >
                                             Mandalas
                                             <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-amber-300 sm:text-xs">in the center of San Pedro</span>
@@ -214,6 +226,7 @@ export function Navbar() {
                                                 "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-lime-200 dark:hover:border-lime-900 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
                                                 pathname === "/hideout" ? "text-lime-300 pl-4 border-lime-300/30" : "text-stone-200 hover:pl-4 hover:text-lime-300"
                                             )}
+                                            aria-current={pathname === "/hideout" ? "page" : undefined}
                                         >
                                             Hideout
                                             <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-lime-300 sm:text-xs">nature and slower nights</span>
@@ -228,6 +241,7 @@ export function Navbar() {
                                                 "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
                                                 pathname === "/contact" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
                                             )}
+                                            aria-current={pathname === "/contact" ? "page" : undefined}
                                         >
                                             Contact
                                         </Link>
@@ -241,6 +255,7 @@ export function Navbar() {
                                                 "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
                                                 pathname === "/guide" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
                                             )}
+                                            aria-current={pathname === "/guide" ? "page" : undefined}
                                         >
                                             Travel guide
                                             <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-white sm:text-xs">arriving at Lake Atitlán</span>
