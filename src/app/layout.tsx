@@ -30,7 +30,6 @@ export const metadata: Metadata = {
     "San Pedro La Laguna",
     "Lake Atitlan",
     "Lake Atitlan hostel",
-    "Lake Atitlan hostel",
     "San Pedro hostel",
     "San Pedro La Laguna hostel",
     "Mandalas Hideout",

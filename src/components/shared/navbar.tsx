@@ -133,6 +133,21 @@ export function Navbar() {
                             <span className="absolute bottom-0 left-3 right-3 h-px bg-white/70" />
                         )}
                     </Link>
+                    <Link
+                        href="/guide"
+                        className={cn(
+                            "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
+                            "hover:text-white",
+                            pathname === "/guide"
+                                ? "text-white"
+                                : scrolled ? "text-stone-300" : "text-white/90"
+                        )}
+                    >
+                        Travel guide
+                        {pathname === "/guide" && (
+                            <span className="absolute bottom-0 left-3 right-3 h-px bg-white/70" />
+                        )}
+                    </Link>
 
                     <ConsultationLink
                         location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}
@@ -158,33 +173,36 @@ export function Navbar() {
                             <Menu className="h-6 w-6" />
                         </Button>
                     </SheetTrigger>
-                    <SheetContent side="right" className="max-h-dvh w-full overflow-y-auto overscroll-contain border-l border-white/10 bg-stone-950/95 p-0 backdrop-blur-3xl sm:w-[400px]">
-                        <div className="relative z-10 flex min-h-full flex-col px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.5rem,env(safe-area-inset-top))] sm:px-8">
-                            <SheetHeader className="mb-4 sm:mb-8">
+                    <SheetContent
+                        side="right"
+                        className="max-h-dvh w-[50vw] min-w-0 overflow-x-hidden overflow-y-auto overscroll-contain border-l border-white/10 bg-stone-950/95 p-0 text-stone-100 shadow-2xl shadow-black/40 backdrop-blur-3xl [&>button]:bg-stone-900/90 [&>button]:text-white [&>button]:opacity-100 [&>button]:ring-1 [&>button]:ring-white/20 [&>button]:hover:bg-stone-800 [&>button]:focus-visible:ring-2 [&>button]:focus-visible:ring-amber-300 sm:w-[320px]"
+                    >
+                        <div className="relative z-10 flex min-h-full flex-col px-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))] min-[360px]:px-4 sm:px-6">
+                            <SheetHeader className="mb-5 p-0 pr-12">
                                 <SheetTitle className="text-left">
                                     <div className="flex flex-col leading-none">
-                                        <span className="font-heading text-3xl font-black tracking-tighter text-stone-800 dark:text-stone-100 sm:text-4xl">
+                                        <span className="font-heading text-lg font-black tracking-tighter text-white min-[360px]:text-xl sm:text-3xl">
                                             MANDALAS
                                         </span>
-                                        <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-stone-400 dark:text-stone-500 mt-1">
-                                            Hostels · Lake Atitlán
+                                        <span className="mt-1 text-[10px] font-bold uppercase leading-[1.35] tracking-[0.08em] text-stone-300 min-[360px]:tracking-[0.12em] sm:text-xs">
+                                            Hostels ·<span className="block sm:inline"> Lake Atitlán</span>
                                         </span>
                                     </div>
                                 </SheetTitle>
                             </SheetHeader>
 
-                            <StaggerReveal className="flex flex-col gap-2 flex-1">
+                            <StaggerReveal className="flex flex-1 flex-col gap-1">
                                 <StaggerItem>
                                     <SheetClose asChild>
                                         <Link
                                             href="/pueblo"
                                             className={cn(
-                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-2xl font-light uppercase tracking-widest transition-all duration-300 hover:border-amber-200 dark:hover:border-amber-900 sm:py-3 sm:text-3xl",
+                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-amber-200 dark:hover:border-amber-900 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
                                                 pathname === "/pueblo" ? "text-amber-300 pl-4 border-amber-300/30" : "text-stone-200 hover:pl-4 hover:text-amber-300"
                                             )}
                                         >
                                             Mandalas
-                                            <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-amber-400 transition-colors">in the center of San Pedro</span>
+                                            <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-amber-300 sm:text-xs">in the center of San Pedro</span>
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
@@ -193,12 +211,12 @@ export function Navbar() {
                                         <Link
                                             href="/hideout"
                                             className={cn(
-                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-2xl font-light uppercase tracking-widest transition-all duration-300 hover:border-lime-200 dark:hover:border-lime-900 sm:py-3 sm:text-3xl",
+                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-lime-200 dark:hover:border-lime-900 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
                                                 pathname === "/hideout" ? "text-lime-300 pl-4 border-lime-300/30" : "text-stone-200 hover:pl-4 hover:text-lime-300"
                                             )}
                                         >
                                             Hideout
-                                            <span className="block text-[10px] lowercase tracking-normal text-stone-400 font-sans group-hover:text-lime-400 transition-colors">nature and slower nights</span>
+                                            <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-lime-300 sm:text-xs">nature and slower nights</span>
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
@@ -207,11 +225,25 @@ export function Navbar() {
                                         <Link
                                             href="/contact"
                                             className={cn(
-                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-2xl font-light uppercase tracking-widest transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 sm:py-3 sm:text-3xl",
+                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
                                                 pathname === "/contact" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
                                             )}
                                         >
                                             Contact
+                                        </Link>
+                                    </SheetClose>
+                                </StaggerItem>
+                                <StaggerItem>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/guide"
+                                            className={cn(
+                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
+                                                pathname === "/guide" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
+                                            )}
+                                        >
+                                            Travel guide
+                                            <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-white sm:text-xs">arriving at Lake Atitlán</span>
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
@@ -221,7 +253,8 @@ export function Navbar() {
                                             location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}
                                             href={bookingSectionHref}
                                             onClick={() => setMenuOpen(false)}
-                                            className={cn("h-14 w-full gap-2", theme.button)}
+                                            showIcon={false}
+                                            className={cn("h-12 w-full min-w-0 px-1 text-[11px] tracking-[0.04em] min-[360px]:px-2 min-[360px]:tracking-[0.07em]", theme.button)}
                                         >
                                             {isPueblo ? "BOOK MANDALAS" : isHideout ? "BOOK HIDEOUT" : "CHOOSE YOUR STAY"}
                                         </ConsultationLink>

@@ -14,6 +14,7 @@ export default function PuebloPage() {
         <div className="bg-background min-h-screen">
             <Hero
                 title="Mandalas"
+                seoContext="Central hostel in San Pedro La Laguna"
                 subtitle="A central base for walking San Pedro, returning to the rooftop, and letting the trip find its rhythm."
                 backgroundImage="/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"
                 backgroundImageMobile="/images/mandalas/hostelworld/pueblo-exterior.jpg"

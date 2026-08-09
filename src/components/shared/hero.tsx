@@ -6,6 +6,9 @@ import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reve
 
 interface HeroProps {
     title: string
+    /** Adds a visually-hidden span inside the h1 with SEO keyword context.
+     *  Crawlers and screen readers will read the full string; visually nothing changes. */
+    seoContext?: string
     subtitle?: string
     backgroundImage?: string
     backgroundImageMobile?: string
@@ -23,6 +26,7 @@ interface HeroProps {
 
 export function Hero({
     title,
+    seoContext,
     subtitle,
     backgroundImage,
     backgroundImageMobile,
@@ -119,6 +123,9 @@ export function Hero({
                             "mb-6 max-w-[21rem] break-words font-heading text-[2.35rem] font-light uppercase leading-[0.98] tracking-[0.06em] text-white drop-shadow-2xl [text-wrap:balance] sm:max-w-5xl sm:text-6xl sm:tracking-[0.1em] md:text-7xl md:tracking-[0.14em] lg:text-8xl lg:tracking-[0.16em]",
                             align === "center" ? "mx-auto" : "mx-0"
                         )}>
+                            {seoContext && (
+                                <span className="sr-only">{seoContext} — </span>
+                            )}
                             {title}
                         </h1>
                     </StaggerItem>

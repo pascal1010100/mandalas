@@ -170,7 +170,7 @@ export default function LandingPage() {
                 <Link href="/hideout" className="group relative overflow-hidden border border-white/10 bg-stone-900">
                   <Image
                     src={BACKGROUNDS.hideout}
-                    alt=""
+                    alt="Mandalas Hideout exterior with volcano in the background"
                     fill
                     sizes="(min-width: 1024px) 42vw, 100vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"

@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
             allow: "/",
             // Keep private routes blocked until their access and noindex behavior
             // have also been verified in a Vercel preview.
-            disallow: ["/admin", "/api", "/my-booking"],
+            disallow: ["/admin", "/api", "/my-booking", "/cloudbeds-preview"],
         },
         sitemap: `${siteUrl}/sitemap.xml`,
         host: siteUrl,

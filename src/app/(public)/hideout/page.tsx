@@ -14,6 +14,7 @@ export default function HideoutPage() {
         <div className="bg-background min-h-screen">
             <Hero
                 title="Hideout"
+                seoContext="Quiet hostel near Lake Atitlán"
                 subtitle="A quieter base for better sleep, lake walks, and turning down the volume of San Pedro."
                 backgroundImage="/images/mandalas/hostelworld/hideout-terrace-dusk.jpg"
                 backgroundImageMobile="/images/mandalas/hostelworld/hideout-exterior-volcano.jpg"

@@ -4,6 +4,7 @@ const properties = [
     {
         path: "/pueblo",
         heading: "Mandalas",
+        accessibleHeading: "Central hostel in San Pedro La Laguna — Mandalas",
         bookingLabel: "Book Mandalas",
         bookingUrl: "https://hotels.cloudbeds.com/en/reservation/5VReHj?currency=gtq",
         instagramUrl: "https://www.instagram.com/mandalas_hostal/",
@@ -11,13 +12,14 @@ const properties = [
     {
         path: "/hideout",
         heading: "Hideout",
+        accessibleHeading: "Quiet hostel near Lake Atitlán — Hideout",
         bookingLabel: "Book Hideout",
         bookingUrl: "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
         instagramUrl: "https://www.instagram.com/mandalashideout/",
     },
 ]
 
-const publicPaths = ["/", "/pueblo", "/hideout", "/contact"]
+const publicPaths = ["/", "/pueblo", "/hideout", "/guide", "/contact"]
 
 function boxesOverlap(
     first: { x: number; y: number; width: number; height: number },
@@ -56,7 +58,11 @@ for (const property of properties) {
         const response = await page.goto(property.path)
 
         expect(response?.ok()).toBeTruthy()
-        await expect(page.getByRole("heading", { level: 1, name: property.heading, exact: true })).toBeVisible()
+        await expect(page.getByRole("heading", {
+            level: 1,
+            name: property.accessibleHeading,
+            exact: true,
+        })).toBeVisible()
 
         const bookingLink = page.locator("main").getByRole("link", {
             name: property.bookingLabel,
@@ -78,10 +84,33 @@ test("mobile navigation exposes the essential destinations", async ({ page }, te
     await expect(page.getByRole("link", { name: /Mandalas in the center of San Pedro/i })).toBeVisible()
     await expect(page.getByRole("link", { name: /Hideout nature and slower nights/i })).toBeVisible()
     await expect(page.getByRole("link", { name: "Contact", exact: true })).toBeVisible()
+    await expect(page.getByRole("link", { name: /Travel guide arriving at Lake Atitlán/i })).toBeVisible()
     await expect(page.getByRole("link", { name: "BOOK HIDEOUT", exact: true })).toHaveAttribute(
         "href",
         "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
     )
+})
+
+test("mobile guide navigation opens as a compact right sidebar", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "mobile-chromium", "Mobile-only sidebar check")
+
+    await page.goto("/guide")
+    await page.getByRole("button", { name: "Open navigation menu" }).click()
+
+    const sidebar = page.getByRole("dialog")
+    const sidebarBox = await sidebar.boundingBox()
+    const viewport = page.viewportSize()
+
+    expect(sidebarBox).not.toBeNull()
+    expect(viewport).not.toBeNull()
+    expect(sidebarBox!.width).toBeGreaterThan(viewport!.width * 0.45)
+    expect(sidebarBox!.width).toBeLessThan(viewport!.width * 0.55)
+    await expect(sidebar.getByRole("link", { name: /Travel guide arriving at Lake Atitlán/i })).toBeVisible()
+    const dimensions = await page.evaluate(() => ({
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+    }))
+    expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1)
 })
 
 test("mobile home keeps both stays in the first viewport", async ({ page }, testInfo) => {
