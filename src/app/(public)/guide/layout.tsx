@@ -8,6 +8,7 @@ const socialTitle = `${pageTitle} | Mandalas Hostal`
 const description =
     "Plan your trip to San Pedro La Laguna on Lake Atitlán with practical information about routes from Antigua and Panajachel, local boats, tuk-tuks and cash."
 const imageUrl = `${siteUrl}/images/mandalas/guide-lancha.png`
+const socialImageUrl = `${siteUrl}/images/mandalas/guide-social.jpg`
 
 const guideJsonLd = {
     "@context": "https://schema.org",
@@ -53,9 +54,9 @@ export const metadata: Metadata = {
         type: "article",
         images: [
             {
-                url: imageUrl,
-                width: 1024,
-                height: 1024,
+                url: socialImageUrl,
+                width: 1200,
+                height: 630,
                 alt: "Boat crossing Lake Atitlán near San Pedro La Laguna",
             },
         ],
@@ -64,7 +65,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: socialTitle,
         description,
-        images: [imageUrl],
+        images: [socialImageUrl],
     },
 }
 

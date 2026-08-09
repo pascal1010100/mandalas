@@ -40,7 +40,7 @@ const pages = [
         description: "Plan your trip to San Pedro La Laguna on Lake Atitlán with practical information about routes from Antigua and Panajachel, local boats, tuk-tuks and cash.",
         socialDescription: "Plan your trip to San Pedro La Laguna on Lake Atitlán with practical information about routes from Antigua and Panajachel, local boats, tuk-tuks and cash.",
         canonical: "https://www.mandalashostels.com/guide",
-        image: "https://www.mandalashostels.com/images/mandalas/guide-lancha.png",
+        image: "https://www.mandalashostels.com/images/mandalas/guide-social.jpg",
     },
 ]
 
@@ -94,7 +94,7 @@ test("/guide exposes coherent metadata and Article structured data", async ({ pa
     )
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
         "content",
-        "https://www.mandalashostels.com/images/mandalas/guide-lancha.png",
+        "https://www.mandalashostels.com/images/mandalas/guide-social.jpg",
     )
 
     const article = JSON.parse(await page.locator("#guide-structured-data").textContent() ?? "{}")
