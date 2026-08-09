@@ -57,8 +57,8 @@ export default function GuidePage() {
                     sizes="100vw"
                     className="object-cover object-[52%_center] motion-safe:scale-[1.025]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/35 to-stone-950" />
-                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(12,10,9,0.78)_0%,rgba(12,10,9,0.32)_58%,rgba(12,10,9,0.1)_100%)]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/25 to-stone-950" />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(12,10,9,0.62)_0%,rgba(12,10,9,0.22)_58%,rgba(12,10,9,0.06)_100%)]" />
 
                 <div className="container relative z-10 mx-auto px-4">
                     <div className="max-w-4xl">
