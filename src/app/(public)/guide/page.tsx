@@ -156,6 +156,32 @@ export default function GuidePage() {
                 </div>
             </section>
 
+            <section aria-labelledby="arrival-help-heading" className="border-y border-amber-200/15 bg-[linear-gradient(100deg,rgba(251,191,36,0.08),rgba(255,255,255,0.025)_52%,transparent)] py-8 sm:py-10">
+                <div className="container mx-auto grid gap-6 px-4 md:grid-cols-[1fr_auto] md:items-center md:gap-10">
+                    <div className="max-w-3xl">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-200">
+                            Help with the final connection
+                        </p>
+                        <h2 id="arrival-help-heading" className="mt-3 font-heading text-2xl font-light uppercase leading-tight tracking-[0.08em] text-white sm:text-3xl">
+                            Not sure how to reach your booked property?
+                        </h2>
+                        <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-300 sm:text-base sm:leading-7">
+                            Send the Mandalas team your starting point, expected arrival time, and property name before you travel.
+                        </p>
+                    </div>
+                    <a
+                        href={buildContactHref("Hi Mandalas, I need help planning my arrival. My starting point is: __. I booked: __. My expected arrival time is: __.")}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`${focusRing} inline-flex min-h-12 w-fit items-center gap-2 rounded-full border border-amber-200/35 bg-amber-100 px-6 text-xs font-semibold uppercase tracking-[0.14em] text-amber-950 transition-[background-color,border-color] duration-300 hover:border-white hover:bg-white motion-reduce:transition-none md:justify-self-end`}
+                    >
+                        <MessageCircle className="size-4" aria-hidden="true" />
+                        Ask about your arrival
+                        <span className="sr-only"> Opens WhatsApp in a new tab.</span>
+                    </a>
+                </div>
+            </section>
+
             <section id="arrival" aria-labelledby="arrival-heading" className="scroll-mt-40 bg-stone-900/55 py-16 sm:py-20 lg:py-24">
                 <div className="container mx-auto px-4">
                     <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-16 xl:gap-24">
@@ -325,31 +351,6 @@ export default function GuidePage() {
                         {guideContent.faqs.map((faq, index) => (
                             <FaqItem key={faq.id} faq={faq} index={index} />
                         ))}
-                    </div>
-                </div>
-            </section>
-
-            <section aria-labelledby="contact-heading" className="border-b border-stone-300 bg-stone-100 py-16 text-stone-950 sm:py-20 lg:py-24">
-                <div className="container mx-auto grid gap-10 px-4 md:grid-cols-[1.1fr_0.9fr] md:items-end md:gap-16 lg:gap-24">
-                    <div>
-                        <span className="mb-7 block h-px w-14 bg-amber-600" aria-hidden="true" />
-                        <h2 id="contact-heading" className="max-w-3xl text-balance font-heading text-4xl font-light uppercase leading-tight tracking-[0.08em] md:text-5xl">
-                            Still unsure about your arrival?
-                        </h2>
-                    </div>
-                    <div>
-                        <p className="max-w-xl leading-7 text-stone-700">
-                            If anything still feels unclear, you do not have to guess. Contact the Mandalas team before you travel about your connection, arrival time, or booked property.
-                        </p>
-                        <a
-                            href={buildContactHref("Hi Mandalas, I have a question about arriving at the property.")}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="mt-7 inline-flex min-h-12 items-center gap-2 rounded-full border border-stone-950 bg-stone-950 px-7 text-xs font-semibold uppercase tracking-[0.16em] text-white transition-[background-color,color] duration-300 hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-950 focus-visible:ring-offset-4 focus-visible:ring-offset-stone-100 motion-reduce:transition-none"
-                        >
-                            <MessageCircle className="size-4" aria-hidden="true" />
-                            Ask on WhatsApp
-                        </a>
                     </div>
                 </div>
             </section>
