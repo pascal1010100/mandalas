@@ -4,6 +4,12 @@ const projectToken = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN
 const apiHost = process.env.NEXT_PUBLIC_POSTHOG_HOST
 
 const PRIVATE_PATH_PREFIXES = ["/admin", "/api", "/my-booking"]
+const ALLOWED_EVENTS = new Set([
+  "$pageview",
+  "$pageleave",
+  "booking_intent",
+  "whatsapp_intent",
+])
 
 function isPrivatePath(pathname: string) {
   return PRIVATE_PATH_PREFIXES.some(
@@ -30,7 +36,7 @@ if (projectToken && apiHost) {
     advanced_disable_feature_flags: true,
     advanced_disable_feature_flags_on_first_load: true,
     capture_pageview: "history_change",
-    capture_pageleave: false,
+    capture_pageleave: true,
     capture_dead_clicks: false,
     capture_exceptions: false,
     capture_performance: false,
@@ -41,6 +47,7 @@ if (projectToken && apiHost) {
     person_profiles: "never",
     before_send(event) {
       if (!event) return null
+      if (!ALLOWED_EVENTS.has(event.event)) return null
       if (isPrivatePath(window.location.pathname)) return null
 
       if (event.properties) {

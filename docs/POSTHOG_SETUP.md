@@ -17,11 +17,24 @@ Use `https://eu.i.posthog.com` when the project is in the EU region. The project
 
 4. Redeploy after saving the variables.
 5. Open the website and click a booking or WhatsApp button.
-6. Confirm `$pageview`, `booking_intent`, and `whatsapp_intent` in PostHog Activity.
+6. Confirm `$pageview`, `$pageleave`, `booking_intent`, and `whatsapp_intent` in PostHog Activity.
+
+The authorized Web Analytics domain is limited to
+`https://www.mandalashostels.com`. Do not authorize previews, localhost or
+third-party booking engines as production domains.
 
 ## Privacy contract
 
-The client configuration disables autocapture, session replay, heatmaps, surveys, dead-click capture, exception capture, performance capture, feature flags and persistence. It does not identify visitors or create person profiles.
+The client configuration disables autocapture, session replay, heatmaps, surveys, dead-click capture, exception capture, performance capture, feature flags and persistence. It does not identify visitors or create person profiles. `$pageleave` is enabled only to improve anonymous session duration and bounce calculations.
+
+The client uses an explicit event allowlist. Only these events can be sent:
+
+- `$pageview`
+- `$pageleave`
+- `booking_intent`
+- `whatsapp_intent`
+
+Any other automatic or custom event is discarded before transmission.
 
 Pageviews are limited to public routes. Events from `/admin`, `/api` and `/my-booking` are discarded, and query strings or URL fragments are removed before an event is sent.
 
@@ -65,3 +78,12 @@ When reviewing results:
 3. Compare booking intent by `property` and `source`, not by anonymous person identifier.
 4. Check the Activity view when a dashboard value looks unexpected.
 5. Do not enable person identification, persistence, autocapture, session replay or heatmaps without the privacy review and human approval required by `AGENTS.md`.
+
+## Privacy review — 2026-08-11
+
+- Authorized domain: `https://www.mandalashostels.com` only.
+- `$pageleave` is approved because it measures anonymous page exit and improves aggregate bounce and duration calculations.
+- Query strings and URL fragments continue to be removed from page URLs and referrers.
+- Private routes continue to be blocked.
+- The custom event payload remains limited to `property` and `source`.
+- Autocapture, replay, heatmaps, person profiles, persistence, surveys, exceptions and performance capture remain disabled in the client.
