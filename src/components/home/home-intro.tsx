@@ -4,10 +4,6 @@ import styles from "./home-intro.module.css"
 
 /** Local-only editorial opening for the home hero. */
 export function HomeIntro() {
-  if (process.env.NODE_ENV === "production") {
-    return null
-  }
-
   return (
     <div
       className={styles.root}
