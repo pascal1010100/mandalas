@@ -1,0 +1,454 @@
+.root {
+  --atitlan-night: oklch(14.7% 0.004 49.25);
+  --cloud-white: oklch(98.5% 0.001 106.423);
+  --warm-stone: oklch(70.9% 0.01 56.259);
+  --mandalas-signal: oklch(87.9% 0.169 91.605);
+  --hideout-signal: oklch(89.7% 0.196 126.665);
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  color: var(--cloud-white);
+  pointer-events: none;
+  contain: paint;
+  visibility: hidden;
+  animation: intro-lifecycle 3.2s both;
+}
+
+.surface {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: transparent;
+}
+
+.surface::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  content: "";
+  background: rgb(255 255 255 / 16%);
+  transform: scaleY(0);
+  transform-origin: center;
+  animation:
+    seam-compose 620ms cubic-bezier(0.16, 1, 0.3, 1) forwards,
+    seam-release 300ms 2.58s ease-in forwards;
+}
+
+.field {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--atitlan-night);
+  opacity: 0;
+  animation: field-release 520ms 2.58s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+.fieldImage {
+  object-fit: cover;
+  transform: scale(1.025);
+  animation: image-settle 1.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fieldHideout {
+  animation-delay: 2.62s;
+}
+
+.fieldShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--atitlan-night) 72%, transparent),
+    color-mix(in oklch, var(--atitlan-night) 88%, transparent)
+  );
+}
+
+.fieldHideout .fieldShade {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--atitlan-night) 74%, transparent),
+    color-mix(in oklch, var(--atitlan-night) 90%, transparent)
+  );
+}
+
+.folioHeader {
+  position: absolute;
+  top: 36px;
+  right: 6vw;
+  left: 6vw;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  animation:
+    header-compose 680ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    copy-release 300ms 2.55s ease-in forwards;
+}
+
+.folioHeader span:last-child {
+  color: color-mix(in oklch, var(--cloud-white) 68%, var(--warm-stone));
+  text-align: right;
+}
+
+.display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  width: min(45rem, 84vw);
+  font-family: var(--font-outfit), sans-serif;
+  transform: translate(-50%, -54%);
+}
+
+.displayLine {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: clamp(1rem, 2vw, 1.75rem);
+  width: 100%;
+}
+
+.displaySubline {
+  margin-top: 1rem;
+  color: color-mix(in oklch, var(--cloud-white) 68%, var(--warm-stone));
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  animation: subline-compose 560ms 260ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    copy-release 300ms 2.55s ease-in forwards;
+}
+
+.displayWord {
+  font-size: clamp(2.35rem, 6vw, 6rem);
+  font-weight: 300;
+  line-height: 0.88;
+  letter-spacing: -0.035em;
+  animation:
+    word-compose 560ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    word-release 300ms 2.55s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.wordTwo {
+  --word-entry: -8px;
+  --word-exit: -14px;
+}
+
+.wordHostels {
+  --word-entry: 8px;
+  --word-exit: 14px;
+  color: color-mix(in oklch, var(--cloud-white) 86%, var(--warm-stone));
+}
+
+.propertyIndex {
+  position: absolute;
+  right: 6vw;
+  bottom: 9%;
+  left: 6vw;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr minmax(4rem, 12vw) 1fr;
+  align-items: center;
+  animation:
+    index-compose 620ms 80ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    copy-release 300ms 2.55s ease-in forwards;
+}
+
+.property {
+  display: grid;
+  gap: 8px;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.property span {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+}
+
+.property strong {
+  color: color-mix(in oklch, var(--cloud-white) 66%, var(--warm-stone));
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.propertyMandalas {
+  justify-self: start;
+}
+
+.propertyMandalas span {
+  color: color-mix(in oklch, var(--cloud-white) 92%, var(--mandalas-signal));
+}
+
+.propertyHideout {
+  justify-self: end;
+  text-align: right;
+}
+
+.propertyHideout span {
+  color: color-mix(in oklch, var(--cloud-white) 92%, var(--hideout-signal));
+}
+
+.indexRule {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--mandalas-signal),
+    rgb(255 255 255 / 30%) 48%,
+    rgb(255 255 255 / 30%) 52%,
+    var(--hideout-signal)
+  );
+  transform-origin: center;
+  animation: rule-compose 620ms 80ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes header-compose {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes word-compose {
+  from {
+    opacity: 0.9;
+    clip-path: inset(0 3% 0 3%);
+    transform: translateX(var(--word-entry));
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+    transform: translateX(0);
+  }
+}
+
+@keyframes word-release {
+  to {
+    opacity: 0;
+    transform: translateX(var(--word-exit));
+  }
+}
+
+@keyframes subline-compose {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes index-compose {
+  from {
+    opacity: 0.75;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rule-compose {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes copy-release {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes field-release {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes image-settle {
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes seam-compose {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes seam-release {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes intro-lifecycle {
+  0%,
+  99% {
+    visibility: visible;
+  }
+
+  100% {
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 767px) {
+  .surface {
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr;
+  }
+
+  .surface::after {
+    top: 50%;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    width: auto;
+    height: 1px;
+    transform: scaleX(0);
+    transform-origin: center;
+  }
+
+  .folioHeader {
+    top: 24px;
+    right: 16px;
+    left: 16px;
+    display: grid;
+    gap: 4px;
+  }
+
+  .folioHeader span:last-child {
+    text-align: left;
+  }
+
+  .display {
+    top: 50%;
+    left: 16px;
+    width: calc(100% - 32px);
+    transform: translateY(-54%);
+  }
+
+  .displayLine {
+    display: grid;
+    gap: 0;
+  }
+
+  .displayWord {
+    font-size: clamp(2.35rem, 14vw, 6rem);
+    justify-self: center;
+  }
+
+  .propertyIndex {
+    inset: 0;
+    display: block;
+  }
+
+  .property {
+    position: absolute;
+    right: 16px;
+    left: 16px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .propertyMandalas {
+    top: 22%;
+  }
+
+  .propertyHideout {
+    bottom: 18%;
+    text-align: center;
+  }
+
+  .property span {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: 0.015em;
+  }
+
+  .indexRule {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6rem;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@media (max-width: 359px), (max-height: 620px) {
+  .folioHeader span:last-child {
+    display: none;
+  }
+
+  .display {
+    top: 50%;
+  }
+
+  .displayWord {
+    font-size: 3rem;
+  }
+
+  .property span {
+    font-size: 1.25rem;
+  }
+
+  .property strong {
+    max-width: 12rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.1em;
+  }
+
+  .displaySubline {
+    margin-top: 0.75rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.2em;
+  }
+
+  .propertyMandalas {
+    top: 20%;
+  }
+
+  .propertyHideout {
+    bottom: 16%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    display: none;
+  }
+}
