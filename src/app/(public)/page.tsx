@@ -2,7 +2,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowUpRight, MapPin, MessageCircle, SunMedium, Waves } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { HomeIntro } from "@/components/home/home-intro"
 import { ConsultationLink } from "@/components/shared/consultation-link"
+import heroStyles from "./home-hero.module.css"
 
 const BACKGROUNDS = {
   pueblo: "/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg",
@@ -14,16 +16,12 @@ const BACKGROUNDS = {
 export default function LandingPage() {
   return (
     <div className="bg-background">
-      <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black md:min-h-screen md:flex-row">
-        <div className="absolute inset-x-0 top-24 z-30 hidden justify-center px-4 pointer-events-none md:flex">
-          <div className="flex flex-col items-center text-center text-white">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-white/65">
-              Two stays · One lake
-            </p>
-            <p className="mt-3 font-heading text-2xl font-light uppercase tracking-[0.28em] text-white/90">
-              Choose your rhythm
-            </p>
-          </div>
+      <section className={`relative flex min-h-[100svh] flex-col overflow-hidden bg-black md:min-h-screen md:flex-row ${heroStyles.hero}`}>
+        <HomeIntro />
+        <div className="pointer-events-none absolute inset-x-0 top-28 z-30 hidden justify-center px-4 md:flex">
+          <p className="font-heading text-lg font-light uppercase tracking-[0.24em] text-white/85 lg:text-xl">
+            Two hostels <span className="px-1 text-white/40">·</span> Two rhythms
+          </p>
         </div>
 
         {/* Cinematic Noise Texture */}
@@ -37,11 +35,11 @@ export default function LandingPage() {
         {/* Pueblo Section */}
         <HomePanel
           href="/pueblo"
-          label="Mandalas"
-          kicker="Social base in town"
-          title="Mandalas"
-          description="Stay in town, head up to the rooftop, and let San Pedro unfold on foot."
-          meta="Rooftop / Center / Social"
+          label="Mandalas Hostel"
+          kicker="In town · Social rooftop"
+          title="Mandalas Hostel"
+          description="Stay in town, head to the rooftop, and let San Pedro unfold on foot."
+          meta="Rooftop · Center · Social"
           background={BACKGROUNDS.pueblo}
           accent="amber"
           borderClass="border-b md:border-b-0 md:border-r"
@@ -50,10 +48,10 @@ export default function LandingPage() {
         <HomePanel
           href="/hideout"
           label="Mandalas Hideout"
-          kicker="Work + lake hub"
-          title="Hideout"
-          description="Work remotely, enjoy good music, and keep the lake close without giving up a welcoming atmosphere."
-          meta="WiFi / Music / Lake"
+          kicker="Near lake · Calm stay"
+          title="Mandalas Hideout"
+          description="Work remotely, enjoy good music, and keep the lake close."
+          meta="WiFi · Music · Lake"
           background={BACKGROUNDS.hideout}
           accent="lime"
           imageClassName="scale-100"
@@ -97,13 +95,13 @@ export default function LandingPage() {
               <div className="grid gap-7">
                 <RhythmPoint
                   icon={SunMedium}
-                  eyebrow="Mandalas"
+                  eyebrow="Mandalas Hostel"
                   title="Town energy"
                   description="Rooftop, kitchen, walkable plans, and a more social base for stepping straight into San Pedro."
                 />
                 <RhythmPoint
                   icon={Waves}
-                  eyebrow="Hideout"
+                  eyebrow="Mandalas Hideout"
                   title="Lake and quiet"
                   description="A calmer base for better sleep, easy lake walks, and returning without carrying the center's noise."
                 />
@@ -248,12 +246,12 @@ function HomePanel({
   const accentClass = accent === "amber" ? "bg-amber-300/80" : "bg-lime-300/80"
   const lightClass = accent === "amber" ? "bg-amber-200/10" : "bg-lime-200/10"
   const overlayClass = accent === "amber"
-    ? "from-amber-950/35 via-black/20 to-black/85"
-    : "from-lime-950/30 via-black/20 to-black/85"
+    ? "from-amber-950/25 via-black/10 to-black/75"
+    : "from-lime-950/25 via-black/10 to-black/78"
 
   return (
     <article
-      className={`group relative z-10 flex-1 overflow-hidden border-white/10 transition-transform duration-700 ease-out hover:z-20 motion-reduce:transform-none motion-reduce:transition-none md:hover:-translate-y-0.5 md:hover:scale-[1.006] ${borderClass || ""}`}
+      className={`group relative z-10 flex-1 overflow-hidden border-white/10 hover:z-20 ${heroStyles.panel} ${borderClass || ""}`}
     >
       <Image
         src={background}
@@ -262,47 +260,42 @@ function HomePanel({
         priority
         sizes="(min-width: 768px) 50vw, 100vw"
         style={imagePosition ? { objectPosition: imagePosition } : undefined}
-        className={`${imageClassName || "scale-[1.04]"} object-cover brightness-[0.92] saturate-[0.95] transition duration-[1250ms] ease-out group-hover:scale-[1.09] group-hover:brightness-100 group-hover:saturate-[1.08] motion-reduce:transform-none motion-reduce:duration-0 motion-reduce:transition-none`}
+        className={`${imageClassName || "scale-[1.025]"} object-cover brightness-[0.96] saturate-[0.98] transition duration-[1100ms] ease-out group-hover:scale-[1.055] group-hover:brightness-100 group-hover:saturate-100 motion-reduce:transform-none motion-reduce:duration-0 motion-reduce:transition-none`}
       />
       <div className={`absolute inset-0 bg-gradient-to-b ${overlayClass}`} />
       <div className={`absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 motion-reduce:transition-none ${lightClass}`} />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,transparent_0%,rgba(0,0,0,0.16)_45%,rgba(0,0,0,0.65)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_25%,transparent_0%,rgba(0,0,0,0.12)_48%,rgba(0,0,0,0.52)_100%)]" />
       <div className={`absolute bottom-0 left-0 h-px w-full origin-left scale-x-[0.72] opacity-50 transition duration-500 group-hover:scale-x-100 group-hover:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${accentClass}`} />
 
       <Link
         href={href}
         aria-label={`View ${label} details`}
-        className={`relative z-10 flex h-full min-h-[50svh] flex-col justify-end p-5 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80 sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-9 lg:p-12 xl:p-16 ${reserveMobileCtaSpace ? "pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-9 lg:pb-12 xl:pb-16" : ""}`}
+        className={`relative z-10 flex h-full min-h-[50svh] flex-col justify-end p-5 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80 sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-9 lg:p-12 xl:p-16 ${heroStyles.link} ${reserveMobileCtaSpace ? `pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-9 lg:pb-12 xl:pb-16 ${heroStyles.linkWithBookingBar}` : ""}`}
       >
-        <div className="mb-auto flex items-center justify-between gap-5 pt-16 md:pt-40 xl:pt-24">
-          <div className="inline-flex max-w-[16rem] items-center gap-3 border border-white/15 bg-black/20 px-3 py-2 backdrop-blur-md">
+        <div className={`mb-auto flex items-center pt-16 md:pt-40 xl:pt-24 ${heroStyles.top}`}>
+          <div className={`inline-flex max-w-full items-center gap-3 ${heroStyles.chip}`}>
             <span className={`h-px w-6 ${accentClass}`} />
-            <div className="min-w-0">
-              <p className="truncate text-xs font-semibold uppercase tracking-[0.16em] text-white/90 sm:text-[10px] sm:tracking-[0.22em]">
-                {label}
-              </p>
-              <p className="mt-1 truncate text-xs font-medium uppercase tracking-[0.12em] text-white/70 sm:text-[10px] sm:tracking-[0.18em]">
-                {kicker}
-              </p>
-            </div>
+            <p className="whitespace-nowrap text-xs font-semibold uppercase tracking-[0.16em] text-white/80 sm:tracking-[0.22em]">
+              {kicker}
+            </p>
           </div>
-          <ArrowUpRight className="h-5 w-5 text-white/70 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-white motion-reduce:transform-none motion-reduce:transition-none" />
         </div>
 
-        <div className="max-w-xl transition-transform duration-500 ease-out group-hover:-translate-y-2 motion-reduce:transform-none motion-reduce:transition-none">
-          <h2 className="font-heading max-w-full text-[2rem] font-light uppercase leading-none tracking-[0.06em] text-white sm:text-5xl sm:tracking-[0.12em] md:text-[3.6rem] md:tracking-[0.08em] lg:text-[4.25rem] xl:text-[5.25rem] xl:tracking-[0.12em] 2xl:text-8xl 2xl:tracking-[0.16em]">
+        <div className="max-w-xl transition-transform duration-500 ease-out group-hover:-translate-y-1 motion-reduce:transform-none motion-reduce:transition-none">
+          <h2 className={`font-heading max-w-full text-balance text-3xl font-light uppercase leading-[0.96] tracking-[0.06em] text-white sm:text-4xl sm:tracking-[0.1em] md:text-5xl md:tracking-[0.08em] lg:text-6xl xl:text-7xl xl:tracking-[0.1em] 2xl:tracking-[0.12em] ${heroStyles.title}`}>
             {title}
           </h2>
-          <p className="mt-3 max-w-[20rem] text-sm font-light leading-relaxed text-white/75 sm:mt-6 sm:min-h-[4.5rem] sm:max-w-md sm:text-base">
+          <p className={`mt-3 max-w-[20rem] text-sm font-light leading-relaxed text-white/78 sm:mt-5 sm:min-h-[3.5rem] sm:max-w-md sm:text-base ${heroStyles.description}`}>
             {description}
           </p>
-          <div className="mt-4 flex flex-col items-start gap-3 border-t border-white/15 pt-3 sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pt-5">
-            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70 sm:text-[10px] sm:tracking-[0.22em]">
+          <div className={`mt-4 flex flex-col items-start gap-3 border-t border-white/15 pt-3 sm:mt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pt-5 ${heroStyles.details}`}>
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70 sm:tracking-[0.22em]">
               {meta}
             </span>
             <span className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/75">
               <span className={`hidden h-px w-8 origin-right scale-x-[0.35] transition-transform duration-500 group-hover:scale-x-100 motion-reduce:transform-none motion-reduce:transition-none sm:block ${accentClass}`} />
-              View stay
+              Explore
+              <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none" />
             </span>
           </div>
         </div>

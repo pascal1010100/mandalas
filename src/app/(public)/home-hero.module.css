@@ -1,0 +1,116 @@
+@media (max-width: 767px) {
+  .top {
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 360px) and (max-height: 640px) {
+  .panel {
+    flex: 0 0 50svh;
+    min-height: 0;
+  }
+
+  .link {
+    min-height: 0;
+    padding: 0.75rem;
+  }
+
+  .linkWithBookingBar {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+
+  .top {
+    padding-top: 2.75rem;
+  }
+
+  .chip {
+    max-width: calc(100% - 2.5rem);
+    padding: 0.375rem 0.5rem;
+  }
+
+  .chip p {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  .title {
+    font-size: 1.875rem;
+    line-height: 0.95;
+  }
+
+  .description {
+    display: none;
+  }
+
+  .details {
+    margin-top: 0.75rem;
+    padding-top: 0.625rem;
+  }
+
+  .details > span {
+    letter-spacing: 0.12em;
+  }
+
+  .details > span:last-child {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .details > span:last-child > span {
+    display: none;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 767px) and (orientation: landscape) {
+  .hero {
+    min-height: 100svh;
+    flex-direction: row;
+  }
+
+  .panel {
+    min-width: 0;
+    flex: 1 1 50%;
+  }
+
+  .link,
+  .linkWithBookingBar {
+    min-height: 100svh;
+    padding: 1rem 1.25rem calc(4.5rem + env(safe-area-inset-bottom));
+  }
+
+  .top {
+    padding-top: 3rem;
+  }
+
+  .chip {
+    max-width: 14rem;
+  }
+
+  .title {
+    font-size: 1.875rem;
+    line-height: 0.95;
+  }
+
+  .description {
+    display: none;
+  }
+
+  .details {
+    margin-top: 0.75rem;
+    padding-top: 0.625rem;
+  }
+
+  .details > span {
+    letter-spacing: 0.12em;
+  }
+
+  .details > span:last-child {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .details > span:last-child > span {
+    display: none;
+  }
+}
