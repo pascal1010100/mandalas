@@ -52,7 +52,7 @@ export function HomeIntro() {
 
       <div className={styles.propertyIndex}>
         <div className={`${styles.property} ${styles.propertyMandalas}`}>
-          <span>Mandalas Hostel</span>
+          <span>Mandalas Hostal</span>
           <strong>In town · Rooftop · Social</strong>
         </div>
 

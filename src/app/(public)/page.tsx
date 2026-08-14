@@ -35,9 +35,9 @@ export default function LandingPage() {
         {/* Pueblo Section */}
         <HomePanel
           href="/pueblo"
-          label="Mandalas Hostel"
+          label="Mandalas Hostal"
           kicker="In town · Social rooftop"
-          title="Mandalas Hostel"
+          title="Mandalas Hostal"
           description="Stay in town, head to the rooftop, and let San Pedro unfold on foot."
           meta="Rooftop · Center · Social"
           background={BACKGROUNDS.pueblo}
@@ -95,7 +95,7 @@ export default function LandingPage() {
               <div className="grid gap-7">
                 <RhythmPoint
                   icon={SunMedium}
-                  eyebrow="Mandalas Hostel"
+                  eyebrow="Mandalas Hostal"
                   title="Town energy"
                   description="Rooftop, kitchen, walkable plans, and a more social base for stepping straight into San Pedro."
                 />

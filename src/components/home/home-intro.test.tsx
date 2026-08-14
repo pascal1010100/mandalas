@@ -32,7 +32,7 @@ describe("HomeIntro", () => {
     expect(screen.getByTestId("home-intro-thesis").textContent).toContain("Two")
     expect(screen.getByTestId("home-intro-thesis").textContent).toContain("hostels.")
     expect(screen.getByTestId("home-intro-thesis").textContent).not.toContain("One town")
-    expect(screen.getByTestId("home-intro-motion").textContent).toContain("Mandalas Hostel")
+    expect(screen.getByTestId("home-intro-motion").textContent).toContain("Mandalas Hostal")
     expect(screen.getByTestId("home-intro-motion").textContent).toContain("Mandalas Hideout")
     expect(screen.getByTestId("home-intro-motion").textContent).toContain("In town · Rooftop · Social")
     expect(screen.getByTestId("home-intro-motion").textContent).toContain("Near the lake · Calm")
