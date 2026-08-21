@@ -44,10 +44,14 @@ test("home presents both stays", async ({ page }) => {
     })).toBeVisible()
     await expect(page.locator('main a[href="/pueblo"]').first()).toBeVisible()
     await expect(page.locator('main a[href="/hideout"]').first()).toBeVisible()
-    await expect(page.locator("main").getByRole("link", {
-        name: "Choose your stay",
-        exact: true,
-    }).first()).toHaveAttribute("href", "/contact#book-directly")
+    await expect(page.locator("main").getByRole("link", { name: "Book Mandalas", exact: true })).toHaveAttribute(
+        "href",
+        properties[0].bookingUrl,
+    )
+    await expect(page.locator("main").getByRole("link", { name: "Book Hideout", exact: true })).toHaveAttribute(
+        "href",
+        properties[1].bookingUrl,
+    )
     await expect(page.locator("a button")).toHaveCount(0)
     await expect(page.locator("body")).not.toHaveAttribute("translate", "no")
     await expect(page.locator("body")).not.toHaveClass(/notranslate/)
@@ -118,7 +122,7 @@ test("mobile home keeps both stays in the first viewport", async ({ page }, test
 
     await page.goto("/")
 
-    const mandalas = page.locator('main a[aria-label="View Mandalas details"]')
+    const mandalas = page.locator('main a[aria-label="View Mandalas Hostal details"]')
     const hideout = page.locator('main a[aria-label="View Mandalas Hideout details"]')
     const mandalasBox = await mandalas.boundingBox()
     const hideoutBox = await hideout.boundingBox()
@@ -136,15 +140,82 @@ test("mobile home keeps both stays in the first viewport", async ({ page }, test
     expect(menuBox!.height).toBeGreaterThanOrEqual(44)
 
     const fixedCta = page.locator("div.fixed").filter({
-        has: page.getByRole("link", { name: "Book Hideout", exact: true }),
+        has: page.getByRole("link", { name: "Book Mandalas", exact: true }),
     })
-    const hideoutMeta = hideout.getByText("WiFi / Music / Lake", { exact: true })
+    await expect(fixedCta.getByRole("link", { name: "Book Mandalas", exact: true })).toHaveAttribute(
+        "href",
+        properties[0].bookingUrl,
+    )
+    await expect(fixedCta.getByRole("link", { name: "Book Hideout", exact: true })).toHaveAttribute(
+        "href",
+        properties[1].bookingUrl,
+    )
+
     const fixedCtaBox = await fixedCta.boundingBox()
-    const hideoutMetaBox = await hideoutMeta.boundingBox()
+    const hideoutMetaBox = await hideout.getByText("WiFi · Music · Lake", { exact: true }).boundingBox()
 
     expect(fixedCtaBox).not.toBeNull()
     expect(hideoutMetaBox).not.toBeNull()
     expect(boxesOverlap(fixedCtaBox!, hideoutMetaBox!)).toBeFalsy()
+})
+
+test("compact home keeps both hostel names visible", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Runs once with a compact custom viewport")
+
+    await page.setViewportSize({ width: 320, height: 568 })
+    await page.addInitScript(() => {
+        window.sessionStorage.setItem("mandalas-home-intro:zen-v5", "seen")
+    })
+    await page.goto("/")
+
+    const viewport = page.viewportSize()!
+    const names = [
+        page.getByRole("heading", { name: "Mandalas Hostal", exact: true }).first(),
+        page.getByRole("heading", { name: "Mandalas Hideout", exact: true }).first(),
+    ]
+
+    for (const name of names) {
+        await expect(name).toBeVisible()
+        const box = await name.boundingBox()
+        expect(box).not.toBeNull()
+        expect(box!.y).toBeGreaterThanOrEqual(0)
+        expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height)
+    }
+
+    const dimensions = await page.evaluate(() => ({
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+    }))
+    expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1)
+})
+
+test("short landscape home preserves a balanced two-hostel comparison", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "Runs once with a short landscape viewport")
+
+    await page.setViewportSize({ width: 667, height: 375 })
+    await page.addInitScript(() => {
+        window.sessionStorage.setItem("mandalas-home-intro:zen-v5", "seen")
+    })
+    await page.goto("/")
+
+    const mandalas = page.locator('main a[aria-label="View Mandalas Hostal details"]')
+    const hideout = page.locator('main a[aria-label="View Mandalas Hideout details"]')
+    const mandalasBox = await mandalas.boundingBox()
+    const hideoutBox = await hideout.boundingBox()
+
+    expect(mandalasBox).not.toBeNull()
+    expect(hideoutBox).not.toBeNull()
+    expect(Math.abs(mandalasBox!.width - hideoutBox!.width)).toBeLessThanOrEqual(2)
+    expect(mandalasBox!.y).toBe(hideoutBox!.y)
+    expect(Math.abs(mandalasBox!.height - hideoutBox!.height)).toBeLessThanOrEqual(1)
+    await expect(mandalas.getByText("Explore", { exact: true })).toHaveCSS("white-space", "nowrap")
+    await expect(hideout.getByText("Explore", { exact: true })).toHaveCSS("white-space", "nowrap")
+
+    const dimensions = await page.evaluate(() => ({
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+    }))
+    expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1)
 })
 
 test("public routes do not overflow horizontally on tablets", async ({ page }, testInfo) => {
@@ -173,7 +244,7 @@ test("tablet home hero labels do not collide with its central message", async ({
 
     const messageBox = await message.boundingBox()
     const labelBoxes = await Promise.all([
-        page.getByText("Social base in town", { exact: true }).boundingBox(),
+        page.getByText("In town · Social rooftop", { exact: true }).boundingBox(),
         page.getByText("Work + lake hub", { exact: true }).boundingBox(),
     ])
 
@@ -201,7 +272,7 @@ test("reduced-motion preference disables cinematic transforms", async ({ page })
 
     const heroImage = page
         .locator("main article")
-        .filter({ has: page.getByRole("link", { name: "View Mandalas details" }) })
+        .filter({ has: page.getByRole("link", { name: "View Mandalas Hostal details" }) })
         .locator("img")
     const motion = await heroImage.evaluate((element) => {
         const styles = window.getComputedStyle(element)

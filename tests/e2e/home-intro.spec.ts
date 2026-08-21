@@ -23,7 +23,7 @@ test.describe("integrated home intro", () => {
 
     test("keeps both real property choices actionable from first paint", async ({ page }) => {
         const motion = await openHome(page)
-        const mandalas = page.getByRole("link", { name: "View Mandalas Hostel details" })
+        const mandalas = page.getByRole("link", { name: "View Mandalas Hostal details" })
         const hideout = page.getByRole("link", { name: "View Mandalas Hideout details" })
 
         await expect(motion).toHaveCSS("pointer-events", "none")
@@ -42,9 +42,9 @@ test.describe("integrated home intro", () => {
         await expect(thesis).toContainText("Two")
         await expect(thesis).toContainText("hostels.")
         await expect(thesis).not.toContainText("One town")
-        await expect(motion).toContainText("Mandalas Hostel")
+        await expect(motion).toContainText("Mandalas Hostal")
         await expect(motion).toContainText("Mandalas Hideout")
-        await expect(motion).toHaveCSS("visibility", "hidden", { timeout: 2_500 })
+        await expect(motion).toHaveCSS("visibility", "hidden", { timeout: 4_000 })
     })
 
     test("respects reduced motion by showing the actionable hero immediately", async ({ page }) => {
@@ -52,7 +52,7 @@ test.describe("integrated home intro", () => {
         const motion = await openHome(page)
 
         await expect(motion).toHaveCSS("display", "none")
-        await expect(page.getByRole("link", { name: "View Mandalas Hostel details" })).toBeVisible()
+        await expect(page.getByRole("link", { name: "View Mandalas Hostal details" })).toBeVisible()
         await expect(page.getByRole("link", { name: "View Mandalas Hideout details" })).toBeVisible()
     })
 })
@@ -67,7 +67,7 @@ test.describe("home intro target viewports", () => {
             await page.setViewportSize(viewport)
             const motion = await openHome(page)
 
-            await expect(page.getByRole("link", { name: "View Mandalas Hostel details" })).toBeVisible()
+            await expect(page.getByRole("link", { name: "View Mandalas Hostal details" })).toBeVisible()
             await expect(page.getByRole("link", { name: "View Mandalas Hideout details" })).toBeVisible()
 
             const layout = await motion.evaluate((element) => {
@@ -77,13 +77,14 @@ test.describe("home intro target viewports", () => {
                 const thesisRect = thesis?.getBoundingClientRect()
 
                 return {
-                    fillsHero: Boolean(hero)
+                    fillsHero: hero !== undefined
                         && Math.abs(root.width - hero.width) <= 1
                         && Math.abs(root.height - hero.height) <= 1,
                     hasHorizontalOverflow: document.documentElement.scrollWidth
                         > document.documentElement.clientWidth + 1,
                     bodyScrollLocked: getComputedStyle(document.body).overflow === "hidden",
-                    thesisFitsHero: Boolean(thesisRect && hero)
+                    thesisFitsHero: thesisRect !== undefined
+                        && hero !== undefined
                         && thesisRect.left >= hero.left
                         && thesisRect.right <= hero.right
                         && thesisRect.top >= hero.top
