@@ -120,21 +120,6 @@ export function Navbar() {
                         )}
                     </Link>
                     <Link
-                        href="/contact"
-                        className={cn(
-                            "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
-                            "hover:text-white",
-                            pathname === "/contact"
-                                ? "text-white"
-                                : scrolled ? "text-stone-300" : "text-white/90"
-                        )}
-                    >
-                        Contact
-                        {pathname === "/contact" && (
-                            <span className="absolute bottom-0 left-3 right-3 h-px bg-white/70" />
-                        )}
-                    </Link>
-                    <Link
                         href="/guide"
                         className={cn(
                             "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
@@ -146,6 +131,21 @@ export function Navbar() {
                     >
                         Travel guide
                         {pathname === "/guide" && (
+                            <span className="absolute bottom-0 left-3 right-3 h-px bg-white/70" />
+                        )}
+                    </Link>
+                    <Link
+                        href="/contact"
+                        className={cn(
+                            "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
+                            "hover:text-white",
+                            pathname === "/contact"
+                                ? "text-white"
+                                : scrolled ? "text-stone-300" : "text-white/90"
+                        )}
+                    >
+                        Contact
+                        {pathname === "/contact" && (
                             <span className="absolute bottom-0 left-3 right-3 h-px bg-white/70" />
                         )}
                     </Link>
@@ -236,20 +236,6 @@ export function Navbar() {
                                 <StaggerItem>
                                     <SheetClose asChild>
                                         <Link
-                                            href="/contact"
-                                            className={cn(
-                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
-                                                pathname === "/contact" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
-                                            )}
-                                            aria-current={pathname === "/contact" ? "page" : undefined}
-                                        >
-                                            Contact
-                                        </Link>
-                                    </SheetClose>
-                                </StaggerItem>
-                                <StaggerItem>
-                                    <SheetClose asChild>
-                                        <Link
                                             href="/guide"
                                             className={cn(
                                                 "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
@@ -259,6 +245,20 @@ export function Navbar() {
                                         >
                                             Travel guide
                                             <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-white sm:text-xs">arriving at Lake Atitlán</span>
+                                        </Link>
+                                    </SheetClose>
+                                </StaggerItem>
+                                <StaggerItem>
+                                    <SheetClose asChild>
+                                        <Link
+                                            href="/contact"
+                                            className={cn(
+                                                "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
+                                                pathname === "/contact" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
+                                            )}
+                                            aria-current={pathname === "/contact" ? "page" : undefined}
+                                        >
+                                            Contact
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>

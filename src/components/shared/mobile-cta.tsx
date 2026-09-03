@@ -1,10 +1,52 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import { ConsultationLink } from "@/components/shared/consultation-link"
 
 export function MobileCTA() {
     const pathname = usePathname()
+    const isPropertyPage = pathname === "/pueblo" || pathname === "/hideout"
+    const [revealedForPath, setRevealedForPath] = useState<string | null>(null)
+
+    useEffect(() => {
+        if (!isPropertyPage) return
+
+        const heroBookingCta = document.querySelector<HTMLElement>(
+            "[data-property-hero-booking-cta]"
+        ) ?? document.querySelector<HTMLElement>("main a[href*='cloudbeds']")
+
+        if (!heroBookingCta) return
+
+        const updateVisibility = (isIntersecting: boolean, bottom: number) => {
+            setRevealedForPath(!isIntersecting && bottom <= 0 ? pathname : null)
+        }
+
+        if (typeof IntersectionObserver === "undefined") {
+            const updateFromViewport = () => {
+                const rect = heroBookingCta.getBoundingClientRect()
+                updateVisibility(rect.bottom > 0 && rect.top < window.innerHeight, rect.bottom)
+            }
+            const initialFrame = window.requestAnimationFrame(updateFromViewport)
+
+            window.addEventListener("scroll", updateFromViewport, { passive: true })
+            window.addEventListener("resize", updateFromViewport)
+
+            return () => {
+                window.cancelAnimationFrame(initialFrame)
+                window.removeEventListener("scroll", updateFromViewport)
+                window.removeEventListener("resize", updateFromViewport)
+            }
+        }
+
+        const observer = new IntersectionObserver(([entry]) => {
+            updateVisibility(entry.isIntersecting, entry.boundingClientRect.bottom)
+        })
+
+        observer.observe(heroBookingCta)
+
+        return () => observer.disconnect()
+    }, [isPropertyPage, pathname])
 
     if (pathname === "/contact") return null
 
@@ -55,10 +97,15 @@ export function MobileCTA() {
             ? "Mandalas"
             : "Mandalas Hostal"
 
+    if (isPropertyPage && revealedForPath !== pathname) return null
+
     return (
         <>
             <div className="h-[calc(4rem+max(1rem,env(safe-area-inset-bottom)))] md:hidden" aria-hidden="true" />
-            <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-stone-950/88 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden">
+            <div
+                data-property-mobile-booking-bar={isPropertyPage ? "" : undefined}
+                className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-stone-950/88 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden"
+            >
                 <ConsultationLink
                     location={location}
                     showIcon={false}
