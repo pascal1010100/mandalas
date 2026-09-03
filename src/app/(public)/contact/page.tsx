@@ -76,7 +76,7 @@ function BookingEngineCard({
             <ArrowUpRight className="h-4 w-4" />
           </ConsultationLink>
           <p className="mt-3 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-white/50">
-            Live availability · secure booking
+            {href ? "Live availability · secure booking" : "Contact us to check availability"}
           </p>
         </div>
       </div>

@@ -14,7 +14,7 @@ const properties = [
         heading: "Hideout",
         accessibleHeading: "Quiet hostel near Lake Atitlán — Hideout",
         bookingLabel: "Book Hideout",
-        bookingUrl: "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
+        bookingUrl: "/contact?location=Hideout#inquiry",
         instagramUrl: "https://www.instagram.com/mandalashideout/",
     },
 ]
@@ -91,7 +91,7 @@ test("mobile navigation exposes the essential destinations", async ({ page }, te
     await expect(page.getByRole("link", { name: /Travel guide arriving at Lake Atitlán/i })).toBeVisible()
     await expect(page.getByRole("link", { name: "BOOK HIDEOUT", exact: true })).toHaveAttribute(
         "href",
-        "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
+        "/contact?location=Hideout#inquiry",
     )
 })
 
@@ -318,7 +318,7 @@ test("contact preserves direct booking and the prefilled WhatsApp inquiry", asyn
     )
     await expect(directBooking.getByRole("link", { name: "Book Hideout", exact: true })).toHaveAttribute(
         "href",
-        "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
+        "/contact?location=Hideout#inquiry",
     )
 
     const inquiry = page.locator("#inquiry")
