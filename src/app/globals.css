@@ -156,6 +156,10 @@
     background: #0c0a09 !important;
   }
 
+  .mandalas-map-tiles {
+    filter: grayscale(1) invert(1) brightness(0.78) contrast(0.82);
+  }
+
   .hero-background-image {
     object-position: var(--hero-position-mobile, center);
   }

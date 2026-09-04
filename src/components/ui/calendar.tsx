@@ -87,7 +87,7 @@ function Calendar({
         table: "w-full border-collapse",
         weekdays: cn("flex", defaultClassNames.weekdays),
         weekday: cn(
-          "text-muted-foreground rounded-md flex-1 font-normal text-[0.8rem] select-none",
+          "text-muted-foreground rounded-md flex-1 font-normal text-xs select-none",
           defaultClassNames.weekday
         ),
         week: cn("flex w-full mt-2", defaultClassNames.week),
@@ -96,7 +96,7 @@ function Calendar({
           defaultClassNames.week_number_header
         ),
         week_number: cn(
-          "text-[0.8rem] select-none text-muted-foreground",
+          "text-xs select-none text-muted-foreground",
           defaultClassNames.week_number
         ),
         day: cn(
@@ -182,6 +182,11 @@ function CalendarDayButton({
   ...props
 }: React.ComponentProps<typeof DayButton>) {
   const defaultClassNames = getDefaultClassNames()
+  const stableDay = [
+    day.date.getFullYear(),
+    String(day.date.getMonth() + 1).padStart(2, "0"),
+    String(day.date.getDate()).padStart(2, "0"),
+  ].join("-")
 
   const ref = React.useRef<HTMLButtonElement>(null)
   React.useEffect(() => {
@@ -193,7 +198,7 @@ function CalendarDayButton({
       ref={ref}
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString()}
+      data-day={stableDay}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&

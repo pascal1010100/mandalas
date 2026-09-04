@@ -327,16 +327,30 @@ test("contact preserves direct booking and the prefilled WhatsApp inquiry", asyn
 
     await inquiry.getByLabel("Name").fill("Test Guest")
     await inquiry.getByLabel("Guests").fill("2")
-    await inquiry.getByLabel("Dates").fill("July 12 to 15")
+
+    const availableDates = inquiry.locator(
+        '[data-slot="calendar"] button[data-day]:not([disabled])',
+    )
+    await availableDates.nth(0).click()
+    await availableDates.nth(2).click()
+    await expect(inquiry.getByText("Check-out", { exact: true })).toBeVisible()
+    await expect(inquiry.getByText("Choose a date", { exact: true })).toHaveCount(0)
+
     await inquiry.getByRole("button", { name: "Ask on WhatsApp" }).click()
 
     const openedUrl = await page.evaluate(() =>
         window.sessionStorage.getItem("mandalas-test-window-open"),
     )
+    const decodedMessage = decodeURIComponent(openedUrl || "")
 
     expect(openedUrl).toMatch(/^https:\/\/wa\.me\//)
     expect(openedUrl).toContain("Test%20Guest")
     expect(openedUrl).toContain("Private%20Room")
+    expect(decodedMessage).toContain("Dates:")
+    expect(decodedMessage).not.toContain("Dates: Pending")
+    expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    ).toBe(true)
 })
 
 test("contact defers the map until the visitor scrolls near it", async ({ page }) => {
@@ -350,4 +364,13 @@ test("contact defers the map until the visitor scrolls near it", async ({ page }
     await loadingMap.scrollIntoViewIfNeeded()
 
     await expect(page.locator(".leaflet-container")).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator(".leaflet-tile").first()).toHaveAttribute(
+        "src",
+        /tile\.openstreetmap\.org/,
+    )
+    await expect(page.getByRole("button", { name: "Marker" })).toHaveCount(2)
+    await expect(page.getByRole("link", { name: "OpenStreetMap" })).toBeVisible()
+    expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    ).toBe(true)
 })

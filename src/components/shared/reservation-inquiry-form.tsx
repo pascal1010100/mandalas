@@ -1,9 +1,12 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { format } from "date-fns";
 import { CalendarDays, Send, UserRound, UsersRound } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -37,13 +40,27 @@ function normalizeLocation(value: string | null) {
   return null;
 }
 
+function formatInquiryDates(dates: DateRange | undefined) {
+  if (!dates?.from) return "";
+
+  const checkIn = format(dates.from, "MMM d, yyyy");
+  if (!dates.to) return `${checkIn} (check-out pending)`;
+
+  return `${checkIn} to ${format(dates.to, "MMM d, yyyy")}`;
+}
+
 export function ReservationInquiryForm() {
   const [name, setName] = useState("");
-  const [dates, setDates] = useState("");
+  const [dates, setDates] = useState<DateRange | undefined>();
   const [guests, setGuests] = useState("");
   const [location, setLocation] = useState("Not sure yet");
   const [roomType, setRoomType] = useState("Not sure yet");
   const [message, setMessage] = useState("");
+  const today = useMemo(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }, []);
+  const formattedDates = useMemo(() => formatInquiryDates(dates), [dates]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -67,7 +84,7 @@ export function ReservationInquiryForm() {
       "Hi Mandalas, I would like to ask about a stay.",
       "",
       `Name: ${name || "Pending"}`,
-      `Dates: ${dates || "Pending"}`,
+      `Dates: ${formattedDates || "Pending"}`,
       `Guests: ${guests || "Pending"}`,
       `Preferred stay: ${location}`,
       `Room type: ${roomType}`,
@@ -75,7 +92,7 @@ export function ReservationInquiryForm() {
     ]
       .filter(Boolean)
       .join("\n");
-  }, [dates, guests, location, message, name, roomType]);
+  }, [formattedDates, guests, location, message, name, roomType]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -147,21 +164,79 @@ export function ReservationInquiryForm() {
           />
         </div>
 
-        <div className="space-y-3 sm:col-span-2">
+        <fieldset className="min-w-0 space-y-4 sm:col-span-2">
+          <legend className="sr-only">Dates</legend>
           <div className="flex items-center justify-between gap-3">
-            <Label htmlFor="travel-dates" className={formLabelClass}>
-              Dates
-            </Label>
-            <CalendarDays className="h-4 w-4 text-white/40" />
+            <span className={formLabelClass}>Dates</span>
+            <CalendarDays className="h-4 w-4 text-white/40" aria-hidden="true" />
           </div>
-          <Input
-            id="travel-dates"
-            value={dates}
-            onChange={(event) => setDates(event.target.value)}
-            placeholder="July 12 to 15"
-            className={fieldClass}
-          />
-        </div>
+
+          <p id="travel-dates-help" className="text-sm leading-relaxed text-stone-300">
+            Select your check-in date, then your check-out date.
+          </p>
+
+          <div className="border-y border-white/15 py-4">
+            <Calendar
+              mode="range"
+              selected={dates}
+              onSelect={setDates}
+              disabled={{ before: today }}
+              startMonth={today}
+              showOutsideDays={false}
+              aria-describedby="travel-dates-help travel-dates-selection"
+              className="mx-auto w-full max-w-[28rem] bg-transparent p-0 text-white [--cell-size:2.5rem] sm:[--cell-size:2.75rem]"
+              classNames={{
+                root: "w-full",
+                months: "relative flex w-full flex-col gap-4",
+                month: "flex w-full flex-col gap-4",
+                month_caption:
+                  "flex h-(--cell-size) w-full items-center justify-center px-(--cell-size)",
+                caption_label:
+                  "select-none font-heading text-sm font-medium uppercase tracking-[0.14em] text-white",
+                nav: "absolute inset-x-0 top-0 flex w-full items-center justify-between",
+                button_previous:
+                  "flex size-(--cell-size) items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-amber-200/80 disabled:opacity-40",
+                button_next:
+                  "flex size-(--cell-size) items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-amber-200/80 disabled:opacity-40",
+                weekdays: "flex border-b border-white/10 pb-2",
+                weekday:
+                  "flex-1 select-none text-center text-xs font-semibold uppercase tracking-[0.08em] text-stone-400",
+                week: "mt-1 flex w-full",
+                day: "relative aspect-square h-full w-full p-0 text-center",
+                day_button:
+                  "flex aspect-square size-auto w-full min-w-(--cell-size) items-center justify-center rounded-md text-sm font-medium text-white transition-colors hover:bg-white/10 focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-amber-100/90 data-[range-start=true]:bg-amber-200 data-[range-start=true]:text-amber-950 data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-amber-100/15 data-[range-middle=true]:text-amber-50 data-[range-end=true]:bg-amber-200 data-[range-end=true]:text-amber-950",
+                today: "rounded-md ring-1 ring-inset ring-white/35",
+                disabled: "text-stone-600 opacity-50",
+                range_start: "rounded-l-md bg-amber-200",
+                range_middle: "rounded-none bg-amber-100/15",
+                range_end: "rounded-r-md bg-amber-200",
+              }}
+            />
+          </div>
+
+          <div
+            id="travel-dates-selection"
+            aria-live="polite"
+            className="grid grid-cols-2 gap-4"
+          >
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">
+                Check-in
+              </p>
+              <p className="mt-1 text-sm font-medium text-white">
+                {dates?.from ? format(dates.from, "EEE, MMM d") : "Choose a date"}
+              </p>
+            </div>
+            <div className="border-l border-white/15 pl-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">
+                Check-out
+              </p>
+              <p className="mt-1 text-sm font-medium text-white">
+                {dates?.to ? format(dates.to, "EEE, MMM d") : "Choose a date"}
+              </p>
+            </div>
+          </div>
+        </fieldset>
 
         <div className="space-y-3">
           <Label
@@ -236,7 +311,7 @@ export function ReservationInquiryForm() {
 
       <Button
         type="submit"
-        className="mt-6 h-12 w-full rounded-full border border-amber-100/30 bg-white px-6 text-xs font-semibold uppercase tracking-[0.16em] text-stone-950 shadow-none transition-colors hover:bg-amber-100 hover:text-stone-950"
+        className="mt-6 h-12 w-full rounded-full border border-amber-100/30 bg-white px-6 text-xs font-semibold uppercase tracking-[0.16em] text-amber-950 shadow-none transition-colors hover:bg-amber-100"
       >
         <Send className="h-4 w-4" />
         Ask on WhatsApp
