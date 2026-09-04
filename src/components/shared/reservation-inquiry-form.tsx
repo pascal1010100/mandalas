@@ -217,7 +217,7 @@ export function ReservationInquiryForm() {
           <div
             id="travel-dates-selection"
             aria-live="polite"
-            className="grid grid-cols-2 gap-4"
+            className="grid grid-cols-2 gap-4 pt-2 sm:pt-3"
           >
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">

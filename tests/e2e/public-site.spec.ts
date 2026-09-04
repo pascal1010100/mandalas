@@ -336,6 +336,12 @@ test("contact preserves direct booking and the prefilled WhatsApp inquiry", asyn
     await expect(inquiry.getByText("Check-out", { exact: true })).toBeVisible()
     await expect(inquiry.getByText("Choose a date", { exact: true })).toHaveCount(0)
 
+    const calendarBox = await inquiry.locator('[data-slot="calendar"]').boundingBox()
+    const selectionBox = await inquiry.locator("#travel-dates-selection").boundingBox()
+    expect(calendarBox).not.toBeNull()
+    expect(selectionBox).not.toBeNull()
+    expect(selectionBox!.y).toBeGreaterThanOrEqual(calendarBox!.y + calendarBox!.height)
+
     await inquiry.getByRole("button", { name: "Ask on WhatsApp" }).click()
 
     const openedUrl = await page.evaluate(() =>
