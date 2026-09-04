@@ -5,11 +5,13 @@ const properties = [
         path: "/pueblo",
         bookingLabel: "Book Mandalas",
         bookingUrl: "https://hotels.cloudbeds.com/en/reservation/5VReHj?currency=gtq",
+        heroSelector: "main a[href*='hotels.cloudbeds.com/en/reservation/5VReHj']",
     },
     {
         path: "/hideout",
         bookingLabel: "Book Hideout",
         bookingUrl: "/contact?location=Hideout#inquiry",
+        heroSelector: "[data-property-hero-booking-cta]",
     },
 ]
 
@@ -30,7 +32,7 @@ for (const property of properties) {
 
         await page.goto(property.path)
 
-        const heroBookingCta = page.locator("[data-property-hero-booking-cta]")
+        const heroBookingCta = page.locator(property.heroSelector).first()
         const mobileBookingBar = page.locator("[data-property-mobile-booking-bar]")
 
         await expect(heroBookingCta).toBeVisible()
@@ -56,7 +58,7 @@ for (const property of properties) {
         test.skip(testInfo.project.name !== "desktop-chromium", "Desktop preservation check")
 
         await page.goto(property.path)
-        await scrollHeroCtaAboveViewport(page.locator("[data-property-hero-booking-cta]"))
+        await scrollHeroCtaAboveViewport(page.locator(property.heroSelector).first())
 
         await expect(page.locator("[data-property-mobile-booking-bar]")).toBeHidden()
     })
