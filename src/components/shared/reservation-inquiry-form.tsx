@@ -175,7 +175,7 @@ export function ReservationInquiryForm() {
             Select your check-in date, then your check-out date.
           </p>
 
-          <div className="border-y border-white/15 py-4">
+          <div className="border-y border-white/15 py-4 pb-6">
             <Calendar
               mode="range"
               selected={dates}
