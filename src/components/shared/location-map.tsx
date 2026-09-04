@@ -11,7 +11,7 @@ const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLa
 const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false })
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false })
 
-const puebloCoords: [number, number] = [14.693, -91.274] // Approximate
+const puebloCoords: [number, number] = [14.69448948, -91.27277374]
 const hideoutCoords: [number, number] = [14.682795, -91.259236]
 
 export function LocationMap() {
@@ -110,14 +110,14 @@ function InteractiveMap() {
                 <Marker position={puebloCoords}>
                     <Popup>
                         <strong>Mandalas</strong><br />
-                        In the heart of town.
+                        Zona 2, segundo acceso peatonal.
                     </Popup>
                 </Marker>
 
                 <Marker position={hideoutCoords}>
                     <Popup>
                         <strong>Mandalas Hideout</strong><br />
-                        Your quieter retreat.
+                        Zona 3, 05 avenida.
                     </Popup>
                 </Marker>
             </MapContainer>
