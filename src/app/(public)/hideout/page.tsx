@@ -28,6 +28,7 @@ export default function HideoutPage() {
                 <ConsultationLink
                     location="Mandalas Hideout"
                     size="lg"
+                    data-property-hero-booking-cta
                     className="h-12 border-white/25 bg-white px-8 text-stone-950 hover:bg-stone-200 gap-2"
                 >
                     Book Hideout
