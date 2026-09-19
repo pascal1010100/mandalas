@@ -8,11 +8,11 @@
 import type { RoomConfig } from '@/lib/store'; // TODO: Move RoomConfig to shared types
 import type { Booking } from '../types/types';
 import type { AvailabilityParams, CapacityParams } from '../types/types';
-import { BookingRepository } from '../repositories/booking.repository';
+import type { IBookingRepository } from '../repositories/booking.repository';
 
 export class AvailabilityService {
     constructor(
-        private bookingRepo: BookingRepository,
+        private bookingRepo: Pick<IBookingRepository, 'findOverlapping'>,
         private getRoomConfig: (roomId: string) => RoomConfig | undefined
     ) { }
 
