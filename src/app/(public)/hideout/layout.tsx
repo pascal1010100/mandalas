@@ -45,14 +45,14 @@ export const metadata: Metadata = {
         absolute: "Quiet Hostel near Lake Atitlán | Mandalas Hideout",
     },
     description:
-        "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check live availability for dorms and private rooms and book direct.",
+        "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check rooms, dates and prices in the official Cloudbeds engine.",
     alternates: {
         canonical: "/hideout",
     },
     openGraph: {
         title: "Quiet Hostel near Lake Atitlán | Mandalas Hideout",
         description:
-            "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check live availability for dorms and private rooms and book direct.",
+            "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check rooms, dates and prices in the official Cloudbeds engine.",
         url: "/hideout",
         images: [
             {
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Quiet Hostel near Lake Atitlán | Mandalas Hideout",
         description:
-            "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check live availability for dorms and private rooms and book direct.",
+            "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check rooms, dates and prices in the official Cloudbeds engine.",
         images: ["/images/mandalas/hostelworld/hideout-terrace-dusk.jpg"],
     },
 }

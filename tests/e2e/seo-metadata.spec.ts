@@ -4,24 +4,24 @@ const pages = [
     {
         path: "/",
         title: "Mandalas Hostels | San Pedro La Laguna, Atitlán",
-        description: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check live availability and book direct for your stay in San Pedro La Laguna.",
-        socialDescription: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check live availability and book direct for your stay in San Pedro La Laguna.",
+        description: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check rooms, dates and prices in the official Cloudbeds engines.",
+        socialDescription: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check rooms, dates and prices in the official Cloudbeds engines.",
         canonical: "https://www.mandalashostels.com",
         image: "https://www.mandalashostels.com/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg",
     },
     {
         path: "/pueblo",
         title: "Central Hostel in San Pedro La Laguna | Mandalas",
-        description: "Stay in central San Pedro La Laguna at Mandalas Hostal, with a rooftop, shared kitchen, dorms and private rooms. Check live availability and book direct.",
-        socialDescription: "Stay in central San Pedro La Laguna at Mandalas Hostal, with a rooftop, shared kitchen, dorms and private rooms. Check live availability and book direct.",
+        description: "Choose Mandalas Hostal for a central, walkable and social stay in San Pedro La Laguna. Check current rooms, dates and prices in the official Cloudbeds engine.",
+        socialDescription: "Choose Mandalas Hostal for a central, walkable and social stay in San Pedro La Laguna. Check current rooms, dates and prices in the official Cloudbeds engine.",
         canonical: "https://www.mandalashostels.com/pueblo",
         image: "https://www.mandalashostels.com/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg",
     },
     {
         path: "/hideout",
         title: "Quiet Hostel near Lake Atitlán | Mandalas Hideout",
-        description: "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check live availability for dorms and private rooms and book direct.",
-        socialDescription: "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check live availability for dorms and private rooms and book direct.",
+        description: "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check rooms, dates and prices in the official Cloudbeds engine.",
+        socialDescription: "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check rooms, dates and prices in the official Cloudbeds engine.",
         canonical: "https://www.mandalashostels.com/hideout",
         image: "https://www.mandalashostels.com/images/mandalas/hostelworld/hideout-terrace-dusk.jpg",
     },
@@ -76,6 +76,26 @@ for (const metadata of pages) {
     })
 }
 
+test("/pueblo metadata stays aligned with verified property facts", async ({ page }) => {
+    await page.goto("/pueblo")
+
+    const metadataContent = await page.locator([
+        'meta[name="description"]',
+        'meta[property="og:description"]',
+        'meta[name="twitter:description"]',
+        '#pueblo-structured-data',
+    ].join(", ")).allTextContents()
+    const metadataAttributes = await page.locator([
+        'meta[name="description"]',
+        'meta[property="og:description"]',
+        'meta[name="twitter:description"]',
+    ].join(", ")).evaluateAll((elements) => elements.map((element) => element.getAttribute("content") ?? ""))
+    const publishedCopy = [...metadataContent, ...metadataAttributes].join(" ")
+
+    expect(publishedCopy).toContain("central, walkable and social")
+    expect(publishedCopy).not.toMatch(/rooftop|shared kitchen|dorms|private rooms|live availability/i)
+})
+
 test("/guide exposes coherent metadata and Article structured data", async ({ page }) => {
     const response = await page.goto("/guide")
 
@@ -104,7 +124,7 @@ test("/guide exposes coherent metadata and Article structured data", async ({ pa
         "@type": "Article",
         "@id": "https://www.mandalashostels.com/guide#article",
         url: "https://www.mandalashostels.com/guide",
-        headline: "Practical Guide to San Pedro La Laguna",
+            headline: "Practical Guide to San Pedro La Laguna | Mandalas Hostal",
         inLanguage: "en",
         mainEntityOfPage: {
             "@type": "WebPage",
@@ -129,6 +149,28 @@ test("/guide exposes coherent metadata and Article structured data", async ({ pa
     })
     expect(article).not.toHaveProperty("datePublished")
     expect(article).not.toHaveProperty("dateModified")
+
+    const breadcrumbs = JSON.parse(await page.locator("#guide-breadcrumb-structured-data").textContent() ?? "{}")
+    expect(breadcrumbs).toMatchObject({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+            { "@type": "ListItem", position: 1, item: "https://www.mandalashostels.com" },
+            { "@type": "ListItem", position: 2, item: "https://www.mandalashostels.com/guide" },
+        ],
+    })
+
+    const faq = JSON.parse(await page.locator("#guide-faq-structured-data").textContent() ?? "{}")
+    expect(faq).toMatchObject({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: expect.arrayContaining([
+            expect.objectContaining({
+                "@type": "Question",
+                name: "What should I do if I miss the last practical connection?",
+            }),
+        ]),
+    })
 })
 
 test("sitemap includes the canonical /guide URL exactly once", async ({ request }) => {

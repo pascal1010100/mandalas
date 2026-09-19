@@ -25,7 +25,7 @@ export function Footer() {
                     </div>
 
                     <div className="min-w-0">
-                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Explore</h4>
+                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Stay</h4>
                         <ul className="space-y-4 text-sm font-medium">
                             <li>
                                 <Link href="/pueblo" className="group flex min-h-11 items-center gap-2 transition-colors hover:text-amber-500">
@@ -49,7 +49,7 @@ export function Footer() {
                     </div>
 
                     <div className="min-w-0">
-                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Contact</h4>
+                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Help</h4>
                         <ul className="space-y-4 text-sm font-light">
                             <li className="flex min-w-0 items-center gap-3">
                                 <Phone className="h-4 w-4 shrink-0 text-stone-400" />
@@ -73,7 +73,7 @@ export function Footer() {
                     <div className="min-w-0">
                         <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Book direct</h4>
                         <p className="text-sm leading-relaxed text-stone-400 font-light mb-5">
-                            Choose Mandalas or Hideout, then check live availability and final prices in Cloudbeds.
+                        Choose Mandalas or Hideout, then check room options, dates and final prices in Cloudbeds.
                         </p>
                         <ConsultationLink className="min-h-11 w-full min-w-0 border-white/20 bg-white px-4 text-stone-950 hover:bg-stone-200 xl:w-auto">
                             Choose your stay

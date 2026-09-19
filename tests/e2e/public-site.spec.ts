@@ -244,7 +244,7 @@ test("tablet home hero labels do not collide with its central message", async ({
 
     const messageBox = await message.boundingBox()
     const labelBoxes = await Promise.all([
-        page.getByText("In town · Social rooftop", { exact: true }).boundingBox(),
+        page.getByText("In town · Walkable and social", { exact: true }).boundingBox(),
         page.getByText("Work + lake hub", { exact: true }).boundingBox(),
     ])
 

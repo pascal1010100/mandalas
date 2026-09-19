@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     default: "Mandalas Hostels | San Pedro La Laguna, Atitlán",
     template: "%s | Mandalas Hostal",
   },
-  description: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check live availability and book direct for your stay in San Pedro La Laguna.",
+  description: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check rooms, dates and prices in the official Cloudbeds engines.",
   applicationName: "Mandalas Hostal",
   keywords: [
     "Mandalas Hostal",
@@ -41,16 +41,13 @@ export const metadata: Metadata = {
   verification: {
     google: "P_umI9VQ3JAZ9YH-PIWi75Brvqw-8i0MGTRoNh_GZZ4",
   },
-  alternates: {
-    canonical: "/",
-  },
   icons: {
     icon: [{ url: "/mandalas-favicon.png", type: "image/png", sizes: "512x512" }],
     shortcut: "/mandalas-favicon.png",
   },
   openGraph: {
     title: "Mandalas Hostels | San Pedro La Laguna, Atitlán",
-    description: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check live availability and book direct for your stay in San Pedro La Laguna.",
+    description: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check rooms, dates and prices in the official Cloudbeds engines.",
     url: "/",
     siteName: "Mandalas Hostal",
     locale: "en_US",
@@ -67,7 +64,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Mandalas Hostels | San Pedro La Laguna, Atitlán",
-    description: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check live availability and book direct for your stay in San Pedro La Laguna.",
+    description: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check rooms, dates and prices in the official Cloudbeds engines.",
     images: ["/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"],
   },
   robots: {

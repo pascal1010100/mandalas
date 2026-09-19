@@ -295,7 +295,7 @@ export function ReservationInquiryForm() {
             id="extra-message"
             value={message}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="Late arrival, private room, quieter stay, rooftop, lake..."
+            placeholder="Late arrival, private room, quieter stay, lake..."
             className={`${fieldClass} min-h-24 resize-none px-0`}
           />
         </div>

@@ -15,7 +15,7 @@ const puebloJsonLd = {
             "@id": `${pageUrl}#webpage`,
             url: pageUrl,
             name: "Mandalas Hostal in San Pedro La Laguna",
-            description: "Mandalas Hostal is the central San Pedro La Laguna stay with a rooftop, kitchen, shared dorms, and private rooms.",
+            description: "Mandalas Hostal is the central, walkable and social Mandalas stay in San Pedro La Laguna.",
             inLanguage: "en",
             isPartOf: { "@id": `${siteUrl}/#website` },
             mainEntity: { "@id": `${pageUrl}#hostel` },
@@ -26,7 +26,7 @@ const puebloJsonLd = {
             name: "Mandalas Hostal",
             alternateName: "Mandala's Hostal",
             url: pageUrl,
-            description: "A central San Pedro La Laguna hostel with a rooftop, shared kitchen, dorms, and private rooms.",
+            description: "A central, walkable and social hostel in San Pedro La Laguna, Lake Atitlán.",
             image: imageUrl,
             telephone: publicContact.whatsappNumber ? `+${publicContact.whatsappNumber}` : undefined,
             email: publicContact.email,
@@ -46,14 +46,14 @@ export const metadata: Metadata = {
         absolute: "Central Hostel in San Pedro La Laguna | Mandalas",
     },
     description:
-        "Stay in central San Pedro La Laguna at Mandalas Hostal, with a rooftop, shared kitchen, dorms and private rooms. Check live availability and book direct.",
+        "Choose Mandalas Hostal for a central, walkable and social stay in San Pedro La Laguna. Check current rooms, dates and prices in the official Cloudbeds engine.",
     alternates: {
         canonical: "/pueblo",
     },
     openGraph: {
         title: "Central Hostel in San Pedro La Laguna | Mandalas",
         description:
-            "Stay in central San Pedro La Laguna at Mandalas Hostal, with a rooftop, shared kitchen, dorms and private rooms. Check live availability and book direct.",
+            "Choose Mandalas Hostal for a central, walkable and social stay in San Pedro La Laguna. Check current rooms, dates and prices in the official Cloudbeds engine.",
         url: "/pueblo",
         images: [
             {
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
         card: "summary_large_image",
         title: "Central Hostel in San Pedro La Laguna | Mandalas",
         description:
-            "Stay in central San Pedro La Laguna at Mandalas Hostal, with a rooftop, shared kitchen, dorms and private rooms. Check live availability and book direct.",
+            "Choose Mandalas Hostal for a central, walkable and social stay in San Pedro La Laguna. Check current rooms, dates and prices in the official Cloudbeds engine.",
         images: ["/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"],
     },
 }

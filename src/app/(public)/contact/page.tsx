@@ -76,7 +76,7 @@ function BookingEngineCard({
             <ArrowUpRight className="h-4 w-4" />
           </ConsultationLink>
           <p className="mt-3 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-white/50">
-            {href ? "Live availability · secure booking" : "Contact us to check availability"}
+            {href ? "Official Cloudbeds booking" : "Contact us to check room options"}
           </p>
         </div>
       </div>
@@ -121,7 +121,7 @@ export default function ContactPage() {
                 Already know your stay?
               </h2>
               <p className="mt-4 text-base leading-relaxed text-stone-400 md:text-lg">
-                Check live availability, final prices, and reserve directly with the stay that fits your trip.
+                Check room options, dates, final prices, and reserve through the official Cloudbeds engine.
               </p>
             </div>
 
@@ -129,7 +129,7 @@ export default function ContactPage() {
               <BookingEngineCard
                 eyebrow="Town center"
                 title="Mandalas"
-                description="For rooftop sunsets, walkable plans, and being close to San Pedro's energy."
+                description="For walkable plans and being close to San Pedro's energy."
                 location="Mandalas"
                 href={mandalasBookingUrl}
                 image="/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"

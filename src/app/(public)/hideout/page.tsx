@@ -11,6 +11,27 @@ import { publicContact } from "@/lib/public-contact"
 
 export default function HideoutPage() {
     return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "Hostel",
+                        "name": "Mandalas Hideout",
+                        "description": "A quieter base for better sleep, lake walks, and turning down the volume of San Pedro.",
+                        "url": "https://www.mandalashostels.com/hideout",
+                        "telephone": "+50257545638",
+                        "address": {
+                            "@type": "PostalAddress",
+                            "addressLocality": "San Pedro La Laguna",
+                            "addressRegion": "Sololá",
+                            "addressCountry": "GT"
+                        },
+                        "image": "https://www.mandalashostels.com/images/mandalas/hostelworld/hideout-terrace-dusk.jpg"
+                    })
+                }}
+            />
         <div className="bg-background min-h-screen">
             <Hero
                 title="Hideout"
@@ -186,8 +207,8 @@ export default function HideoutPage() {
                     },
                     {
                         icon: Bike,
-                        title: "Mandalas rooftop access",
-                        description: "Hideout guests can use the Mandalas rooftop terrace and leave their bikes there when going into town.",
+                        title: "Mandalas town access",
+                        description: "Hideout guests can head into town when they want a more central rhythm.",
                     },
                 ]}
             />
@@ -195,7 +216,7 @@ export default function HideoutPage() {
             <StayOptions
                 eyebrow="Sleep at Hideout"
                 title="Ways to sleep with more quiet"
-                description="Shared and private options for slowing down, with live availability and final prices in the booking engine."
+                description="Shared and private options for slowing down, with room details, dates and final prices in the official Cloudbeds engine."
                 location="Mandalas Hideout"
                 accent="lime"
                 options={[
@@ -255,5 +276,6 @@ export default function HideoutPage() {
                 </FadeIn>
             </section>
         </div>
+        </>
     )
 }
