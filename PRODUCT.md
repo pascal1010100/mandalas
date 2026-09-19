@@ -10,7 +10,7 @@ web
 
 El público principal son viajeros internacionales que visitan San Pedro La Laguna y necesitan elegir una estancia según el ritmo de viaje que buscan:
 
-- Mandalas para una base céntrica, caminable y social.
+- Mandalas Hostel para una base céntrica, caminable y social.
 - Mandalas Hideout para una estancia más tranquila, cerca del lago y fuera del centro.
 
 También existen herramientas internas para el equipo operativo, pero no sustituyen el sistema principal de gestión de reservas.
@@ -23,7 +23,7 @@ El producto tiene éxito cuando una persona puede tomar esa decisión con confia
 
 ## Positioning
 
-La propuesta diferencial es ofrecer dos ritmos complementarios en San Pedro La Laguna bajo una misma marca: una experiencia social y céntrica en Mandalas y una experiencia tranquila cerca del lago en Mandalas Hideout.
+La propuesta diferencial es ofrecer dos ritmos complementarios en San Pedro La Laguna bajo una misma marca: una experiencia social y céntrica en Mandalas Hostel y una experiencia tranquila cerca del lago en Mandalas Hideout.
 
 ## Operating Context
 
@@ -36,7 +36,7 @@ La propuesta diferencial es ofrecer dos ritmos complementarios en San Pedro La L
 
 ## Capabilities and Constraints
 
-- El sitio público incluye páginas para Mandalas, Mandalas Hideout, contacto y gestión de la estancia.
+- El sitio público incluye páginas para Mandalas Hostel, Mandalas Hideout, contacto y gestión de la estancia.
 - La experiencia pública está dirigida principalmente a una audiencia internacional y utiliza inglés como idioma principal.
 - La disponibilidad, los precios finales y el estado de las reservas deben provenir de Cloudbeds.
 - No se deben inventar precios, disponibilidad, testimonios, reseñas, servicios ni afirmaciones sobre las propiedades.
@@ -45,7 +45,7 @@ La propuesta diferencial es ofrecer dos ritmos complementarios en San Pedro La L
 
 ## Brand Commitments
 
-- Conservar los nombres **Mandalas** y **Mandalas Hideout**.
+- Conservar los nombres **Mandalas Hostel** y **Mandalas Hideout**.
 - Mantener la relación real con San Pedro La Laguna y el Lago Atitlán.
 - Utilizar fotografías auténticas de las propiedades y su entorno.
 - Comunicar con claridad la diferencia entre el ritmo social y céntrico de Mandalas y la tranquilidad de Hideout.

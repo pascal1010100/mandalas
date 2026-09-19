@@ -22,6 +22,11 @@ typography:
     fontWeight: 300
     lineHeight: 1.2
     letterSpacing: "0.16em"
+  title:
+    fontFamily: "Outfit, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 600
+    lineHeight: 1.25
   body:
     fontFamily: "Inter, sans-serif"
     fontSize: "1rem"
