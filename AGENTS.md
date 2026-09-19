@@ -14,7 +14,8 @@ Mantener la presencia digital de Mandalas y Hideout, gestionar la integración c
 - React Leaflet para mapas.
 - Cloudbeds PMS API para integración.
 - Vitest / Playwright para QA.
-- pnpm 10 y Node.js 20 como toolchain.
+- pnpm 10.18.2 y Node.js 22.23.2 como toolchain.
+- mise activa automáticamente el runtime definido por el proyecto en `.mise.toml`.
 
 ## Comandos oficiales
 
