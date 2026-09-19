@@ -3,6 +3,7 @@ import { expect, test, type Page } from "@playwright/test"
 const INTRO_TEST_ID = "home-intro-motion"
 const TARGET_VIEWPORTS = [
     { name: "desktop", width: 1440, height: 900 },
+    { name: "tablet", width: 768, height: 1024 },
     { name: "mobile", width: 390, height: 844 },
     { name: "compact mobile", width: 320, height: 568 },
 ] as const
@@ -45,6 +46,16 @@ test.describe("integrated home intro", () => {
         await expect(motion).toContainText("Mandalas Hostal")
         await expect(motion).toContainText("Mandalas Hideout")
         await expect(motion).toHaveCSS("visibility", "hidden", { timeout: 4_000 })
+    })
+
+    test("replays after a page refresh", async ({ page }) => {
+        const motion = await openHome(page)
+
+        await expect(motion).toHaveCSS("visibility", "hidden", { timeout: 4_000 })
+        await page.reload({ waitUntil: "domcontentloaded" })
+
+        await expect(page.getByTestId(INTRO_TEST_ID)).toHaveCSS("visibility", "visible")
+        await expect(page.getByTestId(INTRO_TEST_ID)).toHaveCSS("visibility", "hidden", { timeout: 4_000 })
     })
 
     test("respects reduced motion by showing the actionable hero immediately", async ({ page }) => {

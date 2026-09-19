@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowUpRight, MapPin, MessageCircle, SunMedium, Waves } from "lucide-react"
@@ -13,8 +14,34 @@ const BACKGROUNDS = {
   hideout: "/images/mandalas/hostelworld/hideout-exterior-volcano.jpg",
 }
 
+export const metadata: Metadata = {
+  alternates: {
+    canonical: "/",
+  },
+}
+
 export default function LandingPage() {
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LodgingBusiness",
+            "name": "Mandalas Hostels",
+            "description": "Choose between Mandalas in town and Hideout near Lake Atitlán. Check rooms, dates and prices in the official Cloudbeds engines.",
+            "url": "https://www.mandalashostels.com",
+            "telephone": "+50257545638",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "San Pedro La Laguna",
+              "addressRegion": "Sololá",
+              "addressCountry": "GT"
+            }
+          })
+        }}
+      />
     <div className="bg-background">
       <section className={`relative flex min-h-[100svh] flex-col overflow-hidden bg-black md:min-h-screen md:flex-row ${heroStyles.hero}`}>
         <HomeIntro />
@@ -36,10 +63,10 @@ export default function LandingPage() {
         <HomePanel
           href="/pueblo"
           label="Mandalas Hostal"
-          kicker="In town · Social rooftop"
+          kicker="In town · Walkable and social"
           title="Mandalas Hostal"
-          description="Stay in town, head to the rooftop, and let San Pedro unfold on foot."
-          meta="Rooftop · Center · Social"
+          description="Stay in town, walk San Pedro, and let the day find its rhythm."
+          meta="Center · Walkable · Social"
           background={BACKGROUNDS.pueblo}
           accent="amber"
           borderClass="border-b md:border-b-0 md:border-r"
@@ -97,7 +124,7 @@ export default function LandingPage() {
                   icon={SunMedium}
                   eyebrow="Mandalas Hostal"
                   title="Town energy"
-                  description="Rooftop, kitchen, walkable plans, and a more social base for stepping straight into San Pedro."
+                  description="Walkable plans and a more social base for stepping straight into San Pedro."
                 />
                 <RhythmPoint
                   icon={Waves}
@@ -158,7 +185,7 @@ export default function LandingPage() {
                       Social
                     </h2>
                     <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/68">
-                      For walking, rooftop sunsets, and being close to what is happening.
+                      For walking, easy plans, and being close to what is happening.
                     </p>
                   </div>
                 </div>
@@ -202,7 +229,7 @@ export default function LandingPage() {
 
           <div className="mt-10 grid border-t border-white/10 pt-6 text-xs uppercase tracking-[0.18em] text-white/70 md:grid-cols-4 md:gap-8">
             <div className="py-3 md:py-0">Walkable center</div>
-            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Rooftop and kitchen</div>
+            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Walkable and social</div>
             <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Lake nearby</div>
             <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">
               Dorms and private rooms
@@ -211,6 +238,7 @@ export default function LandingPage() {
         </div>
       </section>
     </div>
+    </>
   )
 }
 

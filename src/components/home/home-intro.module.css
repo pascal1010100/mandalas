@@ -1,18 +1,20 @@
 .root {
-  --atitlan-night: oklch(14.7% 0.004 49.25);
-  --cloud-white: oklch(98.5% 0.001 106.423);
-  --warm-stone: oklch(70.9% 0.01 56.259);
-  --mandalas-signal: oklch(87.9% 0.169 91.605);
-  --hideout-signal: oklch(89.7% 0.196 126.665);
+  --night: oklch(14.7% 0.004 49.25);
+  --white: oklch(98.5% 0.001 106.423);
+  --stone: oklch(70.9% 0.01 56.259);
+  --mandalas: oklch(87.9% 0.169 91.605);
+  --hideout: oklch(89.7% 0.196 126.665);
+
   position: absolute;
   inset: 0;
   z-index: 60;
-  overflow: hidden;
-  color: var(--cloud-white);
-  pointer-events: none;
   contain: paint;
-  visibility: hidden;
-  animation: intro-lifecycle 3.2s both;
+  overflow: hidden;
+  color: var(--white);
+  pointer-events: none;
+  visibility: visible;
+  isolation: isolate;
+  animation: intro-lifecycle 3.4s linear both;
 }
 
 .surface {
@@ -21,41 +23,33 @@
   z-index: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: transparent;
+  transform: scale(1.025);
+  animation: surface-drift 3.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .surface::after {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
+  inset: 0 auto 0 50%;
   width: 1px;
   content: "";
   background: rgb(255 255 255 / 16%);
-  transform: scaleY(0);
-  transform-origin: center;
+  opacity: 0;
   animation:
-    seam-compose 620ms cubic-bezier(0.16, 1, 0.3, 1) forwards,
-    seam-release 300ms 2.58s ease-in forwards;
+    seam-in 900ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    foreground-out 300ms 2.35s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .field {
   position: relative;
-  display: block;
   overflow: hidden;
-  background: var(--atitlan-night);
-  opacity: 0;
-  animation: field-release 520ms 2.58s cubic-bezier(0.4, 0, 1, 1) both;
+  background: var(--night);
 }
 
 .fieldImage {
   object-fit: cover;
-  transform: scale(1.025);
-  animation: image-settle 1.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.fieldHideout {
-  animation-delay: 2.62s;
+  filter: saturate(0.9) brightness(0.88);
+  transform: scale(1.035);
+  animation: image-settle 3.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .fieldShade {
@@ -63,25 +57,97 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    color-mix(in oklch, var(--atitlan-night) 72%, transparent),
-    color-mix(in oklch, var(--atitlan-night) 88%, transparent)
+    color-mix(in oklch, var(--night) 48%, transparent),
+    color-mix(in oklch, var(--night) 66%, transparent)
   );
 }
 
-.fieldHideout .fieldShade {
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklch, var(--atitlan-night) 74%, transparent),
-    color-mix(in oklch, var(--atitlan-night) 90%, transparent)
-  );
+.mapOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  transform: scale(1.012);
+  animation:
+    map-in 1.1s 80ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    foreground-out 300ms 2.35s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.mapStage,
+.mapCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mapCanvasTablet,
+.mapCanvasMobile {
+  display: none;
+}
+
+.mapImageLayer {
+  opacity: 0.54;
+  filter: contrast(1.08) brightness(1.06);
+}
+
+.mapMarker {
+  color: var(--white);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: marker-in 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.mapMarkerMandalas {
+  color: var(--mandalas);
+  animation-delay: 460ms;
+}
+
+.mapMarkerHideout {
+  color: var(--hideout);
+  animation-delay: 580ms;
+}
+
+.mapBalloonGlyph {
+  filter: drop-shadow(0 5px 8px rgb(0 0 0 / 36%));
+}
+
+.mapBalloon {
+  fill: color-mix(in oklch, var(--night) 88%, transparent);
+  stroke: currentColor;
+  stroke-width: 0.9;
+  vector-effect: non-scaling-stroke;
+}
+
+.mapBalloonInset {
+  fill: color-mix(in oklch, currentColor 16%, var(--night));
+  stroke: color-mix(in oklch, var(--white) 64%, transparent);
+  stroke-width: 0.7;
+  vector-effect: non-scaling-stroke;
+}
+
+.mapBalloonMonogram {
+  fill: var(--white);
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.mapBalloonAnchor {
+  fill: currentColor;
+  stroke: color-mix(in oklch, var(--night) 72%, transparent);
+  stroke-width: 0.7;
+  vector-effect: non-scaling-stroke;
 }
 
 .folioHeader {
   position: absolute;
-  top: 36px;
+  top: 32px;
   right: 6vw;
   left: 6vw;
-  z-index: 1;
+  z-index: 4;
   display: flex;
   justify-content: space-between;
   font-family: var(--font-inter), sans-serif;
@@ -91,25 +157,26 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   animation:
-    header-compose 680ms cubic-bezier(0.16, 1, 0.3, 1) both,
-    copy-release 300ms 2.55s ease-in forwards;
+    header-in 720ms 80ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    foreground-out 300ms 2.35s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .folioHeader span:last-child {
-  color: color-mix(in oklch, var(--cloud-white) 68%, var(--warm-stone));
+  color: color-mix(in oklch, var(--white) 68%, var(--stone));
   text-align: right;
 }
 
 .display {
   position: absolute;
-  top: 50%;
+  top: 40%;
   left: 50%;
-  z-index: 1;
+  z-index: 4;
   display: grid;
   justify-items: center;
   width: min(45rem, 84vw);
   font-family: var(--font-outfit), sans-serif;
-  transform: translate(-50%, -54%);
+  transform: translate(-50%, -50%);
+  animation: foreground-out 300ms 2.35s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .displayLine {
@@ -120,37 +187,32 @@
   width: 100%;
 }
 
-.displaySubline {
-  margin-top: 1rem;
-  color: color-mix(in oklch, var(--cloud-white) 68%, var(--warm-stone));
-  font-family: var(--font-inter), sans-serif;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  animation: subline-compose 560ms 260ms cubic-bezier(0.16, 1, 0.3, 1) both,
-    copy-release 300ms 2.55s ease-in forwards;
-}
-
 .displayWord {
   font-size: clamp(2.35rem, 6vw, 6rem);
   font-weight: 300;
   line-height: 0.88;
   letter-spacing: -0.035em;
-  animation:
-    word-compose 560ms cubic-bezier(0.16, 1, 0.3, 1) both,
-    word-release 300ms 2.55s cubic-bezier(0.4, 0, 1, 1) forwards;
+  animation: word-in 760ms 140ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .wordTwo {
-  --word-entry: -8px;
-  --word-exit: -14px;
+  --entry: -8px;
 }
 
 .wordHostels {
-  --word-entry: 8px;
-  --word-exit: 14px;
-  color: color-mix(in oklch, var(--cloud-white) 86%, var(--warm-stone));
+  --entry: 8px;
+  color: color-mix(in oklch, var(--white) 86%, var(--stone));
+}
+
+.displaySubline {
+  margin-top: 1rem;
+  color: color-mix(in oklch, var(--white) 68%, var(--stone));
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  animation: subline-in 700ms 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .propertyIndex {
@@ -158,18 +220,18 @@
   right: 6vw;
   bottom: 9%;
   left: 6vw;
-  z-index: 1;
+  z-index: 4;
   display: grid;
   grid-template-columns: 1fr minmax(4rem, 12vw) 1fr;
   align-items: center;
   animation:
-    index-compose 620ms 80ms cubic-bezier(0.16, 1, 0.3, 1) both,
-    copy-release 300ms 2.55s ease-in forwards;
+    index-in 760ms 260ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    foreground-out 300ms 2.35s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
 .property {
   display: grid;
-  gap: 8px;
+  gap: 7px;
   font-family: var(--font-inter), sans-serif;
 }
 
@@ -182,11 +244,11 @@
 }
 
 .property strong {
-  color: color-mix(in oklch, var(--cloud-white) 66%, var(--warm-stone));
+  color: color-mix(in oklch, var(--white) 66%, var(--stone));
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.25;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
@@ -195,7 +257,7 @@
 }
 
 .propertyMandalas span {
-  color: color-mix(in oklch, var(--cloud-white) 92%, var(--mandalas-signal));
+  color: color-mix(in oklch, var(--white) 92%, var(--mandalas));
 }
 
 .propertyHideout {
@@ -204,7 +266,7 @@
 }
 
 .propertyHideout span {
-  color: color-mix(in oklch, var(--cloud-white) 92%, var(--hideout-signal));
+  color: color-mix(in oklch, var(--white) 92%, var(--hideout));
 }
 
 .indexRule {
@@ -212,118 +274,84 @@
   height: 1px;
   background: linear-gradient(
     90deg,
-    var(--mandalas-signal),
-    rgb(255 255 255 / 30%) 48%,
-    rgb(255 255 255 / 30%) 52%,
-    var(--hideout-signal)
+    var(--mandalas),
+    rgb(255 255 255 / 28%) 48%,
+    rgb(255 255 255 / 28%) 52%,
+    var(--hideout)
   );
   transform-origin: center;
-  animation: rule-compose 620ms 80ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: rule-in 820ms 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes header-compose {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes intro-lifecycle {
+  0%, 78% { opacity: 1; visibility: visible; }
+  99.9% { opacity: 0; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
 }
 
-@keyframes word-compose {
-  from {
-    opacity: 0.9;
-    clip-path: inset(0 3% 0 3%);
-    transform: translateX(var(--word-entry));
-  }
-
-  to {
-    opacity: 1;
-    clip-path: inset(0);
-    transform: translateX(0);
-  }
+@keyframes foreground-out {
+  to { opacity: 0; }
 }
 
-@keyframes word-release {
-  to {
-    opacity: 0;
-    transform: translateX(var(--word-exit));
-  }
+@keyframes surface-drift {
+  to { transform: scale(1); }
 }
 
-@keyframes subline-compose {
+@keyframes image-settle {
+  to { transform: scale(1); }
+}
+
+@keyframes seam-in {
+  from { opacity: 0; transform: scaleY(0.25); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes seam-in-horizontal {
+  from { opacity: 0; transform: scaleX(0.25); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes map-in {
+  from { opacity: 0; transform: scale(1.012); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes marker-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes header-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes word-in {
+  from { opacity: 0; transform: translateX(var(--entry)); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes subline-in {
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes index-compose {
-  from {
-    opacity: 0.75;
-    transform: translateY(5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes index-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes rule-compose {
-  from {
-    transform: scaleX(0);
-  }
-
-  to {
-    transform: scaleX(1);
-  }
+@keyframes rule-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
-@keyframes copy-release {
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes field-release {
-  0% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes image-settle {
-  to {
-    transform: scale(1);
-  }
-}
-
-@keyframes seam-compose {
-  to {
-    transform: scaleY(1);
-  }
-}
-
-@keyframes seam-release {
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes intro-lifecycle {
-  0%,
-  99% {
-    visibility: visible;
-  }
-
-  100% {
-    visibility: hidden;
-  }
+@media (min-width: 768px) and (max-width: 1023px) {
+  .mapCanvasDesktop { display: none; }
+  .mapCanvasTablet { display: block; }
+  .folioHeader { top: 28px; }
+  .display { top: 49%; }
+  .propertyIndex { bottom: 8%; }
 }
 
 @media (max-width: 767px) {
@@ -333,122 +361,104 @@
   }
 
   .surface::after {
-    top: 50%;
-    right: 0;
-    bottom: auto;
-    left: 0;
+    inset: 50% 0 auto;
     width: auto;
     height: 1px;
     transform: scaleX(0);
-    transform-origin: center;
+    animation-name: seam-in-horizontal;
   }
+
+  .mapCanvasDesktop { display: none; }
+
+  .mapCanvasMobile { display: block; }
 
   .folioHeader {
-    top: 24px;
+    top: 22px;
     right: 16px;
     left: 16px;
     display: grid;
-    gap: 4px;
+    gap: 5px;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
   }
 
-  .folioHeader span:last-child {
-    text-align: left;
-  }
+  .folioHeader span:last-child { text-align: left; }
 
   .display {
-    top: 50%;
+    top: 47%;
     left: 16px;
     width: calc(100% - 32px);
-    transform: translateY(-54%);
+    transform: translateY(-50%);
   }
 
-  .displayLine {
-    display: grid;
-    gap: 0;
-  }
-
-  .displayWord {
-    font-size: clamp(2.35rem, 14vw, 6rem);
-    justify-self: center;
-  }
+  .displayLine { display: grid; gap: 0; }
+  .displayWord { justify-self: center; font-size: clamp(2.35rem, 14vw, 6rem); }
+  .displaySubline { margin-top: 0.8rem; font-size: 0.75rem; letter-spacing: 0.2em; }
 
   .propertyIndex {
-    inset: 0;
-    display: block;
-  }
-
-  .property {
-    position: absolute;
     right: 16px;
+    bottom: 9%;
     left: 16px;
-    align-items: center;
-    text-align: center;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
   }
 
-  .propertyMandalas {
-    top: 22%;
-  }
-
-  .propertyHideout {
-    bottom: 18%;
-    text-align: center;
-  }
-
-  .property span {
-    font-size: 1.25rem;
-    line-height: 1.2;
-    letter-spacing: 0.015em;
-  }
-
-  .indexRule {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 6rem;
-    transform: translate(-50%, -50%);
-  }
+  .property { gap: 5px; min-width: 0; }
+  .property span { font-size: clamp(1rem, 4vw, 1.25rem); }
+  .property strong { font-size: 0.75rem; letter-spacing: 0.1em; }
+  .indexRule { display: none; }
 }
 
-@media (max-width: 359px), (max-height: 620px) {
-  .folioHeader span:last-child {
-    display: none;
+@media (max-width: 430px) and (orientation: portrait) {
+  .property strong { font-size: 0.75rem; line-height: 1.2; }
+}
+
+@media (max-width: 420px) {
+  .propertyIndex { gap: 14px; }
+  .property span { font-size: 1rem; }
+  .property strong { font-size: 0.75rem; letter-spacing: 0.08em; }
+}
+
+@media (orientation: landscape) and (max-width: 767px) {
+  .surface {
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
-  .display {
-    top: 50%;
+  .surface::after {
+    inset: 0 auto 0 50%;
+    width: 1px;
+    height: auto;
+    transform: scaleY(0);
+    animation-name: seam-in;
   }
 
-  .displayWord {
-    font-size: 3rem;
-  }
+  .mapCanvasDesktop { display: block; }
+  .mapCanvasMobile { display: none; }
+  .display { top: 43%; }
+  .displayLine { display: flex; gap: 0.8rem; }
+  .displayWord { font-size: clamp(2.35rem, 11vw, 3rem); }
+  .displaySubline { margin-top: 0.65rem; }
+}
 
-  .property span {
-    font-size: 1.25rem;
-  }
+@media (orientation: landscape) and (max-height: 620px) {
+  .propertyIndex { right: 16px; bottom: 10px; left: 56px; }
+  .property strong { font-size: 0.75rem; line-height: 1.2; }
+}
 
-  .property strong {
-    max-width: 12rem;
-    font-size: 0.625rem;
-    letter-spacing: 0.1em;
-  }
+@media (max-width: 359px) {
+  .folioHeader span:last-child { display: none; }
+  .propertyIndex { bottom: 7%; }
+  .property span { font-size: 1rem; }
+  .property strong { max-width: 9rem; font-size: 0.75rem; }
+}
 
-  .displaySubline {
-    margin-top: 0.75rem;
-    font-size: 0.625rem;
-    letter-spacing: 0.2em;
-  }
-
-  .propertyMandalas {
-    top: 20%;
-  }
-
-  .propertyHideout {
-    bottom: 16%;
-  }
+@media (max-height: 620px) and (orientation: portrait) {
+  .folioHeader span:last-child { display: none; }
+  .display { top: 52%; }
+  .propertyIndex { bottom: 12%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .root {
-    display: none;
-  }
+  .root { display: none; }
 }
