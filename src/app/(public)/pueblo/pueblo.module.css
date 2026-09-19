@@ -1,0 +1,401 @@
+.page {
+    --pueblo-accent: oklch(87.9% 0.169 91.605);
+    --pueblo-night: oklch(14.7% 0.004 49.25);
+    --pueblo-surface: oklch(21.6% 0.006 56.043);
+    --hideout-accent: oklch(89.7% 0.196 126.665);
+    min-height: 100vh;
+    background: var(--background);
+}
+
+.shell {
+    width: min(100% - 2rem, 80rem);
+    margin-inline: auto;
+}
+
+.kicker,
+.compareKicker {
+    color: var(--pueblo-accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.displayHeading,
+.sectionHeading,
+.bookingHeading,
+.compareHeading {
+    max-width: 15ch;
+    color: var(--foreground);
+    font-family: var(--font-heading), Outfit, sans-serif;
+    font-weight: 300;
+    text-transform: uppercase;
+    text-wrap: balance;
+}
+
+.displayHeading {
+    margin-top: 1.25rem;
+    font-size: clamp(2.35rem, 7vw, 6rem);
+    letter-spacing: 0.06em;
+    line-height: 0.98;
+}
+
+.sectionHeading,
+.compareHeading {
+    font-size: clamp(1.875rem, 4vw, 3rem);
+    letter-spacing: 0.08em;
+    line-height: 1.08;
+}
+
+.lead {
+    max-width: 66ch;
+    color: var(--muted-foreground);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.heroActions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.heroCompareLink {
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    border: 1px solid rgb(255 255 255 / 0.32);
+    border-radius: 9999px;
+    padding-inline: 1.5rem;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: border-color 180ms ease-out, background-color 180ms ease-out;
+}
+
+.heroCompareLink:hover {
+    border-color: rgb(255 255 255 / 0.6);
+    background: rgb(255 255 255 / 0.1);
+}
+
+.heroCompareLink:focus-visible,
+.arrivalLink:focus-visible,
+.compareLink:focus-visible {
+    outline: 2px solid var(--pueblo-accent);
+    outline-offset: 0.25rem;
+}
+
+.fitSection {
+    padding-block: clamp(3.5rem, 6vw, 5rem);
+    border-block: 1px solid rgb(255 255 255 / 0.1);
+    background: var(--pueblo-surface);
+}
+
+.fitGrid {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 5rem);
+}
+
+.fitCopy .sectionHeading,
+.fitCopy .lead {
+    color: white;
+}
+
+.fitCopy .sectionHeading {
+    margin-block: 1rem 1.5rem;
+}
+
+.fitCopy .lead {
+    color: rgb(255 255 255 / 0.72);
+}
+
+.fitFacts {
+    border-top: 1px solid rgb(255 255 255 / 0.16);
+}
+
+.fitFacts > div {
+    display: grid;
+    gap: 0.5rem;
+    padding-block: 1.125rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.16);
+}
+
+.fitFacts dt {
+    color: var(--pueblo-accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.fitFacts dd {
+    color: white;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.storySection {
+    padding-block: clamp(5rem, 10vw, 9rem) 0;
+}
+
+.storyGrid {
+    display: grid;
+    align-items: start;
+    gap: clamp(3.5rem, 8vw, 8rem);
+}
+
+.storyCopy {
+    align-self: start;
+}
+
+.accentRule {
+    width: 5rem;
+    height: 1px;
+    margin-block: 2rem;
+    background: color-mix(in srgb, var(--pueblo-accent) 58%, transparent);
+}
+
+.storyComposition {
+    position: relative;
+    min-height: clamp(34rem, 112vw, 46rem);
+}
+
+.stairFrame,
+.courtyardFrame,
+.storyReward {
+    position: relative;
+    overflow: hidden;
+    background: var(--pueblo-surface);
+}
+
+.stairFrame {
+    position: absolute;
+    inset: 0 0 auto auto;
+    width: 78%;
+    height: 86%;
+}
+
+.courtyardFrame {
+    position: absolute;
+    inset: auto auto 0 0;
+    width: 62%;
+    height: 38%;
+    border: 0.5rem solid var(--background);
+}
+
+.coverImage,
+.rewardImage {
+    object-fit: cover;
+}
+
+.storyReward {
+    min-height: clamp(25rem, 62vw, 46rem);
+    margin-top: clamp(4rem, 9vw, 8rem);
+}
+
+.rewardImage {
+    object-position: center;
+}
+
+.imageCaption {
+    position: absolute;
+    inset: auto 1rem 1rem auto;
+    max-width: calc(100% - 2rem);
+    padding: 0.625rem 0.875rem;
+    background: oklch(14.7% 0.004 49.25 / 0.82);
+    color: rgb(255 255 255 / 0.84);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+    text-align: right;
+    text-transform: uppercase;
+}
+
+.arrivalSection {
+    padding-block: clamp(4rem, 7vw, 6rem);
+    border-block: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.arrivalGrid {
+    display: grid;
+    gap: 2rem;
+}
+
+.arrivalGrid .sectionHeading {
+    margin-top: 1rem;
+}
+
+.arrivalCopy {
+    align-self: end;
+}
+
+.arrivalLink,
+.compareLink {
+    display: inline-flex;
+    min-height: 3rem;
+    margin-top: 1.25rem;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--pueblo-accent) 55%, transparent);
+    text-underline-offset: 0.35rem;
+    transition: color 180ms ease-out, text-decoration-color 180ms ease-out;
+}
+
+.arrivalLink:hover {
+    color: var(--pueblo-accent);
+}
+
+.bookingSection {
+    padding: clamp(5.5rem, 10vw, 8rem) 1rem;
+    background: var(--pueblo-night);
+    text-align: center;
+}
+
+.bookingInner {
+    display: flex;
+    max-width: 58rem;
+    margin-inline: auto;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bookingHeading {
+    max-width: 15ch;
+    margin-block: 1.25rem 1.75rem;
+    color: white;
+    font-size: clamp(2.35rem, 7vw, 6rem);
+    letter-spacing: 0.06em;
+    line-height: 1;
+}
+
+.bookingCopy {
+    max-width: 54ch;
+    margin-bottom: 2rem;
+    color: rgb(255 255 255 / 0.72);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.compareSection {
+    padding-block: clamp(3.5rem, 6vw, 5rem);
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+    background: var(--pueblo-surface);
+}
+
+.compareGrid {
+    display: grid;
+    gap: 2rem;
+}
+
+.compareKicker {
+    color: var(--hideout-accent);
+}
+
+.compareHeading {
+    max-width: 20ch;
+    margin-top: 1rem;
+    color: white;
+}
+
+.compareLink {
+    justify-self: start;
+    margin-top: 0;
+    color: rgb(255 255 255 / 0.78);
+    text-decoration-color: color-mix(in srgb, var(--hideout-accent) 52%, transparent);
+}
+
+.compareLink span {
+    flex: none;
+}
+
+.compareLink:hover {
+    color: white;
+    text-decoration-color: var(--hideout-accent);
+}
+
+.compareLink:focus-visible {
+    outline-color: var(--hideout-accent);
+}
+
+@media (min-width: 40rem) {
+    .heroActions {
+        flex-direction: row;
+        gap: 1rem;
+    }
+}
+
+@media (min-width: 48rem) {
+    .shell {
+        width: min(100% - 4rem, 80rem);
+    }
+
+    .fitGrid,
+    .arrivalGrid,
+    .compareGrid {
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+        align-items: end;
+    }
+
+    .fitFacts > div {
+        grid-template-columns: minmax(7rem, 0.55fr) minmax(0, 1.45fr);
+        gap: 2rem;
+    }
+
+    .compareLink {
+        justify-self: end;
+    }
+}
+
+@media (min-width: 64rem) {
+    .storyGrid {
+        grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+    }
+
+    .storyCopy {
+        position: sticky;
+        top: 8rem;
+        padding-top: 3rem;
+    }
+
+    .storyComposition {
+        min-height: 54rem;
+    }
+
+    .stairFrame {
+        width: 68%;
+        height: 88%;
+    }
+
+    .courtyardFrame {
+        width: 56%;
+        height: 40%;
+        border-width: 0.75rem;
+    }
+
+    .storyReward {
+        width: min(100% - 4rem, 92rem);
+        margin-inline: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .heroCompareLink,
+    .arrivalLink,
+    .compareLink {
+        transition: none;
+    }
+}
