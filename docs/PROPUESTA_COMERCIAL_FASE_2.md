@@ -2,8 +2,8 @@
 
 ## Mandalas Hostels · Orientación y conversión
 
-> **Inversión propuesta:** Q9,000  
-> **Prioridad:** alta  
+> **Inversión propuesta:** Q9,000
+> **Prioridad:** alta
 > **Fecha de entrega:** por definir según aprobación, credenciales y validación de contenido
 
 ## La oportunidad
@@ -196,4 +196,3 @@ Para iniciar se necesita aprobar:
 ## Propuesta en una frase
 
 > La Fase 2 transforma la web de Mandalas Hostels en un flujo de conversión que ayuda al huésped a elegir entre las dos propiedades, entender cómo llegar, consultar disponibilidad real y continuar con confianza hacia una reserva oficial.
-

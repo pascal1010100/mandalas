@@ -1,11 +1,11 @@
 # Mandalas Hostels — Fase 2: Orientación y conversión
 
-> **Estado:** propuesta de alcance pendiente de aprobación final  
-> **Prioridad:** alta  
-> **Implementación:** Pascal.dev  
-> **Revisión:** Administración de Hostal Mandalas revisa el resultado final cuando Pascal.dev lo presente  
-> **Fecha objetivo:** sin fecha acordada  
-> **Sitio:** https://www.mandalashostels.com  
+> **Estado:** propuesta de alcance pendiente de aprobación final
+> **Prioridad:** alta
+> **Implementación:** Pascal.dev
+> **Revisión:** Administración de Hostal Mandalas revisa el resultado final cuando Pascal.dev lo presente
+> **Fecha objetivo:** sin fecha acordada
+> **Sitio:** https://www.mandalashostels.com
 > **Repositorio:** https://github.com/pascal1010100/mandalas
 
 ## Resumen ejecutivo
@@ -1023,4 +1023,3 @@ Estas posibilidades no forman parte del compromiso actual:
 - Cloudbeds — Availability: https://developers.cloudbeds.com/reference/get_getavailableroomtypes-2
 - Cloudbeds — Booking Engine oficial: https://myfrontdesk.cloudbeds.com/hc/en-us/articles/218512197-Cloudbeds-Booking-Engine-Everything-you-need-to-know
 - Documentación interna: `README.md`, `docs/CLOUDBEDS_API_SETUP.md`, `docs/POSTHOG_SETUP.md`, `docs/MEJORAS_JULIO_2026.md` y `docs/entrega-fase-uno.md`.
-
