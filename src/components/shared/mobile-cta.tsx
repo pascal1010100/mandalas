@@ -6,7 +6,8 @@ import { ConsultationLink } from "@/components/shared/consultation-link"
 
 export function MobileCTA() {
     const pathname = usePathname()
-    const isPropertyPage = pathname === "/pueblo" || pathname === "/hideout"
+    const isSpanish = pathname === "/es" || pathname.startsWith("/es/")
+    const isPropertyPage = ["/pueblo", "/hideout", "/es/pueblo", "/es/hideout"].includes(pathname)
     const [revealedForPath, setRevealedForPath] = useState<string | null>(null)
 
     useEffect(() => {
@@ -48,43 +49,46 @@ export function MobileCTA() {
         return () => observer.disconnect()
     }, [isPropertyPage, pathname])
 
-    if (pathname === "/contact") return null
+    if (pathname === "/contact" || pathname === "/es/contacto") return null
 
-    if (pathname === "/") {
+    if (pathname === "/" || pathname === "/es") {
         return (
             <>
                 <div className="h-[calc(3.75rem+max(0.75rem,env(safe-area-inset-bottom)))] md:hidden" aria-hidden="true" />
                 <div className="fixed inset-x-0 bottom-0 z-50 grid grid-cols-2 gap-2 border-t border-white/10 bg-stone-950/90 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden">
                     <ConsultationLink
+                        locale={isSpanish ? "es" : "en"}
                         location="Mandalas"
                         showIcon={false}
                         className="h-12 w-full border-white/20 bg-white px-3 text-xs text-stone-950 hover:bg-stone-200"
                     >
-                        Book Mandalas
+                        {isSpanish ? "Reservar Mandalas" : "Book Mandalas"}
                     </ConsultationLink>
                     <ConsultationLink
+                        locale={isSpanish ? "es" : "en"}
                         location="Mandalas Hideout"
                         showIcon={false}
                         className="h-12 w-full border-lime-200/30 bg-lime-200 px-3 text-xs text-lime-950 hover:bg-lime-100"
                     >
-                        Book Hideout
+                        {isSpanish ? "Reservar Hideout" : "Book Hideout"}
                     </ConsultationLink>
                 </div>
             </>
         )
     }
 
-    if (pathname === "/guide") {
+    if (pathname === "/guide" || pathname === "/es/guia") {
         return (
             <>
                 <div className="h-[calc(4rem+max(1rem,env(safe-area-inset-bottom)))] md:hidden" aria-hidden="true" />
                 <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-stone-950/92 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden">
                     <ConsultationLink
-                        href="/contact#book-directly"
+                        href={isSpanish ? "/es/contacto#book-directly" : "/contact#book-directly"}
+                        locale={isSpanish ? "es" : "en"}
                         showIcon={false}
                         className="h-12 w-full border-white/20 bg-white text-stone-950 hover:bg-stone-200 focus-visible:ring-white focus-visible:ring-offset-stone-950"
                     >
-                        Choose your stay
+                        {isSpanish ? "Elige tu hospedaje" : "Choose your stay"}
                     </ConsultationLink>
                 </div>
             </>
@@ -107,11 +111,12 @@ export function MobileCTA() {
                 className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-stone-950/88 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden"
             >
                 <ConsultationLink
+                    locale={isSpanish ? "es" : "en"}
                     location={location}
                     showIcon={false}
                     className="h-12 w-full animate-in gap-2 border-white/20 bg-white text-stone-950 duration-500 slide-in-from-bottom hover:bg-stone-200 motion-reduce:animate-none"
                 >
-                    {location.includes("Hideout") ? "Book Hideout" : "Book Mandalas"}
+                    {location.includes("Hideout") ? (isSpanish ? "Reservar Hideout" : "Book Hideout") : (isSpanish ? "Reservar Mandalas" : "Book Mandalas")}
                 </ConsultationLink>
             </div>
         </>

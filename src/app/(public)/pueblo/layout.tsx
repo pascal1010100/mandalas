@@ -49,6 +49,7 @@ export const metadata: Metadata = {
         "Choose Mandalas Hostal for a central, walkable and social stay in San Pedro La Laguna. Check current rooms, dates and prices in the official Cloudbeds engine.",
     alternates: {
         canonical: "/pueblo",
+        languages: { en: "/pueblo", "es-GT": "/es/pueblo", "x-default": "/pueblo" },
     },
     openGraph: {
         title: "Central Hostel in San Pedro La Laguna | Mandalas",

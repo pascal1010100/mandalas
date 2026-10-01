@@ -19,6 +19,7 @@ type ConsultationLinkProps = React.ComponentProps<typeof Button> & {
     showIcon?: boolean
     href?: string
     trackingSource?: AnalyticsSource
+    locale?: "en" | "es"
 }
 
 function getContactLocation(location?: string) {
@@ -26,9 +27,10 @@ function getContactLocation(location?: string) {
     return location.toLowerCase().includes("hideout") ? "Hideout" : "Mandalas"
 }
 
-function buildInquiryHref(location?: string, roomName?: string) {
+function buildInquiryHref(location?: string, roomName?: string, locale: "en" | "es" = "en") {
+    const contactPath = locale === "es" ? "/es/contacto" : "/contact"
     if (!location && !roomName) {
-        return "/contact#book-directly"
+        return `${contactPath}#book-directly`
     }
 
     const params = new URLSearchParams()
@@ -44,7 +46,7 @@ function buildInquiryHref(location?: string, roomName?: string) {
 
     const query = params.toString()
 
-    return `/contact${query ? `?${query}` : ""}#inquiry`
+    return `${contactPath}${query ? `?${query}` : ""}#inquiry`
 }
 
 export function ConsultationLink({
@@ -53,19 +55,20 @@ export function ConsultationLink({
     showIcon = true,
     href,
     trackingSource = "consultation_link",
+    locale = "en",
     children,
     className,
     ...props
 }: ConsultationLinkProps) {
     const bookingEngineUrl = getBookingEngineUrl(location)
-    const destination = href || bookingEngineUrl || buildInquiryHref(location, roomName)
+    const destination = href || bookingEngineUrl || buildInquiryHref(location, roomName, locale)
     const useNativeAnchor = destination.startsWith("http") || destination.startsWith("#")
     const label = children ?? (
         location?.toLowerCase().includes("hideout")
-            ? "Book Hideout"
+            ? locale === "es" ? "Reservar Hideout" : "Book Hideout"
             : location
-                ? "Book Mandalas"
-                : "Choose your stay"
+                ? locale === "es" ? "Reservar Mandalas" : "Book Mandalas"
+                : locale === "es" ? "Elige tu hospedaje" : "Choose your stay"
     )
     const handleClick = () => {
         if (destination.startsWith("http")) {

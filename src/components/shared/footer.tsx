@@ -6,7 +6,9 @@ import { buildContactHref, getDisplayPhone, publicContact } from "@/lib/public-c
 
 const displayPhone = getDisplayPhone()
 
-export function Footer() {
+export function Footer({ locale = "en" }: { locale?: "en" | "es" }) {
+    const es = locale === "es"
+    const prefix = es ? "/es" : ""
     return (
         <footer className="bg-stone-950 text-stone-400 py-16 border-t border-stone-900">
             <div className="container mx-auto px-4">
@@ -16,7 +18,7 @@ export function Footer() {
                             MANDALAS<span className="text-amber-400">.</span>
                         </h3>
                         <p className="text-sm leading-relaxed max-w-xs text-stone-400 font-light">
-                            Two easy ways to stay in San Pedro: close to the movement or quieter near the lake.
+                            {es ? "Dos formas de hospedarte en San Pedro: cerca del movimiento o con más calma junto al lago." : "Two easy ways to stay in San Pedro: close to the movement or quieter near the lake."}
                         </p>
                         <SocialLinks
                             className="gap-2"
@@ -25,35 +27,35 @@ export function Footer() {
                     </div>
 
                     <div className="min-w-0">
-                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Stay</h4>
+                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">{es ? "Hospedaje" : "Stay"}</h4>
                         <ul className="space-y-4 text-sm font-medium">
                             <li>
-                                <Link href="/pueblo" className="group flex min-h-11 items-center gap-2 transition-colors hover:text-amber-500">
+                                <Link href={`${prefix}/pueblo`} className="group flex min-h-11 items-center gap-2 transition-colors hover:text-amber-500">
                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     Mandalas
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/hideout" className="group flex min-h-11 items-center gap-2 transition-colors hover:text-lime-500">
+                                <Link href={`${prefix}/hideout`} className="group flex min-h-11 items-center gap-2 transition-colors hover:text-lime-500">
                                     <span className="w-1.5 h-1.5 rounded-full bg-lime-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     Hideout
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/guide" className="group flex min-h-11 items-center gap-2 transition-colors hover:text-white">
+                                <Link href={es ? "/es/guia" : "/guide"} className="group flex min-h-11 items-center gap-2 transition-colors hover:text-white">
                                     <span className="w-1.5 h-1.5 rounded-full bg-stone-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    Travel guide
+                                    {es ? "Guía de viaje" : "Travel guide"}
                                 </Link>
                             </li>
                         </ul>
                     </div>
 
                     <div className="min-w-0">
-                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Help</h4>
+                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">{es ? "Ayuda" : "Help"}</h4>
                         <ul className="space-y-4 text-sm font-light">
                             <li className="flex min-w-0 items-center gap-3">
                                 <Phone className="h-4 w-4 shrink-0 text-stone-400" />
-                                <a href={buildContactHref("Hi Mandalas, I would like to check availability")} className="flex min-h-11 min-w-0 items-center transition-colors hover:text-amber-300">
+                                <a href={buildContactHref(es ? "Hola Mandalas, quisiera consultar disponibilidad" : "Hi Mandalas, I would like to check availability")} className="flex min-h-11 min-w-0 items-center transition-colors hover:text-amber-300">
                                     {displayPhone}
                                 </a>
                             </li>
@@ -71,18 +73,18 @@ export function Footer() {
                     </div>
 
                     <div className="min-w-0">
-                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Book direct</h4>
+                        <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">{es ? "Reserva directa" : "Book direct"}</h4>
                         <p className="text-sm leading-relaxed text-stone-400 font-light mb-5">
-                        Choose Mandalas or Hideout, then check room options, dates and final prices in Cloudbeds.
+                        {es ? "Elige Mandalas o Hideout y consulta habitaciones, fechas y precios finales en Cloudbeds." : "Choose Mandalas or Hideout, then check room options, dates and final prices in Cloudbeds."}
                         </p>
-                        <ConsultationLink className="min-h-11 w-full min-w-0 border-white/20 bg-white px-4 text-stone-950 hover:bg-stone-200 xl:w-auto">
-                            Choose your stay
+                        <ConsultationLink locale={locale} className="min-h-11 w-full min-w-0 border-white/20 bg-white px-4 text-stone-950 hover:bg-stone-200 xl:w-auto">
+                            {es ? "Elige tu hospedaje" : "Choose your stay"}
                         </ConsultationLink>
                     </div>
                 </div>
 
                 <div className="border-t border-stone-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-stone-600">
-                    <p className="text-stone-400">&copy; {new Date().getFullYear()} Mandalas Hostal. San Pedro La Laguna, Lake Atitlan.</p>
+                    <p className="text-stone-400">&copy; {new Date().getFullYear()} Mandalas Hostal. San Pedro La Laguna, {es ? "Lago de Atitlán" : "Lake Atitlan"}.</p>
                 </div>
             </div>
         </footer>

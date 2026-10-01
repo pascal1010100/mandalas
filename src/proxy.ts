@@ -2,12 +2,19 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 const COOKIE_NAME = 'mandalas_admin_session'
+const LOCALE_COOKIE_NAME = 'mandalas_locale'
 const ENABLE_ADMIN = process.env.ENABLE_ADMIN === 'true'
 const ENABLE_GUEST_PORTAL = process.env.ENABLE_GUEST_PORTAL === 'true'
 const ADMIN_BYPASS_AUTH = process.env.NODE_ENV !== 'production' && process.env.ADMIN_BYPASS_AUTH === 'true'
 
 export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl
+    const savedLocale = request.cookies.get(LOCALE_COOKIE_NAME)?.value
+    const preferredLanguage = request.headers.get('accept-language')?.toLowerCase() || ''
+
+    if (pathname === '/' && !savedLocale && preferredLanguage.startsWith('es')) {
+        return NextResponse.redirect(new URL('/es', request.url))
+    }
     const isAdminPath = pathname.startsWith('/admin')
     const isAdminApiPath = pathname.startsWith('/api/admin')
     const isAdminSessionPath = pathname === '/api/admin/session'
@@ -46,15 +53,16 @@ export function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL('/admin', request.url))
     }
 
-    return NextResponse.next()
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-mandalas-locale', pathname === '/es' || pathname.startsWith('/es/') ? 'es' : 'en')
+
+    return NextResponse.next({ request: { headers: requestHeaders } })
 }
 
 // Configure which paths the proxy runs on
 export const config = {
     matcher: [
-        '/admin/:path*',
-        '/api/admin/:path*',
-        '/my-booking/:path*',
+        '/((?!_next/static|_next/image|mandalas-favicon.png|.*\\..*).*)',
     ],
 }
 

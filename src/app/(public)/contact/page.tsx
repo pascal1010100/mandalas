@@ -29,6 +29,7 @@ type BookingEngineCardProps = {
   image: string;
   buttonLabel: string;
   accent: "amber" | "lime";
+  locale?: "en" | "es";
 };
 
 function BookingEngineCard({
@@ -40,6 +41,7 @@ function BookingEngineCard({
   image,
   buttonLabel,
   accent,
+  locale = "en",
 }: BookingEngineCardProps) {
   const accentClass = accent === "amber" ? "text-amber-200" : "text-lime-200";
 
@@ -67,6 +69,7 @@ function BookingEngineCard({
 
         <div className="mt-auto pt-8">
           <ConsultationLink
+            locale={locale}
             location={location}
             href={href}
             trackingSource="contact_card"
@@ -76,7 +79,7 @@ function BookingEngineCard({
             <ArrowUpRight className="h-4 w-4" />
           </ConsultationLink>
           <p className="mt-3 text-[0.64rem] font-semibold uppercase tracking-[0.16em] text-white/50">
-            {href ? "Official Cloudbeds booking" : "Contact us to check room options"}
+            {href ? (locale === "es" ? "Reserva oficial en Cloudbeds" : "Official Cloudbeds booking") : (locale === "es" ? "Contáctanos para consultar opciones" : "Contact us to check room options")}
           </p>
         </div>
       </div>
@@ -85,14 +88,30 @@ function BookingEngineCard({
 }
 
 export default function ContactPage() {
+  return <ContactPageContent />;
+}
+
+export function ContactPageContent({ locale = "en" }: { locale?: "en" | "es" }) {
+  const es = locale === "es";
+  const t = es ? {
+    title: "Contacto", subtitle: "Cuéntanos tus fechas y el tipo de viaje que buscas. Te orientaremos hacia la estancia que mejor encaje.", choose: "Elige tu hospedaje", direct: "Reserva directa", know: "¿Ya sabes dónde quedarte?", cloudbeds: "Consulta opciones de habitación, fechas y precios finales, y reserva en el motor oficial de Cloudbeds.",
+    town: "Centro del pueblo", townDescription: "Para planes caminables y estar cerca de la energía de San Pedro.", lake: "Cerca del lago", hideoutDescription: "Para noches tranquilas, mañanas pausadas y una base más calmada fuera del centro.", bookM: "Reservar Mandalas", bookH: "Reservar Hideout",
+    help: "Ayuda personal", unsure: "¿No sabes cuál estancia te conviene?", helpDescription: "Cuéntanos tus fechas, grupo o estilo de viaje. Podemos ayudarte con recomendaciones personales, planes especiales y preguntas antes de reservar.", whatsappDescription: "Para grupos, detalles de llegada, solicitudes especiales y preguntas con una persona del hostal.", send: "Enviar mensaje", rhythm: "Elige el ritmo", rhythmDescription: "Mandalas para estar en el pueblo. Hideout para dormir con más calma cerca del lago.", emailDescription: "Para grupos, colaboraciones o preguntas que necesitan más detalle.", instagramDescription: "Mira el ambiente reciente de cada estancia antes de decidir.", mapDescription: "Ambas estancias están en San Pedro La Laguna: una más céntrica para moverte a pie y otra más tranquila camino al lago.",
+    benefits: [["Respuesta directa", "El formulario prepara el mensaje y WhatsApp continúa la conversación."], ["Llegada clara", "Te orientamos con la ubicación y recomendaciones antes de llegar."], ["Dos ambientes", "Energía del pueblo o pausa junto al lago, según tu viaje."]],
+  } : {
+    title: "Contact", subtitle: "Tell us your dates and the kind of trip you are bringing. We will guide you toward the stay that fits best.", choose: "Choose your stay", direct: "Direct booking", know: "Already know your stay?", cloudbeds: "Check room options, dates, final prices, and reserve through the official Cloudbeds engine.",
+    town: "Town center", townDescription: "For walkable plans and being close to San Pedro's energy.", lake: "Near the lake", hideoutDescription: "For quieter nights, slower mornings, and a calmer base outside the center.", bookM: "Book Mandalas", bookH: "Book Hideout",
+    help: "Personal help", unsure: "Not sure which stay fits?", helpDescription: "Tell us about your dates, group, or travel style. We are here for personal advice, special plans, and questions before you book.", whatsappDescription: "For groups, arrival details, special requests, and questions with a person from the hostel.", send: "Send message", rhythm: "Choose the rhythm", rhythmDescription: "Mandalas for being in town. Hideout for sleeping more quietly near the lake.", emailDescription: "For groups, collaborations, or questions that need more detail.", instagramDescription: "See the recent atmosphere of each stay before deciding.", mapDescription: "Both stays are in San Pedro La Laguna: one more central for moving on foot, and one calmer on the way toward the lake.",
+    benefits: [["Direct reply", "The form prepares the message and WhatsApp carries the conversation."], ["Clear arrival", "We guide you with location and recommendations before you arrive."], ["Two atmospheres", "Town energy or lake-side pause, depending on your trip."]],
+  };
   const mandalasBookingUrl = getBookingEngineUrl("Mandalas");
   const hideoutBookingUrl = getBookingEngineUrl("Hideout");
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-200">
       <Hero
-        title="Contact"
-        subtitle="Tell us your dates and the kind of trip you are bringing. We will guide you toward the stay that fits best."
+        title={t.title}
+        subtitle={t.subtitle}
         backgroundImage="/images/mandalas/pueblo-dock-boat.webp"
         backgroundPosition="center 58%"
         height="large"
@@ -105,7 +124,7 @@ export default function ContactPage() {
         >
           <a href="#book-directly">
             <CalendarDays className="h-4 w-4" />
-            Choose your stay
+            {t.choose}
           </a>
         </Button>
       </Hero>
@@ -115,36 +134,38 @@ export default function ContactPage() {
           <FadeIn>
             <div className="mb-9 max-w-2xl">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.26em] text-amber-200/70">
-                Direct booking
+                {t.direct}
               </p>
               <h2 className="font-heading text-3xl font-light uppercase tracking-[0.12em] text-white md:text-5xl">
-                Already know your stay?
+                {t.know}
               </h2>
               <p className="mt-4 text-base leading-relaxed text-stone-400 md:text-lg">
-                Check room options, dates, final prices, and reserve through the official Cloudbeds engine.
+                {t.cloudbeds}
               </p>
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
               <BookingEngineCard
-                eyebrow="Town center"
+                eyebrow={t.town}
                 title="Mandalas"
-                description="For walkable plans and being close to San Pedro's energy."
+                description={t.townDescription}
                 location="Mandalas"
                 href={mandalasBookingUrl}
                 image="/images/mandalas/hostelworld/pueblo-courtyard-hammock.jpg"
-                buttonLabel="Book Mandalas"
+                buttonLabel={t.bookM}
                 accent="amber"
+                locale={locale}
               />
               <BookingEngineCard
-                eyebrow="Near the lake"
+                eyebrow={t.lake}
                 title="Hideout"
-                description="For quieter nights, slower mornings, and a calmer base outside the center."
+                description={t.hideoutDescription}
                 location="Mandalas Hideout"
                 href={hideoutBookingUrl}
                 image="/images/mandalas/hostelworld/hideout-terrace-dusk.jpg"
-                buttonLabel="Book Hideout"
+                buttonLabel={t.bookH}
                 accent="lime"
+                locale={locale}
               />
             </div>
           </FadeIn>
@@ -157,14 +178,13 @@ export default function ContactPage() {
             <div className="min-w-0 space-y-8">
               <div>
                 <p className="mb-5 text-xs font-semibold uppercase tracking-[0.28em] text-white/70">
-                  Personal help
+                  {t.help}
                 </p>
                 <h2 className="mb-5 max-w-xl break-words font-heading text-[1.2rem] font-light uppercase leading-tight tracking-[0.08em] text-white [text-wrap:balance] sm:text-3xl sm:tracking-[0.1em] md:text-4xl md:tracking-[0.14em]">
-                  Not sure which stay fits?
+                  {t.unsure}
                 </h2>
                 <p className="max-w-xl text-base leading-relaxed text-stone-400 md:text-lg">
-                  Tell us about your dates, group, or travel style. We are here
-                  for personal advice, special plans, and questions before you book.
+                  {t.helpDescription}
                 </p>
               </div>
 
@@ -179,15 +199,15 @@ export default function ContactPage() {
                         WhatsApp
                       </h3>
                       <p className="mb-4 text-sm leading-relaxed text-stone-400">
-                        For groups, arrival details, special requests, and
-                        questions with a person from the hostel.
+                        {t.whatsappDescription}
                       </p>
                       <BookingLink
+                        locale={locale}
                         location="Mandalas Hostal"
                         variant="outline"
                         className="border-white/15 bg-transparent text-white hover:bg-white hover:text-stone-950 gap-2"
                       >
-                        Send message
+                        {t.send}
                       </BookingLink>
                     </div>
                   </div>
@@ -200,11 +220,10 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="mb-2 font-semibold text-white">
-                        Choose the rhythm
+                        {t.rhythm}
                       </h3>
                       <p className="mb-4 text-sm leading-relaxed text-stone-400">
-                        Mandalas for being in town. Hideout for sleeping more
-                        quietly near the lake.
+                        {t.rhythmDescription}
                       </p>
                       <div className="flex flex-wrap gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">
                         <span>Mandalas</span>
@@ -223,8 +242,7 @@ export default function ContactPage() {
                     <div>
                       <h3 className="mb-2 font-semibold text-white">Email</h3>
                       <p className="mb-4 text-sm leading-relaxed text-stone-400">
-                        For groups, collaborations, or questions that need more
-                        detail.
+                        {t.emailDescription}
                       </p>
                       <a
                         href={`mailto:${publicContact.email}`}
@@ -246,7 +264,7 @@ export default function ContactPage() {
                         Instagram
                       </h3>
                       <p className="mb-4 text-sm leading-relaxed text-stone-400">
-                        See the recent atmosphere of each stay before deciding.
+                        {t.instagramDescription}
                       </p>
                       <SocialLinks
                         className="gap-2"
@@ -260,7 +278,7 @@ export default function ContactPage() {
           </FadeIn>
 
           <div className="order-1 min-w-0 lg:order-2 lg:col-span-7">
-            <ReservationInquiryForm />
+            <ReservationInquiryForm locale={locale} />
           </div>
         </div>
       </section>
@@ -276,8 +294,7 @@ export default function ContactPage() {
             <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-inset ring-white/10" />
           </div>
           <p className="mt-5 max-w-2xl text-sm leading-relaxed text-stone-500">
-            Both stays are in San Pedro La Laguna: one more central for moving
-            on foot, and one calmer on the way toward the lake.
+            {t.mapDescription}
           </p>
         </FadeIn>
       </section>
@@ -286,20 +303,7 @@ export default function ContactPage() {
         <div className="mx-auto w-full max-w-7xl px-4">
           <FadeIn>
             <div className="grid gap-6 md:grid-cols-3">
-              {[
-                [
-                  "Direct reply",
-                  "The form prepares the message and WhatsApp carries the conversation.",
-                ],
-                [
-                  "Clear arrival",
-                  "We guide you with location and recommendations before you arrive.",
-                ],
-                [
-                  "Two atmospheres",
-                  "Town energy or lake-side pause, depending on your trip.",
-                ],
-              ].map(([title, description]) => (
+              {t.benefits.map(([title, description]) => (
                 <div key={title} className="border-t border-white/10 pt-6">
                   <h3 className="mb-3 font-heading text-xl font-light uppercase tracking-[0.14em] text-white">
                     {title}

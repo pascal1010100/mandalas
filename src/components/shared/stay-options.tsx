@@ -20,6 +20,7 @@ type StayOptionsProps = {
   location: string;
   accent: "amber" | "lime";
   options: StayOption[];
+  locale?: "en" | "es";
 };
 
 const accentStyles = {
@@ -46,9 +47,10 @@ export function StayOptions({
   location,
   accent,
   options,
+  locale = "en",
 }: StayOptionsProps) {
   const style = accentStyles[accent];
-  const bookingLabel = location.includes("Hideout") ? "Book Hideout" : "Book Mandalas";
+  const bookingLabel = location.includes("Hideout") ? (locale === "es" ? "Reservar Hideout" : "Book Hideout") : (locale === "es" ? "Reservar Mandalas" : "Book Mandalas");
 
   return (
     <section className="bg-stone-950/50 py-24">
@@ -113,10 +115,11 @@ export function StayOptions({
                           {option.price}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          final price in booking engine
+                          {locale === "es" ? "precio final en el motor de reservas" : "final price in booking engine"}
                         </p>
                       </div>
                       <ConsultationLink
+                        locale={locale}
                         location={location}
                         showIcon={false}
                         trackingSource="stay_options"

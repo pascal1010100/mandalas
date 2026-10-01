@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet"
-import { Menu } from "lucide-react"
+import { Languages, Menu } from "lucide-react"
 import { ConsultationLink } from "@/components/shared/consultation-link"
 import { StaggerReveal, StaggerItem } from "@/components/animations/stagger-reveal"
 
@@ -15,6 +15,17 @@ export function Navbar() {
     const [menuOpen, setMenuOpen] = React.useState(false)
     const menuTriggerRef = React.useRef<HTMLButtonElement>(null)
     const pathname = usePathname()
+    const isSpanish = pathname === "/es" || pathname.startsWith("/es/")
+    const puebloPath = isSpanish ? "/es/pueblo" : "/pueblo"
+    const hideoutPath = isSpanish ? "/es/hideout" : "/hideout"
+    const guidePath = isSpanish ? "/es/guia" : "/guide"
+    const contactPath = isSpanish ? "/es/contacto" : "/contact"
+    const languagePath = isSpanish
+        ? pathname === "/es/guia" ? "/guide" : pathname === "/es/contacto" ? "/contact" : pathname.replace(/^\/es/, "") || "/"
+        : pathname === "/guide" ? "/es/guia" : pathname === "/contact" ? "/es/contacto" : `/es${pathname === "/" ? "" : pathname}`
+    const rememberLanguage = () => {
+        document.cookie = `mandalas_locale=${isSpanish ? "en" : "es"}; Path=/; Max-Age=31536000; SameSite=Lax`
+    }
     React.useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20)
@@ -56,7 +67,7 @@ export function Navbar() {
     const theme = getNavTheme()
     const isPueblo = pathname.includes("/pueblo")
     const isHideout = pathname.includes("/hideout")
-    const bookingSectionHref = pathname === "/contact" ? "#book-directly" : undefined
+    const bookingSectionHref = pathname === contactPath ? "#book-directly" : undefined
 
     return (
         <nav
@@ -68,7 +79,7 @@ export function Navbar() {
             )}
         >
             <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-                <Link href="/" className="group flex min-h-11 flex-col justify-center leading-none">
+                <Link href={isSpanish ? "/es" : "/"} className="group flex min-h-11 flex-col justify-center leading-none">
                     {/* Main Brand */}
                     <span className={cn(
                         "text-3xl font-black tracking-tighter transition-all duration-300 font-heading",
@@ -90,67 +101,68 @@ export function Navbar() {
                 {/* Desktop Menu */}
                 <div className="hidden items-center gap-2 font-medium lg:flex">
                     <Link
-                        href="/pueblo"
+                        href={puebloPath}
                         className={cn(
                             "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
                             "hover:text-amber-300",
-                            pathname === "/pueblo"
+                            pathname === puebloPath
                                 ? "text-amber-300"
                                 : scrolled ? "text-stone-300" : "text-white/90"
                         )}
                     >
                         Mandalas
-                        {pathname === "/pueblo" && (
+                        {pathname === puebloPath && (
                             <span className="absolute bottom-0 left-3 right-3 h-px bg-amber-300/70" />
                         )}
                     </Link>
                     <Link
-                        href="/hideout"
+                        href={hideoutPath}
                         className={cn(
                             "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
                             "hover:text-lime-300",
-                            pathname === "/hideout"
+                            pathname === hideoutPath
                                 ? "text-lime-300"
                                 : scrolled ? "text-stone-300" : "text-white/90"
                         )}
                     >
                         Hideout
-                        {pathname === "/hideout" && (
+                        {pathname === hideoutPath && (
                             <span className="absolute bottom-0 left-3 right-3 h-px bg-lime-300/70" />
                         )}
                     </Link>
                     <Link
-                        href="/guide"
+                        href={guidePath}
                         className={cn(
                             "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
                             "hover:text-white",
-                            pathname === "/guide"
+                            pathname === guidePath
                                 ? "text-white"
                                 : scrolled ? "text-stone-300" : "text-white/90"
                         )}
                     >
-                        Travel guide
-                        {pathname === "/guide" && (
+                        {isSpanish ? "Guía de viaje" : "Travel guide"}
+                        {pathname === guidePath && (
                             <span className="absolute bottom-0 left-3 right-3 h-px bg-white/70" />
                         )}
                     </Link>
                     <Link
-                        href="/contact"
+                        href={contactPath}
                         className={cn(
                             "relative flex min-h-11 items-center px-3 py-2 transition-colors duration-300",
                             "hover:text-white",
-                            pathname === "/contact"
+                            pathname === contactPath
                                 ? "text-white"
                                 : scrolled ? "text-stone-300" : "text-white/90"
                         )}
                     >
-                        Contact
-                        {pathname === "/contact" && (
+                        {isSpanish ? "Contacto" : "Contact"}
+                        {pathname === contactPath && (
                             <span className="absolute bottom-0 left-3 right-3 h-px bg-white/70" />
                         )}
                     </Link>
 
                     <ConsultationLink
+                        locale={isSpanish ? "es" : "en"}
                         location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}
                         href={bookingSectionHref}
                         className={cn(
@@ -158,8 +170,12 @@ export function Navbar() {
                             theme.button
                         )}
                     >
-                        {isPueblo ? "Book Mandalas" : isHideout ? "Book Hideout" : "Choose your stay"}
+                        {isPueblo ? (isSpanish ? "Reservar Mandalas" : "Book Mandalas") : isHideout ? (isSpanish ? "Reservar Hideout" : "Book Hideout") : (isSpanish ? "Elige tu hospedaje" : "Choose your stay")}
                     </ConsultationLink>
+                    <Link href={languagePath} hrefLang={isSpanish ? "en" : "es"} onClick={rememberLanguage} className="flex min-h-11 items-center gap-1 px-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/80 hover:text-white" aria-label={isSpanish ? "View site in English" : "Ver sitio en español"}>
+                        <Languages className="h-4 w-4" />
+                        {isSpanish ? "EN" : "ES"}
+                    </Link>
                 </div>
 
                 <Sheet
@@ -174,7 +190,7 @@ export function Navbar() {
                             ref={menuTriggerRef}
                             variant="ghost"
                             size="icon"
-                            aria-label="Open navigation menu"
+                            aria-label={isSpanish ? "Abrir menú de navegación" : "Open navigation menu"}
                             className={cn("size-11 transition-colors motion-reduce:transition-none", scrolled ? "text-stone-100 hover:text-white" : "text-white hover:text-white/80")}
                             suppressHydrationWarning
                         >
@@ -198,7 +214,7 @@ export function Navbar() {
                                     </div>
                                 </SheetTitle>
                                 <SheetDescription className="sr-only">
-                                    Navigate to a Mandalas property, contact the team, or read the travel guide.
+                                    {isSpanish ? "Navega a una propiedad Mandalas, contacta al equipo o consulta la guía de viaje." : "Navigate to a Mandalas property, contact the team, or read the travel guide."}
                                 </SheetDescription>
                             </SheetHeader>
 
@@ -206,73 +222,82 @@ export function Navbar() {
                                 <StaggerItem>
                                     <SheetClose asChild>
                                         <Link
-                                            href="/pueblo"
+                                            href={puebloPath}
                                             className={cn(
                                                 "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-amber-200 dark:hover:border-amber-900 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
-                                                pathname === "/pueblo" ? "text-amber-300 pl-4 border-amber-300/30" : "text-stone-200 hover:pl-4 hover:text-amber-300"
+                                                pathname === puebloPath ? "text-amber-300 pl-4 border-amber-300/30" : "text-stone-200 hover:pl-4 hover:text-amber-300"
                                             )}
-                                            aria-current={pathname === "/pueblo" ? "page" : undefined}
+                                            aria-current={pathname === puebloPath ? "page" : undefined}
                                         >
                                             Mandalas
-                                            <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-amber-300 sm:text-xs">in the center of San Pedro</span>
+                                            <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-amber-300 sm:text-xs">{isSpanish ? "en el centro de San Pedro" : "in the center of San Pedro"}</span>
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
                                 <StaggerItem>
                                     <SheetClose asChild>
                                         <Link
-                                            href="/hideout"
+                                            href={hideoutPath}
                                             className={cn(
                                                 "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-lime-200 dark:hover:border-lime-900 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
-                                                pathname === "/hideout" ? "text-lime-300 pl-4 border-lime-300/30" : "text-stone-200 hover:pl-4 hover:text-lime-300"
+                                                pathname === hideoutPath ? "text-lime-300 pl-4 border-lime-300/30" : "text-stone-200 hover:pl-4 hover:text-lime-300"
                                             )}
-                                            aria-current={pathname === "/hideout" ? "page" : undefined}
+                                            aria-current={pathname === hideoutPath ? "page" : undefined}
                                         >
                                             Hideout
-                                            <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-lime-300 sm:text-xs">nature and slower nights</span>
+                                            <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-lime-300 sm:text-xs">{isSpanish ? "naturaleza y noches tranquilas" : "nature and slower nights"}</span>
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
                                 <StaggerItem>
                                     <SheetClose asChild>
                                         <Link
-                                            href="/guide"
+                                            href={guidePath}
                                             className={cn(
                                                 "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
-                                                pathname === "/guide" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
+                                                pathname === guidePath ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
                                             )}
-                                            aria-current={pathname === "/guide" ? "page" : undefined}
+                                            aria-current={pathname === guidePath ? "page" : undefined}
                                         >
-                                            Travel guide
-                                            <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-white sm:text-xs">arriving at Lake Atitlán</span>
+                                            {isSpanish ? "Guía de viaje" : "Travel guide"}
+                                            <span className="mt-0.5 block font-sans text-[10px] lowercase leading-snug tracking-normal text-stone-300 transition-colors group-hover:text-white sm:text-xs">{isSpanish ? "cómo llegar al Lago de Atitlán" : "arriving at Lake Atitlán"}</span>
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
                                 <StaggerItem>
                                     <SheetClose asChild>
                                         <Link
-                                            href="/contact"
+                                            href={contactPath}
                                             className={cn(
                                                 "group block min-h-11 border-b border-transparent py-2 font-heading text-base font-light uppercase tracking-[0.07em] transition-all duration-300 hover:border-stone-200 dark:hover:border-stone-800 min-[360px]:tracking-[0.1em] sm:py-3 sm:text-2xl",
-                                                pathname === "/contact" ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
+                                                pathname === contactPath ? "text-white pl-4 border-white/30" : "text-stone-400 hover:pl-4 hover:text-white"
                                             )}
-                                            aria-current={pathname === "/contact" ? "page" : undefined}
+                                            aria-current={pathname === contactPath ? "page" : undefined}
                                         >
-                                            Contact
+                                            {isSpanish ? "Contacto" : "Contact"}
                                         </Link>
                                     </SheetClose>
                                 </StaggerItem>
                                 <div className="mt-auto space-y-4 pt-4 sm:mb-8 sm:space-y-8">
                                     <StaggerItem>
                                         <ConsultationLink
+                                            locale={isSpanish ? "es" : "en"}
                                             location={isHideout ? "Mandalas Hideout" : isPueblo ? "Mandalas" : undefined}
                                             href={bookingSectionHref}
                                             onClick={() => setMenuOpen(false)}
                                             showIcon={false}
                                             className={cn("h-12 w-full min-w-0 px-1 text-[11px] tracking-[0.04em] min-[360px]:px-2 min-[360px]:tracking-[0.07em]", theme.button)}
                                         >
-                                            {isPueblo ? "BOOK MANDALAS" : isHideout ? "BOOK HIDEOUT" : "CHOOSE YOUR STAY"}
+                                            {isPueblo ? (isSpanish ? "RESERVAR MANDALAS" : "BOOK MANDALAS") : isHideout ? (isSpanish ? "RESERVAR HIDEOUT" : "BOOK HIDEOUT") : (isSpanish ? "ELIGE TU HOSPEDAJE" : "CHOOSE YOUR STAY")}
                                         </ConsultationLink>
+                                    </StaggerItem>
+                                    <StaggerItem>
+                                        <SheetClose asChild>
+                                            <Link href={languagePath} hrefLang={isSpanish ? "en" : "es"} onClick={rememberLanguage} className="flex min-h-11 items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-stone-300 hover:text-white">
+                                                <Languages className="h-4 w-4" />
+                                                {isSpanish ? "English" : "Español"}
+                                            </Link>
+                                        </SheetClose>
                                     </StaggerItem>
                                 </div>
                             </StaggerReveal>

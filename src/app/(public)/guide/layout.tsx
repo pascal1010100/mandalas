@@ -95,6 +95,7 @@ export const metadata: Metadata = {
     description,
     alternates: {
         canonical: "/guide",
+        languages: { en: "/guide", "es-GT": "/es/guia", "x-default": "/guide" },
     },
     openGraph: {
         title: canonicalTitle,

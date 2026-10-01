@@ -17,10 +17,94 @@ const BACKGROUNDS = {
 export const metadata: Metadata = {
   alternates: {
     canonical: "/",
+    languages: { en: "/", "es-GT": "/es", "x-default": "/" },
   },
 }
 
 export default function LandingPage() {
+  return <HomePageContent />
+}
+
+export function HomePageContent({ locale = "en" }: { locale?: "en" | "es" }) {
+  const es = locale === "es"
+  const prefix = es ? "/es" : ""
+  const contactPath = es ? "/es/contacto" : "/contact"
+  const copy = es ? {
+    schemaDescription: "Elige entre Mandalas en el centro y Hideout cerca del Lago de Atitlán. Consulta habitaciones, fechas y precios en los motores oficiales de Cloudbeds.",
+    twoHostels: "Dos hostales",
+    twoRhythms: "Dos ritmos",
+    puebloKicker: "En el centro · Caminable y social",
+    puebloDescription: "Quédate en el centro, recorre San Pedro a pie y deja que el día encuentre su ritmo.",
+    puebloMeta: "Centro · Caminable · Social",
+    hideoutKicker: "Cerca del lago · Estancia tranquila",
+    hideoutDescription: "Trabaja a distancia, disfruta buena música y mantén el lago cerca.",
+    hideoutMeta: "WiFi · Música · Lago",
+    feeling: "La experiencia de tu estancia",
+    heading: "Elige tu hospedaje en San Pedro La Laguna",
+    subheading: "Una estancia para moverte. Otra para volver a respirar.",
+    intro: "Mandalas funciona como dos ritmos conectados por el mismo lago: el centro para salir y Hideout para bajar el ritmo.",
+    townEnergy: "Energía del centro",
+    townEnergyDescription: "Planes caminables y una base más social para entrar directamente en el ritmo de San Pedro.",
+    lakeQuiet: "Lago y tranquilidad",
+    lakeQuietDescription: "Una base más calmada para dormir mejor, caminar junto al lago y volver sin el ruido del centro.",
+    guidedInquiry: "Orientación personal",
+    rightRhythm: "El ritmo adecuado",
+    rightRhythmDescription: "Envíanos tus fechas y tu estilo de viaje. Te orientaremos hacia la estancia que tenga más sentido.",
+    bookMandalas: "Reservar Mandalas",
+    bookHideout: "Reservar Hideout",
+    chooseStay: "Elige tu hospedaje",
+    center: "Centro",
+    social: "Social",
+    socialDescription: "Para caminar, hacer planes fácilmente y estar cerca de lo que sucede.",
+    slow: "Calma",
+    slowDescription: "Más tranquilidad, el lago cerca y noches más suaves.",
+    chooseByEnergy: "Elige según tu energía: una base en el centro o un refugio más pausado.",
+    walkableCenter: "Centro caminable",
+    walkableSocial: "Caminable y social",
+    lakeNearby: "Lago cercano",
+    rooms: "Dormitorios y habitaciones privadas",
+    explore: "Conocer",
+    puebloAlt: "Patio de Mandalas con hamacas y arquitectura blanca",
+    hideoutAlt: "Exterior de Mandalas Hideout con el volcán al fondo",
+  } : {
+    schemaDescription: "Choose between Mandalas in town and Hideout near Lake Atitlán. Check rooms, dates and prices in the official Cloudbeds engines.",
+    twoHostels: "Two hostels",
+    twoRhythms: "Two rhythms",
+    puebloKicker: "In town · Walkable and social",
+    puebloDescription: "Stay in town, walk San Pedro, and let the day find its rhythm.",
+    puebloMeta: "Center · Walkable · Social",
+    hideoutKicker: "Near lake · Calm stay",
+    hideoutDescription: "Work remotely, enjoy good music, and keep the lake close.",
+    hideoutMeta: "WiFi · Music · Lake",
+    feeling: "The Feel Of The Stay",
+    heading: "Choose your stay in San Pedro La Laguna",
+    subheading: "One stay for movement. One stay to breathe again.",
+    intro: "Mandalas works best as two rhythms connected by the same lake: town for going out, Hideout for slowing down.",
+    townEnergy: "Town energy",
+    townEnergyDescription: "Walkable plans and a more social base for stepping straight into San Pedro.",
+    lakeQuiet: "Lake and quiet",
+    lakeQuietDescription: "A calmer base for better sleep, easy lake walks, and returning without carrying the center's noise.",
+    guidedInquiry: "Guided inquiry",
+    rightRhythm: "The right rhythm",
+    rightRhythmDescription: "Send your dates and travel style. We will guide you toward the stay that makes the most sense.",
+    bookMandalas: "Book Mandalas",
+    bookHideout: "Book Hideout",
+    chooseStay: "Choose your stay",
+    center: "Center",
+    social: "Social",
+    socialDescription: "For walking, easy plans, and being close to what is happening.",
+    slow: "Slow",
+    slowDescription: "More quiet, lake nearby, softer nights.",
+    chooseByEnergy: "Choose by energy: lake-town base or slower hideout.",
+    walkableCenter: "Walkable center",
+    walkableSocial: "Walkable and social",
+    lakeNearby: "Lake nearby",
+    rooms: "Dorms and private rooms",
+    explore: "Explore",
+    puebloAlt: "Mandalas courtyard with hammocks and white architecture",
+    hideoutAlt: "Mandalas Hideout exterior with volcano in the background",
+  }
+
   return (
     <>
       <script
@@ -30,8 +114,9 @@ export default function LandingPage() {
             "@context": "https://schema.org",
             "@type": "LodgingBusiness",
             "name": "Mandalas Hostels",
-            "description": "Choose between Mandalas in town and Hideout near Lake Atitlán. Check rooms, dates and prices in the official Cloudbeds engines.",
-            "url": "https://www.mandalashostels.com",
+            "description": copy.schemaDescription,
+            "url": es ? "https://www.mandalashostels.com/es" : "https://www.mandalashostels.com",
+            "inLanguage": locale,
             "telephone": "+50257545638",
             "address": {
               "@type": "PostalAddress",
@@ -44,10 +129,10 @@ export default function LandingPage() {
       />
     <div className="bg-background">
       <section className={`relative flex min-h-[100svh] flex-col overflow-hidden bg-black md:min-h-screen md:flex-row ${heroStyles.hero}`}>
-        <HomeIntro />
+        <HomeIntro locale={locale} />
         <div className="pointer-events-none absolute inset-x-0 top-28 z-30 hidden justify-center px-4 md:flex">
           <p className="font-heading text-lg font-light uppercase tracking-[0.24em] text-white/85 lg:text-xl">
-            Two hostels <span className="px-1 text-white/40">·</span> Two rhythms
+            {copy.twoHostels} <span className="px-1 text-white/40">·</span> {copy.twoRhythms}
           </p>
         </div>
 
@@ -61,29 +146,33 @@ export default function LandingPage() {
 
         {/* Pueblo Section */}
         <HomePanel
-          href="/pueblo"
+          href={`${prefix}/pueblo`}
           label="Mandalas Hostal"
-          kicker="In town · Walkable and social"
+          kicker={copy.puebloKicker}
           title="Mandalas Hostal"
-          description="Stay in town, walk San Pedro, and let the day find its rhythm."
-          meta="Center · Walkable · Social"
+          description={copy.puebloDescription}
+          meta={copy.puebloMeta}
           background={BACKGROUNDS.pueblo}
           accent="amber"
           borderClass="border-b md:border-b-0 md:border-r"
+          exploreLabel={copy.explore}
+          locale={locale}
         />
 
         <HomePanel
-          href="/hideout"
+          href={`${prefix}/hideout`}
           label="Mandalas Hideout"
-          kicker="Near lake · Calm stay"
+          kicker={copy.hideoutKicker}
           title="Mandalas Hideout"
-          description="Work remotely, enjoy good music, and keep the lake close."
-          meta="WiFi · Music · Lake"
+          description={copy.hideoutDescription}
+          meta={copy.hideoutMeta}
           background={BACKGROUNDS.hideout}
           accent="lime"
           imageClassName="scale-100"
           imagePosition="center center"
           reserveMobileCtaSpace
+          exploreLabel={copy.explore}
+          locale={locale}
         />
       </section>
 
@@ -100,19 +189,19 @@ export default function LandingPage() {
           <div className="relative grid gap-12 xl:grid-cols-[1.1fr_0.9fr] xl:items-end">
             <div className="max-w-3xl">
               <p className="mb-6 text-xs font-semibold uppercase tracking-[0.24em] text-white/70">
-                The Feel Of The Stay
+                {copy.feeling}
               </p>
               <h1 className="max-w-3xl font-heading text-4xl font-light uppercase leading-[1.05] tracking-[0.1em] text-white md:text-6xl md:tracking-[0.14em]">
-                Choose your stay in San Pedro La Laguna
+                {copy.heading}
               </h1>
               <h2 className="mt-5 max-w-2xl font-heading text-xl font-light uppercase leading-relaxed tracking-[0.12em] text-white/55 md:text-2xl">
-                One stay for movement. One stay to breathe again.
+                {copy.subheading}
               </h2>
             </div>
 
             <div className="max-w-xl xl:justify-self-end xl:pb-2">
               <p className="text-lg leading-relaxed text-white/62">
-                Mandalas works best as two rhythms connected by the same lake: town for going out, Hideout for slowing down.
+                {copy.intro}
               </p>
             </div>
           </div>
@@ -123,49 +212,51 @@ export default function LandingPage() {
                 <RhythmPoint
                   icon={SunMedium}
                   eyebrow="Mandalas Hostal"
-                  title="Town energy"
-                  description="Walkable plans and a more social base for stepping straight into San Pedro."
+                  title={copy.townEnergy}
+                  description={copy.townEnergyDescription}
                 />
                 <RhythmPoint
                   icon={Waves}
                   eyebrow="Mandalas Hideout"
-                  title="Lake and quiet"
-                  description="A calmer base for better sleep, easy lake walks, and returning without carrying the center's noise."
+                  title={copy.lakeQuiet}
+                  description={copy.lakeQuietDescription}
                 />
                 <RhythmPoint
                   icon={MessageCircle}
-                  eyebrow="Guided inquiry"
-                  title="The right rhythm"
-                  description="Send your dates and travel style. We will guide you toward the stay that makes the most sense."
+                  eyebrow={copy.guidedInquiry}
+                  title={copy.rightRhythm}
+                  description={copy.rightRhythmDescription}
                 />
               </div>
 
               <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
                 <ConsultationLink
+                  locale={locale}
                   location="Mandalas"
                   className="h-12 border-white/20 bg-white px-8 text-stone-950 hover:bg-stone-200"
                 >
-                  Book Mandalas
+                  {copy.bookMandalas}
                 </ConsultationLink>
                 <ConsultationLink
+                  locale={locale}
                   location="Mandalas Hideout"
                   className="h-12 border-lime-200/30 bg-lime-200 px-8 text-stone-950 hover:bg-lime-100"
                 >
-                  Book Hideout
+                  {copy.bookHideout}
                 </ConsultationLink>
                 <Button asChild variant="outline" className="h-12 w-full rounded-full border-white/20 bg-transparent px-8 text-xs font-semibold uppercase tracking-[0.16em] text-white shadow-none hover:bg-white hover:text-stone-950 sm:col-span-2 lg:col-span-1">
-                  <Link href="/contact#book-directly">
-                    Choose your stay
+                  <Link href={`${contactPath}#book-directly`}>
+                    {copy.chooseStay}
                   </Link>
                 </Button>
               </div>
             </div>
 
             <div className="order-1 grid min-h-[38rem] gap-4 lg:order-2 lg:grid-cols-[0.58fr_0.42fr]">
-              <Link href="/pueblo" className="group relative overflow-hidden border border-white/10 bg-stone-900">
+              <Link href={`${prefix}/pueblo`} className="group relative overflow-hidden border border-white/10 bg-stone-900">
                 <Image
                   src="/images/mandalas/hostelworld/pueblo-exterior.jpg"
-                  alt="Mandalas courtyard with hammocks and white architecture"
+                  alt={copy.puebloAlt}
                   fill
                   sizes="(min-width: 1024px) 58vw, 100vw"
                   style={{ objectPosition: "center 52%" }}
@@ -175,27 +266,27 @@ export default function LandingPage() {
                 <div className="relative flex h-full min-h-[22rem] flex-col justify-between p-6 md:p-8">
                   <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-white/70 sm:text-[10px] sm:tracking-[0.22em]">
                     <span>01</span>
-                    <span>Center</span>
+                    <span>{copy.center}</span>
                   </div>
                   <div>
                     <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.24em] text-amber-200/75">
                       Mandalas
                     </p>
                     <h2 className="font-heading text-4xl font-light uppercase leading-none tracking-[0.14em] text-white md:text-6xl">
-                      Social
+                      {copy.social}
                     </h2>
                     <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/68">
-                      For walking, easy plans, and being close to what is happening.
+                      {copy.socialDescription}
                     </p>
                   </div>
                 </div>
               </Link>
 
               <div className="grid gap-4">
-                <Link href="/hideout" className="group relative overflow-hidden border border-white/10 bg-stone-900">
+                <Link href={`${prefix}/hideout`} className="group relative overflow-hidden border border-white/10 bg-stone-900">
                   <Image
                     src={BACKGROUNDS.hideout}
-                    alt="Mandalas Hideout exterior with volcano in the background"
+                    alt={copy.hideoutAlt}
                     fill
                     sizes="(min-width: 1024px) 42vw, 100vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
@@ -206,10 +297,10 @@ export default function LandingPage() {
                       Hideout
                     </p>
                     <h2 className="font-heading text-3xl font-light uppercase tracking-[0.12em] text-white md:text-4xl">
-                      Slow
+                      {copy.slow}
                     </h2>
                     <p className="mt-4 text-sm leading-relaxed text-white/64">
-                      More quiet, lake nearby, softer nights.
+                      {copy.slowDescription}
                     </p>
                   </div>
                 </Link>
@@ -220,7 +311,7 @@ export default function LandingPage() {
                     San Pedro La Laguna
                   </p>
                   <p className="mt-4 text-2xl font-light leading-snug text-white md:text-3xl">
-                    Choose by energy: lake-town base or slower hideout.
+                    {copy.chooseByEnergy}
                   </p>
                 </div>
               </div>
@@ -228,11 +319,11 @@ export default function LandingPage() {
           </div>
 
           <div className="mt-10 grid border-t border-white/10 pt-6 text-xs uppercase tracking-[0.18em] text-white/70 md:grid-cols-4 md:gap-8">
-            <div className="py-3 md:py-0">Walkable center</div>
-            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Walkable and social</div>
-            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">Lake nearby</div>
+            <div className="py-3 md:py-0">{copy.walkableCenter}</div>
+            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">{copy.walkableSocial}</div>
+            <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">{copy.lakeNearby}</div>
             <div className="border-t border-white/10 py-3 md:border-l md:border-t-0 md:py-0 md:pl-8">
-              Dorms and private rooms
+              {copy.rooms}
             </div>
           </div>
         </div>
@@ -255,6 +346,8 @@ type HomePanelProps = {
   imageClassName?: string
   imagePosition?: string
   reserveMobileCtaSpace?: boolean
+  exploreLabel?: string
+  locale?: "en" | "es"
 }
 
 function HomePanel({
@@ -270,6 +363,8 @@ function HomePanel({
   imageClassName,
   imagePosition,
   reserveMobileCtaSpace = false,
+  exploreLabel = "Explore",
+  locale = "en",
 }: HomePanelProps) {
   const accentClass = accent === "amber" ? "bg-amber-300/80" : "bg-lime-300/80"
   const lightClass = accent === "amber" ? "bg-amber-200/10" : "bg-lime-200/10"
@@ -297,7 +392,7 @@ function HomePanel({
 
       <Link
         href={href}
-        aria-label={`View ${label} details`}
+        aria-label={locale === "es" ? `Ver detalles de ${label}` : `View ${label} details`}
         className={`relative z-10 flex h-full min-h-[50svh] flex-col justify-end p-5 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/80 sm:min-h-[50vh] sm:p-7 md:min-h-screen md:p-9 lg:p-12 xl:p-16 ${heroStyles.link} ${reserveMobileCtaSpace ? `pb-[calc(6rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-9 lg:pb-12 xl:pb-16 ${heroStyles.linkWithBookingBar}` : ""}`}
       >
         <div className={`mb-auto flex items-center pt-16 md:pt-40 xl:pt-24 ${heroStyles.top}`}>
@@ -322,7 +417,7 @@ function HomePanel({
             </span>
             <span className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/75">
               <span className={`hidden h-px w-8 origin-right scale-x-[0.35] transition-transform duration-500 group-hover:scale-x-100 motion-reduce:transform-none motion-reduce:transition-none sm:block ${accentClass}`} />
-              Explore
+              {exploreLabel}
               <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none" />
             </span>
           </div>

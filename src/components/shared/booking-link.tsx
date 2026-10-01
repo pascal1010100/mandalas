@@ -12,20 +12,22 @@ type BookingLinkProps = React.ComponentProps<typeof Button> & {
     location?: string
     roomName?: string
     showIcon?: boolean
+    locale?: "en" | "es"
 }
 
 export function BookingLink({
     location,
     roomName,
     showIcon = true,
+    locale = "en",
     children = "Check availability",
     className,
     ...props
 }: BookingLinkProps) {
     const message = [
-        "Hi Mandalas, I would like to check availability",
-        roomName ? `for ${roomName}` : "",
-        location ? `at ${location}` : "",
+        locale === "es" ? "Hola Mandalas, quisiera consultar disponibilidad" : "Hi Mandalas, I would like to check availability",
+        roomName ? `${locale === "es" ? "para" : "for"} ${roomName}` : "",
+        location ? `${locale === "es" ? "en" : "at"} ${location}` : "",
     ].filter(Boolean).join(" ")
 
     const href = buildContactHref(message)

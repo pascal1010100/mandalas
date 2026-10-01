@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "sonner"
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { HtmlLanguage } from "@/components/shared/html-language"
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -79,14 +81,18 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const requestHeaders = await headers();
+  const locale = requestHeaders.get("x-mandalas-locale") === "es" ? "es" : "en";
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body suppressHydrationWarning className={`${outfit.variable} ${inter.variable}`}>
+        <HtmlLanguage />
         {/* ThemeProvider wrapping */}
         <ThemeProvider
           attribute="class"

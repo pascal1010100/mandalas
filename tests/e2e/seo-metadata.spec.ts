@@ -185,6 +185,27 @@ test("sitemap includes the canonical /guide URL exactly once", async ({ request 
     expect(guideUrls).toEqual(["https://www.mandalashostels.com/guide"])
 })
 
+const spanishPages = [
+    ["/es", "Hostales en San Pedro La Laguna | Mandalas Hostels", "https://www.mandalashostels.com/es"],
+    ["/es/pueblo", "Hostal céntrico en San Pedro La Laguna | Mandalas", "https://www.mandalashostels.com/es/pueblo"],
+    ["/es/hideout", "Hostal tranquilo cerca del Lago de Atitlán | Mandalas Hideout", "https://www.mandalashostels.com/es/hideout"],
+    ["/es/contacto", "Contacto y consultas de hospedaje | Mandalas Hostal", "https://www.mandalashostels.com/es/contacto"],
+    ["/es/guia", "Guía para llegar a San Pedro La Laguna | Mandalas Hostal", "https://www.mandalashostels.com/es/guia"],
+] as const
+
+for (const [path, title, canonical] of spanishPages) {
+    test(`${path} exposes Spanish SEO metadata`, async ({ page }) => {
+        const response = await page.goto(path)
+        expect(response?.ok()).toBeTruthy()
+        await expect(page).toHaveTitle(title)
+        await expect(page.locator("html")).toHaveAttribute("lang", "es")
+        await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", canonical)
+        await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toBeAttached()
+        await expect(page.locator('link[rel="alternate"][hreflang="es-GT"]')).toBeAttached()
+        await expect(page.locator('script[type="application/ld+json"]')).not.toHaveCount(0)
+    })
+}
+
 test("robots and sitemap expose only the canonical public surface", async ({ request }) => {
     const robots = await request.get("/robots.txt")
     expect(robots.ok()).toBeTruthy()
@@ -201,9 +222,14 @@ test("robots and sitemap expose only the canonical public surface", async ({ req
 
     expect(urls).toEqual([
         "https://www.mandalashostels.com",
+        "https://www.mandalashostels.com/es",
         "https://www.mandalashostels.com/pueblo",
+        "https://www.mandalashostels.com/es/pueblo",
         "https://www.mandalashostels.com/hideout",
+        "https://www.mandalashostels.com/es/hideout",
         "https://www.mandalashostels.com/contact",
+        "https://www.mandalashostels.com/es/contacto",
         "https://www.mandalashostels.com/guide",
+        "https://www.mandalashostels.com/es/guia",
     ])
 })

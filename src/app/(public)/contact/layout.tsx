@@ -21,6 +21,7 @@ export const metadata: Metadata = {
         "Contact Mandalas Hostal to check dates and choose between Mandalas in town or Hideout near the lake in San Pedro La Laguna.",
     alternates: {
         canonical: "/contact",
+        languages: { en: "/contact", "es-GT": "/es/contacto", "x-default": "/contact" },
     },
     openGraph: {
         title: "Contact and Stay Inquiry | Mandalas Hostal",

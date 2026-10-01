@@ -48,6 +48,7 @@ export const metadata: Metadata = {
         "Mandalas Hideout is a quiet stay near Lake Atitlán, outside San Pedro La Laguna. Check rooms, dates and prices in the official Cloudbeds engine.",
     alternates: {
         canonical: "/hideout",
+        languages: { en: "/hideout", "es-GT": "/es/hideout", "x-default": "/hideout" },
     },
     openGraph: {
         title: "Quiet Hostel near Lake Atitlán | Mandalas Hideout",

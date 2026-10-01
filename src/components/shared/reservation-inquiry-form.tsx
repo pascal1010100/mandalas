@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
+import { es as esLocale } from "date-fns/locale";
 import { CalendarDays, Send, UserRound, UsersRound } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 
@@ -40,27 +41,44 @@ function normalizeLocation(value: string | null) {
   return null;
 }
 
-function formatInquiryDates(dates: DateRange | undefined) {
+function formatInquiryDates(dates: DateRange | undefined, locale: "en" | "es") {
   if (!dates?.from) return "";
 
-  const checkIn = format(dates.from, "MMM d, yyyy");
-  if (!dates.to) return `${checkIn} (check-out pending)`;
+  const options = locale === "es" ? { locale: esLocale } : undefined;
+  const checkIn = format(dates.from, "MMM d, yyyy", options);
+  if (!dates.to) return `${checkIn} (${locale === "es" ? "salida pendiente" : "check-out pending"})`;
 
-  return `${checkIn} to ${format(dates.to, "MMM d, yyyy")}`;
+  return `${checkIn} ${locale === "es" ? "al" : "to"} ${format(dates.to, "MMM d, yyyy", options)}`;
 }
 
-export function ReservationInquiryForm() {
+export function ReservationInquiryForm({ locale = "en" }: { locale?: "en" | "es" }) {
+  const es = locale === "es";
+  const t = es ? {
+    help: "Ayuda personal", title: "¿Necesitas ayuda para elegir?", intro: "Para grupos, planes especiales o una recomendación entre las dos estancias, déjanos los datos esenciales y te ayudaremos personalmente.", aside: "Grupos, solicitudes especiales y orientación personal.", name: "Nombre", namePlaceholder: "Tu nombre", guests: "Huéspedes", guestsPlaceholder: "2 huéspedes", dates: "Fechas", dateHelp: "Selecciona primero la fecha de llegada y después la fecha de salida.", checkIn: "Llegada", checkOut: "Salida", chooseDate: "Elige una fecha", stay: "Estancia", unsure: "Aún no lo sé", room: "Habitación", mixed: "Dormitorio mixto", female: "Dormitorio femenino", private: "Habitación privada", details: "Detalles útiles", detailsPlaceholder: "Llegada tarde, habitación privada, estancia tranquila, lago...", ask: "Consultar por WhatsApp",
+  } : {
+    help: "Personal help", title: "Need a hand choosing?", intro: "For groups, special plans, or a recommendation between the two stays, leave us the essentials and we will help personally.", aside: "Groups, special requests, and personal advice.", name: "Name", namePlaceholder: "Your name", guests: "Guests", guestsPlaceholder: "2 guests", dates: "Dates", dateHelp: "Select your check-in date, then your check-out date.", checkIn: "Check-in", checkOut: "Check-out", chooseDate: "Choose a date", stay: "Stay", unsure: "Not sure yet", room: "Room", mixed: "Mixed dorm", female: "Female dorm", private: "Private room", details: "Helpful details", detailsPlaceholder: "Late arrival, private room, quieter stay, lake...", ask: "Ask on WhatsApp",
+  };
   const [name, setName] = useState("");
   const [dates, setDates] = useState<DateRange | undefined>();
   const [guests, setGuests] = useState("");
   const [location, setLocation] = useState("Not sure yet");
   const [roomType, setRoomType] = useState("Not sure yet");
   const [message, setMessage] = useState("");
+  const localizedLocation = location === "Not sure yet" ? t.unsure : location;
+  const localizedRoomType = roomType === "Not sure yet"
+    ? t.unsure
+    : roomType === "Mixed Dorm"
+      ? t.mixed
+      : roomType === "Female Dorm"
+        ? t.female
+        : roomType === "Private Room"
+          ? t.private
+          : roomType;
   const today = useMemo(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   }, []);
-  const formattedDates = useMemo(() => formatInquiryDates(dates), [dates]);
+  const formattedDates = useMemo(() => formatInquiryDates(dates, locale), [dates, locale]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -81,18 +99,18 @@ export function ReservationInquiryForm() {
 
   const whatsappMessage = useMemo(() => {
     return [
-      "Hi Mandalas, I would like to ask about a stay.",
+      es ? "Hola Mandalas, quisiera consultar sobre una estancia." : "Hi Mandalas, I would like to ask about a stay.",
       "",
-      `Name: ${name || "Pending"}`,
-      `Dates: ${formattedDates || "Pending"}`,
-      `Guests: ${guests || "Pending"}`,
-      `Preferred stay: ${location}`,
-      `Room type: ${roomType}`,
-      message ? `Message: ${message}` : "",
+      `${es ? "Nombre" : "Name"}: ${name || (es ? "Pendiente" : "Pending")}`,
+      `${es ? "Fechas" : "Dates"}: ${formattedDates || (es ? "Pendientes" : "Pending")}`,
+      `${es ? "Huéspedes" : "Guests"}: ${guests || (es ? "Pendiente" : "Pending")}`,
+      `${es ? "Estancia preferida" : "Preferred stay"}: ${location === "Not sure yet" ? t.unsure : location}`,
+      `${es ? "Tipo de habitación" : "Room type"}: ${roomType === "Not sure yet" ? t.unsure : roomType}`,
+      message ? `${es ? "Mensaje" : "Message"}: ${message}` : "",
     ]
       .filter(Boolean)
       .join("\n");
-  }, [formattedDates, guests, location, message, name, roomType]);
+  }, [es, formattedDates, guests, location, message, name, roomType, t.unsure]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -115,19 +133,18 @@ export function ReservationInquiryForm() {
       <div className="mb-9 grid gap-6 border-b border-white/10 pb-7 sm:grid-cols-[1fr_auto] sm:items-end">
         <div>
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.26em] text-amber-200/70">
-            Personal help
+            {t.help}
           </p>
           <h2 className="max-w-xl font-heading text-2xl font-light uppercase leading-tight tracking-[0.14em] text-white md:text-3xl">
-            Need a hand choosing?
+            {t.title}
           </h2>
           <p className="mt-4 max-w-lg text-sm leading-relaxed text-stone-300">
-            For groups, special plans, or a recommendation between the two
-            stays, leave us the essentials and we will help personally.
+            {t.intro}
           </p>
         </div>
 
         <p className="max-w-36 border-l border-white/15 pl-4 text-xs font-semibold uppercase leading-relaxed tracking-[0.16em] text-white/55 max-sm:border-l-0 max-sm:border-t max-sm:pt-4 max-sm:pl-0">
-          Groups, special requests, and personal advice.
+          {t.aside}
         </p>
       </div>
 
@@ -135,7 +152,7 @@ export function ReservationInquiryForm() {
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <Label htmlFor="guest-name" className={formLabelClass}>
-              Name
+              {t.name}
             </Label>
             <UserRound className="h-4 w-4 text-white/40" />
           </div>
@@ -143,7 +160,7 @@ export function ReservationInquiryForm() {
             id="guest-name"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Your name"
+            placeholder={t.namePlaceholder}
             className={fieldClass}
           />
         </div>
@@ -151,7 +168,7 @@ export function ReservationInquiryForm() {
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-3">
             <Label htmlFor="guest-count" className={formLabelClass}>
-              Guests
+              {t.guests}
             </Label>
             <UsersRound className="h-4 w-4 text-white/40" />
           </div>
@@ -159,25 +176,26 @@ export function ReservationInquiryForm() {
             id="guest-count"
             value={guests}
             onChange={(event) => setGuests(event.target.value)}
-            placeholder="2 guests"
+            placeholder={t.guestsPlaceholder}
             className={fieldClass}
           />
         </div>
 
         <fieldset className="min-w-0 space-y-4 sm:col-span-2">
-          <legend className="sr-only">Dates</legend>
+          <legend className="sr-only">{t.dates}</legend>
           <div className="flex items-center justify-between gap-3">
-            <span className={formLabelClass}>Dates</span>
+            <span className={formLabelClass}>{t.dates}</span>
             <CalendarDays className="h-4 w-4 text-white/40" aria-hidden="true" />
           </div>
 
           <p id="travel-dates-help" className="text-sm leading-relaxed text-stone-300">
-            Select your check-in date, then your check-out date.
+            {t.dateHelp}
           </p>
 
           <div className="border-y border-white/15 py-4 pb-6">
             <Calendar
               mode="range"
+              locale={es ? esLocale : undefined}
               selected={dates}
               onSelect={setDates}
               disabled={{ before: today }}
@@ -221,18 +239,18 @@ export function ReservationInquiryForm() {
           >
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">
-                Check-in
+                {t.checkIn}
               </p>
               <p className="mt-1 text-sm font-medium text-white">
-                {dates?.from ? format(dates.from, "EEE, MMM d") : "Choose a date"}
+                {dates?.from ? format(dates.from, "EEE, MMM d", es ? { locale: esLocale } : undefined) : t.chooseDate}
               </p>
             </div>
             <div className="border-l border-white/15 pl-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">
-                Check-out
+                {t.checkOut}
               </p>
               <p className="mt-1 text-sm font-medium text-white">
-                {dates?.to ? format(dates.to, "EEE, MMM d") : "Choose a date"}
+                {dates?.to ? format(dates.to, "EEE, MMM d", es ? { locale: esLocale } : undefined) : t.chooseDate}
               </p>
             </div>
           </div>
@@ -244,7 +262,7 @@ export function ReservationInquiryForm() {
             htmlFor="preferred-stay"
             className={formLabelClass}
           >
-            Stay
+            {t.stay}
           </Label>
           <Select value={location} onValueChange={setLocation}>
             <SelectTrigger
@@ -252,12 +270,12 @@ export function ReservationInquiryForm() {
               aria-labelledby="preferred-stay-label"
               className={selectTriggerClass}
             >
-              <SelectValue />
+              <SelectValue>{localizedLocation}</SelectValue>
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-stone-950 text-white shadow-2xl shadow-black/40">
               <SelectItem value="Mandalas">Mandalas</SelectItem>
               <SelectItem value="Hideout">Hideout</SelectItem>
-              <SelectItem value="Not sure yet">Not sure yet</SelectItem>
+              <SelectItem value="Not sure yet">{t.unsure}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -268,7 +286,7 @@ export function ReservationInquiryForm() {
             htmlFor="room-type"
             className={formLabelClass}
           >
-            Room
+            {t.room}
           </Label>
           <Select value={roomType} onValueChange={setRoomType}>
             <SelectTrigger
@@ -276,26 +294,26 @@ export function ReservationInquiryForm() {
               aria-labelledby="room-type-label"
               className={selectTriggerClass}
             >
-              <SelectValue />
+              <SelectValue>{localizedRoomType}</SelectValue>
             </SelectTrigger>
             <SelectContent className="border-white/10 bg-stone-950 text-white shadow-2xl shadow-black/40">
-              <SelectItem value="Mixed Dorm">Mixed dorm</SelectItem>
-              <SelectItem value="Female Dorm">Female dorm</SelectItem>
-              <SelectItem value="Private Room">Private room</SelectItem>
-              <SelectItem value="Not sure yet">Not sure yet</SelectItem>
+              <SelectItem value="Mixed Dorm">{t.mixed}</SelectItem>
+              <SelectItem value="Female Dorm">{t.female}</SelectItem>
+              <SelectItem value="Private Room">{t.private}</SelectItem>
+              <SelectItem value="Not sure yet">{t.unsure}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-3 sm:col-span-2">
           <Label htmlFor="extra-message" className={formLabelClass}>
-            Helpful details
+            {t.details}
           </Label>
           <Textarea
             id="extra-message"
             value={message}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="Late arrival, private room, quieter stay, lake..."
+            placeholder={t.detailsPlaceholder}
             className={`${fieldClass} min-h-24 resize-none px-0`}
           />
         </div>
@@ -303,9 +321,9 @@ export function ReservationInquiryForm() {
 
       <div className="mt-8 border-y border-white/15 py-4">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/60">
-          <span>{location}</span>
+          <span>{localizedLocation}</span>
           <span className="h-px w-8 bg-amber-200/45" />
-          <span>{roomType}</span>
+          <span>{localizedRoomType}</span>
         </div>
       </div>
 
@@ -314,7 +332,7 @@ export function ReservationInquiryForm() {
         className="mt-6 h-12 w-full rounded-full border border-amber-100/30 bg-white px-6 text-xs font-semibold uppercase tracking-[0.16em] text-amber-950 shadow-none transition-colors hover:bg-amber-100"
       >
         <Send className="h-4 w-4" />
-        Ask on WhatsApp
+        {t.ask}
       </Button>
     </form>
   );
