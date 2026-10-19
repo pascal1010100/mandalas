@@ -46,6 +46,7 @@ NEXT_PUBLIC_CONTACT_EMAIL=info@example.com
 
 NEXT_PUBLIC_CLOUDBEDS_MANDALAS_URL=
 NEXT_PUBLIC_CLOUDBEDS_HIDEOUT_URL=
+NEXT_PUBLIC_CLOUDBEDS_HIDEOUT_BOOKING_ENABLED=true
 
 NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=
 NEXT_PUBLIC_POSTHOG_HOST=
@@ -91,6 +92,7 @@ corepack pnpm cloudbeds:reservations
 - `/pueblo` abre el motor Cloudbeds de Mandalas.
 - `/hideout` abre el motor Cloudbeds de Hideout.
 - `/contact#book-directly` permite elegir entre las dos propiedades.
+- Hideout está activo por defecto. `NEXT_PUBLIC_CLOUDBEDS_HIDEOUT_BOOKING_ENABLED=false` pausa sus CTA de reserva y los dirige a contacto. Esta variable pública se resuelve durante el build; un cambio requiere reconstruir y desplegar.
 - Hideout tiene una integración API de lectura.
 - Mandalas necesita una API key independiente antes de conectarse.
 - El webhook de reservas está preparado, pero no debe activarse hasta configurar y probar el secreto y el canal de alertas.
@@ -139,6 +141,7 @@ El workflow Docker es independiente de la producción en Vercel. Para volverlo o
 
 - [Resumen de mejoras de julio de 2026](docs/MEJORAS_JULIO_2026.md)
 - [Configuración de Cloudbeds](docs/CLOUDBEDS_API_SETUP.md)
+- [Reactivación de reservas de Hideout](docs/HIDEOUT_BOOKING_REACTIVATION.md)
 - [Configuración y operación de PostHog](docs/POSTHOG_SETUP.md)
 - [Guía de sincronización iCal](docs/ICAL_SYNC_GUIDE.md)
 - [Arquitectura de base de datos](docs/mandalas-arquitectura-db.md)

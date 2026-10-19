@@ -14,7 +14,7 @@ const properties = [
         heading: "Hideout",
         accessibleHeading: "Quiet hostel near Lake Atitlán — Hideout",
         bookingLabel: "Book Hideout",
-        bookingUrl: "/contact?location=Hideout#inquiry",
+        bookingUrl: "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
         instagramUrl: "https://www.instagram.com/mandalashideout/",
     },
 ]
@@ -91,7 +91,7 @@ test("mobile navigation exposes the essential destinations", async ({ page }, te
     await expect(page.getByRole("link", { name: /Travel guide arriving at Lake Atitlán/i })).toBeVisible()
     await expect(page.getByRole("link", { name: "BOOK HIDEOUT", exact: true })).toHaveAttribute(
         "href",
-        "/contact?location=Hideout#inquiry",
+        "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
     )
 })
 
@@ -301,6 +301,20 @@ test("navbar booking control reveals the booking choices on contact", async ({ p
     await expect(page.locator("#book-directly")).toBeInViewport()
 })
 
+test("contact routes direct bookings to each property and preserves inquiry details", async ({ page }) => {
+    await page.goto("/contact?location=Hideout&room=Private%20Room", { waitUntil: "domcontentloaded" })
+
+    const directBooking = page.locator("#book-directly")
+    for (const property of properties) {
+        await expect(directBooking.getByRole("link", { name: property.bookingLabel, exact: true })).toHaveAttribute(
+            "href", property.bookingUrl,
+        )
+    }
+    const inquiry = page.locator("#inquiry")
+    await expect(inquiry.getByRole("combobox").nth(0)).toContainText("Hideout")
+    await expect(inquiry.getByRole("combobox").nth(1)).toContainText("Private room")
+})
+
 test("contact preserves direct booking and the prefilled WhatsApp inquiry", async ({ page }) => {
     await page.addInitScript(() => {
         window.open = ((url?: string | URL) => {
@@ -318,7 +332,7 @@ test("contact preserves direct booking and the prefilled WhatsApp inquiry", asyn
     )
     await expect(directBooking.getByRole("link", { name: "Book Hideout", exact: true })).toHaveAttribute(
         "href",
-        "/contact?location=Hideout#inquiry",
+        "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
     )
 
     const inquiry = page.locator("#inquiry")
