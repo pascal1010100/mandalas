@@ -10,7 +10,7 @@ const properties = [
     {
         path: "/hideout",
         bookingLabel: "Book Hideout",
-        bookingUrl: "/contact?location=Hideout#inquiry",
+        bookingUrl: "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
         heroSelector: "[data-property-hero-booking-cta]",
     },
 ]

@@ -34,7 +34,19 @@ test("Spanish home exposes both stays and localized booking paths", async ({ pag
     await expect(page.getByRole("heading", { level: 1, name: "Elige tu hospedaje en San Pedro La Laguna" })).toBeVisible()
     await expect(page.locator('main a[href="/es/pueblo"]').first()).toBeVisible()
     await expect(page.locator('main a[href="/es/hideout"]').first()).toBeVisible()
-    await expect(page.locator('a[href="/es/contacto?location=Hideout#inquiry"]').first()).toBeVisible()
+    await expect(page.locator('a[href="https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq"]').first()).toBeVisible()
+})
+
+test("Spanish direct booking keeps the two Cloudbeds properties separate", async ({ page }) => {
+    await page.goto("/es/contacto", { waitUntil: "domcontentloaded" })
+
+    const directBooking = page.locator("#book-directly")
+    await expect(directBooking.getByRole("link", { name: "Reservar Mandalas", exact: true })).toHaveAttribute(
+        "href", "https://hotels.cloudbeds.com/en/reservation/5VReHj?currency=gtq",
+    )
+    await expect(directBooking.getByRole("link", { name: "Reservar Hideout", exact: true })).toHaveAttribute(
+        "href", "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
+    )
 })
 
 test("Spanish pages remain within the viewport", async ({ page }) => {
@@ -75,5 +87,5 @@ test("Spanish mobile menu exposes localized destinations", async ({ page }, test
     await expect(menu.getByRole("link", { name: /Mandalas en el centro de San Pedro/i })).toHaveAttribute("href", "/es/pueblo")
     await expect(menu.getByRole("link", { name: /Guía de viaje cómo llegar al Lago de Atitlán/i })).toHaveAttribute("href", "/es/guia")
     await expect(menu.getByRole("link", { name: "Contacto", exact: true })).toHaveAttribute("href", "/es/contacto")
-    await expect(menu.getByRole("link", { name: "RESERVAR HIDEOUT", exact: true })).toHaveAttribute("href", "/es/contacto?location=Hideout#inquiry")
+    await expect(menu.getByRole("link", { name: "RESERVAR HIDEOUT", exact: true })).toHaveAttribute("href", "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq")
 })

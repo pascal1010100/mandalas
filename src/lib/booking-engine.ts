@@ -7,9 +7,9 @@ const bookingEngineUrls = {
     "https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq",
 } as const
 
-/** Hideout's Cloudbeds engine is temporarily disabled by operations.
- * Set NEXT_PUBLIC_CLOUDBEDS_HIDEOUT_BOOKING_ENABLED=true when it is live again. */
-const hideoutBookingEnabled = process.env.NEXT_PUBLIC_CLOUDBEDS_HIDEOUT_BOOKING_ENABLED === "true"
+/** Hideout booking is active by default. Operations can explicitly pause it
+ * with NEXT_PUBLIC_CLOUDBEDS_HIDEOUT_BOOKING_ENABLED=false. */
+const hideoutBookingEnabled = process.env.NEXT_PUBLIC_CLOUDBEDS_HIDEOUT_BOOKING_ENABLED !== "false"
 
 export function getBookingEngineUrl(location?: string) {
   if (!location) return undefined
