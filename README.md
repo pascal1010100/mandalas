@@ -91,6 +91,8 @@ corepack pnpm cloudbeds:reservations
 - `/pueblo` abre el motor Cloudbeds de Mandalas.
 - `/hideout` abre el motor Cloudbeds de Hideout.
 - `/contact#book-directly` permite elegir entre las dos propiedades.
+- Hideout utiliza por defecto su motor confirmado: `https://hotels.cloudbeds.com/en/reservation/Uk2zHr?currency=gtq`, también desde los botones en español.
+- Para suspender temporalmente solo las reservas directas de Hideout, establecer `NEXT_PUBLIC_CLOUDBEDS_HIDEOUT_BOOKING_ENABLED=false` y reconstruir el sitio; los botones recuperan el formulario de consulta. La variable es pública y se evalúa durante el build. No modifica Cloudbeds ni requiere una API key.
 - Hideout tiene una integración API de lectura.
 - Mandalas necesita una API key independiente antes de conectarse.
 - El webhook de reservas está preparado, pero no debe activarse hasta configurar y probar el secreto y el canal de alertas.
