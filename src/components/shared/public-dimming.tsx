@@ -15,7 +15,7 @@ export function PublicDimming() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-[2147483647] bg-black/75"
+      className="pointer-events-none fixed inset-0 z-[2147483647] bg-black/90"
     />
   )
 }
