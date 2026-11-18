@@ -3,8 +3,8 @@
 import { usePathname } from "next/navigation"
 
 const dimmedPaths = new Set([
-  "/", "/pueblo", "/hideout", "/contact",
-  "/es", "/es/pueblo", "/es/hideout", "/es/contacto",
+  "/", "/pueblo", "/hideout", "/contact", "/guide",
+  "/es", "/es/pueblo", "/es/hideout", "/es/contacto", "/es/guia",
 ])
 
 export function PublicDimming() {
