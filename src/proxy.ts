@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const DIMMED_PUBLIC_PATHS = new Set(['/', '/pueblo', '/hideout', '/contact', '/es', '/es/pueblo', '/es/hideout', '/es/contact'])
-
 const COOKIE_NAME = 'mandalas_admin_session'
 const LOCALE_COOKIE_NAME = 'mandalas_locale'
 const ENABLE_ADMIN = process.env.ENABLE_ADMIN === 'true'
@@ -56,7 +54,6 @@ export function proxy(request: NextRequest) {
     }
 
     const requestHeaders = new Headers(request.headers)
-    requestHeaders.set('x-mandalas-public-dim', DIMMED_PUBLIC_PATHS.has(pathname) ? '1' : '0')
     requestHeaders.set('x-mandalas-locale', pathname === '/es' || pathname.startsWith('/es/') ? 'es' : 'en')
 
     return NextResponse.next({ request: { headers: requestHeaders } })
