@@ -8,6 +8,8 @@ import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { HtmlLanguage } from "@/components/shared/html-language"
 
+import { PublicDimming } from "@/components/shared/public-dimming"
+
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
@@ -105,12 +107,7 @@ export default async function RootLayout({
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
-        {requestHeaders.get("x-mandalas-public-dim") === "1" && (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none fixed inset-0 z-[2147483647] bg-black/75"
-          />
-        )}
+        <PublicDimming />
       </body>
     </html>
   );
