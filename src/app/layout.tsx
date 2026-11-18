@@ -8,6 +8,8 @@ import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { HtmlLanguage } from "@/components/shared/html-language"
 
+import { PublicDimming } from "@/components/shared/public-dimming"
+
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
@@ -105,6 +107,7 @@ export default async function RootLayout({
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
+        <PublicDimming />
       </body>
     </html>
   );
