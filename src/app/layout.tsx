@@ -105,6 +105,12 @@ export default async function RootLayout({
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />
+        {requestHeaders.get("x-mandalas-public-dim") === "1" && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none fixed inset-0 z-[2147483647] bg-black/75"
+          />
+        )}
       </body>
     </html>
   );
